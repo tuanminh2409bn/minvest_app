@@ -1,0 +1,58 @@
+{
+  "project_info": {
+    "project_number": "245218403052",
+    "project_id": "minvestforexapp-33dff",
+    "storage_bucket": "minvestforexapp-33dff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:245218403052:android:9ef58c4c7b016a17b03bc9",
+        "android_client_info": {
+          "package_name": "com.minvest.aisignals"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "245218403052-od4o65p52jq9aljgd7pqlcs3d3d4v5u8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.minvest.aisignals",
+            "certificate_hash": "c8ccfa1ca575d74b92cf61c37cdef9e0e77b1e88"
+          }
+        },
+        {
+          "client_id": "245218403052-r4v05k1r7dv3r62e1536uvmo5rgdv85m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.minvest.aisignals",
+            "certificate_hash": "6f94031f9a6ecc9d69fdd527c1e7e29f759d39b2"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvzJ4crOk5FYhjHhkLCNX8gBtw5YC9qiU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "245218403052-vv7n891gojgk69s9pgclcsdh0idkshvt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "245218403052-2q6m9neo6l34jfnsferv5ui3h3r4fk68.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.minvestForexApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

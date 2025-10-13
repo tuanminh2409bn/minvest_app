@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="MInvest Forex App - AI Trading Signals">
+  <meta name="google-signin-client_id" content="245218403052-vv7n891gojgk69s9pgclcsdh0idkshvt.apps.googleusercontent.com">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="MInvest">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>MInvest Forex App</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    var serviceWorkerVersion = null;
+  </script>
+
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script>
+
+  <!-- CSS cho chỉ báo tải -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0D1117; /* Màu nền mặc định */
+    }
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      background-color: #0D1117;
+    }
+    .loader {
+      border: 5px solid #2A2D3E; /* Màu xám nền của vòng xoay */
+      border-radius: 50%;
+      border-top: 5px solid #3C4BFE; /* Màu xanh của app */
+      width: 50px;
+      height: 50px;
+      -webkit-animation: spin 1.2s linear infinite;
+      animation: spin 1.2s linear infinite;
+    }
+    .loading-text {
+      margin-top: 24px;
+      color: #B0B8C4;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px;
+    }
+    @-webkit-keyframes spin {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+<!-- HTML cho chỉ báo tải -->
+<div id="loading_indicator" class="loading-container">
+  <div class="loader"></div>
+  <p class="loading-text">Đang tải ứng dụng...</p>
+</div>
+
+<script>
+  window.addEventListener('load', function(ev) {
+    // Tải Flutter engine
+    _flutter.loader.loadEntrypoint({
+      serviceWorker: {
+        serviceWorkerVersion: serviceWorkerVersion,
+      }
+    }).then(function(engineInitializer) {
+      // Khởi tạo Flutter engine
+      return engineInitializer.initializeEngine();
+    }).then(function(appRunner) {
+      // Ẩn chỉ báo tải khi Flutter sẵn sàng chạy
+      var loadingIndicator = document.getElementById("loading_indicator");
+      if (loadingIndicator) {
+        loadingIndicator.style.display = "none";
+      }
+      // Chạy ứng dụng Flutter
+      return appRunner.runApp();
+    });
+  });
+</script>
+</body>
+</html>

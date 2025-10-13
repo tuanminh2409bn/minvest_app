@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter: Chrome (Localhost:63208)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "flutterMode": "debug",
+      "toolArgs": [
+        "--web-port=63208",
+        "--dart-define=BASE_URL=http://localhost:63208"
+      ]
+    },
+    {
+      "name": "Flutter: Web Server (Localhost:63208)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "web-server",
+      "flutterMode": "debug",
+      "toolArgs": [
+        "--web-port=63208",
+        "--dart-define=BASE_URL=http://localhost:63208"
+      ]
+    }
+  ]
+}

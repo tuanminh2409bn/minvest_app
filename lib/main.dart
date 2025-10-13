@@ -1,0 +1,203 @@
+// lib/main.dart
+
+import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:minvest_forex_app/app/auth_gate.dart';
+import 'package:minvest_forex_app/core/providers/language_provider.dart';
+import 'package:minvest_forex_app/core/providers/user_provider.dart';
+import 'package:minvest_forex_app/core/services/purchase_service.dart';
+import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
+import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
+import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
+import 'package:minvest_forex_app/features/signals/screens/signal_detail_screen.dart';
+import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
+import 'package:minvest_forex_app/firebase_options.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/services/notification_service.dart';
+import 'package:provider/provider.dart';
+import 'package:minvest_forex_app/services/session_service.dart';
+import 'package:flutter/services.dart';
+import 'package:minvest_forex_app/features/chat/providers/chat_provider.dart';
+
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    systemNavigationBarColor: Colors.transparent,
+  ));
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<AuthService>(create: (_) => AuthService()),
+        Provider<SessionService>(create: (_) => SessionService()),
+        BlocProvider<AuthBloc>(
+          create: (context) => AuthBloc(
+            authService: context.read<AuthService>(),
+            sessionService: context.read<SessionService>(),
+          ),
+        ),
+        ChangeNotifierProvider(create: (context) => LanguageProvider()),
+        ChangeNotifierProvider(
+          create: (context) => UserProvider(
+            authService: context.read<AuthService>(),
+          ),
+        ),
+        ChangeNotifierProvider(create: (context) => NotificationProvider()),
+        ChangeNotifierProvider(create: (context) => PurchaseService()),
+        ChangeNotifierProvider(create: (context) => ChatProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  StreamSubscription<String>? _forceLogoutSubscription;
+  bool _isLogoutDialogShowing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCoreServices();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final authService = context.read<AuthService>();
+        _forceLogoutSubscription = authService.forceLogoutStream.listen((reason) {
+          if (mounted && !_isLogoutDialogShowing) {
+            setState(() { _isLogoutDialogShowing = true; });
+            _showLogoutDialog(reason);
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _forceLogoutSubscription?.cancel();
+    super.dispose();
+  }
+
+  // --- THAY ĐỔI 3: GỌI SERVICE MỚI ĐỂ KHỞI TẠO VÀ XỬ LÝ THÔNG BÁO ---
+  Future<void> _initializeCoreServices() async {
+    // Khởi tạo PurchaseService
+    context.read<PurchaseService>().initialize();
+    debugPrint("✅ Đã gọi initialize() cho PurchaseService từ MyApp.");
+
+    // Khởi tạo NotificationService
+    await NotificationService().initialize(
+      onNotificationTapped: (data) {
+        _handleNotificationNavigation(data);
+      },
+    );
+
+    final fcmToken = await NotificationService().getFcmToken();
+    if (fcmToken != null) {
+    }
+  }
+
+  Future<void> _handleNotificationNavigation(Map<String, dynamic> data) async {
+    final String? signalId = data['signalId'];
+    if (signalId == null) return;
+    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final signal = await SignalService().getSignalById(signalId);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userTier = userProvider.userTier ?? 'free';
+      if (signal != null) {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (_) => SignalDetailScreen(
+              signal: signal,
+              userTier: userTier,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Lỗi khi điều hướng từ thông báo: $e');
+    }
+  }
+
+  void _showLogoutDialog(String? reason) {
+    // ... (Giữ nguyên hàm này)
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      if (mounted) setState(() => _isLogoutDialogShowing = false);
+      return;
+    }
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(l10n.logoutDialogTitle),
+          content: Text(reason ?? l10n.logoutDialogDefaultReason),
+          actions: <Widget>[
+            TextButton(
+              child: Text(l10n.ok),
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await this.context.read<AuthService>().signOut();
+              },
+            ),
+          ],
+        );
+      },
+    ).then((_) {
+      if (mounted) {
+        setState(() {
+          _isLogoutDialogShowing = false;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LanguageProvider>(
+      builder: (context, languageProvider, child) {
+        return MaterialApp(
+          navigatorKey: navigatorKey,
+          // ... (Phần còn lại giữ nguyên)
+          debugShowCheckedModeBanner: false,
+          title: 'Minvest Forex App',
+          theme: ThemeData.dark().copyWith(
+            scaffoldBackgroundColor: const Color(0xFF121212),
+            appBarTheme: const AppBarTheme(
+              elevation: 0,
+              centerTitle: true,
+              backgroundColor: Color(0xFF1F1F1F),
+            ),
+          ),
+          locale: languageProvider.locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const AuthGate(),
+        );
+      },
+    );
+  }
+}

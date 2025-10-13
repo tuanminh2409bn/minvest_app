@@ -1,0 +1,59 @@
+name: minvest_forex_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.5+1
+
+environment:
+  sdk: '>=3.2.6 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Firebase Ecosystem
+  firebase_core:
+  firebase_auth:
+  cloud_firestore:
+  firebase_storage:
+  firebase_messaging:
+  cloud_functions:
+
+  # Authentication
+  google_sign_in: 6.3.0
+  flutter_facebook_auth:
+  sign_in_with_apple:
+
+  # State Management & Core Utilities
+  flutter_bloc:
+  equatable:
+  provider:
+  shared_preferences:
+  intl:
+
+  # Other packages
+  app_tracking_transparency:
+  cupertino_icons:
+  url_launcher:
+  image_picker:
+  webview_flutter:
+  in_app_purchase:
+  flutter_local_notifications:
+  device_info_plus:
+  crypto:
+  uuid:
+  in_app_purchase_storekit:
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  flutter_lints:
+
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - assets/images/
