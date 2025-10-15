@@ -1,3 +1,5 @@
+// lib/features/auth/screens/welcome/welcome_screen_web.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';

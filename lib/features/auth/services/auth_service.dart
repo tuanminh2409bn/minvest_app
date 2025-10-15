@@ -1,3 +1,5 @@
+// lib/features/auth/services/auth_service.dart
+
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
@@ -11,6 +13,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:minvest_forex_app/core/exceptions/auth_exceptions.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:minvest_forex_app/services/device_info_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:io';
@@ -88,6 +91,9 @@ class AuthService {
     if (user == null) return null;
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final languageCode = prefs.getString('language_code') ?? 'en'; // Lấy ngôn ngữ, mặc định là 'en' nếu không có
+
       await _firestore.runTransaction((transaction) async {
         final userDocRef = _firestore.collection('users').doc(user.uid);
         final userDoc = await transaction.get(userDocRef);
@@ -103,6 +109,7 @@ class AuthService {
               'subscriptionTier': 'free',
               'role': 'guest',
               'isSuspended': false,
+              'languageCode': languageCode, // 2. Thêm languageCode cho Guest
             });
           } else {
             String? email = googleEmail ?? appleEmail ?? facebookUserData?['email'] ?? user.email;
@@ -126,6 +133,7 @@ class AuthService {
               'subscriptionTier': 'free',
               'role': 'user',
               'isSuspended': false,
+              'languageCode': languageCode, // 3. Thêm languageCode cho người dùng thường
             });
           }
         } else {
