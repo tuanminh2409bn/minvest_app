@@ -33,21 +33,31 @@ class AuthService {
     if (user == null) return;
 
     final currentDeviceId = await DeviceInfoService.getDeviceId();
-    stopListeningForSessionChanges();
+    stopListeningForSessionChanges(); // Hủy listener cũ trước khi tạo cái mới
 
     final userDocRef = _firestore.collection('users').doc(user.uid);
-    _sessionSubscription = userDocRef.snapshots().listen((snapshot) {
+    _sessionSubscription = userDocRef.snapshots().listen((snapshot) async { // Thêm 'async'
       if (snapshot.exists && snapshot.data() != null) {
         final data = snapshot.data()!;
-        final activeSession = data['activeSession'] as Map<String, dynamic>?;
 
-        if (activeSession != null) {
-          final sessionDeviceIdOnServer = activeSession['deviceId'] as String?;
-          if (sessionDeviceIdOnServer != null && sessionDeviceIdOnServer != currentDeviceId) {
-            print('AuthService: Session mismatch detected! Forcing logout.');
-            if (!_forceLogoutController.isClosed) {
-              _forceLogoutController.add('Tài khoản của bạn đã được đăng nhập trên một thiết bị khác.');
-            }
+        // 1. Đọc trường "logoutTargetDeviceId" từ server
+        final targetDeviceId = data['logoutTargetDeviceId'] as String?;
+
+        // 2. So sánh mục tiêu với ID của thiết bị hiện tại
+        if (targetDeviceId != null && targetDeviceId == currentDeviceId) {
+          print('AuthService: Nhận lệnh đăng xuất từ server cho thiết bị này.');
+
+          // 3. Kích hoạt luồng đăng xuất bắt buộc
+          if (!_forceLogoutController.isClosed) {
+            _forceLogoutController.add('Tài khoản của bạn đã được đăng nhập trên một thiết bị khác.');
+          }
+
+          // 4. (RẤT QUAN TRỌNG) Xóa "lệnh" trên server sau khi đã nhận
+          // Để tránh việc bị đăng xuất lặp lại nếu có lỗi xảy ra.
+          try {
+            await userDocRef.update({'logoutTargetDeviceId': FieldValue.delete()});
+          } catch (e) {
+            print("Lỗi khi xóa logoutTargetDeviceId: $e");
           }
         }
       }

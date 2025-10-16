@@ -1,3 +1,5 @@
+// lib/app/main_screen_web.dart
+
 import 'package:flutter/material.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/features/auth/screens/profile_screen.dart';
@@ -11,40 +13,46 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  // ▼▼▼ THAY ĐỔI 1: Đổi tên State để khớp với GlobalKey ▼▼▼
+  State<MainScreen> createState() => MainScreenWebState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+// ▼▼▼ THAY ĐỔI 2: Đổi tên State thành public để GlobalKey có thể truy cập ▼▼▼
+class MainScreenWebState extends State<MainScreen> {
   int _selectedIndex = 0;
+
+  // ▼▼▼ THAY ĐỔI 3: Thêm hàm điều khiển từ bên ngoài ▼▼▼
+  void switchToTab(int index) {
+    if (mounted && index >= 0 && index < _pages.length) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
 
   // Danh sách trang không đổi
   static const List<Widget> _pages = <Widget>[
-    SignalScreen(),
-    ChatScreen(),
-    ProfileScreen(),
+    SignalScreen(),  // Index 0
+    ChatScreen(),    // Index 1
+    ProfileScreen(), // Index 2
   ];
 
   @override
   Widget build(BuildContext context) {
-    // ▼▼▼ BƯỚC 1: LẤY DỮ LIỆU TỪ PROVIDER ▼▼▼
-    // Chúng ta đặt ở đây để cả hai hàm build layout đều có thể sử dụng
     final userRole = context.watch<UserProvider>().role;
     final unreadChatCount = context.watch<ChatProvider>().unreadRoomsCount;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth > 640) {
-          // Truyền dữ liệu provider vào hàm build
           return _buildWideLayout(context, userRole, unreadChatCount);
         } else {
-          // Truyền dữ liệu provider vào hàm build
           return _buildNarrowLayout(context, userRole, unreadChatCount);
         }
       },
     );
   }
 
-  // Giao diện cho màn hình rộng (Web/Desktop)
   Widget _buildWideLayout(BuildContext context, String? userRole, int unreadChatCount) {
     final l10n = AppLocalizations.of(context)!;
 
@@ -64,12 +72,10 @@ class _MainScreenState extends State<MainScreen> {
             selectedLabelTextStyle: const TextStyle(color: Colors.white),
             unselectedLabelTextStyle: TextStyle(color: Colors.grey.shade600),
             destinations: <NavigationRailDestination>[
-              // Item Signal
               NavigationRailDestination(
                 icon: const Icon(Icons.signal_cellular_alt),
                 label: Text(l10n.tabSignal),
               ),
-              // ▼▼▼ BƯỚC 2: CẬP NHẬT ITEM CHAT CHO NAVIGATION RAIL ▼▼▼
               NavigationRailDestination(
                 icon: Stack(
                   clipBehavior: Clip.none,
@@ -77,8 +83,7 @@ class _MainScreenState extends State<MainScreen> {
                     const Icon(Icons.chat_bubble_outline),
                     if (userRole == 'support' && unreadChatCount > 0)
                       Positioned(
-                        top: -4,
-                        right: -8,
+                        top: -4, right: -8,
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
@@ -95,7 +100,6 @@ class _MainScreenState extends State<MainScreen> {
                 selectedIcon: const Icon(Icons.chat_bubble),
                 label: Text(l10n.tabChat),
               ),
-              // Item Profile
               NavigationRailDestination(
                 icon: const Icon(Icons.person_outline),
                 selectedIcon: const Icon(Icons.person),
@@ -115,7 +119,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // Giao diện cho màn hình hẹp
   Widget _buildNarrowLayout(BuildContext context, String? userRole, int unreadChatCount) {
     final l10n = AppLocalizations.of(context)!;
 
@@ -126,12 +129,10 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
-          // Item Signal
           BottomNavigationBarItem(
             icon: const Icon(Icons.signal_cellular_alt),
             label: l10n.tabSignal,
           ),
-          // ▼▼▼ BƯỚC 3: CẬP NHẬT ITEM CHAT CHO BOTTOM NAVIGATION BAR ▼▼▼
           BottomNavigationBarItem(
             icon: Stack(
               clipBehavior: Clip.none,
@@ -139,8 +140,7 @@ class _MainScreenState extends State<MainScreen> {
                 const Icon(Icons.chat_bubble_outline),
                 if (userRole == 'support' && unreadChatCount > 0)
                   Positioned(
-                    top: -4,
-                    right: -8,
+                    top: -4, right: -8,
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
@@ -157,7 +157,6 @@ class _MainScreenState extends State<MainScreen> {
             activeIcon: const Icon(Icons.chat_bubble),
             label: l10n.tabChat,
           ),
-          // Item Profile
           BottomNavigationBarItem(
             icon: const Icon(Icons.person_outline),
             activeIcon: const Icon(Icons.person),

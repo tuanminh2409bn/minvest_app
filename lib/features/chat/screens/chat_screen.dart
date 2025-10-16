@@ -1,3 +1,5 @@
+// lib/features/chat/screens/chat_screen.dart
+
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -138,6 +140,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
       ),
       body: Column(
         children: [
+          const _WelcomeHeader(),
           Expanded(
             child: StreamBuilder<List<ChatMessage>>(
               stream: _chatService.getMessagesStream(user.uid),
@@ -145,13 +148,11 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
+                // Logic cũ hiển thị "Bắt đầu cuộc trò chuyện" nếu không có tin nhắn sẽ bị ẩn
+                // bởi lời chào mừng, điều này là hợp lý.
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Text(
-                      l10n.chatStartConversation,
-                      style: TextStyle(color: Colors.grey[400]),
-                    ),
-                  );
+                  // Trả về một widget trống vì lời chào đã hiển thị rồi
+                  return const SizedBox.shrink();
                 }
 
                 final messages = snapshot.data!;
@@ -226,7 +227,6 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
       );
     }
 
-    // Sử dụng Column và CrossAxisAlignment để bong bóng chat tự co giãn
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: Column(
@@ -291,6 +291,46 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   }
 }
 
+class _WelcomeHeader extends StatelessWidget {
+  const _WelcomeHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    // Lấy instance của AppLocalizations để truy cập các chuỗi đa ngôn ngữ
+    final l10n = AppLocalizations.of(context)!;
+
+    final defaultTextStyle = TextStyle(
+      color: Colors.white.withOpacity(0.8),
+      fontSize: 14,
+      height: 1.5, // Giãn dòng cho dễ đọc
+    );
+    final boldTextStyle = defaultTextStyle.copyWith(fontWeight: FontWeight.bold);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+      width: double.infinity,
+      color: const Color(0xFF161B22), // Màu nền hơi khác một chút
+      child: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          style: defaultTextStyle,
+          children: [
+            // Sử dụng các key từ file ngôn ngữ thay vì văn bản cố định
+            TextSpan(text: "${l10n.chatWelcomeTitle}\n"),
+            TextSpan(text: "${l10n.chatWelcomeBody1}\n"),
+            TextSpan(text: l10n.chatWelcomeBody2),
+            TextSpan(
+              text: "0969.15.6969",
+              style: boldTextStyle,
+            ),
+            TextSpan(text: l10n.chatWelcomeBody3),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _TypingIndicator extends StatelessWidget {
   final String text;
   const _TypingIndicator({required this.text});
@@ -308,7 +348,7 @@ class _TypingIndicator extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              text, // Sử dụng text từ tham số
+              text,
               style: TextStyle(
                 color: Colors.white.withOpacity(0.7),
                 fontStyle: FontStyle.italic,
@@ -333,7 +373,7 @@ class _SeenIndicator extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
-            text, // Sử dụng text từ tham số
+            text,
             style: TextStyle(
               color: Colors.grey[500],
               fontSize: 12,

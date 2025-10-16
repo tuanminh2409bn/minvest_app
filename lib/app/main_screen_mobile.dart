@@ -1,3 +1,5 @@
+// lib/app/main_screen_mobile.dart
+
 import 'package:flutter/material.dart';
 import 'package:minvest_forex_app/features/auth/screens/profile_screen.dart';
 import 'package:minvest_forex_app/features/chart/screens/chart_screen.dart';
@@ -12,23 +14,43 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  // Đổi tên State để khớp với GlobalKey (từ _MainScreenState thành MainScreenState)
+  State<MainScreen> createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+// Đổi tên State thành public để GlobalKey có thể truy cập
+class MainScreenState extends State<MainScreen> {
+  late PageController _pageController;
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _selectedIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  // Hàm "thần kỳ" để điều khiển từ bên ngoài
+  void switchToTab(int index) {
+    if (mounted && index >= 0 && index < _pages.length) {
+      _pageController.jumpToPage(index);
+    }
+  }
+
   final List<Widget> _pages = [
-    const SignalScreen(),
-    const ChartScreen(),
-    const ChatScreen(),
-    const ProfileScreen(),
+    const SignalScreen(),  // index 0
+    const ChartScreen(),   // index 1
+    const ChatScreen(),    // index 2
+    const ProfileScreen(), // index 3
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    _pageController.jumpToPage(index);
   }
 
   @override
@@ -36,11 +58,20 @@ class _MainScreenState extends State<MainScreen> {
     final l10n = AppLocalizations.of(context)!;
     final userRole = context.watch<UserProvider>().role;
     final unreadChatCount = context.watch<ChatProvider>().unreadRoomsCount;
+
     return Scaffold(
       body: SafeArea(
-        child: IndexedStack(
-          index: _selectedIndex,
+        // Dùng PageView để có thể điều khiển bằng PageController
+        child: PageView(
+          controller: _pageController,
           children: _pages,
+          onPageChanged: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          // Tắt cuộn ngang giữa các tab
+          physics: const NeverScrollableScrollPhysics(),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -53,23 +84,17 @@ class _MainScreenState extends State<MainScreen> {
             icon: const Icon(Icons.bar_chart),
             label: l10n.tabChart,
           ),
-          // Thêm item mới cho Chat
           BottomNavigationBarItem(
             icon: Stack(
               clipBehavior: Clip.none,
               children: [
                 const Icon(Icons.chat_bubble_outline),
-                // Chỉ hiển thị badge nếu là support và có tin nhắn chưa đọc
                 if (userRole == 'support' && unreadChatCount > 0)
                   Positioned(
-                    top: -4,
-                    right: -8,
+                    top: -4, right: -8,
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
+                      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
                       constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                       child: Text(
                         '$unreadChatCount',

@@ -799,6 +799,7 @@ export const manageUserSession = onCall({ region: "asia-southeast1" }, async (re
   }
 
   const userDocRef = firestore.collection("users").doc(uid);
+
   try {
     await firestore.runTransaction(async (transaction) => {
       const userDoc = await transaction.get(userDocRef);
@@ -810,29 +811,33 @@ export const manageUserSession = onCall({ region: "asia-southeast1" }, async (re
 
       const userData = userDoc.data();
       const currentSession = userData?.activeSession;
+      let updateData: { [key: string]: any } = {};
 
-      if (currentSession && currentSession.deviceId && currentSession.deviceId !== newDeviceId && currentSession.fcmToken) {
-        const message = {
-          token: currentSession.fcmToken,
-          data: { action: "FORCE_LOGOUT" },
-          apns: { headers: { "apns-priority": "10" }, payload: { aps: { "content-available": 1 } } },
-          android: { priority: "high" as const },
-        };
-        try {
-          await admin.messaging().send(message);
-        } catch (error) {
-          functions.logger.error(`Error sending FORCE_LOGOUT to ${currentSession.fcmToken}:`, error);
-        }
-      }
-
+      // Tạo session mới cho thiết bị đang đăng nhập
       const newSessionData = {
         deviceId: newDeviceId,
         fcmToken: newFcmToken,
         loginAt: admin.firestore.FieldValue.serverTimestamp(),
       };
-      transaction.update(userDocRef, { activeSession: newSessionData });
+      updateData.activeSession = newSessionData;
+
+      // Nếu có session cũ và deviceId khác với session mới
+      if (currentSession && currentSession.deviceId && currentSession.deviceId !== newDeviceId) {
+        functions.logger.log(`Phát hiện đăng nhập mới. Thiết bị cũ ${currentSession.deviceId} sẽ bị đăng xuất.`);
+        // Ghi lại ID của thiết bị cần bị đăng xuất.
+        // Client sẽ đọc trường này và tự xử lý.
+        updateData.logoutTargetDeviceId = currentSession.deviceId;
+      } else {
+        // Nếu không có session cũ, đảm bảo trường mục tiêu đăng xuất bị xóa
+        updateData.logoutTargetDeviceId = admin.firestore.FieldValue.delete();
+      }
+
+      // Cập nhật tất cả trong một lần
+      transaction.update(userDocRef, updateData);
     });
+
     return { status: "success", message: "Session managed successfully." };
+
   } catch (error) {
     functions.logger.error("Error in manageUserSession transaction:", error);
     throw new functions.https.HttpsError("internal", "An error occurred while managing the user session.");

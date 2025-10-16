@@ -8,6 +8,8 @@ import 'package:minvest_forex_app/features/auth/screens/welcome/welcome_screen.d
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:minvest_forex_app/main.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -105,7 +107,13 @@ class _AuthGateState extends State<AuthGate> {
             });
 
             if (state.status == AuthStatus.authenticated) {
-              return const MainScreen();
+              if (kIsWeb) {
+                // Gắn key của Web khi chạy trên nền tảng Web
+                return MainScreen(key: mainScreenWebKey);
+              } else {
+                // Gắn key của Mobile khi chạy trên các nền tảng khác
+                return MainScreen(key: mainScreenKey);
+              }
             } else if (state.status == AuthStatus.loggingOut) {
               return const Scaffold(
                 backgroundColor: Color(0xFF0D1117),

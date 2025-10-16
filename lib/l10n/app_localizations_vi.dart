@@ -467,6 +467,23 @@ class AppLocalizationsVi extends AppLocalizations {
   String get tabChat => 'Trò chuyện';
 
   @override
+  String get exnessUpgradeNoteForIos =>
+      'Đối với khách hàng đã đăng ký tài khoản Exness qua Minvest thì vui lòng bấm liên hệ chúng tôi để được nâng cấp tài khoản.';
+
+  @override
+  String get chatWelcomeTitle => '👋 Chào mừng bạn đến với Minvest AI!';
+
+  @override
+  String get chatWelcomeBody1 =>
+      'Hãy để lại tin nhắn, đội ngũ của chúng tôi sẽ phản hồi sớm nhất.';
+
+  @override
+  String get chatWelcomeBody2 => 'Hoặc liên hệ trực tiếp qua Zalo/WhatsApp: ';
+
+  @override
+  String get chatWelcomeBody3 => ' để được hỗ trợ nhanh hơn nhé!';
+
+  @override
   String get chatLoginPrompt => 'Vui lòng đăng nhập để sử dụng tính năng này';
 
   @override

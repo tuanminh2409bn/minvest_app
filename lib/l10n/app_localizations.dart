@@ -950,6 +950,36 @@ abstract class AppLocalizations {
   /// **'Chat'**
   String get tabChat;
 
+  /// No description provided for @exnessUpgradeNoteForIos.
+  ///
+  /// In en, this message translates to:
+  /// **'For customers who have registered an Exness account through Minvest, please click contact us to have your account upgraded.'**
+  String get exnessUpgradeNoteForIos;
+
+  /// No description provided for @chatWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'👋 Welcome to Minvest AI!'**
+  String get chatWelcomeTitle;
+
+  /// No description provided for @chatWelcomeBody1.
+  ///
+  /// In en, this message translates to:
+  /// **'Please leave a message, our team will respond as soon as possible.'**
+  String get chatWelcomeBody1;
+
+  /// No description provided for @chatWelcomeBody2.
+  ///
+  /// In en, this message translates to:
+  /// **'Or contact us directly via Zalo/WhatsApp: '**
+  String get chatWelcomeBody2;
+
+  /// No description provided for @chatWelcomeBody3.
+  ///
+  /// In en, this message translates to:
+  /// **' for faster support!'**
+  String get chatWelcomeBody3;
+
   /// No description provided for @chatLoginPrompt.
   ///
   /// In en, this message translates to:

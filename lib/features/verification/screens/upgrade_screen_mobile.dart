@@ -1,5 +1,3 @@
-// lib/features/verification/screens/upgrade_screen_mobile.dart
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:minvest_forex_app/features/verification/screens/account_verification_screen.dart';
@@ -96,12 +94,27 @@ class UpgradeScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   _buildActionButton(
                     context,
-                    text: l10n.contactUs, // "Liên Hệ Hỗ Trợ"
+                    text: l10n.contactUs,
                     onPressed: () {
                       _launchURL('https://t.me/HotlineMinvest');
                     },
-                    isPrimary: false, // Nút kiểu phụ (viền)
+                    isPrimary: false,
                   ),
+                  if (isIos) ...[
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        l10n.exnessUpgradeNoteForIos,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 13,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 30),
                 ],
               ),
@@ -189,7 +202,7 @@ class UpgradeScreen extends StatelessWidget {
   Widget _buildActionButton(BuildContext context, {required String text, required VoidCallback onPressed, required bool isPrimary}) {
     return SizedBox(
       height: 50,
-      width: double.infinity, // Thêm để nút luôn rộng tối đa
+      width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
