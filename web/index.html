@@ -21,7 +21,7 @@
   <link rel="manifest" href="manifest.json">
 
   <script>
-    var serviceWorkerVersion = null;
+    var serviceWorkerVersion = "{{flutter_service_worker_version}}";
   </script>
 
   <!-- This script adds the flutter initialization JS code -->
@@ -77,21 +77,17 @@
 
 <script>
   window.addEventListener('load', function(ev) {
-    // Tải Flutter engine
     _flutter.loader.loadEntrypoint({
       serviceWorker: {
         serviceWorkerVersion: serviceWorkerVersion,
       }
     }).then(function(engineInitializer) {
-      // Khởi tạo Flutter engine
       return engineInitializer.initializeEngine();
     }).then(function(appRunner) {
-      // Ẩn chỉ báo tải khi Flutter sẵn sàng chạy
       var loadingIndicator = document.getElementById("loading_indicator");
       if (loadingIndicator) {
         loadingIndicator.style.display = "none";
       }
-      // Chạy ứng dụng Flutter
       return appRunner.runApp();
     });
   });

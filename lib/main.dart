@@ -27,6 +27,7 @@ import 'package:minvest_forex_app/features/chat/screens/support_chat_screen.dart
 import 'package:minvest_forex_app/features/chat/services/chat_service.dart';
 import 'package:minvest_forex_app/app/main_screen_mobile.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'web/landing/landing_page.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
@@ -235,6 +236,22 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Consumer<LanguageProvider>(
       builder: (context, languageProvider, child) {
+        if (kIsWeb) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Minvest Forex App',
+            theme: ThemeData.dark().copyWith(
+              scaffoldBackgroundColor: const Color(0xFF121212),
+              appBarTheme: const AppBarTheme(
+                elevation: 0,
+                centerTitle: true,
+                backgroundColor: Color(0xFF1F1F1F),
+              ),
+            ),
+            home: const LandingPage(),
+          );
+        }
+
         return MaterialApp(
           navigatorKey: navigatorKey,
           // ... (Phần còn lại giữ nguyên)
