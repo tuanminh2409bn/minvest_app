@@ -7,6 +7,14 @@ class LandingContent {
     'Contact Us',
   ];
 
+  static const List<String> featureNavItems = [
+    'Features',
+    'AI Signals',
+    'Pricing',
+    'News',
+    'Contact Us',
+  ];
+
   static const List<Map<String, String>> heroSignals = [
     {'pair': 'AUDJPY', 'price': '96.541', 'status': 'LIVE'},
     {'pair': 'USDJPY', 'price': '148.224', 'status': 'LIVE'},

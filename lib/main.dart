@@ -27,7 +27,9 @@ import 'package:minvest_forex_app/features/chat/screens/support_chat_screen.dart
 import 'package:minvest_forex_app/features/chat/services/chat_service.dart';
 import 'package:minvest_forex_app/app/main_screen_mobile.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'web/landing/features_page.dart';
 import 'web/landing/landing_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
@@ -240,31 +242,20 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Minvest Forex App',
-            theme: ThemeData.dark().copyWith(
-              scaffoldBackgroundColor: const Color(0xFF121212),
-              appBarTheme: const AppBarTheme(
-                elevation: 0,
-                centerTitle: true,
-                backgroundColor: Color(0xFF1F1F1F),
-              ),
-            ),
-            home: const LandingPage(),
+            theme: _buildAppTheme(),
+            routes: {
+              '/': (context) => const LandingPage(),
+              '/features': (context) => const FeaturesPage(),
+            },
+            initialRoute: '/',
           );
         }
 
         return MaterialApp(
           navigatorKey: navigatorKey,
-          // ... (Phần còn lại giữ nguyên)
           debugShowCheckedModeBanner: false,
           title: 'Minvest Forex App',
-          theme: ThemeData.dark().copyWith(
-            scaffoldBackgroundColor: const Color(0xFF121212),
-            appBarTheme: const AppBarTheme(
-              elevation: 0,
-              centerTitle: true,
-              backgroundColor: Color(0xFF1F1F1F),
-            ),
-          ),
+          theme: _buildAppTheme(),
           locale: languageProvider.locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -273,4 +264,17 @@ class _MyAppState extends State<MyApp> {
       },
     );
   }
+}
+
+ThemeData _buildAppTheme() {
+  final base = ThemeData.dark();
+  return base.copyWith(
+    textTheme: GoogleFonts.beVietnamProTextTheme(base.textTheme),
+    scaffoldBackgroundColor: const Color(0xFF121212),
+    appBarTheme: const AppBarTheme(
+      elevation: 0,
+      centerTitle: true,
+      backgroundColor: Color(0xFF1F1F1F),
+    ),
+  );
 }

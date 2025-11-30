@@ -11,39 +11,78 @@ class LandingNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
         children: [
-          Image.asset('assets/mockups/logo.png', height: 46, fit: BoxFit.contain),
-          const Spacer(),
-          ...LandingContent.navItems.map(
-            (item) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                item,
-                style: AppTextStyles.h3.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+          InkWell(
+            onTap: () => Navigator.of(context).pushNamed('/'),
+            child: Image.asset('assets/mockups/logo.png', height: 42, fit: BoxFit.contain),
           ),
-          const Spacer(),
-          _ctaButton('Get Signals now'),
-          const SizedBox(width: AppSpacing.sm),
-          _outlineButton('Sign in'),
-          const SizedBox(width: AppSpacing.sm),
-          Container(
-            width: 40,
-            height: 28,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.white24),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image.asset('assets/images/us_flag.png', fit: BoxFit.cover),
+          const SizedBox(width: 16),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final navSpacing = constraints.maxWidth < 900 ? 12.0 : 20.0;
+                final fontSize = constraints.maxWidth < 900 ? 16.0 : 18.0;
+                return Row(
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              const SizedBox(width: 50),
+                              ...LandingContent.navItems.map(
+                                (item) => Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: navSpacing / 2),
+                                  child: InkWell(
+                                    onTap: () {
+                                      if (item == 'Features') {
+                                        Navigator.of(context).pushNamed('/features');
+                                      }
+                                    },
+                                    child: Text(
+                                      item,
+                                      style: AppTextStyles.h3.copyWith(
+                                        fontSize: fontSize,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _ctaButton('Get Signals now'),
+                        const SizedBox(width: AppSpacing.sm),
+                        _outlineButton('Sign in'),
+                        const SizedBox(width: AppSpacing.sm),
+                        Container(
+                          width: 44,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.asset('assets/images/us_flag.png', fit: BoxFit.cover),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -66,7 +105,7 @@ class LandingNavBar extends StatelessWidget {
         ],
       ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: Colors.transparent,

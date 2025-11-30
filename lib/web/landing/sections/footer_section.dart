@@ -14,11 +14,14 @@ class FooterSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.asset('assets/mockups/logo.png', height: 64),
+                InkWell(
+                  onTap: () => Navigator.of(context).pushNamed('/'),
+                  child: Image.asset('assets/mockups/logo.png', height: 70),
+                ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   'Enterprise code: 0107136243 is issued by the Hanoi Department of Finance on 24/11/2015; 6th amendment registered by the Hanoi Department of Finance on 05/08/2025.',
@@ -32,7 +35,7 @@ class FooterSection extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 48),
+          const SizedBox(width: 90),
           Expanded(
             flex: 2,
             child: Column(
@@ -40,13 +43,14 @@ class FooterSection extends StatelessWidget {
               children: [
                 Text('Pages', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
                 const SizedBox(height: AppSpacing.sm),
-                _link('AI Signals'),
-                _link('Features'),
-                _link('News'),
-                _link('Contact Us'),
+                _navLink(context, 'Features', '/features'),
+                _navLink(context, 'AI Signals', null),
+                _navLink(context, 'News', null),
+                _navLink(context, 'Contact Us', null),
               ],
             ),
           ),
+          const SizedBox(width: 40),
           Expanded(
             flex: 2,
             child: Column(
@@ -54,12 +58,13 @@ class FooterSection extends StatelessWidget {
               children: [
                 Text('Legal & Regulatory', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
                 const SizedBox(height: AppSpacing.sm),
-                _link('Terms Of Registration'),
-                _link('Operating Principles'),
-                _link('Terms & Conditions'),
+                _textOnlyLink('Terms Of Registration'),
+                _textOnlyLink('Operating Principles'),
+                _textOnlyLink('Terms & Conditions'),
               ],
             ),
           ),
+          const SizedBox(width: 40),
           Expanded(
             flex: 2,
             child: Column(
@@ -107,7 +112,24 @@ class FooterSection extends StatelessWidget {
     );
   }
 
-  Widget _link(String text) {
+  Widget _navLink(BuildContext context, String text, String? route) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: InkWell(
+        onTap: route != null
+            ? () {
+                Navigator.of(context).pushNamed(route);
+              }
+            : null,
+        child: Text(
+          text,
+          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _textOnlyLink(String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Text(
