@@ -13,7 +13,7 @@ class GradientBlob extends StatelessWidget {
       child: DecoratedBox(
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
-          gradient: AppGradients.glow,
+          gradient: AppGradients.cta,
         ),
       ),
     );

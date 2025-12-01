@@ -41,6 +41,10 @@ class LandingNavBar extends StatelessWidget {
                                     onTap: () {
                                       if (item == 'Features') {
                                         Navigator.of(context).pushNamed('/features');
+                                      } else if (item == 'AI Signals') {
+                                        Navigator.of(context).pushNamed('/ai-signals');
+                                      } else if (item == 'Pricing') {
+                                        Navigator.of(context).pushNamed('/pricing');
                                       }
                                     },
                                     child: Text(

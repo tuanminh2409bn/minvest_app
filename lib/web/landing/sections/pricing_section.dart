@@ -5,7 +5,16 @@ import '../../theme/text_styles.dart';
 import '../../theme/spacing.dart';
 
 class PricingSection extends StatelessWidget {
-  const PricingSection({super.key});
+  final String heading;
+  final String subheading;
+  final double headingFontSize;
+
+  const PricingSection({
+    super.key,
+    this.heading = 'Best Prices for Premium Access',
+    this.subheading = 'Choose a plan that fits your business needs and start automating with AI',
+    this.headingFontSize = 28,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +69,12 @@ class PricingSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'Best Prices for Premium Access',
-            style: AppTextStyles.h1.copyWith(fontSize: 28, fontWeight: FontWeight.w700),
+            heading,
+            style: AppTextStyles.h1.copyWith(fontSize: headingFontSize, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Choose a plan that fits your business needs and start automating with AI',
+            subheading,
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),

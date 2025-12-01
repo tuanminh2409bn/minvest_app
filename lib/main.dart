@@ -29,6 +29,8 @@ import 'package:minvest_forex_app/app/main_screen_mobile.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'web/landing/features_page.dart';
 import 'web/landing/landing_page.dart';
+import 'web/landing/ai_signals_page.dart';
+import 'web/landing/pricing_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -246,6 +248,8 @@ class _MyAppState extends State<MyApp> {
             routes: {
               '/': (context) => const LandingPage(),
               '/features': (context) => const FeaturesPage(),
+              '/ai-signals': (context) => const AISignalsPage(),
+              '/pricing': (context) => const PricingPage(),
             },
             initialRoute: '/',
           );

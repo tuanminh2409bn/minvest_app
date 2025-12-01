@@ -18,10 +18,4 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-
-  static const LinearGradient glow = LinearGradient(
-    colors: [Color(0xFF3F5EFB), Color(0xFFFF5F6D)],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-  );
 }
