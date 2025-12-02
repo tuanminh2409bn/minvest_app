@@ -909,9 +909,9 @@ class _SignalsPerformanceCard extends StatelessWidget {
 
   Widget _item(IconData icon, String title, String subtitle) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           gradient: const LinearGradient(
@@ -919,6 +919,7 @@ class _SignalsPerformanceCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
+          border: Border.all(color: Colors.white12),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

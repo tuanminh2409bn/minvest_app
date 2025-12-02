@@ -74,31 +74,16 @@ class _WinMoreSectionState extends State<WinMoreSection> {
           const SizedBox(height: AppSpacing.xl),
           SizedBox(
             height: 640,
-            child: Stack(
-              alignment: Alignment.center,
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Transform.scale(
-                      scaleX: 4.0,
-                      scaleY: 1.0,
-                      child: Opacity(
-                        opacity: 0.85,
-                        child: Image.asset(
-                          'assets/mockups/light.png',
-                          fit: BoxFit.cover,
-                          alignment: Alignment.center,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: -220,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              const _GlowBackground(),
+              Positioned(
+                left: -220,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                       _floatingCard(0, offsetY: -60),
                       const SizedBox(height: 16),
                       _floatingCard(1, offsetY: 0),
@@ -110,49 +95,25 @@ class _WinMoreSectionState extends State<WinMoreSection> {
                 Positioned(
                   right: -220,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _floatingCard(3, offsetY: -40),
-                      const SizedBox(height: 16),
-                      _floatingCard(4, offsetY: 10),
-                      const SizedBox(height: 16),
-                      _floatingCard(5, offsetY: 50),
-                    ],
-                  ),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _floatingCard(3, offsetY: -40),
+                    const SizedBox(height: 16),
+                    _floatingCard(4, offsetY: 10),
+                    const SizedBox(height: 16),
+                    _floatingCard(5, offsetY: 50),
+                  ],
                 ),
-                SizedBox(
-                  width: 320,
-                  height: 640,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Image.asset('assets/mockups/iPhone16.png', fit: BoxFit.contain),
-                      Positioned.fill(
-                        left: 13,
-                        right: 13,
-                        top: 38,
-                        bottom: 26,
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(18),
-                            topRight: Radius.circular(18),
-                            bottomLeft: Radius.circular(26),
-                            bottomRight: Radius.circular(26),
-                          ),
-                          child: const _PhoneScreen(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const _PhoneMockup(),
+            ],
           ),
+        ),
           const SizedBox(height: AppSpacing.lg),
           Text(
             'Our multi-market AI scans Forex, Crypto, and Metals in real-time,\n'
-            'delivering expert-validated trading signals —\n'
-            'with clear entry, stop-loss, and take-profit levels.',
+                'delivering expert-validated trading signals —\n'
+                'with clear entry, stop-loss, and take-profit levels.',
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
@@ -209,6 +170,81 @@ class _CardData {
   final String image;
   final double rotation;
   const _CardData({required this.image, required this.rotation});
+}
+
+class _GlowBackground extends StatelessWidget {
+  const _GlowBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Center(
+          child: FractionallySizedBox(
+            widthFactor: 2.0,
+            heightFactor: 1.0,
+            child: Opacity(
+              opacity: 0.85,
+              child: Image.asset(
+                'assets/mockups/light.png',
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PhoneMockup extends StatelessWidget {
+  const _PhoneMockup();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 320,
+      height: 640,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          _PhoneFrame(),
+          const _PhoneScreenHolder(),
+        ],
+      ),
+    );
+  }
+}
+
+class _PhoneFrame extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset('assets/mockups/iPhone16.png', fit: BoxFit.contain);
+  }
+}
+
+class _PhoneScreenHolder extends StatelessWidget {
+  const _PhoneScreenHolder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      left: 13,
+      right: 13,
+      top: 32,
+      bottom: 26,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(18),
+          topRight: Radius.circular(18),
+          bottomLeft: Radius.circular(26),
+          bottomRight: Radius.circular(26),
+        ),
+        child: const _PhoneScreen(),
+      ),
+    );
+  }
 }
 
 class _PhoneScreen extends StatelessWidget {
@@ -517,63 +553,7 @@ class YourOnDemandSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 150),
-        SizedBox(
-          height: 640,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Transform.scale(
-                    scaleX: 1.8,
-                    scaleY: 1.3,
-                    child: Opacity(
-                      opacity: 0.9,
-                      child: Image.asset(
-                        'assets/mockups/light.png',
-                        fit: BoxFit.cover,
-                        alignment: Alignment.center,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -30,
-                child: SizedBox(
-                  width: 1100,
-                  child: Image.asset(
-                    'assets/mockups/laptop.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 160,
-                child: Column(
-                  children: [
-                    Row(
-                      children: const [
-                        _InfoCard(text: 'AI-Powered Trading Signal Platform'),
-                        SizedBox(width: 16),
-                        _InfoCard(text: 'Self-Learning Systems, Sharper Insights, Stronger Trades'),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: const [
-                        _InfoCard(text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading'),
-                        SizedBox(width: 16),
-                        _InfoCard(text: 'Analysing the market 24/7'),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        const _LaptopShowcase(),
       ],
     );
   }
@@ -610,6 +590,100 @@ class _InfoCard extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _LaptopShowcase extends StatelessWidget {
+  const _LaptopShowcase();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 640,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: const [
+          _LaptopGlow(),
+          _LaptopImage(),
+          _LaptopCards(),
+        ],
+      ),
+    );
+  }
+}
+
+class _LaptopGlow extends StatelessWidget {
+  const _LaptopGlow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Center(
+          child: FractionallySizedBox(
+            widthFactor: 1.8,
+            heightFactor: 1.0,
+            child: Opacity(
+              opacity: 0.9,
+              child: Image.asset(
+                'assets/mockups/light.png',
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LaptopImage extends StatelessWidget {
+  const _LaptopImage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: -30,
+      child: SizedBox(
+        width: 1100,
+        child: Image.asset(
+          'assets/mockups/laptop.png',
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+}
+
+class _LaptopCards extends StatelessWidget {
+  const _LaptopCards();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 160,
+      child: Column(
+        children: [
+          Row(
+            children: const [
+              _InfoCard(text: 'AI-Powered Trading Signal Platform'),
+              SizedBox(width: 16),
+              _InfoCard(text: 'Self-Learning Systems, Sharper Insights, Stronger Trades'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: const [
+              _InfoCard(text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading'),
+              SizedBox(width: 16),
+              _InfoCard(text: 'Analysing the market 24/7'),
+            ],
+          ),
+        ],
       ),
     );
   }
