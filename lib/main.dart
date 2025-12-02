@@ -31,6 +31,8 @@ import 'web/landing/features_page.dart';
 import 'web/landing/landing_page.dart';
 import 'web/landing/ai_signals_page.dart';
 import 'web/landing/pricing_page.dart';
+import 'web/landing/news_page.dart';
+import 'web/landing/contact_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -250,6 +252,8 @@ class _MyAppState extends State<MyApp> {
               '/features': (context) => const FeaturesPage(),
               '/ai-signals': (context) => const AISignalsPage(),
               '/pricing': (context) => const PricingPage(),
+              '/news': (context) => const NewsPage(),
+              '/contact-us': (context) => const ContactPage(),
             },
             initialRoute: '/',
           );

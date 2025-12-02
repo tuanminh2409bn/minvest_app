@@ -45,6 +45,10 @@ class LandingNavBar extends StatelessWidget {
                                         Navigator.of(context).pushNamed('/ai-signals');
                                       } else if (item == 'Pricing') {
                                         Navigator.of(context).pushNamed('/pricing');
+                                      } else if (item == 'News') {
+                                        Navigator.of(context).pushNamed('/news');
+                                      } else if (item == 'Contact Us') {
+                                        Navigator.of(context).pushNamed('/contact-us');
                                       }
                                     },
                                     child: Text(

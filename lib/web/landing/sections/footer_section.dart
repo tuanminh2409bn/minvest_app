@@ -40,16 +40,16 @@ class FooterSection extends StatelessWidget {
             flex: 2,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Pages', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-              const SizedBox(height: AppSpacing.sm),
-              _navLink(context, 'Features', '/features'),
-              _navLink(context, 'AI Signals', '/ai-signals'),
-              _navLink(context, 'Pricing', '/pricing'),
-              _navLink(context, 'News', null),
-              _navLink(context, 'Contact Us', null),
-            ],
-          ),
+              children: [
+                Text('Pages', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                const SizedBox(height: AppSpacing.sm),
+                _navLink(context, 'Features', '/features'),
+                _navLink(context, 'AI Signals', '/ai-signals'),
+                _navLink(context, 'Pricing', '/pricing'),
+                _navLink(context, 'News', '/news'),
+                _navLink(context, 'Contact Us', '/contact-us'),
+              ],
+            ),
           ),
           const SizedBox(width: 40),
           Expanded(
