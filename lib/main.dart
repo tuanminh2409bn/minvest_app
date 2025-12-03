@@ -33,6 +33,7 @@ import 'web/landing/ai_signals_page.dart';
 import 'web/landing/pricing_page.dart';
 import 'web/landing/news_page.dart';
 import 'web/landing/contact_page.dart';
+import 'features/auth/screens/welcome/signup_screen_web.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -170,7 +171,6 @@ class _MyAppState extends State<MyApp> {
         if (chatRoomId == null) return;
 
         if (userRole == 'support') {
-          // Logic cho support không đổi, hoạt động trên cả 2 nền tảng
           try {
             final chatUser = await ChatService().getUserDetails(chatRoomId);
             if (chatUser != null && navigatorKey.currentState != null) {
@@ -222,7 +222,6 @@ class _MyAppState extends State<MyApp> {
               child: Text(l10n.ok),
               onPressed: () async {
                 Navigator.of(dialogContext).pop();
-                // Dùng context của MyApp để truy cập Provider, không phải `this.context`
                 await Provider.of<AuthService>(context, listen: false).signOut();
               },
             ),
@@ -247,6 +246,8 @@ class _MyAppState extends State<MyApp> {
             debugShowCheckedModeBanner: false,
             title: 'Minvest Forex App',
             theme: _buildAppTheme(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             routes: {
               '/': (context) => const LandingPage(),
               '/features': (context) => const FeaturesPage(),
@@ -254,6 +255,8 @@ class _MyAppState extends State<MyApp> {
               '/pricing': (context) => const PricingPage(),
               '/news': (context) => const NewsPage(),
               '/contact-us': (context) => const ContactPage(),
+              '/signin': (context) => const AuthGate(),
+              '/signup': (context) => const SignupScreenWeb(),
             },
             initialRoute: '/',
           );

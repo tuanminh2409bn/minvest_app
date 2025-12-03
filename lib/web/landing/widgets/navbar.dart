@@ -4,12 +4,14 @@ import '../../theme/content.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/gradients.dart';
 import '../../theme/spacing.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LandingNavBar extends StatelessWidget {
   const LandingNavBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
@@ -72,7 +74,14 @@ class LandingNavBar extends StatelessWidget {
                       children: [
                         _ctaButton('Get Signals now'),
                         const SizedBox(width: AppSpacing.sm),
-                        _outlineButton('Sign in'),
+                        if (user == null) ...[
+                          _outlineButton(
+                            'Sign in',
+                            onTap: () => Navigator.of(context).pushNamed('/signin'),
+                          ),
+                        ] else ...[
+                          _userAvatar(user),
+                        ],
                         const SizedBox(width: AppSpacing.sm),
                         Container(
                           width: 44,
@@ -97,60 +106,93 @@ class LandingNavBar extends StatelessWidget {
       ),
     );
   }
-
   Widget _ctaButton(String text) {
-    return Container(
-      padding: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: const [
-          BoxShadow(color: Colors.black54, blurRadius: 12, offset: Offset(0, 6)),
-        ],
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.transparent,
-        ),
-        child: Text(
-          text,
-          style: AppTextStyles.h3.copyWith(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
+    return Builder(
+      builder: (context) => GestureDetector(
+        onTap: () => Navigator.of(context).pushNamed('/signup'),
+        child: Container(
+          padding: const EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: const [
+              BoxShadow(color: Colors.black54, blurRadius: 12, offset: Offset(0, 6)),
+            ],
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.transparent,
+            ),
+            child: Text(
+              text,
+              style: AppTextStyles.h3.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _outlineButton(String text) {
-    return Container(
-      padding: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        gradient: AppGradients.cta,
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.black,
-        ),
-        child: Text(
-          text,
-          style: AppTextStyles.h3.copyWith(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
+  Widget _outlineButton(String text, {VoidCallback? onTap}) {
+    return Builder(
+      builder: (context) => GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            gradient: AppGradients.cta,
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.black,
+            ),
+            child: Text(
+              text,
+              style: AppTextStyles.h3.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _userAvatar(User user) {
+    final photoUrl = user.photoURL;
+    return GestureDetector(
+      onTap: () {
+        // Placeholder: navigate to profile or account menu
+      },
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white24),
+          image: photoUrl != null
+              ? DecorationImage(image: NetworkImage(photoUrl), fit: BoxFit.cover)
+              : null,
+          color: photoUrl == null ? Colors.white24 : null,
+        ),
+        child: photoUrl == null
+            ? const Icon(Icons.person, color: Colors.white, size: 18)
+            : null,
       ),
     );
   }

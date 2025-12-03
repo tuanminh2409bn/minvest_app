@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import '../theme/colors.dart';
 import '../theme/breakpoints.dart';
 import '../theme/text_styles.dart';
@@ -185,22 +187,42 @@ class _HeroInteractiveState extends State<_HeroInteractive> {
                       color: Colors.white,
                       height: 1.1,
                     ),
-                    onPressed: () {},
+                    onPressed: () => Navigator.of(context).pushNamed('/signup'),
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  GradientButton(
-                    label: 'Free Trial',
-                    width: 188,
+                  SizedBox(
+                    width: 138,
                     height: 38,
-                    borderRadius: 6,
-                    padding: EdgeInsets.zero,
-                    textStyle: AppTextStyles.body.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      height: 1.1,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => context.read<AuthBloc>().add(SignInAnonymouslyRequested()),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(1),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(7),
+                            color: Colors.black,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Free Trial',
+                            style: AppTextStyles.body.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    onPressed: () {},
                   ),
                 ],
               ),
@@ -1230,7 +1252,10 @@ class CtaSection extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                GradientButton(label: 'Get Signals Now', onPressed: () {}),
+                GradientButton(
+                  label: 'Get Signals Now',
+                  onPressed: () => Navigator.of(context).pushNamed('/signup'),
+                ),
                 const SizedBox(width: AppSpacing.md),
                 TextButton(
                   onPressed: () {},

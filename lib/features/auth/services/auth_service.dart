@@ -28,6 +28,98 @@ class AuthService {
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
+  Future<String> sendPhoneOtp(String phoneNumber) async {
+    final completer = Completer<String>();
+    await _firebaseAuth.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationCompleted: (credential) {},
+      verificationFailed: (e) {
+        if (!completer.isCompleted) {
+          completer.completeError(e);
+        }
+      },
+      codeSent: (verificationId, forceResendingToken) {
+        if (!completer.isCompleted) {
+          completer.complete(verificationId);
+        }
+      },
+      codeAutoRetrievalTimeout: (verificationId) {
+        if (!completer.isCompleted) {
+          completer.complete(verificationId);
+        }
+      },
+    );
+    return completer.future;
+  }
+
+  Future<User?> signUpWithEmailPhone({
+    required String email,
+    required String password,
+    required String displayName,
+    required String phoneNumber,
+    required String countryCode,
+    required String verificationId,
+    required String smsCode,
+  }) async {
+    final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+    final user = userCredential.user;
+    if (user == null) return null;
+
+    await user.updateDisplayName(displayName);
+
+    final phoneCredential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: smsCode);
+    try {
+      await user.linkWithCredential(phoneCredential);
+    } catch (e) {
+      // ignore link errors to avoid blocking signup
+      print('Link phone error: $e');
+    }
+
+    await _handleSuccessfulSignIn(userCredential);
+
+    try {
+      await _firestore.collection('users').doc(user.uid).set({
+        'phone': phoneNumber,
+        'countryCode': countryCode,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error updating phone: $e');
+    }
+
+    return user;
+  }
+
+  Future<User?> signUpWithEmailPassword({
+    required String email,
+    required String password,
+    required String displayName,
+    String? phoneNumber,
+    String? countryCode,
+  }) async {
+    final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    final user = userCredential.user;
+    if (user == null) return null;
+
+    await user.updateDisplayName(displayName);
+
+    // Không cần OTP: chỉ lưu thông tin người dùng vào Firestore.
+    await _handleSuccessfulSignIn(userCredential);
+
+    try {
+      await _firestore.collection('users').doc(user.uid).set({
+        'phone': phoneNumber,
+        'countryCode': countryCode,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error updating phone info: $e');
+    }
+
+    return user;
+  }
+
   Future<void> listenForSessionChanges() async {
     final user = _firebaseAuth.currentUser;
     if (user == null) return;
@@ -108,11 +200,11 @@ class AuthService {
         final userDocRef = _firestore.collection('users').doc(user.uid);
         final userDoc = await transaction.get(userDocRef);
 
-        if (!userDoc.exists) {
-          if (isAnonymous) {
-            transaction.set(userDocRef, {
-              'uid': user.uid,
-              'email': 'guest_${user.uid}@minvest.com',
+      if (!userDoc.exists) {
+        if (isAnonymous) {
+          transaction.set(userDocRef, {
+            'uid': user.uid,
+            'email': 'guest_${user.uid}@minvest.com',
               'displayName': 'Guest',
               'photoURL': null,
               'createdAt': Timestamp.now(),
@@ -130,25 +222,26 @@ class AuthService {
               email = '${user.uid}@appleid.placeholder.com';
             }
 
-            if (email == null) {
-              throw Exception("Không thể lấy được địa chỉ email. Vui lòng thử lại.");
-            }
-
-            transaction.set(userDocRef, {
-              'uid': user.uid,
-              'email': email,
-              'displayName': displayName,
-              'photoURL': photoURL,
-              'createdAt': Timestamp.now(),
-              'subscriptionTier': 'free',
-              'role': 'user',
-              'isSuspended': false,
-              'languageCode': languageCode, // 3. Thêm languageCode cho người dùng thường
-            });
+          if (email == null) {
+            throw Exception("Không thể lấy được địa chỉ email. Vui lòng thử lại.");
           }
-        } else {
-          if (userDoc.data()?['isSuspended'] == true) {
-            throw SuspendedAccountException(userDoc.data()?['suspensionReason'] ?? 'Vui lòng liên hệ quản trị viên.');
+
+          transaction.set(userDocRef, {
+            'uid': user.uid,
+            'email': email,
+            'displayName': displayName,
+            'photoURL': photoURL,
+            'createdAt': Timestamp.now(),
+            'subscriptionTier': 'free',
+            'role': 'user',
+            'isSuspended': false,
+            'languageCode': languageCode, // 3. Thêm languageCode cho người dùng thường
+            'phone': user.phoneNumber,
+          });
+        }
+      } else {
+        if (userDoc.data()?['isSuspended'] == true) {
+          throw SuspendedAccountException(userDoc.data()?['suspensionReason'] ?? 'Vui lòng liên hệ quản trị viên.');
           }
         }
       });

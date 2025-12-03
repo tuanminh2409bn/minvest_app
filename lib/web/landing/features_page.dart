@@ -118,25 +118,30 @@ class _WinMoreSectionState extends State<WinMoreSection> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),
-          Container(
-            padding: const EdgeInsets.all(1.2),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: const LinearGradient(
-                colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.black,
-              ),
-              child: Text(
-                'Get Signals now',
-                style: AppTextStyles.h3.copyWith(fontSize: 16, color: Colors.white),
+          Builder(
+            builder: (context) => GestureDetector(
+              onTap: () => Navigator.of(context).pushNamed('/signup'),
+              child: Container(
+                padding: const EdgeInsets.all(1.2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.black,
+                  ),
+                  child: Text(
+                    'Get Signals now',
+                    style: AppTextStyles.h3.copyWith(fontSize: 16, color: Colors.white),
+                  ),
+                ),
               ),
             ),
           ),
@@ -624,10 +629,10 @@ class _LaptopGlow extends StatelessWidget {
       child: IgnorePointer(
         child: Center(
           child: FractionallySizedBox(
-            widthFactor: 1.8,
+            widthFactor: 1.3,
             heightFactor: 1.0,
             child: Opacity(
-              opacity: 0.9,
+              opacity: 0.5,
               child: Image.asset(
                 'assets/mockups/light.png',
                 fit: BoxFit.cover,
@@ -717,28 +722,33 @@ class MaximizeResultsSection extends StatelessWidget {
   }
 
   Widget _ctaButton() {
-    return Container(
-      padding: const EdgeInsets.all(1.2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF00BFFF), Color(0xFF2E60FF), Color(0xFFD500F9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: const [
-          BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 4)),
-        ],
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.black,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        child: Text(
-          'Get Signals now',
-          style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+    return Builder(
+      builder: (context) => GestureDetector(
+        onTap: () => Navigator.of(context).pushNamed('/signup'),
+        child: Container(
+          padding: const EdgeInsets.all(1.2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF00BFFF), Color(0xFF2E60FF), Color(0xFFD500F9)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: const [
+              BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 4)),
+            ],
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.black,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Text(
+              'Get Signals now',
+              style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+          ),
         ),
       ),
     );
