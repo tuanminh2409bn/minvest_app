@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
 import '../../theme/text_styles.dart';
@@ -98,12 +99,18 @@ class _PricingSectionState extends State<PricingSection> {
             spacing: 16,
             runSpacing: 16,
             alignment: WrapAlignment.center,
-            children: plans
-                .map((plan) => _PricingCard(
-                      plan: plan,
-                      features: features,
-                    ))
-                .toList(),
+            children: [
+              for (int i = 0; i < plans.length; i++)
+                _AnimatedPricingCard(
+                  plan: plans[i],
+                  features: features,
+                  slideDirection: i == 0
+                      ? _SlideDirection.fromLeft
+                      : i == 1
+                          ? _SlideDirection.fromBottom
+                          : _SlideDirection.fromRight,
+                ),
+            ],
           ),
         ],
       ),
@@ -180,25 +187,146 @@ class _PlanData {
   });
 }
 
-class _PricingCard extends StatelessWidget {
+enum _SlideDirection { fromLeft, fromRight, fromBottom }
+
+class _AnimatedPricingCard extends StatefulWidget {
   final _PlanData plan;
   final List<String> features;
+  final _SlideDirection slideDirection;
 
-  const _PricingCard({
+  const _AnimatedPricingCard({
     required this.plan,
     required this.features,
+    required this.slideDirection,
   });
 
   @override
+  State<_AnimatedPricingCard> createState() => _AnimatedPricingCardState();
+}
+
+class _AnimatedPricingCardState extends State<_AnimatedPricingCard> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slide;
+  late final Animation<double> _fade;
+  bool _hasPlayed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    final beginOffset = switch (widget.slideDirection) {
+      _SlideDirection.fromLeft => const Offset(-0.18, 0),
+      _SlideDirection.fromRight => const Offset(0.18, 0),
+      _ => const Offset(0, 0.18),
+    };
+    _slide = Tween(begin: beginOffset, end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _fade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 300,
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        gradient: plan.gradient,
-        borderRadius: BorderRadius.circular(14),
+    return VisibilityDetector(
+      key: Key('pricing_card_${widget.plan.title}'),
+      onVisibilityChanged: (info) {
+        if (!_hasPlayed && info.visibleFraction > 0.15) {
+          _hasPlayed = true;
+          _controller.forward();
+        }
+      },
+      child: SlideTransition(
+        position: _slide,
+        child: FadeTransition(
+          opacity: _fade,
+          child: _PricingCardContent(
+            plan: widget.plan,
+            features: widget.features,
+          ),
+        ),
       ),
+    );
+  }
+}
+
+class _AnimatedBorderCard extends StatefulWidget {
+  final Widget child;
+  const _AnimatedBorderCard({required this.child});
+
+  @override
+  State<_AnimatedBorderCard> createState() => _AnimatedBorderCardState();
+}
+
+class _AnimatedBorderCardState extends State<_AnimatedBorderCard> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = _controller.value;
+        final colors = const [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)];
+        final stops = [
+          (t + 0.0) % 1,
+          (t + 0.4) % 1,
+          (t + 0.8) % 1,
+        ]..sort();
+        return Container(
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: colors,
+              stops: stops,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: colors[1].withOpacity(0.25),
+                blurRadius: 22,
+                spreadRadius: 2,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+class _PricingCardContent extends StatelessWidget {
+  final _PlanData plan;
+  final List<String> features;
+  const _PricingCardContent({required this.plan, required this.features});
+
+  @override
+  Widget build(BuildContext context) {
+    return _AnimatedBorderCard(
       child: Container(
+        width: 300,
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: Colors.black,

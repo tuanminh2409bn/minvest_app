@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import '../theme/colors.dart';
@@ -270,8 +271,39 @@ class HeroSubtitleSection extends StatelessWidget {
   }
 }
 
-class HeroSignalsSection extends StatelessWidget {
+class HeroSignalsSection extends StatefulWidget {
   const HeroSignalsSection({super.key});
+
+  @override
+  State<HeroSignalsSection> createState() => _HeroSignalsSectionState();
+}
+
+class _HeroSignalsSectionState extends State<HeroSignalsSection> with SingleTickerProviderStateMixin {
+  late final AnimationController _entranceController;
+  late final Animation<Offset> _slideIn;
+  late final Animation<double> _fadeIn;
+  bool _hasPlayed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 950),
+    );
+    _slideIn = Tween(begin: const Offset(-0.2, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
+    );
+    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _entranceController, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _entranceController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -279,66 +311,35 @@ class HeroSignalsSection extends StatelessWidget {
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth.clamp(320.0, 560.0);
         return Center(
-          child: Container(
-            width: maxWidth,
-            padding: const EdgeInsets.all(2),
-            constraints: const BoxConstraints(minHeight: 480),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF04B3E9), Color(0xFFD500F9)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSearchBar(context),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildTabs(context),
-                  const SizedBox(height: AppSpacing.md),
-                  const _SignalCard(
-                    icon: Icons.currency_bitcoin,
-                    iconColor: Color(0xFF00B6FF),
-                    pair: 'BTC',
-                    date: 'June 1, 2025',
-                    entry: '30',
-                    sl: '3310',
-                    tp1: '3330',
-                    tp2: '3350',
-                    badgeLabel: 'Sell Limit',
-                    badgeGradient: LinearGradient(
-                      colors: [Color(0xFFFF00FF), Color(0xFF9B00FF)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+          child: VisibilityDetector(
+            key: const Key('hero_signals_visibility'),
+            onVisibilityChanged: (info) {
+              if (!_hasPlayed && info.visibleFraction > 0.2) {
+                _hasPlayed = true;
+                _entranceController.forward();
+              }
+            },
+            child: SlideTransition(
+              position: _slideIn,
+              child: FadeTransition(
+                opacity: _fadeIn,
+                child: _AnimatedGlowCard(
+                  width: maxWidth,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSearchBar(context),
+                        const SizedBox(height: AppSpacing.md),
+                        _buildTabs(context),
+                        const SizedBox(height: AppSpacing.md),
+                        const _StaggeredSignalCards(),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  const _SignalCard(
-                    icon: Icons.auto_awesome,
-                    iconColor: Color(0xFF00B6FF),
-                    pair: 'XAUUSD',
-                    date: 'June 1, 2025',
-                    entry: '30',
-                    sl: '3310',
-                    tp1: '3330',
-                    tp2: '3350',
-                    badgeLabel: 'Buy Limit',
-                    badgeGradient: LinearGradient(
-                      colors: [Color(0xFF3DA1FF), Color(0xFF2C6BFF)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -390,6 +391,270 @@ class HeroSignalsSection extends StatelessWidget {
         tab('Forex'),
         const SizedBox(width: AppSpacing.sm),
         tab('Crypto'),
+      ],
+    );
+  }
+}
+
+class _AnimatedGlowCard extends StatefulWidget {
+  final double width;
+  final Widget child;
+  const _AnimatedGlowCard({
+    required this.width,
+    required this.child,
+  });
+
+  @override
+  State<_AnimatedGlowCard> createState() => _AnimatedGlowCardState();
+}
+
+class _AnimatedBorderCard extends StatefulWidget {
+  final Widget child;
+  const _AnimatedBorderCard({required this.child});
+
+  @override
+  State<_AnimatedBorderCard> createState() => _AnimatedBorderCardState();
+}
+
+class _AnimatedBorderCardState extends State<_AnimatedBorderCard> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = _controller.value;
+        final colors = const [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)];
+        final stops = [
+          (t + 0.0) % 1,
+          (t + 0.4) % 1,
+          (t + 0.8) % 1,
+        ]..sort();
+
+        return Container(
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: colors,
+              stops: stops,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: colors[1].withOpacity(0.25),
+                blurRadius: 22,
+                spreadRadius: 2,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: child,
+          ),
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+class _AnimatedGlowCardState extends State<_AnimatedGlowCard> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = _controller.value;
+        final colors = const [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)];
+        final stops = [
+          (t + 0.0) % 1,
+          (t + 0.4) % 1,
+          (t + 0.8) % 1,
+        ]..sort();
+
+        return Container(
+          width: widget.width,
+          padding: const EdgeInsets.all(2),
+          constraints: const BoxConstraints(minHeight: 480),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: colors,
+              stops: stops,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: colors[1].withOpacity(0.28),
+                blurRadius: 24,
+                spreadRadius: 2,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: _GlowPainter(progress: t),
+                    ),
+                  ),
+                ),
+                child!,
+              ],
+            ),
+          ),
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+class _GlowPainter extends CustomPainter {
+  final double progress;
+  _GlowPainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width * (0.3 + 0.4 * progress), size.height * (0.7 - 0.4 * progress));
+    final radius = size.width * 0.9;
+    final paint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFF2E60FF).withOpacity(0.18),
+          Colors.transparent,
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawRect(Offset.zero & size, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _GlowPainter oldDelegate) => oldDelegate.progress != progress;
+}
+
+class _StaggeredSignalCards extends StatefulWidget {
+  const _StaggeredSignalCards();
+
+  @override
+  State<_StaggeredSignalCards> createState() => _StaggeredSignalCardsState();
+}
+
+class _StaggeredSignalCardsState extends State<_StaggeredSignalCards> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _firstOpacity;
+  late final Animation<double> _secondOpacity;
+  late final Animation<Offset> _firstSlide;
+  late final Animation<Offset> _secondSlide;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _firstOpacity = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeOut)));
+    _secondOpacity = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.3, 1.0, curve: Curves.easeOut)));
+    _firstSlide = Tween(begin: const Offset(0, 0.08), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeOut)));
+    _secondSlide = Tween(begin: const Offset(0, 0.08), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.3, 1.0, curve: Curves.easeOut)));
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FadeTransition(
+          opacity: _firstOpacity,
+          child: SlideTransition(
+            position: _firstSlide,
+            child: const _SignalCard(
+              icon: Icons.currency_bitcoin,
+              iconColor: Color(0xFF00B6FF),
+              pair: 'BTC',
+              date: 'June 1, 2025',
+              entry: '30',
+              sl: '3310',
+              tp1: '3330',
+              tp2: '3350',
+              badgeLabel: 'Sell Limit',
+              badgeGradient: LinearGradient(
+                colors: [Color(0xFFFF00FF), Color(0xFF9B00FF)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        FadeTransition(
+          opacity: _secondOpacity,
+          child: SlideTransition(
+            position: _secondSlide,
+            child: const _SignalCard(
+              icon: Icons.auto_awesome,
+              iconColor: Color(0xFF00B6FF),
+              pair: 'XAUUSD',
+              date: 'June 1, 2025',
+              entry: '30',
+              sl: '3310',
+              tp1: '3330',
+              tp2: '3350',
+              badgeLabel: 'Buy Limit',
+              badgeGradient: LinearGradient(
+                colors: [Color(0xFF3DA1FF), Color(0xFF2C6BFF)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -505,45 +770,88 @@ class _SignalCard extends StatelessWidget {
   }
 }
 
-class LiveSignalsSection extends StatelessWidget {
+class LiveSignalsSection extends StatefulWidget {
   const LiveSignalsSection({super.key});
+
+  @override
+  State<LiveSignalsSection> createState() => _LiveSignalsSectionState();
+}
+
+class _LiveSignalsSectionState extends State<LiveSignalsSection> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slideIn;
+  late final Animation<double> _fadeIn;
+  bool _hasPlayed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _slideIn = Tween(begin: const Offset(0.18, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xxl),
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 480),
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _chip(context, 'AI Signals'),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              'LIVE – 24/7 AI Trading Signals',
-              style: AppTextStyles.h1.copyWith(fontSize: 42, fontWeight: FontWeight.w800),
+      child: VisibilityDetector(
+        key: const Key('live_signals_visibility'),
+        onVisibilityChanged: (info) {
+          if (!_hasPlayed && info.visibleFraction > 0.2) {
+            _hasPlayed = true;
+            _controller.forward();
+          }
+        },
+        child: SlideTransition(
+          position: _slideIn,
+          child: FadeTransition(
+            opacity: _fadeIn,
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 480),
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _chip(context, 'AI Signals'),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    'LIVE – 24/7 AI Trading Signals',
+                    style: AppTextStyles.h1.copyWith(fontSize: 42, fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Real-time cloud analytics delivering high-probability, trend-following strategies with adaptive precision and emotion-free execution.',
+                    style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Wrap(
+                    spacing: AppSpacing.md,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      _outlinedChip('AI Signals'),
+                      _outlinedChip('Trend-Following'),
+                      _outlinedChip('Real-time'),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Real-time cloud analytics delivering high-probability, trend-following strategies with adaptive precision and emotion-free execution.',
-              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.sm,
-              children: [
-                _outlinedChip('AI Signals'),
-                _outlinedChip('Trend-Following'),
-                _outlinedChip('Real-time'),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -601,33 +909,86 @@ class LiveSignalsSection extends StatelessWidget {
   }
 }
 
-class OrderEngineSection extends StatelessWidget {
+class OrderEngineSection extends StatefulWidget {
   const OrderEngineSection({super.key});
+
+  @override
+  State<OrderEngineSection> createState() => _OrderEngineSectionState();
+}
+
+class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _leftSlide;
+  late final Animation<Offset> _rightSlide;
+  late final Animation<double> _leftFade;
+  late final Animation<double> _rightFade;
+  bool _hasPlayed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _leftSlide = Tween(begin: const Offset(-0.18, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _rightSlide = Tween(begin: const Offset(0.18, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _leftFade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _rightFade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 32),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 520),
-                child: const _OrderCard(),
+      child: VisibilityDetector(
+        key: const Key('order_engine_visibility'),
+        onVisibilityChanged: (info) {
+          if (!_hasPlayed && info.visibleFraction > 0.2) {
+            _hasPlayed = true;
+            _controller.forward();
+          }
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 32),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 520),
+                  child: SlideTransition(
+                    position: _leftSlide,
+                    child: FadeTransition(
+                      opacity: _leftFade,
+                      child: const _OrderCard(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 520),
+              child: SlideTransition(
+                position: _rightSlide,
+                child: FadeTransition(
+                  opacity: _rightFade,
+                  child: const _KeyFindingsCard(),
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 520),
-              child: const _KeyFindingsCard(),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -725,44 +1086,168 @@ class _OrderCard extends StatelessWidget {
   }
 }
 
-class _KeyFindingsCard extends StatelessWidget {
-  const _KeyFindingsCard();
+class _TransparentCardAnimated extends StatefulWidget {
+  const _TransparentCardAnimated();
+
+  @override
+  State<_TransparentCardAnimated> createState() => _TransparentCardAnimatedState();
+}
+
+class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slideIn;
+  late final Animation<double> _fadeIn;
+  bool _hasPlayed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _slideIn = Tween(begin: const Offset(0.16, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF04B3E9), Color(0xFFD500F9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Key Findings', style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
-            const SizedBox(height: AppSpacing.md),
-            _chartPlaceholder(),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                _Metric(label: 'Predictive Accuracy', value: '+81%'),
-                _Metric(label: 'Improvement in Profitability', value: '+37%'),
-                _Metric(label: 'Improved Risk Management', value: '+63%'),
+    return VisibilityDetector(
+      key: const Key('transparent_card_visibility'),
+      onVisibilityChanged: (info) {
+        if (!_hasPlayed && info.visibleFraction > 0.2) {
+          _hasPlayed = true;
+          _controller.forward();
+        }
+      },
+      child: SlideTransition(
+        position: _slideIn,
+        child: FadeTransition(
+          opacity: _fadeIn,
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _TransparentCard()._chip(context),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'Transparent - Real Performance',
+                  style: AppTextStyles.h1.copyWith(fontSize: 40, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'See real data on signal accuracy, success rate, and profitability — verified and traceable in every trade',
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 17),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Wrap(
+                  spacing: AppSpacing.md,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    _TransparentCard()._pill('Results'),
+                    _TransparentCard()._pill('Performance-Tracking'),
+                    _TransparentCard()._pill('Accurate'),
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _KeyFindingsCard extends StatefulWidget {
+  const _KeyFindingsCard();
+
+  @override
+  State<_KeyFindingsCard> createState() => _KeyFindingsCardState();
+}
+
+class _KeyFindingsCardState extends State<_KeyFindingsCard> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = _controller.value;
+        final colors = const [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)];
+        final stops = [
+          (t + 0.0) % 1,
+          (t + 0.4) % 1,
+          (t + 0.8) % 1,
+        ]..sort();
+
+        return Container(
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: colors,
+              stops: stops,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: colors[1].withOpacity(0.25),
+                blurRadius: 22,
+                spreadRadius: 2,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: child,
+          ),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Key Findings', style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
+          const SizedBox(height: AppSpacing.md),
+          _chartPlaceholder(),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              _Metric(label: 'Predictive Accuracy', value: '+81%'),
+              _Metric(label: 'Improvement in Profitability', value: '+37%'),
+              _Metric(label: 'Improved Risk Management', value: '+63%'),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -891,47 +1376,73 @@ class PerformanceSection extends StatelessWidget {
   }
 }
 
-class _SignalsPerformanceCard extends StatelessWidget {
+class _SignalsPerformanceCard extends StatefulWidget {
   const _SignalsPerformanceCard();
 
   @override
+  State<_SignalsPerformanceCard> createState() => _SignalsPerformanceCardState();
+}
+
+class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slideIn;
+  late final Animation<double> _fadeIn;
+  bool _hasPlayed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _slideIn = Tween(begin: const Offset(-0.16, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF04B3E9), Color(0xFFD500F9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF0D101A), Color(0xFF0A0B13)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+    return VisibilityDetector(
+      key: const Key('signals_performance_visibility'),
+      onVisibilityChanged: (info) {
+        if (!_hasPlayed && info.visibleFraction > 0.2) {
+          _hasPlayed = true;
+          _controller.forward();
+        }
+      },
+      child: SlideTransition(
+        position: _slideIn,
+        child: FadeTransition(
+          opacity: _fadeIn,
+          child: _AnimatedBorderCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF0D101A), Color(0xFF0A0B13)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Text('Signals Performance', style: AppTextStyles.h3.copyWith(color: Colors.white)),
                 ),
-              ),
-              child: Text('Signals Performance', style: AppTextStyles.h3.copyWith(color: Colors.white)),
+                _item(Icons.balance, 'Risk-to-Reward Ratio', 'How risk compares to reward'),
+                _item(Icons.attach_money, 'Profit/Loss Overview', 'Net gain vs loss'),
+                _item(Icons.emoji_events, 'Win Rate', 'Percentage of winning trades'),
+                _item(Icons.track_changes, 'Accuracy Rate', 'How precise our signals are'),
+              ],
             ),
-            _item(Icons.balance, 'Risk-to-Reward Ratio', 'How risk compares to reward'),
-            _item(Icons.attach_money, 'Profit/Loss Overview', 'Net gain vs loss'),
-            _item(Icons.emoji_events, 'Win Rate', 'Percentage of winning trades'),
-            _item(Icons.track_changes, 'Accuracy Rate', 'How precise our signals are'),
-          ],
+          ),
         ),
       ),
     );
@@ -980,39 +1491,7 @@ class _TransparentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _chip(context),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-            'Transparent - Real Performance',
-            style: AppTextStyles.h1.copyWith(fontSize: 40, fontWeight: FontWeight.w800),
-          ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'See real data on signal accuracy, success rate, and profitability — verified and traceable in every trade',
-              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 17),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.sm,
-              children: [
-                _pill('Results'),
-                _pill('Performance-Tracking'),
-                _pill('Accurate'),
-              ],
-            ),
-          ],
-        ),
-      ),
+      child: const _TransparentCardAnimated(),
     );
   }
 
@@ -1116,14 +1595,14 @@ class CoreValueSection extends StatelessWidget {
             spacing: 20,
             runSpacing: 20,
             alignment: WrapAlignment.center,
-            children: items
-                .map(
-                  (item) => _CoreValueCard(
-                    title: item.title,
-                    description: item.desc,
-                  ),
-                )
-                .toList(),
+            children: [
+              for (int i = 0; i < items.length; i++)
+                _AnimatedCoreValueCard(
+                  title: items[i].title,
+                  description: items[i].desc,
+                  slideFromLeft: i.isEven,
+                ),
+            ],
           ),
         ],
       ),
@@ -1145,38 +1624,89 @@ class _CoreValueCard extends StatelessWidget {
     return Container(
       width: 520,
       constraints: const BoxConstraints(minHeight: 200),
-      padding: const EdgeInsets.all(1.2),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF4779D4),
-            Color(0xFF3E42BD),
-            Color(0xFFC812E5),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        borderRadius: BorderRadius.circular(12),
+        color: AppColors.background,
       ),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: AppColors.background,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: AppTextStyles.h3.copyWith(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w700),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTextStyles.h3.copyWith(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            description,
+            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnimatedCoreValueCard extends StatefulWidget {
+  final String title;
+  final String description;
+  final bool slideFromLeft;
+
+  const _AnimatedCoreValueCard({
+    required this.title,
+    required this.description,
+    required this.slideFromLeft,
+  });
+
+  @override
+  State<_AnimatedCoreValueCard> createState() => _AnimatedCoreValueCardState();
+}
+
+class _AnimatedCoreValueCardState extends State<_AnimatedCoreValueCard> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slide;
+  late final Animation<double> _fade;
+  bool _hasPlayed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    final beginOffset = widget.slideFromLeft ? const Offset(-0.16, 0) : const Offset(0.16, 0);
+    _slide = Tween(begin: beginOffset, end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _fade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: Key('core_value_${widget.title}'),
+      onVisibilityChanged: (info) {
+        if (!_hasPlayed && info.visibleFraction > 0.15) {
+          _hasPlayed = true;
+          _controller.forward();
+        }
+      },
+      child: SlideTransition(
+        position: _slide,
+        child: FadeTransition(
+          opacity: _fade,
+          child: _AnimatedBorderCard(
+            child: _CoreValueCard(
+              title: widget.title,
+              description: widget.description,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              description,
-              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
-            ),
-          ],
+          ),
         ),
       ),
     );

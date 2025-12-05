@@ -45,6 +45,7 @@ dependencies:
   crypto:
   uuid:
   in_app_purchase_storekit:
+  visibility_detector:
 
 dev_dependencies:
   flutter_test:
