@@ -998,3 +998,42 @@ export const deleteUserAccount = onCall({ region: "asia-southeast1" }, async (re
         throw new HttpsError("internal", "Không thể xóa tài khoản, vui lòng thử lại sau.", error);
     }
 });
+
+// =================================================================
+// === FUNTION GỬI THÔNG TIN LÊN FIRESTORE ===
+// =================================================================
+export const submitContactMessage = onCall({ region: "asia-southeast1" }, async (request) => {
+    const data = request.data || {};
+    const firstName = (data.firstName || "").toString().trim();
+    const lastName = (data.lastName || "").toString().trim();
+    const email = (data.email || "").toString().trim();
+    const phone = (data.phone || "").toString().trim();
+    const message = (data.message || "").toString().trim();
+
+    if (!firstName || !lastName || !email || !message) {
+        throw new HttpsError("invalid-argument", "Vui lòng điền đầy đủ họ tên, email và nội dung.");
+    }
+    if (!email.includes("@")) {
+        throw new HttpsError("invalid-argument", "Địa chỉ email không hợp lệ.");
+    }
+    if (message.length > 2000) {
+        throw new HttpsError("invalid-argument", "Nội dung quá dài. Vui lòng rút gọn dưới 2000 ký tự.");
+    }
+
+    try {
+        await firestore.collection("contact_messages").add({
+            firstName,
+            lastName,
+            email,
+            phone,
+            message,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            uid: request.auth?.uid ?? null,
+            source: "landing_contact_form",
+        });
+        return { status: "success" };
+    } catch (error) {
+        functions.logger.error("Lỗi lưu contact_messages:", error);
+        throw new HttpsError("internal", "Không thể lưu thông tin liên hệ, vui lòng thử lại sau.");
+    }
+});

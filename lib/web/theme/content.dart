@@ -86,9 +86,9 @@ class LandingContent {
   ];
 
   static const List<Map<String, String>> faqItems = [
-    {'question': 'How does Minvest work?', 'answer': ''},
-    {'question': 'What trading style can I use with signals?', 'answer': ''},
-    {'question': 'What signal timeframes do you trade?', 'answer': ''},
-    {'question': 'How to use Minvest AI signals?', 'answer': ''},
+    {'question': 'Do the signals ensure a 100% success rate?', 'answer': 'While no signal can be guaranteed 100%, Minvest AI strives to maintain a stable 60–80% success rate, supported by detailed analysis and risk management so you can make the final decision with greater confidence.'},
+    {'question': 'If I don’t want to deposit right away, can I still receive signal suggestions?', 'answer': 'Yes. Simply create an Exness account through the Minvest link, and you’ll get access to our free demo signal group (Community VIP).'},
+    {'question': 'If I’ve signed up but haven’t received any signals, what steps should I take?', 'answer': 'Processing is typically automatic. If you still don’t see any signal suggestions, please contact us via Whatsapp for instant assistance.'},
+    {'question': 'Can I still join if I don’t sign up for an Exness account?', 'answer': 'Please contact us via WhatsApp or Live Chat for assistance.'},
   ];
 }

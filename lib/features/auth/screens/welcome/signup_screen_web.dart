@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
+import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
 import 'package:provider/provider.dart';
 
 class SignupScreenWeb extends StatefulWidget {
@@ -33,42 +33,48 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
 
   @override
   Widget build(BuildContext context) {
-    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
-
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
-        children: [
-          const SizedBox(height: 12),
-          Center(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final double verticalGap = (constraints.maxHeight * 0.16).clamp(70.0, 130.0);
+          final double stackHeight = (670 + (verticalGap * 2)).clamp(750.0, 1050.0);
+
+          return SingleChildScrollView(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: const LandingNavBar(),
-            ),
-          ),
-          const SizedBox(height: 96),
-          Expanded(
-            child: Stack(
-              children: [
-                Positioned.fill(child: Container(color: Colors.black)),
-                const _AuthBackdrop(),
-                Positioned.fill(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      // Mobile có thể dùng chung layout web để giữ UI
-                      return _buildWebLayout(context, languageProvider);
-                    },
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: const LandingNavBar(),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 96),
+                  SizedBox(
+                    height: stackHeight,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(child: Container(color: Colors.black)),
+                        const _AuthBackdrop(),
+                        Positioned.fill(child: _buildWebLayout(context, verticalGap)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: verticalGap),
+                  const FooterSection(),
+                ],
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildWebLayout(BuildContext context, LanguageProvider languageProvider) {
+  Widget _buildWebLayout(BuildContext context, double verticalPadding) {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -76,80 +82,70 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
       });
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool compact = constraints.maxHeight < 760;
-        final double vPad = compact ? 24 : 120;
+    final double vPad = verticalPadding.clamp(120.0, 200.0);
 
-        final content = Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: vPad),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF07080E),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.white10),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black54, blurRadius: 20, spreadRadius: 2),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: vPad),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: const Color(0xFF07080E),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.white10),
+              boxShadow: const [
+                BoxShadow(color: Colors.black54, blurRadius: 20, spreadRadius: 2),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Sign Up Account', textAlign: TextAlign.center, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
+                const SizedBox(height: 6),
+                const Text('Enter your personal data to create your account', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)),
+                const SizedBox(height: 24),
+                _SocialSignInButton(
+                  icon: Image.asset('assets/images/google_logo.png', height: 20, width: 20),
+                  text: 'Continue with Google',
+                  onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: const [
+                    Expanded(child: Divider(color: Colors.white12, thickness: 1)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('or', style: TextStyle(color: Colors.white70)),
+                    ),
+                    Expanded(child: Divider(color: Colors.white12, thickness: 1)),
                   ],
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text('Sign Up Account', textAlign: TextAlign.center, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
-                    const SizedBox(height: 6),
-                    const Text('Enter your personal data to create your account', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)),
-                    const SizedBox(height: 24),
-                    _SocialSignInButton(
-                      icon: Image.asset('assets/images/google_logo.png', height: 20, width: 20),
-                      text: 'Continue with Google',
-                      onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: const [
-                        Expanded(child: Divider(color: Colors.white12, thickness: 1)),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('or', style: TextStyle(color: Colors.white70)),
-                        ),
-                        Expanded(child: Divider(color: Colors.white12, thickness: 1)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _TextField(label: 'Name *', hint: 'Enter Name', controller: _nameController),
-                    const SizedBox(height: 12),
-                    _TextField(label: 'Email *', hint: 'example123@gmail.com', controller: _emailController),
-                    const SizedBox(height: 12),
-                    _TextField(label: 'Password *', hint: 'Enter Password', controller: _passwordController, obscure: true),
-                    const SizedBox(height: 12),
-                    _PhoneField(
-                      countryCode: _countryCode,
-                      onChangedCode: (code) => setState(() => _countryCode = code),
-                      controller: _phoneController,
-                    ),
-                    const SizedBox(height: 16),
-                    _PrimaryButton(
-                      text: 'Continue',
-                      onPressed: _submit,
-                      loading: _isVerifying,
-                    ),
-                  ],
+                const SizedBox(height: 12),
+                _TextField(label: 'Name *', hint: 'Enter Name', controller: _nameController),
+                const SizedBox(height: 12),
+                _TextField(label: 'Email *', hint: 'example123@gmail.com', controller: _emailController),
+                const SizedBox(height: 12),
+                _TextField(label: 'Password *', hint: 'Enter Password', controller: _passwordController, obscure: true),
+                const SizedBox(height: 12),
+                _PhoneField(
+                  countryCode: _countryCode,
+                  onChangedCode: (code) => setState(() => _countryCode = code),
+                  controller: _phoneController,
                 ),
-              ),
+                const SizedBox(height: 16),
+                _PrimaryButton(
+                  text: 'Continue',
+                  onPressed: _submit,
+                  loading: _isVerifying,
+                ),
+              ],
             ),
           ),
-        );
-
-        if (compact) {
-          return SingleChildScrollView(child: content);
-        }
-        return content;
-      },
+        ),
+      ),
     );
   }
 

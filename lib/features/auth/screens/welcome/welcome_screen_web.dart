@@ -4,14 +4,58 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
+import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
 import 'package:minvest_forex_app/web/theme/text_styles.dart';
+import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isSigningIn = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleEmailSignIn(BuildContext context) async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập email và mật khẩu')),
+      );
+      return;
+    }
+
+    setState(() => _isSigningIn = true);
+    try {
+      final authService = context.read<AuthService>();
+      await authService.signInWithEmailPassword(email: email, password: password);
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => route.isFirst);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đăng nhập thất bại: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSigningIn = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,43 +63,57 @@ class WelcomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
-        children: [
-          const SizedBox(height: 12),
-          Center(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final double verticalGap = (constraints.maxHeight * 0.16).clamp(70.0, 130.0);
+          final bool isWide = constraints.maxWidth > 800;
+          final double stackHeight = (650 + (verticalGap * 2)).clamp(750.0, 1050.0);
+
+          return SingleChildScrollView(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: const LandingNavBar(),
-            ),
-          ),
-          const SizedBox(height: 96),
-          Expanded(
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Container(color: Colors.black),
-                ),
-                const _SigninBackdrop(),
-                Positioned.fill(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      if (constraints.maxWidth > 800) {
-                        return _buildWebLayout(context, languageProvider);
-                      } else {
-                        return _buildMobileLayout(context, languageProvider);
-                      }
-                    },
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: const LandingNavBar(),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 96),
+                  if (isWide)
+                    SizedBox(
+                      height: stackHeight,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Container(color: Colors.black),
+                          ),
+                          const _SigninBackdrop(),
+                          Positioned.fill(
+                            child: _buildWebLayout(context, verticalGap),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildMobileLayout(context, languageProvider),
+                    ),
+                  SizedBox(height: verticalGap),
+                  const FooterSection(),
+                ],
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildWebLayout(BuildContext context, LanguageProvider languageProvider) {
+  Widget _buildWebLayout(BuildContext context, double verticalPadding) {
     final l10n = AppLocalizations.of(context)!;
     // Redirect to home if already signed in
     final user = FirebaseAuth.instance.currentUser;
@@ -68,87 +126,78 @@ class WelcomeScreen extends StatelessWidget {
       });
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool compact = constraints.maxHeight < 760;
-        final double vPad = compact ? 24 : 120;
+    final double vPad = verticalPadding.clamp(120.0, 200.0);
 
-        final content = Padding(
-          padding: EdgeInsets.symmetric(vertical: vPad, horizontal: 16),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF07080E),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.white10),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black54, blurRadius: 20, spreadRadius: 2),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: vPad, horizontal: 16),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: const Color(0xFF07080E),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.white10),
+              boxShadow: const [
+                BoxShadow(color: Colors.black54, blurRadius: 20, spreadRadius: 2),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Welcome Back', textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
+                const SizedBox(height: 6),
+                const Text('Sign in to your account to continue', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)),
+                const SizedBox(height: 24),
+                _SocialSignInButton(
+                  icon: Image.asset('assets/images/google_logo.png', height: 20, width: 20),
+                  text: 'Continue with Google',
+                  onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: const [
+                    Expanded(child: Divider(color: Colors.white12, thickness: 1)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('or', style: TextStyle(color: Colors.white70)),
+                    ),
+                    Expanded(child: Divider(color: Colors.white12, thickness: 1)),
                   ],
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                const SizedBox(height: 12),
+                _TextField(label: 'Email', hint: 'example123@gmail.com', controller: _emailController),
+                const SizedBox(height: 12),
+                _TextField(label: 'Password', hint: 'Enter Password', controller: _passwordController, obscure: true),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text('Forgot your password?', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                ),
+                const SizedBox(height: 16),
+                _PrimaryButton(
+                  text: 'Continue',
+                  loading: _isSigningIn,
+                  onPressed: _isSigningIn ? null : () => _handleEmailSignIn(context),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Welcome Back', textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
-                    const SizedBox(height: 6),
-                    const Text('Sign in to your account to continue', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)),
-                    const SizedBox(height: 24),
-                    _SocialSignInButton(
-                      icon: Image.asset('assets/images/google_logo.png', height: 20, width: 20),
-                      text: 'Continue with Google',
-                      onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: const [
-                        Expanded(child: Divider(color: Colors.white12, thickness: 1)),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('or', style: TextStyle(color: Colors.white70)),
-                        ),
-                        Expanded(child: Divider(color: Colors.white12, thickness: 1)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _TextField(label: 'Email', hint: 'example123@gmail.com'),
-                    const SizedBox(height: 12),
-                    _TextField(label: 'Password', hint: 'Enter Password', obscure: true),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: const Text('Forgot your password?', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                    ),
-                    const SizedBox(height: 16),
-                    _PrimaryButton(
-                      text: 'Continue',
-                      onPressed: () {},
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Create new account here! ', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).pushNamed('/signup'),
-                          child: const Text('Sign Up', style: TextStyle(color: Color(0xFF3FA9F5), fontWeight: FontWeight.w700, fontSize: 12)),
-                        ),
-                      ],
+                    const Text('Create new account here! ', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pushNamed('/signup'),
+                      child: const Text('Sign Up', style: TextStyle(color: Color(0xFF3FA9F5), fontWeight: FontWeight.w700, fontSize: 12)),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
           ),
-        );
-
-        if (compact) {
-          return SingleChildScrollView(child: content);
-        }
-        return content;
-      },
+        ),
+      ),
     );
   }
 
@@ -158,6 +207,7 @@ class WelcomeScreen extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
@@ -186,7 +236,7 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const Spacer(),
+            const SizedBox(height: 32),
             Text(l10n.welcomeTo, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, color: Colors.white)),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -207,7 +257,7 @@ class WelcomeScreen extends StatelessWidget {
               text: l10n.continueByFacebook,
               onPressed: () => context.read<AuthBloc>().add(SignInWithFacebookRequested()),
             ),
-            const Spacer(flex: 2),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -388,8 +438,14 @@ class _TextField extends StatelessWidget {
   final String label;
   final String hint;
   final bool obscure;
+  final TextEditingController? controller;
 
-  const _TextField({required this.label, required this.hint, this.obscure = false});
+  const _TextField({
+    required this.label,
+    required this.hint,
+    this.controller,
+    this.obscure = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -399,6 +455,7 @@ class _TextField extends StatelessWidget {
         Text(label, style: const TextStyle(color: Colors.white70, fontSize: 13)),
         const SizedBox(height: 6),
         TextField(
+          controller: controller,
           obscureText: obscure,
           decoration: InputDecoration(
             hintText: hint,
@@ -424,21 +481,28 @@ class _TextField extends StatelessWidget {
 
 class _PrimaryButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
-  const _PrimaryButton({required this.text, required this.onPressed});
+  final VoidCallback? onPressed;
+  final bool loading;
+  const _PrimaryButton({
+    required this.text,
+    required this.onPressed,
+    this.loading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 48,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: loading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF2E97FF),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        child: Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+        child: loading
+            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+            : Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
       ),
     );
   }

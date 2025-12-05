@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../theme/gradients.dart';
@@ -6,8 +7,65 @@ import '../theme/spacing.dart';
 import 'widgets/navbar.dart';
 import 'sections/footer_section.dart';
 
-class ContactPage extends StatelessWidget {
+class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
+
+  @override
+  State<ContactPage> createState() => _ContactPageState();
+}
+
+class _ContactPageState extends State<ContactPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _messageController = TextEditingController();
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isSubmitting = true);
+    try {
+      final callable = FirebaseFunctions.instanceFor(region: 'asia-southeast1').httpsCallable('submitContactMessage');
+      await callable.call({
+        'firstName': _firstNameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'message': _messageController.text.trim(),
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đã gửi thông tin liên hệ thành công.')),
+        );
+        _formKey.currentState!.reset();
+        _firstNameController.clear();
+        _lastNameController.clear();
+        _emailController.clear();
+        _phoneController.clear();
+        _messageController.clear();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gửi thông tin thất bại: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,48 +155,91 @@ class ContactPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             gradient: AppGradients.cta,
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(9),
-            ),
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: _textField(label: 'First Name', hint: 'Enter First Name')),
-                    const SizedBox(width: 16),
-                    Expanded(child: _textField(label: 'Last Name', hint: 'Enter Last Name')),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(child: _textField(label: 'Email', hint: 'example123@gmail.com')),
-                    const SizedBox(width: 16),
-                    Expanded(child: _textField(label: 'Phone', hint: '+1 234 567 890')),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                _textArea(label: 'What Are Your Concerns?', hint: 'Write Concerns Here...'),
-                const SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                      textStyle: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    onPressed: () {},
-                    child: const Text('Submit'),
+          child: Form(
+            key: _formKey,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(9),
+              ),
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _textField(
+                          label: 'First Name',
+                          hint: 'Enter First Name',
+                          controller: _firstNameController,
+                          requiredField: true,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _textField(
+                          label: 'Last Name',
+                          hint: 'Enter Last Name',
+                          controller: _lastNameController,
+                          requiredField: true,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _textField(
+                          label: 'Email',
+                          hint: 'example123@gmail.com',
+                          controller: _emailController,
+                          requiredField: true,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _textField(
+                          label: 'Phone',
+                          hint: '+1 234 567 890',
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  _textArea(
+                    label: 'What Are Your Concerns?',
+                    hint: 'Write Concerns Here...',
+                    controller: _messageController,
+                    requiredField: true,
+                  ),
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        textStyle: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      onPressed: _isSubmitting ? null : _submitForm,
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                            )
+                          : const Text('Submit'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -146,7 +247,13 @@ class ContactPage extends StatelessWidget {
     );
   }
 
-  Widget _textField({required String label, required String hint}) {
+  Widget _textField({
+    required String label,
+    required String hint,
+    TextEditingController? controller,
+    bool requiredField = false,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -155,25 +262,42 @@ class ContactPage extends StatelessWidget {
           style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
         ),
         const SizedBox(height: 6),
-        Container(
-          height: 44,
-          decoration: BoxDecoration(
-            color: const Color(0xFF0F0F0F),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: Colors.white12),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          validator: (value) {
+            if (requiredField && (value == null || value.trim().isEmpty)) {
+              return 'Vui lòng nhập $label';
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 13),
+            filled: true,
+            fillColor: const Color(0xFF0F0F0F),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(6),
+              borderSide: const BorderSide(color: Colors.white12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(6),
+              borderSide: const BorderSide(color: Colors.white30),
+            ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          alignment: Alignment.centerLeft,
-          child: Text(
-            hint,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 13),
-          ),
+          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
         ),
       ],
     );
   }
 
-  Widget _textArea({required String label, required String hint}) {
+  Widget _textArea({
+    required String label,
+    required String hint,
+    TextEditingController? controller,
+    bool requiredField = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -182,19 +306,31 @@ class ContactPage extends StatelessWidget {
           style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
         ),
         const SizedBox(height: 6),
-        Container(
-          height: 160,
-          decoration: BoxDecoration(
-            color: const Color(0xFF0F0F0F),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: Colors.white12),
+        TextFormField(
+          controller: controller,
+          maxLines: 6,
+          validator: (value) {
+            if (requiredField && (value == null || value.trim().isEmpty)) {
+              return 'Vui lòng nhập $label';
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 13),
+            filled: true,
+            fillColor: const Color(0xFF0F0F0F),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(6),
+              borderSide: const BorderSide(color: Colors.white12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(6),
+              borderSide: const BorderSide(color: Colors.white30),
+            ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          alignment: Alignment.topLeft,
-          child: Text(
-            hint,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 13),
-          ),
+          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
         ),
       ],
     );

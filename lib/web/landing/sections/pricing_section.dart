@@ -4,7 +4,7 @@ import '../../theme/colors.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/spacing.dart';
 
-class PricingSection extends StatelessWidget {
+class PricingSection extends StatefulWidget {
   final String heading;
   final String subheading;
   final double headingFontSize;
@@ -17,12 +17,20 @@ class PricingSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final plans = [
+  State<PricingSection> createState() => _PricingSectionState();
+}
+
+class _PricingSectionState extends State<PricingSection> {
+  bool _isAnnual = true;
+
+  List<_PlanData> _buildPlans() {
+    final price = _isAnnual ? '\$460' : '\$78';
+    final oldPrice = _isAnnual ? '\$920' : null;
+    return [
       _PlanData(
         title: 'GOLD',
-        price: '\$460',
-        oldPrice: '\$920',
+        price: price,
+        oldPrice: oldPrice,
         badge: 'SAVE 50%',
         gradient: const LinearGradient(
           colors: [Color(0xFF00BFFF), Color(0xFF7B61FF)],
@@ -32,8 +40,8 @@ class PricingSection extends StatelessWidget {
       ),
       _PlanData(
         title: 'FOREX',
-        price: '\$460',
-        oldPrice: '\$920',
+        price: price,
+        oldPrice: oldPrice,
         badge: 'SAVE 50%',
         gradient: const LinearGradient(
           colors: [Color(0xFF00BFFF), Color(0xFF7B61FF)],
@@ -43,8 +51,8 @@ class PricingSection extends StatelessWidget {
       ),
       _PlanData(
         title: 'CRYPTO',
-        price: '\$460',
-        oldPrice: '\$920',
+        price: price,
+        oldPrice: oldPrice,
         badge: 'SAVE 50%',
         gradient: const LinearGradient(
           colors: [Color(0xFFB81EE3), Color(0xFF0ED4FF)],
@@ -53,6 +61,11 @@ class PricingSection extends StatelessWidget {
         ),
       ),
     ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final plans = _buildPlans();
 
     const features = [
       'Includes Entry, SL, TP',
@@ -69,12 +82,12 @@ class PricingSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            heading,
-            style: AppTextStyles.h1.copyWith(fontSize: headingFontSize, fontWeight: FontWeight.w700),
+            widget.heading,
+            style: AppTextStyles.h1.copyWith(fontSize: widget.headingFontSize, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            subheading,
+            widget.subheading,
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
@@ -108,32 +121,43 @@ class PricingSection extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _toggleItem('Monthly', selected: false),
-          _toggleItem('Annually', selected: true),
+          _toggleItem(
+            'Monthly',
+            selected: !_isAnnual,
+            onTap: () => setState(() => _isAnnual = false),
+          ),
+          _toggleItem(
+            'Annually',
+            selected: _isAnnual,
+            onTap: () => setState(() => _isAnnual = true),
+          ),
         ],
       ),
     );
   }
 
-  Widget _toggleItem(String text, {required bool selected}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: selected
-            ? const LinearGradient(
-                colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        color: selected ? null : Colors.black,
-      ),
-      child: Text(
-        text,
-        style: AppTextStyles.body.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
+  Widget _toggleItem(String text, {required bool selected, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: selected
+              ? const LinearGradient(
+                  colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: selected ? null : Colors.black,
+        ),
+        child: Text(
+          text,
+          style: AppTextStyles.body.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -143,7 +167,7 @@ class PricingSection extends StatelessWidget {
 class _PlanData {
   final String title;
   final String price;
-  final String oldPrice;
+  final String? oldPrice;
   final String badge;
   final LinearGradient gradient;
 
@@ -194,13 +218,14 @@ class _PricingCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(plan.price, style: AppTextStyles.h1.copyWith(fontSize: 34, color: const Color(0xFF00B2FF))),
-            Text(
-              plan.oldPrice,
-              style: AppTextStyles.body.copyWith(
-                color: Colors.white54,
-                decoration: TextDecoration.lineThrough,
+            if (plan.oldPrice != null && plan.oldPrice!.isNotEmpty)
+              Text(
+                plan.oldPrice!,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.white54,
+                  decoration: TextDecoration.lineThrough,
+                ),
               ),
-            ),
             const SizedBox(height: AppSpacing.md),
             Text("What's included:", style: AppTextStyles.body.copyWith(color: Colors.white70)),
             const SizedBox(height: AppSpacing.sm),

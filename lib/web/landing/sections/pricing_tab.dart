@@ -4,8 +4,15 @@ import '../../theme/text_styles.dart';
 import '../../theme/spacing.dart';
 import '../../theme/gradients.dart';
 
-class PricingTab extends StatelessWidget {
+class PricingTab extends StatefulWidget {
   const PricingTab({super.key});
+
+  @override
+  State<PricingTab> createState() => _PricingTabState();
+}
+
+class _PricingTabState extends State<PricingTab> {
+  bool _isAnnual = false;
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +25,14 @@ class PricingTab extends StatelessWidget {
       'Providing the best signals in real time',
     ];
 
+    final String price = _isAnnual ? '\$460' : '\$78';
+    final String? oldPrice = _isAnnual ? '\$920' : null;
+
     final plans = [
       _PlanData(
         title: 'GOLD',
-        price: '\$78',
+        price: price,
+        oldPrice: oldPrice,
         gradient: const LinearGradient(
           colors: [Color(0xFF131629), Color(0xFF0A0C18)],
           begin: Alignment.topCenter,
@@ -35,7 +46,8 @@ class PricingTab extends StatelessWidget {
       ),
       _PlanData(
         title: 'FOREX',
-        price: '\$78',
+        price: price,
+        oldPrice: oldPrice,
         gradient: const LinearGradient(
           colors: [Color(0xFF131629), Color(0xFF0A0C18)],
           begin: Alignment.topCenter,
@@ -49,7 +61,8 @@ class PricingTab extends StatelessWidget {
       ),
       _PlanData(
         title: 'CRYPTO',
-        price: '\$78',
+        price: price,
+        oldPrice: oldPrice,
         gradient: const LinearGradient(
           colors: [Color(0xFF131629), Color(0xFF0A0C18)],
           begin: Alignment.topCenter,
@@ -67,7 +80,10 @@ class PricingTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 8),
-        _BillingToggle(),
+        _BillingToggle(
+          isAnnual: _isAnnual,
+          onChanged: (value) => setState(() => _isAnnual = value),
+        ),
         const SizedBox(height: 32),
         Wrap(
           spacing: 16,
@@ -88,6 +104,10 @@ class PricingTab extends StatelessWidget {
 }
 
 class _BillingToggle extends StatelessWidget {
+  final bool isAnnual;
+  final ValueChanged<bool> onChanged;
+  const _BillingToggle({required this.isAnnual, required this.onChanged});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -99,9 +119,9 @@ class _BillingToggle extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: const [
-          _ToggleItem(label: 'Monthly', selected: true),
-          _ToggleItem(label: 'Annually', selected: false),
+        children: [
+          _ToggleItem(label: 'Monthly', selected: !isAnnual, onTap: () => onChanged(false)),
+          _ToggleItem(label: 'Annually', selected: isAnnual, onTap: () => onChanged(true)),
         ],
       ),
     );
@@ -111,23 +131,27 @@ class _BillingToggle extends StatelessWidget {
 class _ToggleItem extends StatelessWidget {
   final String label;
   final bool selected;
-  const _ToggleItem({required this.label, required this.selected});
+  final VoidCallback onTap;
+  const _ToggleItem({required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        gradient: selected ? AppGradients.cta : null,
-        color: selected ? null : Colors.black,
-      ),
-      child: Text(
-        label,
-        style: AppTextStyles.body.copyWith(
-          color: Colors.white,
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: selected ? AppGradients.cta : null,
+          color: selected ? null : Colors.black,
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.body.copyWith(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -137,11 +161,13 @@ class _ToggleItem extends StatelessWidget {
 class _PlanData {
   final String title;
   final String price;
+  final String? oldPrice;
   final LinearGradient gradient;
   final LinearGradient borderGradient;
   const _PlanData({
     required this.title,
     required this.price,
+    required this.oldPrice,
     required this.gradient,
     required this.borderGradient,
   });
@@ -185,6 +211,17 @@ class _PricingCard extends StatelessWidget {
               plan.price,
               style: AppTextStyles.h1.copyWith(color: const Color(0xFF13A2FF), fontSize: 34, fontWeight: FontWeight.w800),
             ),
+            if (plan.oldPrice != null && plan.oldPrice!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  plan.oldPrice!,
+                  style: AppTextStyles.body.copyWith(
+                    color: Colors.white54,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+                ),
+              ),
             const SizedBox(height: 12),
             Text(
               "What's included:",

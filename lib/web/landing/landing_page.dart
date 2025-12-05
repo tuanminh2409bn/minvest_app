@@ -301,9 +301,9 @@ class HeroSignalsSection extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSearchBar(),
+                  _buildSearchBar(context),
                   const SizedBox(height: AppSpacing.md),
-                  _buildTabs(),
+                  _buildTabs(context),
                   const SizedBox(height: AppSpacing.md),
                   const _SignalCard(
                     icon: Icons.currency_bitcoin,
@@ -347,7 +347,7 @@ class HeroSignalsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -362,20 +362,22 @@ class HeroSignalsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildTabs() {
+  Widget _buildTabs(BuildContext context) {
     Widget tab(String text, {bool active = false}) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: active ? const Color(0xFF2B2B2B) : const Color(0xFF1F1F1F),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          text,
-          style: AppTextStyles.body.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 14,
+      return InkWell(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: active ? const Color(0xFF2B2B2B) : const Color(0xFF1F1F1F),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            text,
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
           ),
         ),
       );
@@ -520,7 +522,7 @@ class LiveSignalsSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _chip('AI Signals'),
+            _chip(context, 'AI Signals'),
             const SizedBox(height: AppSpacing.lg),
             Text(
               'LIVE – 24/7 AI Trading Signals',
@@ -547,29 +549,32 @@ class LiveSignalsSection extends StatelessWidget {
     );
   }
 
-  Widget _chip(String text) {
-    return Container(
-      padding: const EdgeInsets.all(1.2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+  Widget _chip(BuildContext context, String text) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushNamed('/ai-signals'),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.all(1.2),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(9),
-          color: Colors.black,
+          borderRadius: BorderRadius.circular(10),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-        child: Text(
-          text,
-          style: AppTextStyles.body.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(9),
+            color: Colors.black,
+          ),
+          child: Text(
+            text,
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+            ),
           ),
         ),
       ),
@@ -642,7 +647,7 @@ class _OrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _chip(),
+          _chip(context),
           const SizedBox(height: AppSpacing.lg),
           Text(
             'Order Explanation Engine',
@@ -668,29 +673,32 @@ class _OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _chip() {
-    return Container(
-      padding: const EdgeInsets.all(1.2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+  Widget _chip(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushNamed('/ai-signals'),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.all(1.2),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(9),
-          color: Colors.black,
+          borderRadius: BorderRadius.circular(10),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-        child: Text(
-          'AI Signals',
-          style: AppTextStyles.body.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(9),
+            color: Colors.black,
+          ),
+          child: Text(
+            'AI Signals',
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+            ),
           ),
         ),
       ),
@@ -981,12 +989,12 @@ class _TransparentCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _chip(),
+            _chip(context),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'Transparent - Real Performance',
-              style: AppTextStyles.h1.copyWith(fontSize: 40, fontWeight: FontWeight.w800),
-            ),
+            'Transparent - Real Performance',
+            style: AppTextStyles.h1.copyWith(fontSize: 40, fontWeight: FontWeight.w800),
+          ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               'See real data on signal accuracy, success rate, and profitability — verified and traceable in every trade',
@@ -1008,29 +1016,32 @@ class _TransparentCard extends StatelessWidget {
     );
   }
 
-  Widget _chip() {
-    return Container(
-      padding: const EdgeInsets.all(1.2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+  Widget _chip(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushNamed('/ai-signals'),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.all(1.2),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(9),
-          color: Colors.black,
+          borderRadius: BorderRadius.circular(10),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-        child: Text(
-          'AI Signals',
-          style: AppTextStyles.body.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(9),
+            color: Colors.black,
+          ),
+          child: Text(
+            'AI Signals',
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+            ),
           ),
         ),
       ),
@@ -1066,7 +1077,7 @@ class CoreValueSection extends StatelessWidget {
       (
         title: 'Real-Time Market Analysis',
         desc:
-            'Our AI monitors the market continuously, identifying technical convergence zones and reliable breakout points – so you can enter trades at the right moment.'
+            'Our AI monitors the market continuously, identifying technical convergence zones and reliable breakout points so you can enter trades at the right moment.'
       ),
       (
         title: 'Save Time on Analysis',
@@ -1076,7 +1087,7 @@ class CoreValueSection extends StatelessWidget {
       (
         title: 'Minimize Emotional Trading',
         desc:
-            'With smart alerts, risk detection, and data-driven signals – not emotions – you stay disciplined and in control of every decision.'
+            'With smart alerts, risk detection, and data-driven signals not emotions you stay disciplined and in control of every decision.'
       ),
       (
         title: 'Seize Every Opportunity',
@@ -1210,9 +1221,13 @@ class _FaqItem extends StatelessWidget {
         title: Text(question, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
         childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
-          Text(
-            answer.isEmpty ? 'Content updating...' : answer,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary, fontSize: 13),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              answer.isEmpty ? 'Content updating...' : answer,
+              style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 14),
+              textAlign: TextAlign.start,
+            ),
           ),
         ],
       ),

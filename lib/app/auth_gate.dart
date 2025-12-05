@@ -21,6 +21,7 @@ class AuthGate extends StatefulWidget {
 class _AuthGateState extends State<AuthGate> {
   // --- THAY ĐỔI 1: Đổi tên biến cờ cho tổng quát ---
   bool _isSessionResetDialogShowing = false;
+  bool _hasRedirectedToLanding = false;
 
   void _showErrorDialog(BuildContext context, String message) {
     final displayMessage =
@@ -98,25 +99,41 @@ class _AuthGateState extends State<AuthGate> {
           builder: (context, userProvider, child) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               // --- THAY ĐỔI 3: Lắng nghe cờ hiệu mới ---
-              if (userProvider.requiresSessionReset &&
-                  state.status == AuthStatus.authenticated &&
-                  mounted) {
-                // Gọi hàm hiển thị dialog mới
-                _showSessionResetDialog(context, userProvider);
-              }
-            });
+            if (userProvider.requiresSessionReset &&
+                state.status == AuthStatus.authenticated &&
+                mounted) {
+              // Gọi hàm hiển thị dialog mới
+              _showSessionResetDialog(context, userProvider);
+            }
 
-            if (state.status == AuthStatus.authenticated) {
-              if (kIsWeb) {
-                // Gắn key của Web khi chạy trên nền tảng Web
-                return MainScreen(key: mainScreenWebKey);
-              } else {
-                // Gắn key của Mobile khi chạy trên các nền tảng khác
-                return MainScreen(key: mainScreenKey);
-              }
-            } else if (state.status == AuthStatus.loggingOut) {
+            // Với web: khi đã đăng nhập, điều hướng về landing page thay vì vào MainScreen web
+            if (kIsWeb &&
+                state.status == AuthStatus.authenticated &&
+                !_hasRedirectedToLanding &&
+                mounted) {
+              _hasRedirectedToLanding = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                }
+                Navigator.of(context).pushReplacementNamed('/');
+              });
+            }
+          });
+
+          if (state.status == AuthStatus.authenticated) {
+            if (kIsWeb) {
+              // Trả placeholder trong khi chuyển về landing
               return const Scaffold(
                 backgroundColor: Color(0xFF0D1117),
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            // Gắn key của Mobile khi chạy trên các nền tảng khác
+            return MainScreen(key: mainScreenKey);
+          } else if (state.status == AuthStatus.loggingOut) {
+            return const Scaffold(
+              backgroundColor: Color(0xFF0D1117),
                 body: Center(child: CircularProgressIndicator()),
               );
             } else {

@@ -120,6 +120,22 @@ class AuthService {
     return user;
   }
 
+  Future<User?> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return await _handleSuccessfulSignIn(userCredential);
+    } catch (e) {
+      print('Lỗi đăng nhập email/password: $e');
+      rethrow;
+    }
+  }
+
   Future<void> listenForSessionChanges() async {
     final user = _firebaseAuth.currentUser;
     if (user == null) return;
