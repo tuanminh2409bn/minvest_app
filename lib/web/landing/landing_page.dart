@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -89,8 +92,46 @@ class _HeroInteractive extends StatefulWidget {
   State<_HeroInteractive> createState() => _HeroInteractiveState();
 }
 
-class _HeroInteractiveState extends State<_HeroInteractive> {
+class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerProviderStateMixin {
   Offset _pointer = Offset.zero;
+  late final AnimationController _contentController;
+  late final Animation<Offset> _titleSlide;
+  late final Animation<double> _titleFade;
+  late final Animation<Offset> _subtitleSlide;
+  late final Animation<double> _subtitleFade;
+  late final Animation<Offset> _ctaSlide;
+  late final Animation<double> _ctaFade;
+  bool _contentPlayed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _contentController = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _titleSlide = Tween(begin: const Offset(-0.12, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _contentController, curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic)),
+    );
+    _titleFade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _contentController, curve: const Interval(0.0, 0.55, curve: Curves.easeOut)),
+    );
+    _subtitleSlide = Tween(begin: const Offset(-0.08, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _contentController, curve: const Interval(0.15, 0.7, curve: Curves.easeOutCubic)),
+    );
+    _subtitleFade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _contentController, curve: const Interval(0.15, 0.7, curve: Curves.easeOut)),
+    );
+    _ctaSlide = Tween(begin: const Offset(0, 0.16), end: Offset.zero).animate(
+      CurvedAnimation(parent: _contentController, curve: const Interval(0.35, 1.0, curve: Curves.easeOutCubic)),
+    );
+    _ctaFade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _contentController, curve: const Interval(0.35, 1.0, curve: Curves.easeOut)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,79 +196,106 @@ class _HeroInteractiveState extends State<_HeroInteractive> {
 
   Widget _buildContent() {
     return Positioned.fill(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Guiding Traders & Growing Portfolios',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.h1.copyWith(fontSize: 44),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'The Ultimate AI Engine – Designed by Expert Traders.',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.body.copyWith(fontSize: 16, color: Colors.white70),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GradientButton(
-                    label: 'Get Signal Now',
-                    width: 188,
-                    height: 38,
-                    borderRadius: 6,
-                    padding: EdgeInsets.zero,
-                    textStyle: AppTextStyles.body.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      height: 1.1,
+      child: VisibilityDetector(
+        key: const Key('hero_content'),
+        onVisibilityChanged: (info) {
+          if (!_contentPlayed && info.visibleFraction > 0.12) {
+            _contentPlayed = true;
+            _contentController.forward();
+          }
+        },
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SlideTransition(
+                  position: _titleSlide,
+                  child: FadeTransition(
+                    opacity: _titleFade,
+                    child: Text(
+                      'Guiding Traders & Growing Portfolios',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.h1.copyWith(fontSize: 44),
                     ),
-                    onPressed: () => Navigator.of(context).pushNamed('/signup'),
                   ),
-                  const SizedBox(width: AppSpacing.md),
-                  SizedBox(
-                    width: 138,
-                    height: 38,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () => context.read<AuthBloc>().add(SignInAnonymouslyRequested()),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                SlideTransition(
+                  position: _subtitleSlide,
+                  child: FadeTransition(
+                    opacity: _subtitleFade,
+                    child: Text(
+                      'The Ultimate AI Engine – Designed by Expert Traders.',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.body.copyWith(fontSize: 16, color: Colors.white70),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                SlideTransition(
+                  position: _ctaSlide,
+                  child: FadeTransition(
+                    opacity: _ctaFade,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GradientButton(
+                          label: 'Get Signal Now',
+                          width: 188,
+                          height: 38,
+                          borderRadius: 6,
+                          padding: EdgeInsets.zero,
+                          textStyle: AppTextStyles.body.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            height: 1.1,
                           ),
+                          onPressed: () => Navigator.of(context).pushNamed('/signup'),
                         ),
-                        padding: const EdgeInsets.all(1),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(7),
-                            color: Colors.black,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            'Free Trial',
-                            style: AppTextStyles.body.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
+                        const SizedBox(width: AppSpacing.md),
+                        SizedBox(
+                          width: 138,
+                          height: 38,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () => context.read<AuthBloc>().add(SignInAnonymouslyRequested()),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(1),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(7),
+                                  color: Colors.black,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  'Free Trial',
+                                  style: AppTextStyles.body.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -582,20 +650,11 @@ class _StaggeredSignalCards extends StatefulWidget {
 
 class _StaggeredSignalCardsState extends State<_StaggeredSignalCards> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _firstOpacity;
-  late final Animation<double> _secondOpacity;
-  late final Animation<Offset> _firstSlide;
-  late final Animation<Offset> _secondSlide;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
-    _firstOpacity = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeOut)));
-    _secondOpacity = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.3, 1.0, curve: Curves.easeOut)));
-    _firstSlide = Tween(begin: const Offset(0, 0.08), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeOut)));
-    _secondSlide = Tween(begin: const Offset(0, 0.08), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.3, 1.0, curve: Curves.easeOut)));
-    _controller.forward();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 8))..repeat();
   }
 
   @override
@@ -606,14 +665,16 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards> with Singl
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FadeTransition(
-          opacity: _firstOpacity,
-          child: SlideTransition(
-            position: _firstSlide,
+    const double viewportHeight = 300;
+    return ClipRect(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          final v = _controller.value;
+          final first = _slidingCard(
+            controllerValue: v,
+            phaseOffset: 0.0,
+            viewportHeight: viewportHeight,
             child: const _SignalCard(
               icon: Icons.currency_bitcoin,
               iconColor: Color(0xFF00B6FF),
@@ -630,17 +691,15 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards> with Singl
                 end: Alignment.bottomCenter,
               ),
             ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        FadeTransition(
-          opacity: _secondOpacity,
-          child: SlideTransition(
-            position: _secondSlide,
+          );
+          final second = _slidingCard(
+            controllerValue: v,
+            phaseOffset: 0.5,
+            viewportHeight: viewportHeight,
             child: const _SignalCard(
               icon: Icons.auto_awesome,
               iconColor: Color(0xFF00B6FF),
-              pair: 'XAUUSD',
+              pair: 'XAU/USD',
               date: 'June 1, 2025',
               entry: '30',
               sl: '3310',
@@ -653,9 +712,49 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards> with Singl
                 end: Alignment.bottomCenter,
               ),
             ),
-          ),
-        ),
-      ],
+          );
+          final items = [
+            (progress: (v + 0.0) % 1.0, widget: first),
+            (progress: (v + 0.5) % 1.0, widget: second),
+          ]..sort((a, b) => b.progress.compareTo(a.progress)); // progress lớn hơn vẽ sau → nằm trên
+
+          return SizedBox(
+            height: viewportHeight,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [for (final item in items) item.widget],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _slidingCard({
+    required double controllerValue,
+    required double phaseOffset,
+    required double viewportHeight,
+    required Widget child,
+  }) {
+    final v = (controllerValue + phaseOffset) % 1.0;
+    double opacity;
+    if (v < 0.15) {
+      opacity = Curves.easeIn.transform(v / 0.15);
+    } else if (v > 0.85) {
+      opacity = Curves.easeOut.transform((1 - v) / 0.15);
+    } else {
+      opacity = 1.0;
+    }
+    final slideT = Curves.easeInOut.transform(v);
+    final travel = viewportHeight * 0.45;
+    final baseOffset = viewportHeight * 0.12; // đẩy điểm xuất phát xuống dưới một chút
+    final offsetY = (lerpDouble(travel, -travel, slideT) ?? 0) + baseOffset;
+    return Opacity(
+      opacity: opacity,
+      child: Transform.translate(
+        offset: Offset(0, offsetY),
+        child: child,
+      ),
     );
   }
 }
@@ -777,26 +876,40 @@ class LiveSignalsSection extends StatefulWidget {
   State<LiveSignalsSection> createState() => _LiveSignalsSectionState();
 }
 
-class _LiveSignalsSectionState extends State<LiveSignalsSection> with SingleTickerProviderStateMixin {
+class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _slideIn;
   late final Animation<double> _fadeIn;
   bool _hasPlayed = false;
+  late final AnimationController _typeController;
+  String _typedText = '';
+  static const String _fullText = 'LIVE – 24/7 AI Trading Signals';
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
     _slideIn = Tween(begin: const Offset(0.18, 0), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
+    _typeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 4500))
+      ..addListener(() {
+        final phase = _typeController.value;
+        final typingPortion = phase <= 0.8 ? (phase / 0.8) : 1.0; // 0-0.8 gõ, 0.8-1.0 giữ ở cuối
+        final progress = (typingPortion * _fullText.length).clamp(0, _fullText.length).floor();
+        setState(() {
+          _typedText = _fullText.substring(0, progress);
+        });
+      })
+      ..repeat(reverse: false);
   }
 
   @override
   void dispose() {
+    _typeController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -829,10 +942,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with SingleTick
                 children: [
                   _chip(context, 'AI Signals'),
                   const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'LIVE – 24/7 AI Trading Signals',
-                    style: AppTextStyles.h1.copyWith(fontSize: 42, fontWeight: FontWeight.w800),
-                  ),
+                  _buildTypingTitle(),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     'Real-time cloud analytics delivering high-probability, trend-following strategies with adaptive precision and emotion-free execution.',
@@ -854,6 +964,21 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with SingleTick
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTypingTitle() {
+    // Con trỏ nhấp nháy, bắt đầu ngay từ đầu chu kỳ.
+    final showCursor = (_typeController.value % 0.6) < 0.3;
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: _typedText),
+          TextSpan(text: showCursor ? ' |' : '  '),
+        ],
+      ),
+      style: AppTextStyles.h1.copyWith(fontSize: 42, fontWeight: FontWeight.w800),
+      softWrap: true,
     );
   }
 
@@ -976,17 +1101,17 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
             ),
             const SizedBox(width: 16),
             Expanded(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 520),
-              child: SlideTransition(
-                position: _rightSlide,
-                child: FadeTransition(
-                  opacity: _rightFade,
-                  child: const _KeyFindingsCard(),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 520),
+                child: SlideTransition(
+                  position: _rightSlide,
+                  child: FadeTransition(
+                    opacity: _rightFade,
+                    child: const _KeyFindingsCard(),
+                  ),
                 ),
               ),
             ),
-          ),
           ],
         ),
       ),
@@ -994,8 +1119,38 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
   }
 }
 
-class _OrderCard extends StatelessWidget {
+class _OrderCard extends StatefulWidget {
   const _OrderCard();
+
+  @override
+  State<_OrderCard> createState() => _OrderCardState();
+}
+
+class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
+  late final AnimationController _typeController;
+  String _typedText = '';
+  static const String _fullText = 'Order Explanation Engine';
+
+  @override
+  void initState() {
+    super.initState();
+    _typeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 4500))
+      ..addListener(() {
+        final phase = _typeController.value;
+        final typingPortion = phase <= 0.8 ? (phase / 0.8) : 1.0; // 0-0.8 gõ, 0.8-1.0 giữ ở cuối
+        final progress = (typingPortion * _fullText.length).clamp(0, _fullText.length).floor();
+        setState(() {
+          _typedText = _fullText.substring(0, progress);
+        });
+      })
+      ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _typeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1010,10 +1165,7 @@ class _OrderCard extends StatelessWidget {
         children: [
           _chip(context),
           const SizedBox(height: AppSpacing.lg),
-          Text(
-            'Order Explanation Engine',
-            style: AppTextStyles.h1.copyWith(fontSize: 40, fontWeight: FontWeight.w800),
-          ),
+          _buildTypingTitle(),
           const SizedBox(height: AppSpacing.sm),
           Text(
             'Explains trade setups in simple terms — showing how confluences form, why entries are made, and helping traders learn from each decision.',
@@ -1031,6 +1183,20 @@ class _OrderCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTypingTitle() {
+    final showCursor = (_typeController.value % 0.6) > 0.3; // blink chậm
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: _typedText),
+          TextSpan(text: showCursor ? ' |' : '  '),
+        ],
+      ),
+      style: AppTextStyles.h1.copyWith(fontSize: 40, fontWeight: FontWeight.w800),
+      softWrap: true,
     );
   }
 
@@ -1093,11 +1259,15 @@ class _TransparentCardAnimated extends StatefulWidget {
   State<_TransparentCardAnimated> createState() => _TransparentCardAnimatedState();
 }
 
-class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with SingleTickerProviderStateMixin {
+class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _slideIn;
   late final Animation<double> _fadeIn;
   bool _hasPlayed = false;
+  late final AnimationController _typeController;
+  String _typedText = '';
+  bool _typingStarted = false;
+  static const String _fullText = 'Transparent - Real Performance';
 
   @override
   void initState() {
@@ -1107,10 +1277,20 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _fadeIn = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _typeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 4500))
+      ..addListener(() {
+        final phase = _typeController.value;
+        final typingPortion = phase <= 0.8 ? (phase / 0.8) : 1.0;
+        final progress = (typingPortion * _fullText.length).clamp(0, _fullText.length).floor();
+        setState(() {
+          _typedText = _fullText.substring(0, progress);
+        });
+      });
   }
 
   @override
   void dispose() {
+    _typeController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -1123,6 +1303,10 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
         if (!_hasPlayed && info.visibleFraction > 0.2) {
           _hasPlayed = true;
           _controller.forward();
+          if (!_typingStarted) {
+            _typingStarted = true;
+            _typeController.repeat();
+          }
         }
       },
       child: SlideTransition(
@@ -1140,10 +1324,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
               children: [
                 _TransparentCard()._chip(context),
                 const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Transparent - Real Performance',
-                  style: AppTextStyles.h1.copyWith(fontSize: 40, fontWeight: FontWeight.w800),
-                ),
+                _buildTypingTitle(),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   'See real data on signal accuracy, success rate, and profitability — verified and traceable in every trade',
@@ -1164,6 +1345,20 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTypingTitle() {
+    final showCursor = (_typeController.value % 0.6) > 0.3;
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: _typedText),
+          TextSpan(text: showCursor ? ' |' : '  '),
+        ],
+      ),
+      style: AppTextStyles.h1.copyWith(fontSize: 40, fontWeight: FontWeight.w800),
+      softWrap: true,
     );
   }
 }
@@ -1228,31 +1423,30 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard> with SingleTickerPro
               color: Colors.black,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: child,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Key Findings', style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
+                const SizedBox(height: AppSpacing.md),
+                _chartPlaceholder(_controller.value),
+                const SizedBox(height: AppSpacing.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    _Metric(label: 'Predictive Accuracy', value: '+81%'),
+                    _Metric(label: 'Improvement in Profitability', value: '+37%'),
+                    _Metric(label: 'Improved Risk Management', value: '+63%'),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Key Findings', style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
-          const SizedBox(height: AppSpacing.md),
-          _chartPlaceholder(),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              _Metric(label: 'Predictive Accuracy', value: '+81%'),
-              _Metric(label: 'Improvement in Profitability', value: '+37%'),
-              _Metric(label: 'Improved Risk Management', value: '+63%'),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _chartPlaceholder() {
+  Widget _chartPlaceholder(double progress) {
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: Container(
@@ -1266,7 +1460,7 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard> with SingleTickerPro
           ),
         ),
         child: CustomPaint(
-          painter: _ChartPainter(),
+          painter: _ChartPainter(progress: progress),
         ),
       ),
     );
@@ -1301,6 +1495,9 @@ class _Metric extends StatelessWidget {
 }
 
 class _ChartPainter extends CustomPainter {
+  final double progress;
+  _ChartPainter({required this.progress});
+
   @override
   void paint(Canvas canvas, Size size) {
     final gridPaint = Paint()
@@ -1308,7 +1505,7 @@ class _ChartPainter extends CustomPainter {
       ..strokeWidth = 1;
     final linePaint = Paint()
       ..color = const Color(0xFF00C6FF)
-      ..strokeWidth = 3
+      ..strokeWidth = 3.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
@@ -1321,7 +1518,7 @@ class _ChartPainter extends CustomPainter {
       canvas.drawLine(Offset(0, dy), Offset(size.width, dy), gridPaint);
     }
 
-    final points = [
+    final basePoints = [
       Offset(0, size.height * 0.55),
       Offset(size.width * 0.15, size.height * 0.6),
       Offset(size.width * 0.25, size.height * 0.45),
@@ -1335,16 +1532,45 @@ class _ChartPainter extends CustomPainter {
       Offset(size.width * 0.9, size.height * 0.25),
     ];
 
+    final wiggle = math.sin(progress * 6 * math.pi);
+    final points = <Offset>[];
+    for (int i = 0; i < basePoints.length; i++) {
+      final amp = size.height * 0.12; // biên độ dao động
+      final phase = progress * 6 * math.pi + i * 0.9;
+      final dy = math.sin(phase) * amp * (1.0 - i / basePoints.length * 0.2);
+      points.add(Offset(basePoints[i].dx, basePoints[i].dy + dy + wiggle * 8));
+    }
+
     final path = Path()..moveTo(points.first.dx, points.first.dy);
     for (int i = 1; i < points.length; i++) {
       path.lineTo(points[i].dx, points[i].dy);
     }
 
-    canvas.drawPath(path, linePaint);
+    // Vẽ dần từ trái sang phải theo progress
+    final metrics = path.computeMetrics().toList();
+    if (metrics.isNotEmpty) {
+      final metric = metrics.first;
+      final len = metric.length;
+      final currentLen = (len * progress).clamp(0.0, len);
+      if (currentLen > 0) {
+        final animatedPath = metric.extractPath(0, currentLen);
+        canvas.drawPath(animatedPath, linePaint);
+        final tangent = metric.getTangentForOffset(currentLen);
+        if (tangent != null) {
+          canvas.drawCircle(
+            tangent.position,
+            4,
+            Paint()
+              ..color = const Color(0xFF00C6FF)
+              ..style = PaintingStyle.fill,
+          );
+        }
+      }
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _ChartPainter oldDelegate) => oldDelegate.progress != progress;
 }
 
 class PerformanceSection extends StatelessWidget {
