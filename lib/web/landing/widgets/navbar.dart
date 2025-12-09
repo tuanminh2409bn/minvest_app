@@ -5,6 +5,7 @@ import '../../theme/text_styles.dart';
 import '../../theme/gradients.dart';
 import '../../theme/spacing.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:minvest_forex_app/app/main_screen_web.dart';
 
 class LandingNavBar extends StatelessWidget {
   const LandingNavBar({super.key});
@@ -72,15 +73,18 @@ class LandingNavBar extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _ctaButton('Get Signals now'),
-                        const SizedBox(width: AppSpacing.sm),
                         if (user == null) ...[
+                          _ctaButton('Get Signals now'),
+                          const SizedBox(width: AppSpacing.sm),
                           _outlineButton(
                             'Sign in',
                             onTap: () => Navigator.of(context).pushNamed('/signin'),
                           ),
                         ] else ...[
-                          _userAvatar(user),
+                          _userNameChip(
+                            user,
+                            onTap: () => Navigator.of(context).pushNamed('/profile'),
+                          ),
                         ],
                         const SizedBox(width: AppSpacing.sm),
                         Container(
@@ -173,12 +177,10 @@ class LandingNavBar extends StatelessWidget {
     );
   }
 
-  Widget _userAvatar(User user) {
+  Widget _userAvatar(User user, {VoidCallback? onTap}) {
     final photoUrl = user.photoURL;
     return GestureDetector(
-      onTap: () {
-        // Placeholder: navigate to profile or account menu
-      },
+      onTap: onTap,
       child: Container(
         width: 36,
         height: 36,
@@ -193,6 +195,32 @@ class LandingNavBar extends StatelessWidget {
         child: photoUrl == null
             ? const Icon(Icons.person, color: Colors.white, size: 18)
             : null,
+      ),
+    );
+  }
+
+  Widget _userNameChip(User user, {VoidCallback? onTap}) {
+    final name = (user.displayName ?? user.email ?? 'User').trim();
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white24),
+          color: Colors.white.withOpacity(0.06),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _userAvatar(user, onTap: onTap),
+            const SizedBox(width: 8),
+            Text(
+              name,
+              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
       ),
     );
   }

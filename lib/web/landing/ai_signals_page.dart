@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
+import 'package:minvest_forex_app/features/signals/screens/signal_detail_screen_web.dart' as web_detail;
+import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../theme/spacing.dart';
@@ -8,6 +14,7 @@ import 'sections/footer_section.dart';
 import 'sections/pricing_tab.dart';
 
 enum AISignalsTab { aiSignals, performance, history, pricing }
+enum AssetFilter { all, gold, crypto, forex }
 
 class AISignalsPage extends StatefulWidget {
   const AISignalsPage({super.key});
@@ -18,6 +25,8 @@ class AISignalsPage extends StatefulWidget {
 
 class _AISignalsPageState extends State<AISignalsPage> {
   AISignalsTab selectedTab = AISignalsTab.aiSignals;
+  AssetFilter _assetFilter = AssetFilter.all;
+  DateTimeRange? _dateRange;
 
   @override
   Widget build(BuildContext context) {
@@ -43,17 +52,23 @@ class _AISignalsPageState extends State<AISignalsPage> {
                       setState(() => selectedTab = tab);
                     },
                   ),
-                  const SizedBox(height: 24),
-                  if (selectedTab == AISignalsTab.aiSignals) ...const [
-                    _FiltersRow(),
-                    SizedBox(height: 32),
-                    _SignalGrid(),
-                  ] else if (selectedTab == AISignalsTab.performance) ...const [
-                    _PerformanceSection(),
-                  ] else if (selectedTab == AISignalsTab.history) ...const [
-                    _FiltersRow(),
-                    SizedBox(height: 24),
-                    _HistorySection(),
+                const SizedBox(height: 24),
+                if (selectedTab == AISignalsTab.aiSignals) ...[
+                _FiltersRow(
+                  assetFilter: _assetFilter,
+                  dateRange: _dateRange,
+                  onAssetChanged: (value) => setState(() => _assetFilter = value),
+                  onDateRangeChanged: (value) => setState(() => _dateRange = value),
+                ),
+                const SizedBox(height: 32),
+                _SignalGridLive(
+                  assetFilter: _assetFilter,
+                  dateRange: _dateRange,
+                ),
+              ] else if (selectedTab == AISignalsTab.performance) ...const [
+                _PerformanceSection(),
+              ] else if (selectedTab == AISignalsTab.history) ...const [
+                _HistorySection(),
                   ] else ...const [
                     PricingTab(),
                   ],
@@ -159,7 +174,16 @@ class _TabChip extends StatelessWidget {
 }
 
 class _FiltersRow extends StatelessWidget {
-  const _FiltersRow();
+  final AssetFilter assetFilter;
+  final DateTimeRange? dateRange;
+  final ValueChanged<AssetFilter> onAssetChanged;
+  final ValueChanged<DateTimeRange?> onDateRangeChanged;
+  const _FiltersRow({
+    required this.assetFilter,
+    required this.dateRange,
+    required this.onAssetChanged,
+    required this.onDateRangeChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -167,11 +191,17 @@ class _FiltersRow extends StatelessWidget {
       spacing: 16,
       runSpacing: 12,
       crossAxisAlignment: WrapCrossAlignment.center,
-      children: const [
-        _FilterDropdown(label: 'Asset', value: 'All Assets'),
-        _FilterDropdown(label: 'Currency pairs', value: 'All Currency pairs'),
-        _FilterDropdown(label: 'Date Range', value: 'Select Date Range', width: 260),
-        _TimezoneDropdown(),
+      children: [
+        _AssetDropdown(
+          value: assetFilter,
+          onChanged: onAssetChanged,
+        ),
+        const _FilterDropdown(label: 'Currency pairs', value: 'All Currency pairs'),
+        _DateRangePicker(
+          dateRange: dateRange,
+          onChanged: onDateRangeChanged,
+        ),
+        const _TimezoneDropdown(),
       ],
     );
   }
@@ -257,66 +287,226 @@ class _TimezoneDropdown extends StatelessWidget {
   }
 }
 
-class _SignalGrid extends StatelessWidget {
-  const _SignalGrid();
+class _AssetDropdown extends StatelessWidget {
+  final AssetFilter value;
+  final ValueChanged<AssetFilter> onChanged;
+  const _AssetDropdown({required this.value, required this.onChanged});
+
+  String _label(AssetFilter v) {
+    switch (v) {
+      case AssetFilter.gold:
+        return 'Gold';
+      case AssetFilter.crypto:
+        return 'Crypto';
+      case AssetFilter.forex:
+        return 'Forex';
+      default:
+        return 'All Assets';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double columnWidth = (constraints.maxWidth - 32) / 3;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Asset',
+          style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: 200,
+          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0D0D0D),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<AssetFilter>(
+              value: value,
+              dropdownColor: const Color(0xFF0D0D0D),
+              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
+              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+              items: const [
+                DropdownMenuItem(value: AssetFilter.all, child: Text('All Assets')),
+                DropdownMenuItem(value: AssetFilter.gold, child: Text('Gold')),
+                DropdownMenuItem(value: AssetFilter.crypto, child: Text('Crypto')),
+                DropdownMenuItem(value: AssetFilter.forex, child: Text('Forex')),
+              ],
+              onChanged: (v) {
+                if (v != null) onChanged(v);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DateRangePicker extends StatelessWidget {
+  final DateTimeRange? dateRange;
+  final ValueChanged<DateTimeRange?> onChanged;
+  const _DateRangePicker({required this.dateRange, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    String label;
+    if (dateRange == null) {
+      label = 'Select Date Range';
+    } else {
+      label =
+          '${DateFormat('dd/MM/yyyy').format(dateRange!.start)} - ${DateFormat('dd/MM/yyyy').format(dateRange!.end)}';
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Date Range',
+          style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () async {
+            final picked = await showDateRangePicker(
+              context: context,
+              firstDate: DateTime(2022),
+              lastDate: DateTime(2100),
+              initialDateRange: dateRange,
+              builder: (context, child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: const ColorScheme.dark(
+                      primary: Color(0xFF00BFFF),
+                      surface: Color(0xFF0D0D0D),
+                      onSurface: Colors.white,
+                    ),
+                  ),
+                  child: child ?? const SizedBox.shrink(),
+                );
+              },
+            );
+            onChanged(picked);
+          },
+          child: Container(
+            width: 260,
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D0D0D),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white12),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+                const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+class _SignalGridLive extends StatefulWidget {
+  final AssetFilter assetFilter;
+  final DateTimeRange? dateRange;
+  const _SignalGridLive({
+    required this.assetFilter,
+    required this.dateRange,
+  });
+
+  @override
+  State<_SignalGridLive> createState() => _SignalGridLiveState();
+}
+
+class _SignalGridLiveState extends State<_SignalGridLive> {
+  final SignalService _signalService = SignalService();
+  static const int _pageSize = 5;
+  int _goldPage = 0;
+  int _cryptoPage = 0;
+  int _forexPage = 0;
+
+  @override
+  void didUpdateWidget(covariant _SignalGridLive oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.assetFilter != widget.assetFilter || oldWidget.dateRange != widget.dateRange) {
+      _goldPage = 0;
+      _cryptoPage = 0;
+      _forexPage = 0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final double columnWidth = (constraints.maxWidth - 32) / 3;
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        final now = Timestamp.now();
+        final sampleSignals = [
+          Signal(
+            id: 'sample1',
+            symbol: 'XAU/USD',
+            type: 'buy',
+            status: 'running',
+            entryPrice: 0,
+            stopLoss: 0,
+            takeProfits: const [],
+            createdAt: now,
+            matchStatus: 'NOT MATCHED',
+            isMatched: false,
+          ),
+          Signal(
+            id: 'sample2',
+            symbol: 'XAU/USD',
+            type: 'sell',
+            status: 'running',
+            entryPrice: 0,
+            stopLoss: 0,
+            takeProfits: const [],
+            createdAt: now,
+            matchStatus: 'NOT MATCHED',
+            isMatched: false,
+          ),
+          Signal(
+            id: 'sample3',
+            symbol: 'XAU/USD',
+            type: 'buy',
+            status: 'running',
+            entryPrice: 0,
+            stopLoss: 0,
+            takeProfits: const [],
+            createdAt: now,
+            matchStatus: 'NOT MATCHED',
+            isMatched: false,
+          ),
+        ];
+        final goldPaged = _paginate(sampleSignals, _goldPage);
+        final hasPrevGold = _goldPage > 0;
+        final hasNextGold = sampleSignals.length > (_goldPage + 1) * _pageSize;
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               width: columnWidth,
-              child: const _SignalColumn(
+              child: _SignalColumnLive(
                 title: 'GOLD',
                 icon: Icons.emoji_events_outlined,
-                cards: [
-                  SignalCardData(
-                    pair: 'XAUUSD',
-                    status: 'Limit',
-                    createdAt: '(GMT +7) 21/10/2025, 17:12:44',
-                    action: SignalAction.sell,
-                  ),
-                  SignalCardData(
-                    pair: 'XAUUSD',
-                    status: 'Running',
-                    createdAt: '(GMT +7) 21/10/2025, 17:12:44',
-                    action: SignalAction.sell,
-                  ),
-                  SignalCardData(
-                    pair: 'XAUUSD',
-                    status: 'S/L',
-                    createdAt: '(GMT +7) 21/10/2025, 17:12:44',
-                    action: SignalAction.sell,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: columnWidth,
-              child: const _SignalColumn(
-                title: 'FOREX',
-                icon: Icons.verified,
-                cards: [
-                  SignalCardData(
-                    pair: 'EURUSD',
-                    status: 'S/L',
-                    createdAt: '(GMT +7) 21/10/2025, 17:12:44',
-                    action: SignalAction.sell,
-                    iconData: Icons.currency_exchange,
-                  ),
-                  SignalCardData(
-                    pair: 'USDJPY',
-                    status: '',
-                    createdAt: '(GMT +7) 21/10/2025, 17:12:44',
-                    action: SignalAction.buy,
-                    iconData: Icons.currency_bitcoin,
-                  ),
-                ],
+                signals: goldPaged,
+                page: _goldPage,
+                onPageChanged: (p) => setState(() => _goldPage = p),
+                hasPrev: hasPrevGold,
+                hasNext: hasNextGold,
               ),
             ),
             const SizedBox(width: 16),
@@ -324,18 +514,165 @@ class _SignalGrid extends StatelessWidget {
               width: columnWidth,
               child: const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined),
             ),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: columnWidth,
+              child: const _EmptyColumn(title: 'FOREX', icon: Icons.verified),
+            ),
           ],
         );
-      },
-    );
+      }
+
+      return StreamBuilder<List<Signal>>(
+        stream: _signalService.getSignals(isLive: true, userTier: 'web'),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: AppTextStyles.body.copyWith(color: Colors.white),
+              ),
+            );
+          }
+          final filtered = _filteredSignals(snapshot.data ?? []);
+          final goldAll = filtered.where(_isGold).toList();
+          final cryptoAll = filtered.where(_isCrypto).toList();
+          final forexAll = filtered.where(_isForex).toList();
+
+          final goldPage = _normalizePage(_goldPage, goldAll.length);
+          final cryptoPage = _normalizePage(_cryptoPage, cryptoAll.length);
+          final forexPage = _normalizePage(_forexPage, forexAll.length);
+
+          final goldPaged = _paginate(goldAll, goldPage);
+          final cryptoPaged = _paginate(cryptoAll, cryptoPage);
+          final forexPaged = _paginate(forexAll, forexPage);
+
+          final hasPrevGold = goldPage > 0;
+          final hasPrevCrypto = cryptoPage > 0;
+          final hasPrevForex = forexPage > 0;
+          final hasNextGold = goldAll.length > (goldPage + 1) * _pageSize;
+          final hasNextCrypto = cryptoAll.length > (cryptoPage + 1) * _pageSize;
+          final hasNextForex = forexAll.length > (forexPage + 1) * _pageSize;
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: columnWidth,
+                child: _SignalColumnLive(
+                  title: 'GOLD',
+                  icon: Icons.emoji_events_outlined,
+                  signals: goldPaged,
+                  page: goldPage,
+                  onPageChanged: (p) => setState(() => _goldPage = p),
+                  hasPrev: hasPrevGold,
+                  hasNext: hasNextGold,
+                ),
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                width: columnWidth,
+                child: cryptoPaged.isEmpty
+                    ? const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined)
+                    : _SignalColumnLive(
+                        title: 'CRYPTO',
+                        icon: Icons.workspace_premium_outlined,
+                        signals: cryptoPaged,
+                        page: cryptoPage,
+                        onPageChanged: (p) => setState(() => _cryptoPage = p),
+                        hasPrev: hasPrevCrypto,
+                        hasNext: hasNextCrypto,
+                      ),
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                width: columnWidth,
+                child: forexPaged.isEmpty
+                    ? const _EmptyColumn(title: 'FOREX', icon: Icons.verified)
+                    : _SignalColumnLive(
+                        title: 'FOREX',
+                        icon: Icons.verified,
+                        signals: forexPaged,
+                        page: forexPage,
+                        onPageChanged: (p) => setState(() => _forexPage = p),
+                        hasPrev: hasPrevForex,
+                        hasNext: hasNextForex,
+                      ),
+              ),
+            ],
+          );
+        },
+      );
+    });
+  }
+
+  List<Signal> _paginate(List<Signal> list, int page) {
+    final start = page * _pageSize;
+    return list.skip(start).take(_pageSize).toList();
+  }
+
+  int _normalizePage(int page, int totalItems) {
+    if (totalItems <= 0) return 0;
+    final totalPages = (totalItems / _pageSize).ceil();
+    return page.clamp(0, totalPages - 1).toInt();
+  }
+
+  bool _isGold(Signal s) => s.symbol.toUpperCase().contains('XAU');
+  bool _isCrypto(Signal s) => s.symbol.toUpperCase().contains('BTC') || s.symbol.toUpperCase().contains('CRYPTO');
+  bool _isForex(Signal s) {
+    final sym = s.symbol.toUpperCase();
+    return sym.contains('/') && !sym.contains('XAU') && !sym.contains('BTC');
+  }
+
+  List<Signal> _filteredSignals(List<Signal> signals) {
+    Iterable<Signal> filtered = signals;
+    switch (widget.assetFilter) {
+      case AssetFilter.gold:
+        filtered = filtered.where(_isGold);
+        break;
+      case AssetFilter.crypto:
+        filtered = filtered.where(_isCrypto);
+        break;
+      case AssetFilter.forex:
+        filtered = filtered.where(_isForex);
+        break;
+      case AssetFilter.all:
+        break;
+    }
+
+    if (widget.dateRange != null) {
+      final start = widget.dateRange!.start;
+      final end = widget.dateRange!.end.add(const Duration(days: 1)); // inclusive
+      filtered = filtered.where((s) {
+        if (s.createdAt is! Timestamp) return true;
+        final dt = (s.createdAt as Timestamp).toDate();
+        return dt.isAfter(start) && dt.isBefore(end);
+      });
+    }
+    return filtered.toList();
   }
 }
 
-class _SignalColumn extends StatelessWidget {
+class _SignalColumnLive extends StatelessWidget {
   final String title;
   final IconData icon;
-  final List<SignalCardData> cards;
-  const _SignalColumn({required this.title, required this.icon, required this.cards});
+  final List<Signal> signals;
+  final int page;
+  final bool hasPrev;
+  final bool hasNext;
+  final ValueChanged<int> onPageChanged;
+  const _SignalColumnLive({
+    required this.title,
+    required this.icon,
+    required this.signals,
+    required this.page,
+    required this.hasPrev,
+    required this.hasNext,
+    required this.onPageChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -353,11 +690,85 @@ class _SignalColumn extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        ...cards.map((c) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: SignalCard(data: c),
-            )),
+        if (signals.isEmpty)
+          Container(
+            height: 170,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F0F0F),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white12),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'No signals available',
+                    style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Signals will appear here when available',
+                    style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ...signals.map((s) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _SignalWebCard(signal: s),
+              )),
+        if (signals.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _NavButton(
+                enabled: hasPrev,
+                icon: Icons.arrow_back_ios_new,
+                onTap: () => onPageChanged(page - 1),
+              ),
+              Text(
+                'Page ${page + 1}',
+                style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 11),
+              ),
+              _NavButton(
+                enabled: hasNext,
+                icon: Icons.arrow_forward_ios,
+                onTap: () => onPageChanged(page + 1),
+              ),
+            ],
+          ),
+        ],
       ],
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  final bool enabled;
+  final IconData icon;
+  final VoidCallback onTap;
+  const _NavButton({required this.enabled, required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: enabled ? onTap : null,
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        width: 32,
+        height: 28,
+        decoration: BoxDecoration(
+          color: enabled ? const Color(0xFF151515) : const Color(0xFF0D0D0D),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.white12),
+        ),
+        alignment: Alignment.center,
+        child: Icon(icon, size: 14, color: enabled ? Colors.white : Colors.white38),
+      ),
     );
   }
 }
@@ -384,7 +795,7 @@ class _EmptyColumn extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Container(
-          height: 200,
+          height: 170,
           decoration: BoxDecoration(
             color: const Color(0xFF0F0F0F),
             borderRadius: BorderRadius.circular(10),
@@ -412,54 +823,53 @@ class _EmptyColumn extends StatelessWidget {
   }
 }
 
-enum SignalAction { buy, sell }
-
-class SignalCardData {
-  final String pair;
-  final String status;
-  final String createdAt;
-  final SignalAction action;
-  final IconData? iconData;
-  const SignalCardData({
-    required this.pair,
-    required this.status,
-    required this.createdAt,
-    required this.action,
-    this.iconData,
-  });
-}
-
-class SignalCard extends StatelessWidget {
-  final SignalCardData data;
-  const SignalCard({super.key, required this.data});
+class _SignalWebCard extends StatelessWidget {
+  final Signal signal;
+  const _SignalWebCard({required this.signal});
 
   @override
   Widget build(BuildContext context) {
-    final isSell = data.action == SignalAction.sell;
-    final actionColor = isSell ? const Color(0xFFE54747) : const Color(0xFF3DCC5C);
-    final icon = data.iconData ?? Icons.circle;
-    return Container(
-      constraints: const BoxConstraints(minHeight: 150),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F0F0F),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white12),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: Colors.white, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                data.pair,
-                style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-              const Spacer(),
-              if (data.status.isNotEmpty)
+    final isBuy = signal.type.toLowerCase() == 'buy';
+    final actionColor = isBuy ? const Color(0xFF3DCC5C) : const Color(0xFFE54747);
+    final createdAt = signal.createdAt;
+    String createdText = '';
+    if (createdAt is Timestamp) {
+      final dt = createdAt.toDate().toLocal().add(const Duration(hours: 0)); // assume local is GMT+7; adjust if needed
+      createdText = DateFormat('dd/MM/yyyy HH:mm').format(dt);
+    }
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => web_detail.SignalDetailScreen(
+              signal: signal,
+              userTier: 'web',
+            ),
+          ),
+        );
+      },
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 150),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F0F0F),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white12),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _FlagStack(symbol: signal.symbol),
+                const SizedBox(width: 8),
+                Text(
+                  signal.symbol,
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -468,43 +878,108 @@ class SignalCard extends StatelessWidget {
                     border: Border.all(color: Colors.white12),
                   ),
                   child: Text(
-                    data.status,
+                    signal.status,
                     style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text('Created:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
-          const SizedBox(height: 4),
-          Text(
-            data.createdAt,
-            style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              isSell ? 'Sell' : 'Buy',
-              style: AppTextStyles.body.copyWith(
-                color: actionColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text('Created:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
+            const SizedBox(height: 4),
+            Text(
+              createdText,
+              style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isBuy ? Icons.north_east : Icons.south_east,
+                    size: 16,
+                    color: actionColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    isBuy ? 'Buy' : 'Sell',
+                    style: AppTextStyles.body.copyWith(
+                      color: actionColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Text(
-                'Details',
-                style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 13),
-              ),
-              const Spacer(),
-              const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 14),
-            ],
-          ),
-        ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Text(
+                  'Detail',
+                  style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 13),
+                ),
+                const Spacer(),
+                const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 14),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FlagStack extends StatelessWidget {
+  final String symbol;
+  const _FlagStack({required this.symbol});
+
+  static const Map<String, String> _currencyFlags = {
+    'AUD': 'assets/images/aud_flag.png',
+    'CHF': 'assets/images/chf_flag.png',
+    'EUR': 'assets/images/eur_flag.png',
+    'GBP': 'assets/images/gbp_flag.png',
+    'JPY': 'assets/images/jpy_flag.png',
+    'NZD': 'assets/images/nzd_flag.png',
+    'USD': 'assets/images/us_flag.png',
+    'XAU': 'assets/images/crown_icon.png',
+  };
+
+  List<String> _flags() {
+    final parts = symbol.toUpperCase().split('/');
+    if (parts.length == 2) {
+      final p1 = _currencyFlags[parts[0]];
+      final p2 = _currencyFlags[parts[1]];
+      return [
+        if (p1 != null) p1,
+        if (p2 != null) p2,
+      ];
+    }
+    return [];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final flags = _flags();
+    if (flags.isEmpty) {
+      return const Icon(Icons.flag_circle_outlined, color: Colors.white, size: 18);
+    }
+    return SizedBox(
+      width: 42,
+      height: 28,
+      child: Stack(
+        children: List.generate(flags.length, (index) {
+          return Positioned(
+            left: index * 14.0,
+            child: CircleAvatar(
+              radius: 14,
+              backgroundColor: Colors.grey.shade800,
+              backgroundImage: AssetImage(flags[index]),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -755,122 +1230,36 @@ class _ComingSoonSection extends StatelessWidget {
   }
 }
 
-class _HistorySection extends StatelessWidget {
+class _HistorySection extends StatefulWidget {
   const _HistorySection();
 
   @override
-  Widget build(BuildContext context) {
-    const rows = [
-      HistoryRow(
-        date: '28/10/2025',
-        time: '10:14',
-        asset: 'GOLD',
-        order: 'BUY',
-        status: 'Cancel',
-        pips: '0',
-        entry: '4011',
-        sl: '4026',
-        tp1: '4000',
-        tp2: '3995',
-      ),
-      HistoryRow(
-        date: '28/10/2025',
-        time: '19:10',
-        asset: 'GOLD',
-        order: 'BUY',
-        status: 'TP1',
-        pips: '+180',
-        entry: '4011',
-        sl: '3998',
-        tp1: '4000',
-        tp2: '3995',
-      ),
-      HistoryRow(
-        date: '28/10/2025',
-        time: '19:10',
-        asset: 'GOLD',
-        order: 'BUY',
-        status: 'SL',
-        pips: '-170',
-        entry: '4011',
-        sl: '3998',
-        tp1: '4000',
-        tp2: '3995',
-      ),
-      HistoryRow(
-        date: '28/10/2025',
-        time: '19:10',
-        asset: 'GOLD',
-        order: 'SELL',
-        status: 'TP1',
-        pips: '+180',
-        entry: '4011',
-        sl: '3998',
-        tp1: '4000',
-        tp2: '3995',
-      ),
-      HistoryRow(
-        date: '28/10/2025',
-        time: '19:10',
-        asset: 'GOLD',
-        order: 'BUY',
-        status: 'TP1',
-        pips: '+180',
-        entry: '4011',
-        sl: '3998',
-        tp1: '4000',
-        tp2: '3995',
-      ),
-      HistoryRow(
-        date: '28/10/2025',
-        time: '19:10',
-        asset: 'GOLD',
-        order: 'BUY',
-        status: 'TP1',
-        pips: '+180',
-        entry: '4011',
-        sl: '3998',
-        tp1: '4000',
-        tp2: '3995',
-      ),
-      HistoryRow(
-        date: '28/10/2025',
-        time: '19:10',
-        asset: 'GOLD',
-        order: 'BUY',
-        status: 'TP1',
-        pips: '+180',
-        entry: '4011',
-        sl: '3998',
-        tp1: '4000',
-        tp2: '3995',
-      ),
-      HistoryRow(
-        date: '28/10/2025',
-        time: '19:10',
-        asset: 'GOLD',
-        order: 'BUY',
-        status: 'TP1',
-        pips: '+180',
-        entry: '4011',
-        sl: '3998',
-        tp1: '4000',
-        tp2: '3995',
-      ),
-      HistoryRow(
-        date: '28/10/2025',
-        time: '19:10',
-        asset: 'GOLD',
-        order: 'SELL',
-        status: 'SL',
-        pips: '-170',
-        entry: '4011',
-        sl: '3998',
-        tp1: '4000',
-        tp2: '3995',
-      ),
-    ];
+  State<_HistorySection> createState() => _HistorySectionState();
+}
 
+class _HistorySectionState extends State<_HistorySection> {
+  static const int _pageSize = 10;
+  int _page = 0;
+
+  List<HistoryRow> _sampleRows() {
+    return List.generate(8, (index) {
+      return HistoryRow(
+        date: '28/10/2025',
+        time: '10:1$index',
+        asset: 'GOLD',
+        order: index.isEven ? 'BUY' : 'SELL',
+        status: index.isEven ? 'TP1' : 'SL',
+        pips: index.isEven ? '+180' : '-170',
+        entry: '4011',
+        sl: '3998',
+        tp1: '4000',
+        tp2: '3995',
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -884,18 +1273,59 @@ class _HistorySection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        _HistoryTable(rows: rows),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Previous', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
-            const SizedBox(width: 24),
-            Text('Page 3 of 53', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
-            const SizedBox(width: 24),
-            Text('Next', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
-          ],
+        StreamBuilder<List<Signal>>(
+          stream: SignalService().getSignals(isLive: false, userTier: 'web', allowUnauthenticated: true),
+          builder: (context, snapshot) {
+            final rows = <HistoryRow>[];
+            final waiting = snapshot.connectionState == ConnectionState.waiting;
+            final hasError = snapshot.hasError;
+            final signals = snapshot.data ?? [];
+            if (FirebaseAuth.instance.currentUser == null) {
+              rows.addAll(_sampleRows());
+            } else {
+              if (waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (hasError) {
+                return Text('Lỗi tải lịch sử: ${snapshot.error}', style: AppTextStyles.body.copyWith(color: Colors.white));
+              }
+              rows.addAll(signals.map(_mapSignalToRow));
+            }
+            if (rows.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Text('Chưa có lịch sử tín hiệu', style: AppTextStyles.body.copyWith(color: Colors.white70)),
+              );
+            }
+            final totalPages = (rows.length / _pageSize).ceil().clamp(1, 9999);
+            final currentPage = _page.clamp(0, totalPages - 1);
+            final visible = rows.skip(currentPage * _pageSize).take(_pageSize).toList();
+
+            return Column(
+              children: [
+                _HistoryTable(rows: visible),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: currentPage > 0 ? () => setState(() => _page = currentPage - 1) : null,
+                      child: const Text('Previous'),
+                    ),
+                    const SizedBox(width: 24),
+                    Text('Page ${currentPage + 1} of $totalPages', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
+                    const SizedBox(width: 24),
+                    TextButton(
+                      onPressed: currentPage < totalPages - 1 ? () => setState(() => _page = currentPage + 1) : null,
+                      child: const Text('Next'),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
+        const SizedBox(height: 12),
       ],
     );
   }
@@ -1081,4 +1511,38 @@ class HistoryRow {
     required this.tp1,
     required this.tp2,
   });
+}
+
+HistoryRow _mapSignalToRow(Signal s) {
+  final created = s.createdAt is Timestamp ? (s.createdAt as Timestamp).toDate() : DateTime.now();
+  final dateStr = DateFormat('dd/MM/yyyy').format(created);
+  final timeStr = DateFormat('HH:mm').format(created);
+  final parts = s.symbol.split('/');
+  final asset = parts.isNotEmpty ? (parts.first.toUpperCase() == 'XAU' ? 'GOLD' : parts.first.toUpperCase()) : s.symbol;
+  final order = s.type.toUpperCase();
+  final status = (s.result ?? s.status).toString();
+  final pips = s.pips != null ? (s.pips! >= 0 ? '+${s.pips}' : s.pips.toString()) : '-';
+
+  String _fmt(num? v) => v == null ? '-' : v.toStringAsFixed(2);
+  String _tp(int idx) {
+    if (s.takeProfits.length > idx) {
+      final v = s.takeProfits[idx];
+      if (v is num) return v.toStringAsFixed(2);
+      if (v is String) return v;
+    }
+    return '-';
+  }
+
+  return HistoryRow(
+    date: dateStr,
+    time: timeStr,
+    asset: asset,
+    order: order,
+    status: status,
+    pips: pips,
+    entry: _fmt(s.entryPrice),
+    sl: _fmt(s.stopLoss),
+    tp1: _tp(0),
+    tp2: _tp(1),
+  );
 }

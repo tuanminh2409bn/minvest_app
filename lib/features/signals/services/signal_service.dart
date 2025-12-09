@@ -8,10 +8,12 @@ class SignalService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Stream<List<Signal>> getSignals(
-      {required bool isLive, required String userTier}) {
-
-    if (_auth.currentUser == null) {
+  Stream<List<Signal>> getSignals({
+    required bool isLive,
+    required String userTier,
+    bool allowUnauthenticated = false,
+  }) {
+    if (_auth.currentUser == null && !allowUnauthenticated) {
       return Stream.value([]);
     }
 
@@ -19,8 +21,6 @@ class SignalService {
 
     if (isLive) {
       query = query.where('status', isEqualTo: 'running');
-    } else {
-      query = query.where('status', isEqualTo: 'closed');
     }
 
     query = query.orderBy('createdAt', descending: true);
@@ -30,9 +30,7 @@ class SignalService {
     }
 
     return query.snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Signal.fromFirestore(doc))
-          .toList();
+      return snapshot.docs.map((doc) => Signal.fromFirestore(doc)).toList();
     });
   }
 

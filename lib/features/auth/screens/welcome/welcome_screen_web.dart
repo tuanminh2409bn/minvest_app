@@ -380,22 +380,28 @@ class _SigninCards extends StatelessWidget {
       _SigninCardData(image: 'assets/mockups/card6.png', rotation: -8),
     ];
     return Positioned.fill(
-      child: IgnorePointer(
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(
-              left: -180,
-              top: 120,
-              child: _SigninCardColumn(cards: cards.sublist(0, 3), offsets: const [-60, 0, 40]),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: -180,
+            top: 120,
+            child: _SigninCardColumn(
+              cards: cards.sublist(0, 3),
+              offsets: const [-60, 0, 40],
+              hoverDirectionUp: true,
             ),
-            Positioned(
-              right: -180,
-              top: 70,
-              child: _SigninCardColumn(cards: cards.sublist(3, 6), offsets: const [-40, 10, 50]),
+          ),
+          Positioned(
+            right: -180,
+            top: 70,
+            child: _SigninCardColumn(
+              cards: cards.sublist(3, 6),
+              offsets: const [-40, 10, 50],
+              hoverDirectionUp: false,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -404,7 +410,8 @@ class _SigninCards extends StatelessWidget {
 class _SigninCardColumn extends StatelessWidget {
   final List<_SigninCardData> cards;
   final List<double> offsets;
-  const _SigninCardColumn({required this.cards, required this.offsets});
+  final bool hoverDirectionUp;
+  const _SigninCardColumn({required this.cards, required this.offsets, required this.hoverDirectionUp});
 
   @override
   Widget build(BuildContext context) {
@@ -415,12 +422,11 @@ class _SigninCardColumn extends StatelessWidget {
         final offsetY = offsets[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: Transform.translate(
-            offset: Offset(0, offsetY),
-            child: Transform.rotate(
-              angle: card.rotation * 3.1416 / 180,
-              child: Image.asset(card.image, width: 280, fit: BoxFit.contain),
-            ),
+          child: _HoverCard(
+            image: card.image,
+            rotation: card.rotation,
+            baseOffsetY: offsetY,
+            hoverDirectionUp: hoverDirectionUp,
           ),
         );
       }),
@@ -432,6 +438,44 @@ class _SigninCardData {
   final String image;
   final double rotation;
   const _SigninCardData({required this.image, required this.rotation});
+}
+
+class _HoverCard extends StatefulWidget {
+  final String image;
+  final double rotation;
+  final double baseOffsetY;
+  final bool hoverDirectionUp;
+  const _HoverCard({
+    required this.image,
+    required this.rotation,
+    required this.baseOffsetY,
+    required this.hoverDirectionUp,
+  });
+
+  @override
+  State<_HoverCard> createState() => _HoverCardState();
+}
+
+class _HoverCardState extends State<_HoverCard> {
+  bool _isHover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final double hoverOffset = _isHover ? (widget.hoverDirectionUp ? -10 : 10) : 0;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHover = true),
+      onExit: (_) => setState(() => _isHover = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        transform: Matrix4.identity()..translate(0.0, widget.baseOffsetY + hoverOffset),
+        child: Transform.rotate(
+          angle: widget.rotation * 3.1416 / 180,
+          child: Image.asset(widget.image, width: 280, fit: BoxFit.contain),
+        ),
+      ),
+    );
+  }
 }
 
 class _TextField extends StatelessWidget {

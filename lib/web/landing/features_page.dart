@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'package:minvest_forex_app/web/theme/colors.dart';
 import 'package:minvest_forex_app/web/theme/spacing.dart';
 import 'package:minvest_forex_app/web/theme/text_styles.dart';
@@ -48,8 +51,10 @@ class WinMoreSection extends StatefulWidget {
   State<WinMoreSection> createState() => _WinMoreSectionState();
 }
 
-class _WinMoreSectionState extends State<WinMoreSection> {
+class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProviderStateMixin {
   int hoveredIndex = -1;
+  late final AnimationController _hoverController;
+  int _textHoverIndex = -1;
 
   final List<_CardData> cards = const [
     _CardData(image: 'assets/mockups/card1.png', rotation: -2),
@@ -59,6 +64,18 @@ class _WinMoreSectionState extends State<WinMoreSection> {
     _CardData(image: 'assets/mockups/card5.png', rotation: -10),
     _CardData(image: 'assets/mockups/card6.png', rotation: -8),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _hoverController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
+  }
+
+  @override
+  void dispose() {
+    _hoverController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,41 +91,56 @@ class _WinMoreSectionState extends State<WinMoreSection> {
           const SizedBox(height: AppSpacing.xl),
           SizedBox(
             height: 640,
-          child: Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              const _GlowBackground(),
-              Positioned(
-                left: -220,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                      _floatingCard(0, offsetY: -60),
-                      const SizedBox(height: 16),
-                      _floatingCard(1, offsetY: 0),
-                      const SizedBox(height: 16),
-                      _floatingCard(2, offsetY: 40),
-                    ],
+            child: Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                const _GlowBackground(),
+                Positioned.fill(
+                  child: IgnorePointer(
+                    ignoring: false,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned(
+                          left: -280,
+                          top: 140,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _floatingCard(0, offsetY: -60),
+                              const SizedBox(height: 16),
+                              _floatingCard(1, offsetY: 0),
+                              const SizedBox(height: 16),
+                              _floatingCard(2, offsetY: 40),
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                          right: -260,
+                          top: 120,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _floatingCard(3, offsetY: -60),
+                              const SizedBox(height: 16),
+                              _floatingCard(4, offsetY: 0),
+                              const SizedBox(height: 16),
+                              _floatingCard(5, offsetY: 40),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                Positioned(
-                  right: -220,
-                  child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _floatingCard(3, offsetY: -40),
-                    const SizedBox(height: 16),
-                    _floatingCard(4, offsetY: 10),
-                    const SizedBox(height: 16),
-                    _floatingCard(5, offsetY: 50),
-                  ],
+                _PhoneMockup(
+                  onHoverStart: (index) => _startTextHover(index),
+                  onHoverEnd: (index) => _endTextHover(index),
                 ),
-              ),
-              const _PhoneMockup(),
-            ],
+              ],
+            ),
           ),
-        ),
           const SizedBox(height: AppSpacing.lg),
           Text(
             'Our multi-market AI scans Forex, Crypto, and Metals in real-time,\n'
@@ -152,15 +184,33 @@ class _WinMoreSectionState extends State<WinMoreSection> {
 
   Widget _floatingCard(int index, {double offsetY = 0}) {
     final data = cards[index];
-    final isHovered = hoveredIndex == index;
+    final activeIndex = hoveredIndex != -1 ? hoveredIndex : _textHoverIndex;
+    final isActive = activeIndex == index;
     return MouseRegion(
-      onEnter: (_) => setState(() => hoveredIndex = index),
-      onExit: (_) => setState(() => hoveredIndex = -1),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        transform: Matrix4.identity()
-          ..translate(0.0, isHovered ? offsetY - 12 : offsetY)
-          ..rotateZ(data.rotation * 3.1416 / 180),
+      onEnter: (_) {
+        setState(() => hoveredIndex = index);
+        _hoverController.forward(from: 0);
+      },
+      onExit: (_) {
+        setState(() => hoveredIndex = -1);
+        if (_textHoverIndex == -1) {
+          _hoverController.reverse(from: _hoverController.value);
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _hoverController,
+        builder: (context, child) {
+          final t = isActive ? Curves.easeOutBack.transform(_hoverController.value) : 0.0;
+          final extraTilt = t * 0.12; // ~7 deg
+          final extraY = t * -24; // bập một nhịp xuống
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            transform: Matrix4.identity()
+              ..translate(0.0, isActive ? offsetY + extraY : offsetY)
+              ..rotateZ((data.rotation * math.pi / 180) + extraTilt),
+            child: child,
+          );
+        },
         child: Image.asset(
           data.image,
           width: 320,
@@ -168,6 +218,20 @@ class _WinMoreSectionState extends State<WinMoreSection> {
         ),
       ),
     );
+  }
+
+  void _startTextHover(int index) {
+    setState(() => _textHoverIndex = index);
+    _hoverController.forward(from: 0);
+  }
+
+  void _endTextHover(int index) {
+    if (_textHoverIndex == index) {
+      setState(() => _textHoverIndex = -1);
+      if (hoveredIndex == -1) {
+        _hoverController.reverse(from: _hoverController.value);
+      }
+    }
   }
 }
 
@@ -204,7 +268,9 @@ class _GlowBackground extends StatelessWidget {
 }
 
 class _PhoneMockup extends StatelessWidget {
-  const _PhoneMockup();
+  final void Function(int index) onHoverStart;
+  final void Function(int index) onHoverEnd;
+  const _PhoneMockup({required this.onHoverStart, required this.onHoverEnd});
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +281,10 @@ class _PhoneMockup extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           _PhoneFrame(),
-          const _PhoneScreenHolder(),
+          _PhoneScreenHolder(
+            onHoverStart: onHoverStart,
+            onHoverEnd: onHoverEnd,
+          ),
         ],
       ),
     );
@@ -230,7 +299,9 @@ class _PhoneFrame extends StatelessWidget {
 }
 
 class _PhoneScreenHolder extends StatelessWidget {
-  const _PhoneScreenHolder();
+  final void Function(int index) onHoverStart;
+  final void Function(int index) onHoverEnd;
+  const _PhoneScreenHolder({required this.onHoverStart, required this.onHoverEnd});
 
   @override
   Widget build(BuildContext context) {
@@ -246,13 +317,18 @@ class _PhoneScreenHolder extends StatelessWidget {
           bottomLeft: Radius.circular(26),
           bottomRight: Radius.circular(26),
         ),
-        child: const _PhoneScreen(),
+        child: _PhoneScreen(
+          onHoverStart: onHoverStart,
+          onHoverEnd: onHoverEnd,
+        ),
       ),
     );
   }
 }
 
 class _PhoneScreen extends StatelessWidget {
+  final void Function(int index) onHoverStart;
+  final void Function(int index) onHoverEnd;
   final List<_SignalRowData> rows = const [
     _SignalRowData(icon: Icons.water_drop, pair: 'WTI', side: 'Buy limit'),
     _SignalRowData(icon: Icons.currency_bitcoin, pair: 'XAU/USD', side: 'Sell limit'),
@@ -262,7 +338,7 @@ class _PhoneScreen extends StatelessWidget {
     _SignalRowData(icon: Icons.currency_bitcoin, pair: 'BTC/USDT', side: 'Sell limit'),
   ];
 
-  const _PhoneScreen();
+  const _PhoneScreen({required this.onHoverStart, required this.onHoverEnd});
 
   @override
   Widget build(BuildContext context) {
@@ -332,12 +408,16 @@ class _PhoneScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Text(
-                            r.side,
-                            style: AppTextStyles.body.copyWith(
-                              color: r.side.toLowerCase().contains('buy') ? Colors.greenAccent : Colors.redAccent,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                          MouseRegion(
+                            onEnter: (_) => onHoverStart(index),
+                            onExit: (_) => onHoverEnd(index),
+                            child: Text(
+                              r.side,
+                              style: AppTextStyles.body.copyWith(
+                                color: r.side.toLowerCase().contains('buy') ? Colors.greenAccent : Colors.redAccent,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ],
@@ -564,42 +644,6 @@ class YourOnDemandSection extends StatelessWidget {
   }
 }
 
-class _InfoCard extends StatelessWidget {
-  final String text;
-  const _InfoCard({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 520,
-      height: 118,
-      padding: const EdgeInsets.all(1.2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF00BFFF), Color(0xFF7B61FF), Color(0xFFD500F9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(9),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        child: Center(
-          child: Text(
-            text,
-            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _LaptopShowcase extends StatelessWidget {
   const _LaptopShowcase();
 
@@ -675,20 +719,124 @@ class _LaptopCards extends StatelessWidget {
         children: [
           Row(
             children: const [
-              _InfoCard(text: 'AI-Powered Trading Signal Platform'),
+              _AnimatedInfoCard(text: 'AI-Powered Trading Signal Platform', slideFromLeft: true),
               SizedBox(width: 16),
-              _InfoCard(text: 'Self-Learning Systems, Sharper Insights, Stronger Trades'),
+              _AnimatedInfoCard(text: 'Self-Learning Systems, Sharper Insights, Stronger Trades', slideFromLeft: false),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             children: const [
-              _InfoCard(text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading'),
+              _AnimatedInfoCard(text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading', slideFromLeft: true),
               SizedBox(width: 16),
-              _InfoCard(text: 'Analysing the market 24/7'),
+              _AnimatedInfoCard(text: 'Analysing the market 24/7', slideFromLeft: false),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AnimatedInfoCard extends StatefulWidget {
+  final String text;
+  final bool slideFromLeft;
+  const _AnimatedInfoCard({required this.text, required this.slideFromLeft});
+
+  @override
+  State<_AnimatedInfoCard> createState() => _AnimatedInfoCardState();
+}
+
+class _AnimatedInfoCardState extends State<_AnimatedInfoCard> with TickerProviderStateMixin {
+  late final AnimationController _entryController;
+  late final AnimationController _borderController;
+  late final Animation<Offset> _slide;
+  late final Animation<double> _fade;
+  bool _hasPlayed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _entryController = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _borderController = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+    _slide = Tween(
+      begin: Offset(widget.slideFromLeft ? -0.18 : 0.18, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _entryController, curve: Curves.easeOutCubic));
+    _fade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _entryController, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _entryController.dispose();
+    _borderController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: ValueKey('info_card_${widget.text}'),
+      onVisibilityChanged: (info) {
+        if (!_hasPlayed && info.visibleFraction > 0.2) {
+          _hasPlayed = true;
+          _entryController.forward(from: 0);
+        }
+      },
+      child: SlideTransition(
+        position: _slide,
+        child: FadeTransition(
+          opacity: _fade,
+          child: AnimatedBuilder(
+            animation: _borderController,
+            builder: (context, child) {
+              final t = _borderController.value;
+              final colors = const [Color(0xFF00BFFF), Color(0xFF7B61FF), Color(0xFFD500F9)];
+              final stops = [
+                (t + 0.0) % 1,
+                (t + 0.4) % 1,
+                (t + 0.8) % 1,
+              ]..sort();
+              return Container(
+                width: 520,
+                height: 118,
+                padding: const EdgeInsets.all(1.2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: LinearGradient(
+                    colors: colors,
+                    stops: stops,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors[1].withOpacity(0.25),
+                      blurRadius: 18,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: child,
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(9),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              child: Center(
+                child: Text(
+                  widget.text,
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

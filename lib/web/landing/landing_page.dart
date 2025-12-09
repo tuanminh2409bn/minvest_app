@@ -4,7 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
+import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 import '../theme/colors.dart';
 import '../theme/breakpoints.dart';
 import '../theme/text_styles.dart';
@@ -1532,13 +1534,11 @@ class _ChartPainter extends CustomPainter {
       Offset(size.width * 0.9, size.height * 0.25),
     ];
 
-    final wiggle = math.sin(progress * 6 * math.pi);
+    final wiggle = 0.0;
     final points = <Offset>[];
     for (int i = 0; i < basePoints.length; i++) {
-      final amp = size.height * 0.12; // biên độ dao động
-      final phase = progress * 6 * math.pi + i * 0.9;
-      final dy = math.sin(phase) * amp * (1.0 - i / basePoints.length * 0.2);
-      points.add(Offset(basePoints[i].dx, basePoints[i].dy + dy + wiggle * 8));
+      // giữ nguyên hình dạng, chỉ dùng progress để vẽ dần
+      points.add(basePoints[i]);
     }
 
     final path = Path()..moveTo(points.first.dx, points.first.dy);
@@ -1609,8 +1609,9 @@ class _SignalsPerformanceCard extends StatefulWidget {
   State<_SignalsPerformanceCard> createState() => _SignalsPerformanceCardState();
 }
 
-class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with TickerProviderStateMixin {
+  late final AnimationController _entranceController;
+  late final AnimationController _itemsController;
   late final Animation<Offset> _slideIn;
   late final Animation<double> _fadeIn;
   bool _hasPlayed = false;
@@ -1618,16 +1619,18 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with S
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _entranceController = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
     _slideIn = Tween(begin: const Offset(-0.16, 0), end: Offset.zero).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+      CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
     );
-    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _entranceController, curve: Curves.easeOut));
+    _itemsController = AnimationController(vsync: this, duration: const Duration(seconds: 5));
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _entranceController.dispose();
+    _itemsController.dispose();
     super.dispose();
   }
 
@@ -1638,7 +1641,8 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with S
       onVisibilityChanged: (info) {
         if (!_hasPlayed && info.visibleFraction > 0.2) {
           _hasPlayed = true;
-          _controller.forward();
+          _entranceController.forward();
+          _itemsController.repeat();
         }
       },
       child: SlideTransition(
@@ -1662,10 +1666,10 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with S
                   ),
                   child: Text('Signals Performance', style: AppTextStyles.h3.copyWith(color: Colors.white)),
                 ),
-                _item(Icons.balance, 'Risk-to-Reward Ratio', 'How risk compares to reward'),
-                _item(Icons.attach_money, 'Profit/Loss Overview', 'Net gain vs loss'),
-                _item(Icons.emoji_events, 'Win Rate', 'Percentage of winning trades'),
-                _item(Icons.track_changes, 'Accuracy Rate', 'How precise our signals are'),
+                _staggerItem(0, Icons.balance, 'Risk-to-Reward Ratio', 'How risk compares to reward'),
+                _staggerItem(1, Icons.attach_money, 'Profit/Loss Overview', 'Net gain vs loss'),
+                _staggerItem(2, Icons.emoji_events, 'Win Rate', 'Percentage of winning trades'),
+                _staggerItem(3, Icons.track_changes, 'Accuracy Rate', 'How precise our signals are'),
               ],
             ),
           ),
@@ -1674,36 +1678,59 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with S
     );
   }
 
-  Widget _item(IconData icon, String title, String subtitle) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF0D101A), Color(0xFF0A0B13)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          border: Border.all(color: Colors.white12),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: Colors.white70, size: 28),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: AppTextStyles.h3.copyWith(fontSize: 18, color: Colors.white)),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
-                ],
-              ),
+  Widget _staggerItem(int index, IconData icon, String title, String subtitle) {
+    return AnimatedBuilder(
+      animation: _itemsController,
+      builder: (context, child) {
+        final phase = (_itemsController.value + index * 0.22) % 1.0;
+        double opacity;
+        if (phase < 0.2) {
+          opacity = Curves.easeIn.transform(phase / 0.2);
+        } else if (phase > 0.8) {
+          opacity = Curves.easeOut.transform((1 - phase) / 0.2);
+        } else {
+          opacity = 1.0;
+        }
+        final slideT = Curves.easeInOut.transform(phase);
+        final travel = 14.0;
+        final baseOffset = 4.0;
+        final offsetY = (lerpDouble(travel, -travel, slideT) ?? 0) + baseOffset;
+
+        return FadeTransition(
+          opacity: AlwaysStoppedAnimation(opacity),
+          child: Transform.translate(offset: Offset(0, offsetY), child: child),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0D101A), Color(0xFF0A0B13)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-          ],
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: Colors.white70, size: 28),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: AppTextStyles.h3.copyWith(fontSize: 18, color: Colors.white)),
+                    const SizedBox(height: 4),
+                    Text(subtitle, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -2029,7 +2056,7 @@ class CtaSection extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.md),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => context.read<AuthBloc>().add(SignInAnonymouslyRequested()),
                   child: Text('Try demo', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
                 ),
               ],

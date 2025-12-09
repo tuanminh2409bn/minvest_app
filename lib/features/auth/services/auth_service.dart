@@ -106,7 +106,7 @@ class AuthService {
     await user.updateDisplayName(displayName);
 
     // Không cần OTP: chỉ lưu thông tin người dùng vào Firestore.
-    await _handleSuccessfulSignIn(userCredential);
+    await _handleSuccessfulSignIn(userCredential, manualDisplayName: displayName);
 
     try {
       await _firestore.collection('users').doc(user.uid).set({
@@ -204,6 +204,7 @@ class AuthService {
     String? appleEmail,
     String? appleFullName,
     String? googleEmail,
+    String? manualDisplayName,
   }) async {
     final User? user = userCredential.user;
     if (user == null) return null;
@@ -231,7 +232,7 @@ class AuthService {
             });
           } else {
             String? email = googleEmail ?? appleEmail ?? facebookUserData?['email'] ?? user.email;
-            final displayName = appleFullName ?? facebookUserData?['name'] ?? user.displayName;
+            final displayName = manualDisplayName ?? appleFullName ?? facebookUserData?['name'] ?? user.displayName;
             final photoURL = facebookUserData?['picture']?['data']?['url'] ?? user.photoURL;
 
             if (email == null && user.providerData.any((p) => p.providerId == 'apple.com')) {

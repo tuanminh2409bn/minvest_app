@@ -34,6 +34,7 @@ import 'web/landing/pricing_page.dart';
 import 'web/landing/news_page.dart';
 import 'web/landing/contact_page.dart';
 import 'features/auth/screens/welcome/signup_screen_web.dart';
+import 'features/auth/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -257,6 +258,7 @@ class _MyAppState extends State<MyApp> {
               '/contact-us': (context) => const ContactPage(),
               '/signin': (context) => const AuthGate(),
               '/signup': (context) => const SignupScreenWeb(),
+              '/profile': (context) => const ProfileScreen(),
             },
             initialRoute: '/',
           );

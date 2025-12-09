@@ -1,358 +1,323 @@
-// profile_screen_web.dart
-
-import 'package:flutter/material.dart';
-import 'package:minvest_forex_app/features/admin/screens/admin_panel_screen.dart';
-import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:minvest_forex_app/core/providers/user_provider.dart';
-import 'package:minvest_forex_app/features/verification/screens/upgrade_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
-import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
+import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
+import 'package:minvest_forex_app/web/theme/colors.dart';
+import 'package:minvest_forex_app/web/theme/text_styles.dart';
 
-import '../../notifications/providers/notification_provider.dart';
-
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
-  Map<String, String> _getTierInfo(String tier, AppLocalizations l10n) {
-    switch (tier.toLowerCase()) {
-      case 'demo':
-        return {
-          l10n.signalTime: '8h-17h',
-          l10n.lotPerWeek: '0.05',
-          l10n.signalQty: '8 signals',
-        };
-      case 'vip':
-        return {
-          l10n.signalTime: '8h-17h',
-          l10n.lotPerWeek: '0.3',
-          l10n.signalQty: 'full',
-        };
-      case 'elite':
-        return {
-          l10n.signalTime: 'fulltime',
-          l10n.lotPerWeek: '0.5',
-          l10n.signalQty: 'full',
-        };
-      default: // Free tier
-        return {
-          l10n.signalTime: 'N/A',
-          l10n.lotPerWeek: 'N/A',
-          l10n.signalQty: 'N/A',
-        };
-    }
-  }
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
-  Future<void> _launchURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      // Could not launch the url
-    }
-  }
+class _ProfileScreenState extends State<ProfileScreen> {
+  int _tabIndex = 0; // 0: Overview, 1: Setting, 2: Payment
 
-  Future<void> _handleLogout(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final bool? confirmLogout = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF161B22),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(l10n.confirmLogout, style: const TextStyle(color: Colors.white)),
-          content: Text(l10n.confirmLogoutMessage, style: const TextStyle(color: Colors.white70)),
-          actions: <Widget>[
-            TextButton(
-              child: Text(l10n.cancel, style: const TextStyle(color: Colors.white)),
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-            ),
-            TextButton(
-              child: Text(l10n.logout, style: const TextStyle(color: Colors.red)),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmLogout == true && context.mounted) {
-      final userProvider = context.read<UserProvider>();
-      final notificationProvider = context.read<NotificationProvider>();
-      context.read<AuthBloc>().add(
-          SignOutRequested(providersToReset: [userProvider, notificationProvider])
-      );
-    }
-  }
-
-  // --- BUILD WIDGET CHÍNH ---
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final user = FirebaseAuth.instance.currentUser;
+    final name = user?.displayName?.trim().isNotEmpty == true
+        ? user!.displayName!
+        : 'User';
+    final email = user?.email ?? '';
 
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, child) {
-        final currentUser = FirebaseAuth.instance.currentUser;
-        final userTier = userProvider.userTier ?? 'free';
-        final userRole = userProvider.role ?? 'user';
-        final tierInfo = _getTierInfo(userTier, l10n);
-
-        return Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF0D1117), Color(0xFF161B22), Color.fromARGB(255, 20, 29, 110)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth > 900) {
-                  return _buildWideLayout(context, currentUser, userTier, tierInfo, userRole, l10n);
-                } else {
-                  return _buildNarrowLayout(context, currentUser, userTier, tierInfo, userRole, l10n);
-                }
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // === GIAO DIỆN RỘNG (WEB) ===
-  Widget _buildWideLayout(BuildContext context, User? currentUser, String userTier, Map<String, String> tierInfo, String userRole, AppLocalizations l10n) {
-    return Center(
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 1200),
-        padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 50.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // CỘT BÊN TRÁI
-            Expanded(
-              flex: 2,
-              child: _buildInfoColumn(context, currentUser, userTier, userRole, l10n),
-            ),
-            const VerticalDivider(width: 50, color: Colors.white24, indent: 20, endIndent: 20),
-
-            // CỘT BÊN PHẢI
-            Expanded(
-              flex: 3,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(top: 40.0),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch, // Thay vì .start
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const LandingNavBar(),
+                    const SizedBox(height: 20),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          l10n.subscriptionDetails,
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                        _ProfileSidebar(
+                          name: name,
+                          email: email,
+                          tabIndex: _tabIndex,
+                          onTabChanged: (i) => setState(() => _tabIndex = i),
                         ),
-                        const SizedBox(width: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(20)),
-                          child: Text(userTier.toUpperCase(), style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14)),
+                        const SizedBox(width: 24),
+                        Expanded(
+                          child: _buildTabContent(name),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 30),
-                    ...tierInfo.entries.map((entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 15.0),
-                      child: Row(
-                        children: [
-                          Text('${entry.key}:', style: const TextStyle(color: Colors.white70, fontSize: 18)),
-                          const Spacer(),
-                          Text(entry.value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                    )),
-                    const SizedBox(height: 50),
-                    _UpgradeCardWeb(l10n: l10n),
+                    const SizedBox(height: 40),
+                    const FooterSection(),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // === GIAO DIỆN HẸP (TABLET/MOBILE) ===
-  Widget _buildNarrowLayout(BuildContext context, User? currentUser, String userTier, Map<String, String> tierInfo, String userRole, AppLocalizations l10n) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: _buildInfoColumn(context, currentUser, userTier, userRole, l10n, isNarrow: true, tierInfo: tierInfo),
           ),
         ),
       ),
     );
   }
 
-  // === CỘT THÔNG TIN CHUNG ===
-  Widget _buildInfoColumn(BuildContext context, User? currentUser, String userTier, String userRole, AppLocalizations l10n, {bool isNarrow = false, Map<String, String>? tierInfo}) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        if (isNarrow) const SizedBox(height: 40),
-        CircleAvatar(radius: 50, backgroundImage: currentUser?.photoURL != null ? NetworkImage(currentUser!.photoURL!) : null, child: currentUser?.photoURL == null ? const Icon(Icons.person, size: 50) : null),
-        const SizedBox(height: 20),
-        Text(currentUser?.displayName ?? l10n.yourName, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-        if(isNarrow && tierInfo != null) ...[
-          const SizedBox(height: 30),
-          ...tierInfo.entries.map((entry) => Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text('${entry.key}: ${entry.value}', style: const TextStyle(color: Colors.white, fontSize: 16)),
-          )),
-          const SizedBox(height: 30),
-          _UpgradeCard(l10n: l10n),
+  Widget _buildTabContent(String name) {
+    switch (_tabIndex) {
+      case 0:
+        return const _OverviewContent();
+      case 1:
+        return _PlaceholderCard(title: 'Setting', content: 'Settings coming soon.');
+      case 2:
+        return _PlaceholderCard(title: 'Payment History', content: 'No payment history yet.');
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+}
+
+class _ProfileSidebar extends StatelessWidget {
+  final String name;
+  final String email;
+  final int tabIndex;
+  final ValueChanged<int> onTabChanged;
+  const _ProfileSidebar({
+    required this.name,
+    required this.email,
+    required this.tabIndex,
+    required this.onTabChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 260,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.white24,
+                child: Text(
+                  name.isNotEmpty ? name[0].toUpperCase() : '?',
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+                    if (email.isNotEmpty)
+                      Text(email, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text('Nationality:', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
           const SizedBox(height: 20),
+          _tabButton('Overview', 0),
+          _tabButton('Setting', 1),
+          _tabButton('Payment History', 2),
         ],
+      ),
+    );
+  }
 
-        const SizedBox(height: 30),
-
-        if (userRole == 'admin')
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: _buildActionButton(
-              text: l10n.adminPanel,
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminPanelScreen())),
+  Widget _tabButton(String text, int index) {
+    final bool active = tabIndex == index;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: () => onTabChanged(index),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: active ? const Color(0xFF151515) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: active ? Colors.white : Colors.white24),
+          ),
+          alignment: Alignment.centerLeft,
+          child: Text(
+            text,
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
-
-        _buildActionButton(text: l10n.contactUs247, onPressed: () => _launchURL('https://zalo.me/0969156969')),
-        const SizedBox(height: 16),
-        _buildActionButton(text: l10n.logout, onPressed: () => _handleLogout(context)),
-        const SizedBox(height: 40),
-        Text(l10n.followMinvest, style: const TextStyle(color: Colors.white70)),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _SocialIcon(iconPath: 'assets/images/facebook_logo.png', url: 'https://www.facebook.com/minvest.vn'),
-            const SizedBox(width: 20),
-            _SocialIcon(iconPath: 'assets/images/tiktok_logo.png', url: 'https://www.tiktok.com/@minvest.minh'),
-            const SizedBox(width: 20),
-            _SocialIcon(iconPath: 'assets/images/youtube_logo.png', url: 'https://www.youtube.com/@minvestvn'),
-            const SizedBox(width: 20),
-            _SocialIcon(iconPath: 'assets/images/telegram_logo.png', url: 'https://t.me/minvest_free', size: 32),
-            const SizedBox(width: 20),
-            _SocialIcon(iconPath: 'assets/images/web_logo.png', url: 'https://minvest.vn/'),
-          ],
         ),
-        if (isNarrow) const SizedBox(height: 20),
+      ),
+    );
+  }
+}
+
+class _OverviewContent extends StatelessWidget {
+  const _OverviewContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _CardContainer(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Signals Plan', style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 12),
+              Row(
+                children: const [
+                  Expanded(child: _PlanTile(title: 'Gold Signals')),
+                  SizedBox(width: 12),
+                  Expanded(child: _PlanTile(title: 'Forex Signals')),
+                  SizedBox(width: 12),
+                  Expanded(child: _PlanTile(title: 'Crypto Signals')),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        _CardContainer(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('AI Minvest', style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F0F0F),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: Row(
+                  children: [
+                    Text('Your Tokens', style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.white24),
+                      ),
+                      child: Text('10 left', style: AppTextStyles.body.copyWith(color: Colors.greenAccent, fontWeight: FontWeight.w700)),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.help_outline, size: 16, color: Colors.white54),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
 }
 
-// === CÁC WIDGET CON ===
-
-class _UpgradeCard extends StatelessWidget {
-  final AppLocalizations l10n;
-  const _UpgradeCard({required this.l10n});
+class _PlanTile extends StatelessWidget {
+  final String title;
+  const _PlanTile({required this.title});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), gradient: const LinearGradient(colors: [Color(0xFF157CC9), Color(0xFF2A43B9), Color(0xFFC611CE)], begin: Alignment.topLeft, end: Alignment.bottomRight)),
-      child: Column(
-        children: [
-          const Icon(Icons.workspace_premium, color: Colors.amber, size: 32),
-          const SizedBox(height: 8),
-          Text(l10n.upgradeCardTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-          const SizedBox(height: 4),
-          Text(l10n.upgradeCardSubtitle, style: const TextStyle(color: Colors.white70, fontSize: 14)),
-          const SizedBox(height: 16),
-          ElevatedButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UpgradeScreen())), style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.blue.shade800, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12)), child: Text(l10n.upgradeNow, style: const TextStyle(fontWeight: FontWeight.bold))),
-        ],
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F0F0F),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white12),
       ),
-    );
-  }
-}
-
-class _UpgradeCardWeb extends StatelessWidget {
-  final AppLocalizations l10n;
-  const _UpgradeCardWeb({required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), gradient: const LinearGradient(colors: [Color(0xFF157CC9), Color(0xFF2A43B9), Color(0xFFC611CE)], begin: Alignment.topLeft, end: Alignment.bottomRight)),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.workspace_premium, color: Colors.amber, size: 40),
-          const SizedBox(height: 12),
-          Text(l10n.upgradeCardTitle, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-          const SizedBox(height: 8),
-          Text(l10n.upgradeCardSubtitle, style: const TextStyle(color: Colors.white70, fontSize: 16), textAlign: TextAlign.center),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UpgradeScreen())),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.blue.shade800,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
-            ),
-            child: Text(l10n.upgradeNow, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Row(
+            children: [
+              Text(title, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+              const Spacer(),
+              _DeactivateButton(),
+            ],
           ),
+          const SizedBox(height: 6),
+          Text('Start Date:', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+          Text('...', style: AppTextStyles.caption.copyWith(color: Colors.white)),
+          const SizedBox(height: 4),
+          Text('End Date:', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+          Text('...', style: AppTextStyles.caption.copyWith(color: Colors.white)),
         ],
       ),
     );
   }
 }
 
-Widget _buildActionButton({required String text, required VoidCallback onPressed}) {
-  return SizedBox(
-    width: double.infinity,
-    height: 50,
-    child: ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, padding: EdgeInsets.zero, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-      child: Ink(
-        decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF0C0938), Color(0xFF141A4C), Color(0xFF1D2B62)], begin: Alignment.centerLeft, end: Alignment.centerRight), borderRadius: BorderRadius.circular(12)),
-        child: Container(alignment: Alignment.center, child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16))),
+class _DeactivateButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white24),
       ),
-    ),
-  );
+      child: Text(
+        'Deactivate',
+        style: AppTextStyles.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
 }
 
-class _SocialIcon extends StatelessWidget {
-  final String iconPath;
-  final String url;
-  final double size;
-  const _SocialIcon({required this.iconPath, required this.url, this.size = 32.0});
-
-  Future<void> _launchURL() async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {}
-  }
+class _CardContainer extends StatelessWidget {
+  final Widget child;
+  const _CardContainer({required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _launchURL,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.all(4.0),
-        child: Image.asset(iconPath, fit: BoxFit.contain),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111111),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _PlaceholderCard extends StatelessWidget {
+  final String title;
+  final String content;
+  const _PlaceholderCard({required this.title, required this.content});
+
+  @override
+  Widget build(BuildContext context) {
+    return _CardContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 12),
+          Text(content, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+        ],
       ),
     );
   }

@@ -1,5 +1,6 @@
 //lib/features/signals/screens/signal_detail_screen_web.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
@@ -19,10 +20,14 @@ class SignalDetailScreen extends StatelessWidget {
   });
 
   static const Map<String, String> _currencyFlags = {
-    'AUD': 'assets/images/aud_flag.png', 'CHF': 'assets/images/chf_flag.png',
-    'EUR': 'assets/images/eur_flag.png', 'GBP': 'assets/images/gbp_flag.png',
-    'JPY': 'assets/images/jpy_flag.png', 'NZD': 'assets/images/nzd_flag.png',
-    'USD': 'assets/images/us_flag.png', 'XAU': 'assets/images/crown_icon.png',
+    'AUD': 'assets/images/aud_flag.png',
+    'CHF': 'assets/images/chf_flag.png',
+    'EUR': 'assets/images/eur_flag.png',
+    'GBP': 'assets/images/gbp_flag.png',
+    'JPY': 'assets/images/jpy_flag.png',
+    'NZD': 'assets/images/nzd_flag.png',
+    'USD': 'assets/images/us_flag.png',
+    'XAU': 'assets/images/crown_icon.png',
   };
 
   List<String> _getFlagPathsFromSymbol(String symbol) {
@@ -30,14 +35,15 @@ class SignalDetailScreen extends StatelessWidget {
     if (parts.length == 2) {
       final path1 = _currencyFlags[parts[0]];
       final path2 = _currencyFlags[parts[1]];
-      return [ if (path1 != null) path1, if (path2 != null) path2 ];
+      return [if (path1 != null) path1, if (path2 != null) path2];
     }
     return [];
   }
 
   // ▼▼▼ HÀM ĐÃ ĐƯỢC SỬA LẠI ĐỂ AN TOÀN TUYỆT ĐỐI ▼▼▼
   String _getTranslatedReason(BuildContext context, AppLocalizations l10n) {
-    final currentLocale = Provider.of<LanguageProvider>(context, listen: false).locale;
+    final currentLocale =
+        Provider.of<LanguageProvider>(context, listen: false).locale;
     final dynamic reasonData = signal.reason; // Giữ kiểu là dynamic
 
     // Trường hợp 1: Dữ liệu là dạng Map (cấu trúc mới)
@@ -71,68 +77,98 @@ class SignalDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final bool canViewReason = userTier == 'elite';
     final List<String> flagPaths = _getFlagPathsFromSymbol(signal.symbol);
     final String statusText = signal.getTranslatedResult(l10n);
-    final Color statusColor = signal.getStatusColor();
+    const Color statusColor = Color(0xFF289EFF);
+    final String reasonText = _getTranslatedReason(context, l10n);
+
+    final DateTime created = _toDateTime(signal.createdAt);
+    final String createdLabel =
+        '(GMT +7) ${DateFormat('dd/MM/yyyy, HH:mm:ss').format(created)}';
+
+    final String entryText = _formatPrice(signal.entryPrice);
+    final String slText = _formatPrice(signal.stopLoss);
+    final String tp1 = signal.takeProfits.isNotEmpty
+        ? _formatPrice(signal.takeProfits[0])
+        : '—';
+    final String tp2 = signal.takeProfits.length > 1
+        ? _formatPrice(signal.takeProfits[1])
+        : '—';
+    final String tp3 = signal.takeProfits.length > 2
+        ? _formatPrice(signal.takeProfits[2])
+        : '—';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1117),
+        backgroundColor: Colors.black,
         scrolledUnderElevation: 0,
         elevation: 0,
-        centerTitle: false,
-        title: Row(
-          children: [
-            if (flagPaths.isNotEmpty)
-              SizedBox(
-                width: 42,
-                height: 28,
-                child: Stack(
-                  children: List.generate(flagPaths.length, (index) {
-                    return Positioned(
-                      left: index * 14.0,
-                      child: CircleAvatar(
-                        radius: 14,
-                        backgroundColor: Colors.grey.shade800,
-                        backgroundImage: AssetImage(flagPaths[index]),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            const SizedBox(width: 10),
-            Text(
-              signal.symbol,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-          ],
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        toolbarHeight: 0,
+        automaticallyImplyLeading: false,
       ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0D1117), Color(0xFF161B22), Color.fromARGB(255, 20, 29, 110)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.0, 0.5, 1.0],
-          ),
-        ),
+        decoration: const BoxDecoration(color: Colors.black),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                _buildDetailCard(context, canViewReason, statusText, statusColor, l10n),
-              ],
+            constraints: const BoxConstraints(maxWidth: 1100),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Header(
+                    flagPaths: flagPaths,
+                    symbol: signal.symbol,
+                    statusText: statusText,
+                    type: signal.type,
+                    createdLabel: createdLabel,
+                  ),
+                  const SizedBox(height: 16),
+                  _SectionCard(
+                    title: 'Price Levels',
+                    child: _PriceGrid(
+                      topItems: [
+                        PriceCell(
+                            label: 'ENTRY',
+                            value: entryText,
+                            color: const Color(0xFF289EFF)),
+                        PriceCell(
+                            label: 'SL',
+                            value: slText,
+                            color: const Color(0xFFE54747)),
+                      ],
+                      bottomItems: [
+                        PriceCell(
+                            label: 'TP1',
+                            value: tp1,
+                            color: const Color(0xFF3BFF00)),
+                        PriceCell(
+                            label: 'TP2',
+                            value: tp2,
+                            color: const Color(0xFF3BFF00)),
+                        PriceCell(
+                            label: 'TP3',
+                            value: tp3,
+                            color: const Color(0xFF3BFF00)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _SectionCard(
+                    title: 'Capital Management',
+                    child: Text(
+                      reasonText,
+                      style: const TextStyle(
+                          color: Colors.white70, height: 1.6, fontSize: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (userTier != 'elite') const _UpgradeSection(),
+                ],
+              ),
             ),
           ),
         ),
@@ -140,179 +176,379 @@ class SignalDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailCard(BuildContext context, bool canViewReason, String statusText, Color statusColor, AppLocalizations l10n) {
-    const int decimalPlaces = 2;
-    final String reasonText = _getTranslatedReason(context, l10n);
+  DateTime _toDateTime(dynamic createdAt) {
+    if (createdAt is Timestamp) return createdAt.toDate().toLocal();
+    if (createdAt is DateTime) return createdAt.toLocal();
+    return DateTime.now();
+  }
 
+  String _formatPrice(num? value) {
+    if (value == null) return '—';
+    return value.toStringAsFixed(5);
+  }
+
+  Color _statusColor(String status) {
+    final lower = status.toLowerCase();
+    if (lower.contains('pending')) return const Color(0xFFFFA726);
+    if (lower.contains('run') || lower.contains('live'))
+      return const Color(0xFF18D46F);
+    if (lower.contains('sl')) return const Color(0xFFE54747);
+    return Colors.white;
+  }
+}
+
+class _Header extends StatelessWidget {
+  final List<String> flagPaths;
+  final String symbol;
+  final String statusText;
+  final String type;
+  final String createdLabel;
+  const _Header({
+    required this.flagPaths,
+    required this.symbol,
+    required this.statusText,
+    required this.type,
+    required this.createdLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isBuy = type.toLowerCase() == 'buy';
+    final typeColor = isBuy ? const Color(0xFF18D46F) : const Color(0xFFE54747);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF151a2e),
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFF0F111A),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoRow(l10n.status, statusText, valueColor: statusColor),
-          _buildInfoRow(l10n.sentOn, DateFormat('HH:mm dd/MM/yyyy').format(signal.createdAt.toDate())),
-          const Divider(height: 30, color: Colors.blueGrey),
-          _buildPriceRow(l10n.entryPrice, signal.entryPrice.toStringAsFixed(decimalPlaces), signal.result),
-          _buildPriceRow(l10n.stopLossFull, signal.stopLoss.toStringAsFixed(decimalPlaces), signal.result),
-          _buildPriceRow(l10n.takeProfitFull1, signal.takeProfits.isNotEmpty ? signal.takeProfits[0].toStringAsFixed(decimalPlaces) : '—', signal.result),
-          _buildPriceRow(l10n.takeProfitFull2, signal.takeProfits.length > 1 ? signal.takeProfits[1].toStringAsFixed(decimalPlaces) : '—', signal.result),
-          _buildPriceRow(l10n.takeProfitFull3, signal.takeProfits.length > 2 ? signal.takeProfits[2].toStringAsFixed(decimalPlaces) : '—', signal.result),
-          const Divider(height: 30, color: Colors.blueGrey),
-          Text(
-            l10n.reason,
-            style: const TextStyle(color: Color(0xFF5865F2), fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          canViewReason
-              ? Text(
-            reasonText,
-            style: const TextStyle(color: Colors.white70, height: 1.5, fontSize: 14),
-          )
-              : _buildUpgradeToView(context, reasonText, l10n),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String title, String value, {Color? valueColor}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 14)),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: valueColor ?? Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPriceRow(String title, String value, String? result) {
-    Icon? statusIcon;
-    final String lowerTitle = title.toLowerCase().replaceAll(' ', '');
-
-    if ((lowerTitle == 'stoploss' || lowerTitle == 'dừnglỗ') && result?.toLowerCase() == 'sl hit') {
-      statusIcon = const Icon(Icons.cancel, color: Color(0xFFDA3633), size: 18);
-    }
-
-    if (lowerTitle.contains('takeprofit') || lowerTitle.contains('chốtlời')) {
-      final tpNumber = int.tryParse(lowerTitle.replaceAll(RegExp(r'[^0-9]'), ''));
-      if (tpNumber != null && signal.hitTps.contains(tpNumber)) {
-        statusIcon = const Icon(Icons.check_circle, color: Colors.greenAccent, size: 18);
-      }
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Flexible(
-              child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 14))
-          ),
           Row(
             children: [
-              Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
-              if (statusIcon != null) ...[
-                const SizedBox(width: 8),
-                statusIcon,
-              ]
+              if (flagPaths.isNotEmpty)
+                SizedBox(
+                  width: 52,
+                  height: 32,
+                  child: Stack(
+                    children: List.generate(flagPaths.length, (index) {
+                      return Positioned(
+                        left: index * 16.0,
+                        child: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.grey.shade800,
+                          backgroundImage: AssetImage(flagPaths[index]),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              if (flagPaths.isNotEmpty) const SizedBox(width: 10),
+              Text(
+                symbol.toUpperCase(),
+                style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                statusText,
+                style: const TextStyle(
+                    color: Color(0xFF289EFF),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(width: 12),
+              Row(
+                children: [
+                  Icon(isBuy ? Icons.north_east : Icons.south_east,
+                      color: typeColor, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    isBuy ? 'Buy' : 'Sell',
+                    style: TextStyle(
+                        color: typeColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back_ios_new,
+                    color: Colors.white, size: 16),
+                label: const Text('Go back',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600)),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.access_time, color: Colors.white70, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                createdLabel,
+                style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600),
+              ),
             ],
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildUpgradeToView(BuildContext context, String reason, AppLocalizations l10n) {
-    if (reason == l10n.noReasonProvided) {
-      return Column(
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final Widget child;
+  const _SectionCard({required this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F111A),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.upgradeToViewReason, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, height: 1.5, fontSize: 14)),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: 50,
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UpgradeScreen())),
-              style: ElevatedButton.styleFrom(padding: EdgeInsets.zero, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), backgroundColor: Colors.transparent, shadowColor: Colors.transparent),
-              child: Ink(
-                decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF172AFE), Color(0xFF3C4BFE), Color(0xFF5E69FD)], begin: Alignment.centerLeft, end: Alignment.centerRight), borderRadius: BorderRadius.circular(12)),
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('assets/images/crown_icon.png', height: 24, width: 24),
-                      const SizedBox(width: 8),
-                      Text(l10n.upgradeAccount, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
+          Row(
+            children: [
+              const Icon(Icons.widgets_outlined,
+                  color: Colors.white70, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                title,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700),
               ),
-            ),
+            ],
           ),
+          const SizedBox(height: 14),
+          child,
         ],
-      );
-    }
+      ),
+    );
+  }
+}
 
-    return Stack(
-      alignment: Alignment.bottomCenter,
+class PriceCell {
+  final String label;
+  final String value;
+  final Color color;
+  PriceCell({required this.label, required this.value, required this.color});
+}
+
+class _PriceGrid extends StatelessWidget {
+  final List<PriceCell> topItems;
+  final List<PriceCell> bottomItems;
+  const _PriceGrid({required this.topItems, required this.bottomItems});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       children: [
-        ShaderMask(
-          shaderCallback: (rect) {
-            return const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.white, Colors.transparent], stops: [0.6, 1.0]).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-          },
-          blendMode: BlendMode.dstIn,
-          child: Text(reason, maxLines: 5, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70, height: 1.5, fontSize: 14)),
+        Row(
+          children: _rowChildren(topItems, fillTo: 3),
         ),
-        Padding(
-          padding: const EdgeInsets.only(top: 40.0),
-          child: SizedBox(
-            height: 50,
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UpgradeScreen())),
-              style: ElevatedButton.styleFrom(padding: EdgeInsets.zero, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), backgroundColor: Colors.transparent, shadowColor: Colors.transparent),
-              child: Ink(
-                decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF172AFE), Color(0xFF3C4BFE), Color(0xFF5E69FD)], begin: Alignment.centerLeft, end: Alignment.centerRight), borderRadius: BorderRadius.circular(12)),
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('assets/images/crown_icon.png', height: 24, width: 24),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                            l10n.upgradeToViewFullAnalysis,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+        const SizedBox(height: 12),
+        Row(
+          children: _rowChildren(bottomItems, fillTo: 3),
         ),
       ],
+    );
+  }
+
+  List<Widget> _rowChildren(List<PriceCell> cells, {required int fillTo}) {
+    final padded = List<PriceCell?>.from(cells);
+    while (padded.length < fillTo) {
+      padded.add(null);
+    }
+    final widgets = <Widget>[];
+    for (int i = 0; i < padded.length; i++) {
+      widgets.add(
+        Expanded(
+          child: padded[i] == null
+              ? const SizedBox()
+              : _PriceBox(cell: padded[i]!),
+        ),
+      );
+      if (i != padded.length - 1) widgets.add(const SizedBox(width: 12));
+    }
+    return widgets;
+  }
+}
+
+class _PriceBox extends StatelessWidget {
+  final PriceCell cell;
+  const _PriceBox({required this.cell});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0C0E16),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${cell.label}:',
+            style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+                fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            cell.value,
+            style: TextStyle(
+                color: cell.color, fontSize: 15, fontWeight: FontWeight.w800),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UpgradeSection extends StatelessWidget {
+  const _UpgradeSection();
+
+  @override
+  Widget build(BuildContext context) {
+    const List<String> perks = [
+      'Continuously updating market data 24/7',
+      'Providing the best signals in real time',
+      'Includes Entry, SL, TP',
+      'Detailed analysis and evaluation of each signal',
+      'Real-time notifications via email',
+      'Signal performance statistics',
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F111A),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white12),
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Text('10 free signals left',
+                  style: TextStyle(
+                      color: Color(0xFF289EFF),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700)),
+              Spacer(),
+              Text('Gold Plan',
+                  style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('\$78',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800)),
+                  SizedBox(height: 6),
+                  Text('/month',
+                      style: TextStyle(color: Colors.white70, fontSize: 12)),
+                ],
+              ),
+              const Spacer(),
+              SizedBox(
+                height: 44,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const UpgradeScreen())),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                  ),
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [
+                        Color(0xFF04B3E9),
+                        Color(0xFF2E60FF),
+                        Color(0xFFD500F9)
+                      ]),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                      child: Text('Upgrade Now',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 10,
+            children: perks.map((p) {
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0C0E16),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: Text(p,
+                    style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600)),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 }

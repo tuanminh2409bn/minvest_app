@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/features/admin/services/admin_service.dart';
+import 'package:minvest_forex_app/features/news/models/news_model.dart';
+import 'package:minvest_forex_app/features/news/services/news_service.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -15,6 +17,7 @@ class AdminPanelScreen extends StatefulWidget {
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
   final AdminService _adminService = AdminService();
+  final NewsService _newsService = NewsService();
   final Set<String> _selectedUserIds = {};
 
   void _handleUpdateUsers() {
@@ -51,6 +54,24 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     return '\$${format.format(amount)}'.trim();
   }
 
+  void _openCreateNews() {
+    showDialog(
+      context: context,
+      builder: (_) => _CreateNewsDialog(
+        onSubmit: (article) async {
+          final id = await _newsService.createNews(article);
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(id != null ? 'Đã đăng bài News' : 'Đăng bài thất bại'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +83,12 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               icon: const Icon(Icons.clear_all),
               onPressed: () => setState(() => _selectedUserIds.clear()),
               tooltip: 'Bỏ chọn tất cả',
-            )
+            ),
+          IconButton(
+            icon: const Icon(Icons.post_add),
+            tooltip: 'Tạo bài News',
+            onPressed: _openCreateNews,
+          ),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -274,5 +300,149 @@ class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
         ),
       ],
     );
+  }
+}
+
+class _CreateNewsDialog extends StatefulWidget {
+  final Future<void> Function(NewsArticle article) onSubmit;
+  const _CreateNewsDialog({required this.onSubmit});
+
+  @override
+  State<_CreateNewsDialog> createState() => _CreateNewsDialogState();
+}
+
+class _CreateNewsDialogState extends State<_CreateNewsDialog> {
+  final _titleCtrl = TextEditingController();
+  final _subtitleCtrl = TextEditingController();
+  final _contentCtrl = TextEditingController();
+  final _thumbnailCtrl = TextEditingController();
+  final _tagsCtrl = TextEditingController();
+  final _authorCtrl = TextEditingController(text: 'Admin');
+  String _category = 'News';
+  bool _isFeatured = false;
+  String _status = 'published';
+  bool _submitting = false;
+
+  @override
+  void dispose() {
+    _titleCtrl.dispose();
+    _subtitleCtrl.dispose();
+    _contentCtrl.dispose();
+    _thumbnailCtrl.dispose();
+    _tagsCtrl.dispose();
+    _authorCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Tạo bài News'),
+      content: SizedBox(
+        width: 520,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _input(_titleCtrl, 'Tiêu đề', maxLines: 2),
+              const SizedBox(height: 10),
+              _input(_subtitleCtrl, 'Mô tả ngắn', maxLines: 2),
+              const SizedBox(height: 10),
+              _input(_thumbnailCtrl, 'Thumbnail URL'),
+              const SizedBox(height: 10),
+              _input(_authorCtrl, 'Tác giả'),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                value: _category,
+                decoration: const InputDecoration(
+                  labelText: 'Danh mục',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'News', child: Text('News')),
+                  DropdownMenuItem(value: 'Investor', child: Text('Investor')),
+                  DropdownMenuItem(value: 'Knowledge', child: Text('Knowledge')),
+                  DropdownMenuItem(value: 'Technical Analysis', child: Text('Technical Analysis')),
+                ],
+                onChanged: (v) => setState(() => _category = v ?? 'News'),
+              ),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                value: _status,
+                decoration: const InputDecoration(
+                  labelText: 'Trạng thái',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'published', child: Text('Published')),
+                  DropdownMenuItem(value: 'draft', child: Text('Draft')),
+                ],
+                onChanged: (v) => setState(() => _status = v ?? 'published'),
+              ),
+              const SizedBox(height: 10),
+              CheckboxListTile(
+                value: _isFeatured,
+                onChanged: (v) => setState(() => _isFeatured = v ?? false),
+                title: const Text('Đánh dấu Featured'),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+              _input(_tagsCtrl, 'Tags (phân tách bởi dấu phẩy)'),
+              const SizedBox(height: 10),
+              _input(_contentCtrl, 'Nội dung', maxLines: 6),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _submitting ? null : () => Navigator.pop(context),
+          child: const Text('Hủy'),
+        ),
+        ElevatedButton(
+          onPressed: _submitting ? null : _submit,
+          child: _submitting
+              ? const SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                )
+              : const Text('Đăng bài'),
+        ),
+      ],
+    );
+  }
+
+  Widget _input(TextEditingController ctrl, String label, {int maxLines = 1}) {
+    return TextField(
+      controller: ctrl,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    if (_titleCtrl.text.trim().isEmpty || _contentCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nhập tiêu đề và nội dung')));
+      return;
+    }
+    setState(() => _submitting = true);
+    final article = NewsArticle(
+      id: '',
+      title: _titleCtrl.text.trim(),
+      subtitle: _subtitleCtrl.text.trim(),
+      content: _contentCtrl.text.trim(),
+      thumbnailUrl: _thumbnailCtrl.text.trim(),
+      category: _category,
+      author: _authorCtrl.text.trim().isEmpty ? 'Admin' : _authorCtrl.text.trim(),
+      tags: _tagsCtrl.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+      isFeatured: _isFeatured,
+      status: _status,
+      publishedAt: Timestamp.now(),
+    );
+    await widget.onSubmit(article);
+    if (mounted) Navigator.pop(context);
   }
 }
