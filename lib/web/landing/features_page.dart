@@ -288,19 +288,30 @@ class _PhoneMockup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 320,
-      height: 640,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          _PhoneFrame(),
-          _PhoneScreenHolder(
-            onHoverStart: onHoverStart,
-            onHoverEnd: onHoverEnd,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxW = constraints.maxWidth;
+        // Giữ tỷ lệ 1:2 nhưng co lại trên mobile để vừa khung
+        final width = maxW < 360 ? maxW * 0.82 : maxW < 540 ? maxW * 0.66 : 320.0;
+        final height = width * 2;
+
+        return SizedBox(
+          width: width,
+          height: height,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              _PhoneFrame(),
+              _PhoneScreenHolder(
+                width: width,
+                height: height,
+                onHoverStart: onHoverStart,
+                onHoverEnd: onHoverEnd,
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -313,17 +324,29 @@ class _PhoneFrame extends StatelessWidget {
 }
 
 class _PhoneScreenHolder extends StatelessWidget {
+  final double width;
+  final double height;
   final void Function(int index) onHoverStart;
   final void Function(int index) onHoverEnd;
-  const _PhoneScreenHolder({required this.onHoverStart, required this.onHoverEnd});
+  const _PhoneScreenHolder({
+    required this.width,
+    required this.height,
+    required this.onHoverStart,
+    required this.onHoverEnd,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Tăng inset để màn hình trong nhỏ hơn khung một chút
+    final horizontalInset = width * 0.06;
+    final topInset = height * 0.06;
+    final bottomInset = height * 0.05;
+
     return Positioned.fill(
-      left: 13,
-      right: 13,
-      top: 32,
-      bottom: 26,
+      left: horizontalInset,
+      right: horizontalInset,
+      top: topInset,
+      bottom: bottomInset,
       child: ClipRRect(
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(18),
@@ -356,94 +379,101 @@ class _PhoneScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F0F0F),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontalPad = constraints.maxWidth * 0.035; // co giãn theo khung
+        final verticalPad = constraints.maxHeight * 0.025;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F0F0F),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: horizontalPad.clamp(10, 16), vertical: verticalPad.clamp(10, 16)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('9:41', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 12)),
-                const Spacer(),
-                const Icon(Icons.wifi, size: 14, color: Colors.white),
-                const SizedBox(width: 6),
-                const Icon(Icons.battery_full, size: 14, color: Colors.white),
+                Row(
+                  children: [
+                    Text('9:41', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 12)),
+                    const Spacer(),
+                    const Icon(Icons.wifi, size: 14, color: Colors.white),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.battery_full, size: 14, color: Colors.white),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Icon(Icons.arrow_back, color: Colors.white, size: 16),
+                const SizedBox(height: 10),
+                Text('AI Signals', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _chip('Gold', true),
+                      const SizedBox(width: 6),
+                      _chip('Forex', false),
+                      const SizedBox(width: 6),
+                      _chip('Crypto', false),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: rows.length,
+                    itemBuilder: (context, index) {
+                      final r = rows[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1A1A1A),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFF242424)),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          child: Row(
+                            children: [
+                              Icon(r.icon, color: const Color(0xFF00A7FF), size: 18),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(r.pair, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+                                    Text('Update: dd/mm/yyyy', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 10)),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              MouseRegion(
+                                onEnter: (_) => onHoverStart(index),
+                                onExit: (_) => onHoverEnd(index),
+                                child: Text(
+                                  r.side,
+                                  style: AppTextStyles.body.copyWith(
+                                    color: r.side.toLowerCase().contains('buy') ? Colors.greenAccent : Colors.redAccent,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 10),
-            const Icon(Icons.arrow_back, color: Colors.white, size: 16),
-            const SizedBox(height: 10),
-            Text('AI Signals', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _chip('Gold', true),
-                  const SizedBox(width: 6),
-                  _chip('Forex', false),
-                  const SizedBox(width: 6),
-                  _chip('Crypto', false),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                itemCount: rows.length,
-                itemBuilder: (context, index) {
-                  final r = rows[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1A1A),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF242424)),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      child: Row(
-                        children: [
-                          Icon(r.icon, color: const Color(0xFF00A7FF), size: 18),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(r.pair, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
-                                Text('Update: dd/mm/yyyy', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 10)),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          MouseRegion(
-                            onEnter: (_) => onHoverStart(index),
-                            onExit: (_) => onHoverEnd(index),
-                            child: Text(
-                              r.side,
-                              style: AppTextStyles.body.copyWith(
-                                color: r.side.toLowerCase().contains('buy') ? Colors.greenAccent : Colors.redAccent,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -557,23 +587,54 @@ class SmartToolsSection extends StatelessWidget {
                         style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
                       ),
                       const SizedBox(height: 24),
-                      Row(
-                        children: const [
-                          _StatCard(
-                            title: 'Total Profit',
-                            value: '9,250.8 pips',
-                          ),
-                          SizedBox(width: 16),
-                          _StatCard(
-                            title: 'Completion signal',
-                            value: '507',
-                          ),
-                          SizedBox(width: 16),
-                          _StatCard(
-                            title: 'Win Rate',
-                            value: '62.7%',
-                          ),
-                        ],
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final bool isNarrow = constraints.maxWidth < 720;
+                          if (isNarrow) {
+                            return Column(
+                              children: const [
+                                _StatCard(
+                                  title: 'Total Profit',
+                                  value: '9,250.8 pips',
+                                ),
+                                SizedBox(height: 12),
+                                _StatCard(
+                                  title: 'Completion signal',
+                                  value: '507',
+                                ),
+                                SizedBox(height: 12),
+                                _StatCard(
+                                  title: 'Win Rate',
+                                  value: '62.7%',
+                                ),
+                              ],
+                            );
+                          }
+                          return Row(
+                            children: const [
+                              Expanded(
+                                child: _StatCard(
+                                  title: 'Total Profit',
+                                  value: '9,250.8 pips',
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: _StatCard(
+                                  title: 'Completion signal',
+                                  value: '507',
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: _StatCard(
+                                  title: 'Win Rate',
+                                  value: '62.7%',
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -594,7 +655,8 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return SizedBox(
+      width: double.infinity,
       child: Container(
         padding: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
@@ -663,17 +725,50 @@ class _LaptopShowcase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 640,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: const [
-          _LaptopGlow(),
-          _LaptopImage(),
-          _LaptopCards(),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double maxW = constraints.maxWidth;
+        final bool isNarrow = maxW < 900;
+        final double laptopWidth = isNarrow ? maxW * 1.25 : (maxW < 1200 ? maxW * 0.9 : 1100);
+        final double height = isNarrow ? maxW : 640;
+        final double offsetY = isNarrow ? 0 : -30;
+
+        if (isNarrow) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: height,
+                width: double.infinity,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    const _LaptopGlow(),
+                    _LaptopImage(width: laptopWidth, offsetY: offsetY),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              _LaptopCardsInline(maxWidth: maxW),
+            ],
+          );
+        }
+
+        return SizedBox(
+          height: height,
+          width: double.infinity,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              const _LaptopGlow(),
+              _LaptopImage(width: laptopWidth, offsetY: offsetY),
+              _LaptopCards(availableWidth: laptopWidth),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -705,17 +800,22 @@ class _LaptopGlow extends StatelessWidget {
 }
 
 class _LaptopImage extends StatelessWidget {
-  const _LaptopImage();
+  final double width;
+  final double offsetY;
+  const _LaptopImage({required this.width, required this.offsetY});
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: -30,
-      child: SizedBox(
-        width: 1100,
-        child: Image.asset(
-          'assets/mockups/laptop.png',
-          fit: BoxFit.contain,
+      bottom: 0,
+      child: Transform.translate(
+        offset: Offset(0, offsetY),
+        child: SizedBox(
+          width: width,
+          child: Image.asset(
+            'assets/mockups/laptop.png',
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
@@ -723,31 +823,141 @@ class _LaptopImage extends StatelessWidget {
 }
 
 class _LaptopCards extends StatelessWidget {
-  const _LaptopCards();
+  final double availableWidth;
+  const _LaptopCards({required this.availableWidth});
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: 160,
-      child: Column(
-        children: [
-          Row(
-            children: const [
-              _AnimatedInfoCard(text: 'AI-Powered Trading Signal Platform', slideFromLeft: true),
-              SizedBox(width: 16),
-              _AnimatedInfoCard(text: 'Self-Learning Systems, Sharper Insights, Stronger Trades', slideFromLeft: false),
+      top: 110,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final bool isNarrow = constraints.maxWidth < 900;
+          final double baseW = constraints.maxWidth;
+          final double cardWidth = isNarrow ? baseW * 0.6 : 440;
+          final double cardHeight = isNarrow ? 72 : 108;
+
+          if (isNarrow) {
+            return Column(
+              children: [
+                SizedBox(
+                  width: cardWidth,
+                  child: _AnimatedInfoCard(
+                    text: 'AI-Powered Trading Signal Platform',
+                    slideFromLeft: true,
+                    width: cardWidth,
+                    height: cardHeight,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: cardWidth,
+                  child: _AnimatedInfoCard(
+                    text: 'Self-Learning Systems, Sharper Insights, Stronger Trades',
+                    slideFromLeft: false,
+                    width: cardWidth,
+                    height: cardHeight,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: cardWidth,
+                  child: _AnimatedInfoCard(
+                    text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading',
+                    slideFromLeft: true,
+                    width: cardWidth,
+                    height: cardHeight,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: cardWidth,
+                  child: _AnimatedInfoCard(
+                    text: 'Analysing the market 24/7',
+                    slideFromLeft: false,
+                    width: cardWidth,
+                    height: cardHeight,
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return Column(
+            children: [
+              Row(
+                children: [
+                  _AnimatedInfoCard(text: 'AI-Powered Trading Signal Platform', slideFromLeft: true, width: cardWidth, height: cardHeight),
+                  SizedBox(width: 16),
+                  _AnimatedInfoCard(text: 'Self-Learning Systems, Sharper Insights, Stronger Trades', slideFromLeft: false, width: cardWidth, height: cardHeight),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  _AnimatedInfoCard(text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading', slideFromLeft: true, width: cardWidth, height: cardHeight),
+                  SizedBox(width: 16),
+                  _AnimatedInfoCard(text: 'Analysing the market 24/7', slideFromLeft: false, width: cardWidth, height: cardHeight),
+                ],
+              ),
             ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: const [
-              _AnimatedInfoCard(text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading', slideFromLeft: true),
-              SizedBox(width: 16),
-              _AnimatedInfoCard(text: 'Analysing the market 24/7', slideFromLeft: false),
-            ],
-          ),
-        ],
+          );
+        },
       ),
+    );
+  }
+}
+
+class _LaptopCardsInline extends StatelessWidget {
+  final double maxWidth;
+  const _LaptopCardsInline({required this.maxWidth});
+
+  @override
+  Widget build(BuildContext context) {
+    final double cardWidth = maxWidth * 0.8;
+    const double cardHeight = 76;
+    return Column(
+      children: [
+        SizedBox(
+          width: cardWidth,
+          child: _AnimatedInfoCard(
+            text: 'AI-Powered Trading Signal Platform',
+            slideFromLeft: true,
+            width: cardWidth,
+            height: cardHeight,
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: cardWidth,
+          child: _AnimatedInfoCard(
+            text: 'Self-Learning Systems, Sharper Insights, Stronger Trades',
+            slideFromLeft: false,
+            width: cardWidth,
+            height: cardHeight,
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: cardWidth,
+          child: _AnimatedInfoCard(
+            text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading',
+            slideFromLeft: true,
+            width: cardWidth,
+            height: cardHeight,
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: cardWidth,
+          child: _AnimatedInfoCard(
+            text: 'Analysing the market 24/7',
+            slideFromLeft: false,
+            width: cardWidth,
+            height: cardHeight,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -755,7 +965,14 @@ class _LaptopCards extends StatelessWidget {
 class _AnimatedInfoCard extends StatefulWidget {
   final String text;
   final bool slideFromLeft;
-  const _AnimatedInfoCard({required this.text, required this.slideFromLeft});
+  final double width;
+  final double height;
+  const _AnimatedInfoCard({
+    required this.text,
+    required this.slideFromLeft,
+    this.width = 440,
+    this.height = 108,
+  });
 
   @override
   State<_AnimatedInfoCard> createState() => _AnimatedInfoCardState();
@@ -789,6 +1006,7 @@ class _AnimatedInfoCardState extends State<_AnimatedInfoCard> with TickerProvide
 
   @override
   Widget build(BuildContext context) {
+    final bool isNarrow = MediaQuery.of(context).size.width < 900;
     return VisibilityDetector(
       key: ValueKey('info_card_${widget.text}'),
       onVisibilityChanged: (info) {
@@ -812,8 +1030,8 @@ class _AnimatedInfoCardState extends State<_AnimatedInfoCard> with TickerProvide
                 (t + 0.8) % 1,
               ]..sort();
               return Container(
-                width: 520,
-                height: 118,
+                width: widget.width,
+                height: widget.height,
                 padding: const EdgeInsets.all(1.2),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
@@ -844,7 +1062,11 @@ class _AnimatedInfoCardState extends State<_AnimatedInfoCard> with TickerProvide
               child: Center(
                 child: Text(
                   widget.text,
-                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
+                  style: AppTextStyles.body.copyWith(
+                    color: Colors.white,
+                    fontSize: isNarrow ? 14 : 15,
+                    fontWeight: FontWeight.w700,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
