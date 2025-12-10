@@ -20,22 +20,30 @@ class FeaturesPage extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 12),
-                const LandingNavBar(),
-                const SizedBox(height: 24),
-                const WinMoreSection(),
-                const SizedBox(height: 96),
-                const SmartToolsSection(),
-                const SizedBox(height: 96),
-                const YourOnDemandSection(),
-                const SizedBox(height: 96),
-                const MaximizeResultsSection(),
-                const SizedBox(height: 48),
-                const FooterSection(),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final bool isNarrow = constraints.maxWidth < 900;
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isNarrow ? 12 : 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 12),
+                      const LandingNavBar(),
+                      const SizedBox(height: 24),
+                      const WinMoreSection(),
+                      SizedBox(height: isNarrow ? 64 : 96),
+                      const SmartToolsSection(),
+                      SizedBox(height: isNarrow ? 64 : 96),
+                      const YourOnDemandSection(),
+                      SizedBox(height: isNarrow ? 64 : 96),
+                      const MaximizeResultsSection(),
+                      const SizedBox(height: 48),
+                      const FooterSection(),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -89,57 +97,63 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xl),
-          SizedBox(
-            height: 640,
-            child: Stack(
-              alignment: Alignment.center,
-              clipBehavior: Clip.none,
-              children: [
-                const _GlowBackground(),
-                Positioned.fill(
-                  child: IgnorePointer(
-                    ignoring: false,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Positioned(
-                          left: -280,
-                          top: 140,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final bool isNarrow = constraints.maxWidth < 900;
+              return SizedBox(
+                height: isNarrow ? 520 : 640,
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    const _GlowBackground(),
+                    if (!isNarrow)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          ignoring: false,
+                          child: Stack(
+                            clipBehavior: Clip.none,
                             children: [
-                              _floatingCard(0, offsetY: -60),
-                              const SizedBox(height: 16),
-                              _floatingCard(1, offsetY: 0),
-                              const SizedBox(height: 16),
-                              _floatingCard(2, offsetY: 40),
+                              Positioned(
+                                left: -220,
+                                top: 120,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _floatingCard(0, offsetY: -60),
+                                    const SizedBox(height: 16),
+                                    _floatingCard(1, offsetY: 0),
+                                    const SizedBox(height: 16),
+                                    _floatingCard(2, offsetY: 40),
+                                  ],
+                                ),
+                              ),
+                              Positioned(
+                                right: -220,
+                                top: 100,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _floatingCard(3, offsetY: -60),
+                                    const SizedBox(height: 16),
+                                    _floatingCard(4, offsetY: 0),
+                                    const SizedBox(height: 16),
+                                    _floatingCard(5, offsetY: 40),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                        Positioned(
-                          right: -260,
-                          top: 120,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _floatingCard(3, offsetY: -60),
-                              const SizedBox(height: 16),
-                              _floatingCard(4, offsetY: 0),
-                              const SizedBox(height: 16),
-                              _floatingCard(5, offsetY: 40),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
+                    _PhoneMockup(
+                      onHoverStart: (index) => _startTextHover(index),
+                      onHoverEnd: (index) => _endTextHover(index),
                     ),
-                  ),
+                  ],
                 ),
-                _PhoneMockup(
-                  onHoverStart: (index) => _startTextHover(index),
-                  onHoverEnd: (index) => _endTextHover(index),
-                ),
-              ],
-            ),
+              );
+            },
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(

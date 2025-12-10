@@ -1,5 +1,6 @@
 //lib/features/signals/screens/signal_detail_screen_web.dart
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -194,6 +195,37 @@ class SignalDetailScreen extends StatelessWidget {
       return const Color(0xFF18D46F);
     if (lower.contains('sl')) return const Color(0xFFE54747);
     return Colors.white;
+  }
+}
+
+class _TokenCounter extends StatelessWidget {
+  const _TokenCounter();
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return const Text('10 free signals left', style: TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
+    }
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Text('10 free signals left', style: TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
+        }
+        final data = snapshot.data!.data() ?? {};
+        final tier = (data['subscriptionTier'] ?? 'free').toString().toLowerCase();
+        if (tier == 'elite') {
+          return const Text('Unlimited signals', style: TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
+        }
+        final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
+        final storedDate = (data['freeTokensDate'] ?? '') as String;
+        final used = (data['freeTokensUsed'] ?? 0) as int;
+        final effectiveUsed = storedDate == todayKey ? used : 0;
+        final left = (10 - effectiveUsed).clamp(0, 10);
+        return Text('$left free signals left', style: const TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
+      },
+    );
   }
 }
 
@@ -460,11 +492,7 @@ class _UpgradeSection extends StatelessWidget {
         children: [
           Row(
             children: const [
-              Text('10 free signals left',
-                  style: TextStyle(
-                      color: Color(0xFF289EFF),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700)),
+              _TokenCounter(),
               Spacer(),
               Text('Gold Plan',
                   style: TextStyle(
@@ -494,8 +522,7 @@ class _UpgradeSection extends StatelessWidget {
               SizedBox(
                 height: 44,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => const UpgradeScreen())),
+                  onPressed: () => Navigator.of(context).pushNamed('/pricing'),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(

@@ -38,24 +38,60 @@ class LandingPage extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 1200),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: const [
+                    children: [
                       SizedBox(height: 12),
                       LandingNavBar(),
                       HeroSection(),
+                      SizedBox(height: 100),
                       HeroSubtitleSection(),
-                      SizedBox(height: 96),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: HeroSignalsSection()),
-                          SizedBox(width: 16),
-                          Expanded(child: LiveSignalsSection()),
-                        ],
+                      SizedBox(height: 100),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final bool isNarrow = constraints.maxWidth < 900;
+                          if (isNarrow) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: const [
+                                LiveSignalsSection(),
+                                SizedBox(height: 24),
+                                HeroSignalsSection(),
+                              ],
+                            );
+                          }
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Expanded(child: HeroSignalsSection()),
+                              SizedBox(width: 16),
+                              Expanded(child: LiveSignalsSection()),
+                            ],
+                          );
+                        },
                       ),
-                      SizedBox(height: 96),
-                      OrderEngineSection(),
-                      SizedBox(height: 96),
-                      PerformanceSection(),
+                      SizedBox(height: isMobile ? 32 : 80),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final bool isNarrow = constraints.maxWidth < 900;
+                          if (isNarrow) {
+                            return Column(
+                              children: const [
+                                OrderEngineSection(),
+                                SizedBox(height: 24),
+                                _TransparentCardAnimated(),
+                                SizedBox(height: 24),
+                                _SignalsPerformanceCard(),
+                              ],
+                            );
+                          }
+                          return Column(
+                            children: const [
+                              OrderEngineSection(),
+                              SizedBox(height: 72),
+                              _SignalsPerformanceRow(),
+                            ],
+                          );
+                        },
+                      ),
                       SizedBox(height: 96),
                       CoreValueSection(),
                       SizedBox(height: 96),
@@ -80,16 +116,31 @@ class HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Center(
-        child: _HeroInteractive(),
-      ),
-    );
+    return LayoutBuilder(builder: (context, constraints) {
+      final bool isNarrow = constraints.maxWidth < 720;
+      final double heroHeight = isNarrow ? 620 : 760;
+      final Size baseSize = Size(constraints.maxWidth, heroHeight);
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: SizedBox(
+          width: double.infinity,
+          height: heroHeight,
+          child: _HeroInteractive(
+            enableHover: !isNarrow,
+            baseSize: baseSize,
+            expandToWidth: true,
+          ),
+        ),
+      );
+    });
   }
 }
 
 class _HeroInteractive extends StatefulWidget {
+  final bool enableHover;
+  final Size baseSize;
+  final bool expandToWidth;
+  const _HeroInteractive({super.key, this.enableHover = true, this.baseSize = const Size(1200, 800), this.expandToWidth = false});
   @override
   State<_HeroInteractive> createState() => _HeroInteractiveState();
 }
@@ -137,9 +188,28 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
-    final size = const Size(1200, 800);
+    final size = widget.baseSize;
     final viewportWidth = MediaQuery.of(context).size.width;
-    final scaleFactor = viewportWidth < size.width ? viewportWidth / size.width : 1.0;
+    final double targetWidth = widget.expandToWidth ? viewportWidth : viewportWidth.clamp(320, size.width);
+    final double scaleFactor = targetWidth / size.width;
+    final content = SizedBox(
+      width: size.width,
+      height: size.height,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          _buildBlob(size),
+          _buildContent(),
+        ],
+      ),
+    );
+
+    final scaled = Transform.scale(scale: scaleFactor, child: content);
+
+    if (!widget.enableHover) {
+      return scaled;
+    }
+
     return MouseRegion(
       onHover: (event) {
         final renderBox = context.findRenderObject() as RenderBox?;
@@ -154,20 +224,7 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
         }
       },
       onExit: (_) => setState(() => _pointer = Offset.zero),
-      child: Transform.scale(
-        scale: scaleFactor,
-        child: SizedBox(
-          width: size.width,
-          height: size.height,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              _buildBlob(size),
-              _buildContent(),
-            ],
-          ),
-        ),
-      ),
+      child: scaled,
     );
   }
 
@@ -240,8 +297,10 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                   position: _ctaSlide,
                   child: FadeTransition(
                     opacity: _ctaFade,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    child: Wrap(
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.sm,
+                      alignment: WrapAlignment.center,
                       children: [
                         GradientButton(
                           label: 'Get Signal Now',
@@ -257,7 +316,6 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                           ),
                           onPressed: () => Navigator.of(context).pushNamed('/signup'),
                         ),
-                        const SizedBox(width: AppSpacing.md),
                         SizedBox(
                           width: 138,
                           height: 38,
@@ -788,75 +846,99 @@ class _SignalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF303030)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isNarrow = constraints.maxWidth < 520;
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFF303030)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF121212),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: iconColor, size: 28),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Column(
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(pair, style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
-                  Text(date, style: AppTextStyles.body.copyWith(color: Colors.white70, fontWeight: FontWeight.w600)),
-                ],
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: badgeGradient,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: Text(
-                  badgeLabel,
-                  style: AppTextStyles.body.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF121212),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, color: iconColor, size: 28),
                   ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(pair, style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
+                        Text(date, style: AppTextStyles.body.copyWith(color: Colors.white70, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    decoration: BoxDecoration(
+                      gradient: badgeGradient,
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: Text(
+                      badgeLabel,
+                      style: AppTextStyles.body.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (isNarrow)
+                Wrap(
+                  spacing: 24,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.start,
+                  children: [
+                    _line('Entry: $entry'),
+                    _line('SL : $sl'),
+                    _line('TP1: $tp1'),
+                    _line('TP2 : $tp2'),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _line('Entry: $entry'),
+                          _line('SL : $sl'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.lg),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _line('TP1: $tp1'),
+                          _line('TP2 : $tp2'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _line('Entry: $entry'),
-                  _line('SL : $sl'),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _line('TP1: $tp1'),
-                  _line('TP2 : $tp2'),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -1073,50 +1155,81 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-      child: VisibilityDetector(
-        key: const Key('order_engine_visibility'),
-        onVisibilityChanged: (info) {
-          if (!_hasPlayed && info.visibleFraction > 0.2) {
-            _hasPlayed = true;
-            _controller.forward();
-          }
-        },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 32),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 520),
-                  child: SlideTransition(
-                    position: _leftSlide,
-                    child: FadeTransition(
-                      opacity: _leftFade,
-                      child: const _OrderCard(),
-                    ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isNarrow = constraints.maxWidth < 900;
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: isNarrow ? 16 : 32, vertical: 32),
+          child: VisibilityDetector(
+            key: const Key('order_engine_visibility'),
+            onVisibilityChanged: (info) {
+              if (!_hasPlayed && info.visibleFraction > 0.2) {
+                _hasPlayed = true;
+                _controller.forward();
+              }
+            },
+            child: isNarrow
+                ? Column(
+                    children: [
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 320),
+                        child: SlideTransition(
+                          position: _leftSlide,
+                          child: FadeTransition(
+                            opacity: _leftFade,
+                            child: const _OrderCard(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 320),
+                        child: SlideTransition(
+                          position: _rightSlide,
+                          child: FadeTransition(
+                            opacity: _rightFade,
+                            child: const _KeyFindingsCard(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 32),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 520),
+                            child: SlideTransition(
+                              position: _leftSlide,
+                              child: FadeTransition(
+                                opacity: _leftFade,
+                                child: const _OrderCard(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 520),
+                          child: SlideTransition(
+                            position: _rightSlide,
+                            child: FadeTransition(
+                              opacity: _rightFade,
+                              child: const _KeyFindingsCard(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 520),
-                child: SlideTransition(
-                  position: _rightSlide,
-                  child: FadeTransition(
-                    opacity: _rightFade,
-                    child: const _KeyFindingsCard(),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -1737,6 +1850,22 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
   }
 }
 
+class _SignalsPerformanceRow extends StatelessWidget {
+  const _SignalsPerformanceRow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        Expanded(child: _SignalsPerformanceCard()),
+        SizedBox(width: 16),
+        Expanded(child: _TransparentCardAnimated()),
+      ],
+    );
+  }
+}
+
 class _TransparentCard extends StatelessWidget {
   const _TransparentCard();
 
@@ -2047,18 +2176,20 @@ class CtaSection extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.md,
               children: [
                 GradientButton(
                   label: 'Get Signals Now',
+                  width: 200,
                   onPressed: () => Navigator.of(context).pushNamed('/signup'),
                 ),
-                const SizedBox(width: AppSpacing.md),
-                TextButton(
-                  onPressed: () => context.read<AuthBloc>().add(SignInAnonymouslyRequested()),
-                  child: Text('Try demo', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
-                ),
+                //TextButton(
+                  //onPressed: () => context.read<AuthBloc>().add(SignInAnonymouslyRequested()),
+                  //child: Text('Try demo', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                //),
               ],
             ),
           ],

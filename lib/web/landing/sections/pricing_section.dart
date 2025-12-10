@@ -85,6 +85,7 @@ class _PricingSectionState extends State<PricingSection> {
           Text(
             widget.heading,
             style: AppTextStyles.h1.copyWith(fontSize: widget.headingFontSize, fontWeight: FontWeight.w700),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(

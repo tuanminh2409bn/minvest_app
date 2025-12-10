@@ -6,7 +6,6 @@ import '../../theme/gradients.dart';
 
 class PricingTab extends StatefulWidget {
   const PricingTab({super.key});
-
   @override
   State<PricingTab> createState() => _PricingTabState();
 }

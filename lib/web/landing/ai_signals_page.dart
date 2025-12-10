@@ -5,6 +5,10 @@ import 'package:minvest_forex_app/features/signals/screens/signal_detail_screen_
 import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../theme/spacing.dart';
@@ -449,7 +453,8 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final double columnWidth = (constraints.maxWidth - 32) / 3;
+      final bool stacked = constraints.maxWidth < 900;
+      final double columnWidth = stacked ? constraints.maxWidth : (constraints.maxWidth - 32) / 3;
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         final now = Timestamp.now();
@@ -827,6 +832,122 @@ class _SignalWebCard extends StatelessWidget {
   final Signal signal;
   const _SignalWebCard({required this.signal});
 
+  Future<bool> _consumeFreeToken(BuildContext context) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+
+    final userProvider = Provider.of<UserProvider?>(context, listen: false);
+    final tier = userProvider?.userTier?.toLowerCase() ?? 'free';
+    if (tier == 'elite') return true;
+
+    final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    try {
+      final result = await FirebaseFirestore.instance.runTransaction<bool>((tx) async {
+        final snap = await tx.get(docRef);
+        if (!snap.exists) {
+          tx.set(docRef, {
+            'uid': user.uid,
+            'email': user.email ?? 'guest_${user.uid}@minvest.com',
+            'subscriptionTier': 'free',
+            'freeTokensDate': todayKey,
+            'freeTokensUsed': 1,
+          }, SetOptions(merge: true));
+          return true;
+        } else {
+          final data = snap.data() as Map<String, dynamic>? ?? {};
+          String storedDate = (data['freeTokensDate'] ?? '') as String;
+          int used = (data['freeTokensUsed'] ?? 0) as int;
+          if (storedDate != todayKey) {
+            storedDate = todayKey;
+            used = 0;
+          }
+          if (used >= 10) {
+            return false;
+          }
+          tx.update(docRef, {
+            'freeTokensDate': storedDate,
+            'freeTokensUsed': used + 1,
+          });
+          return true;
+        }
+      });
+      return result;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể trừ token: $e')),
+      );
+      return false;
+    }
+  }
+
+  void _showTokenLimitDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF0F0F0F),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Token đã hết', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: const Text(
+          'Bạn đã dùng hết 10 tokens miễn phí hôm nay. Nâng cấp gói để xem thêm tín hiệu.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Để sau', style: TextStyle(color: Colors.white70)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushNamed('/pricing');
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E97FF)),
+            child: const Text('Nâng cấp'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openDetail(BuildContext context) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      Navigator.of(context).pushNamed('/signin');
+      return;
+    }
+    final userProvider = Provider.of<UserProvider?>(context, listen: false);
+    final tier = userProvider?.userTier?.toLowerCase() ?? 'free';
+
+    if (tier == 'elite') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => web_detail.SignalDetailScreen(
+            signal: signal,
+            userTier: 'web',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final ok = await _consumeFreeToken(context);
+    if (!ok) {
+      _showTokenLimitDialog(context);
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => web_detail.SignalDetailScreen(
+          signal: signal,
+          userTier: 'web',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isBuy = signal.type.toLowerCase() == 'buy';
@@ -838,17 +959,7 @@ class _SignalWebCard extends StatelessWidget {
       createdText = DateFormat('dd/MM/yyyy HH:mm').format(dt);
     }
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => web_detail.SignalDetailScreen(
-              signal: signal,
-              userTier: 'web',
-            ),
-          ),
-        );
-      },
+      onTap: () => _openDetail(context),
       child: Container(
         constraints: const BoxConstraints(minHeight: 150),
         decoration: BoxDecoration(
