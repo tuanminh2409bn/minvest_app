@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/app/auth_gate.dart';
-import 'package:minvest_forex_app/app/main_screen_web.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/core/services/purchase_service.dart';
@@ -24,6 +23,7 @@ import 'package:minvest_forex_app/services/session_service.dart';
 import 'package:flutter/services.dart';
 import 'package:minvest_forex_app/features/chat/providers/chat_provider.dart';
 import 'package:minvest_forex_app/features/chat/screens/support_chat_screen.dart';
+import 'package:minvest_forex_app/features/chat/screens/chat_screen.dart';
 import 'package:minvest_forex_app/features/chat/services/chat_service.dart';
 import 'package:minvest_forex_app/app/main_screen_mobile.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -39,7 +39,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
-final GlobalKey<MainScreenWebState> mainScreenWebKey = GlobalKey<MainScreenWebState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -190,8 +189,12 @@ class _MyAppState extends State<MyApp> {
         }
         else {
           if (kIsWeb) {
-            // Nếu là Web, dùng key của Web và index 1
-            mainScreenWebKey.currentState?.switchToTab(1);
+            // Web không dùng MainScreen web nữa, điều hướng thẳng tới ChatScreen
+            if (navigatorKey.currentState != null) {
+              navigatorKey.currentState!.push(
+                MaterialPageRoute(builder: (_) => const ChatScreen()),
+              );
+            }
           } else {
             // Nếu là Mobile, dùng key của Mobile và index 2
             mainScreenKey.currentState?.switchToTab(2);

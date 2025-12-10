@@ -200,64 +200,77 @@ class _FeaturedArticleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final DateTime? published = article.publishedAt is Timestamp ? (article.publishedAt as Timestamp).toDate() : null;
     final String dateText = published != null ? DateFormat('MMM d, yyyy').format(published) : '';
-    return InkWell(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => NewsDetailScreen(article: article)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 280,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A1A1A),
-              borderRadius: BorderRadius.circular(8),
-              image: article.thumbnailUrl.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(article.thumbnailUrl),
-                      fit: BoxFit.cover,
-                      onError: (_, __) {},
-                    )
-                  : null,
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isNarrow = constraints.maxWidth < 640;
+        final double imageHeight = isNarrow ? 200 : 280;
+        final double titleSize = isNarrow ? 15 : 16;
+        final double subtitleSize = isNarrow ? 13 : 14;
+        final double bodySize = isNarrow ? 12.5 : 13;
+
+        return InkWell(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => NewsDetailScreen(article: article)),
           ),
-          const SizedBox(height: 12),
-          Text(
-            article.title,
-            style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: imageHeight,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1A1A),
+                    image: article.thumbnailUrl.isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(article.thumbnailUrl),
+                            fit: BoxFit.cover,
+                            onError: (_, __) {},
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                article.title,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontSize: titleSize,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                article.subtitle.isNotEmpty ? article.subtitle : article.title,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontSize: subtitleSize,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                article.subtitle.isNotEmpty ? article.subtitle : article.content,
+                style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: bodySize, height: 1.35),
+              ),
+              const SizedBox(height: 10),
+              if (dateText.isNotEmpty)
+                Text(
+                  dateText,
+                  style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
+                ),
+              const SizedBox(height: 10),
+              Text(
+                'Read more →',
+                style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 12),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            article.subtitle.isNotEmpty ? article.subtitle : article.title,
-            style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            article.subtitle.isNotEmpty ? article.subtitle : article.content,
-            style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13, height: 1.35),
-          ),
-          const SizedBox(height: 10),
-          if (dateText.isNotEmpty)
-            Text(
-              dateText,
-              style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
-            ),
-          const SizedBox(height: 10),
-          Text(
-            'Read more →',
-            style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 12),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -270,79 +283,99 @@ class _ArticleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final DateTime? published = article.publishedAt is Timestamp ? (article.publishedAt as Timestamp).toDate() : null;
     final String dateText = published != null ? DateFormat('MMM d, yyyy').format(published) : '';
-    return InkWell(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => NewsDetailScreen(article: article)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A1A1A),
-              borderRadius: BorderRadius.circular(6),
-              image: article.thumbnailUrl.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(article.thumbnailUrl),
-                      fit: BoxFit.cover,
-                      onError: (_, __) {},
-                    )
-                  : null,
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isNarrow = constraints.maxWidth < 640;
+        final double imageSize = isNarrow ? constraints.maxWidth : 120;
+        final double titleSize = isNarrow ? 13.5 : 14;
+        final double bodySize = isNarrow ? 11.5 : 12;
+
+        final image = Container(
+          width: isNarrow ? double.infinity : imageSize,
+          height: isNarrow ? 180 : imageSize,
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.circular(6),
+            image: article.thumbnailUrl.isNotEmpty
+                ? DecorationImage(
+                    image: NetworkImage(article.thumbnailUrl),
+                    fit: BoxFit.cover,
+                    onError: (_, __) {},
+                  )
+                : null,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        );
+
+        final content = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.article, color: Colors.white70, size: 14),
-                    const SizedBox(width: 6),
-                    Text(
-                      article.category,
-                      style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
-                    ),
-                    if (dateText.isNotEmpty) ...[
-                      const SizedBox(width: 12),
-                      const Icon(Icons.calendar_month, color: Colors.white70, size: 12),
-                      const SizedBox(width: 4),
-                      Text(
-                        dateText,
-                        style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 6),
+                const Icon(Icons.article, color: Colors.white70, size: 14),
+                const SizedBox(width: 6),
                 Text(
-                  article.title,
-                  style: AppTextStyles.body.copyWith(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                  article.category,
+                  style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
+                ),
+                if (dateText.isNotEmpty) ...[
+                  const SizedBox(width: 12),
+                  const Icon(Icons.calendar_month, color: Colors.white70, size: 12),
+                  const SizedBox(width: 4),
+                  Text(
+                    dateText,
+                    style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  article.subtitle.isNotEmpty ? article.subtitle : article.content,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 12, height: 1.35),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Read more →',
-                  style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 11.5),
-                ),
+                ],
               ],
             ),
+            const SizedBox(height: 6),
+            Text(
+              article.title,
+              style: AppTextStyles.body.copyWith(
+                color: Colors.white,
+                fontSize: titleSize,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              article.subtitle.isNotEmpty ? article.subtitle : article.content,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: bodySize, height: 1.35),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Read more →',
+              style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: bodySize),
+            ),
+          ],
+        );
+
+        return InkWell(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => NewsDetailScreen(article: article)),
           ),
-        ],
-      ),
+          child: isNarrow
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(borderRadius: BorderRadius.circular(6), child: image),
+                    const SizedBox(height: 10),
+                    content,
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(borderRadius: BorderRadius.circular(6), child: image),
+                    const SizedBox(width: 12),
+                    Expanded(child: content),
+                  ],
+                ),
+        );
+      },
     );
   }
 }

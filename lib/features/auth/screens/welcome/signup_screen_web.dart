@@ -38,7 +38,13 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final double verticalGap = (constraints.maxHeight * 0.16).clamp(70.0, 130.0);
-          final double stackHeight = (670 + (verticalGap * 2)).clamp(750.0, 1050.0);
+          final bool isNarrow = constraints.maxWidth < 900;
+          final double effectiveGap = isNarrow ? 40 : verticalGap;
+          final double formPadding = isNarrow ? 24 : verticalGap;
+          final double stackHeight = (670 + (effectiveGap * 2)).clamp(720.0, 1050.0);
+          final bool showCards = constraints.maxWidth > 900;
+          final double topSpace = isNarrow ? 32 : 96;
+          final double bottomSpace = isNarrow ? 32 : effectiveGap;
 
           return SingleChildScrollView(
             child: ConstrainedBox(
@@ -52,18 +58,26 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
                       child: const LandingNavBar(),
                     ),
                   ),
-                  const SizedBox(height: 96),
-                  SizedBox(
-                    height: stackHeight,
-                    child: Stack(
-                      children: [
-                        Positioned.fill(child: Container(color: Colors.black)),
-                        const _AuthBackdrop(),
-                        Positioned.fill(child: _buildWebLayout(context, verticalGap)),
-                      ],
+                  SizedBox(height: topSpace),
+                  if (isNarrow)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _GlowWrapper(
+                        child: _buildWebLayout(context, formPadding),
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      height: stackHeight,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(child: Container(color: Colors.black)),
+                          _AuthBackdrop(showCards: showCards),
+                          Positioned.fill(child: _buildWebLayout(context, formPadding)),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: verticalGap),
+                  SizedBox(height: bottomSpace),
                   const FooterSection(),
                 ],
               ),
@@ -201,31 +215,26 @@ class _SocialSignInButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          side: const BorderSide(color: Colors.white12),
         ),
-        child: Ink(
+        child: Container(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0C0938), Color(0xFF141A4C), Color(0xFF1D2B62)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
+            color: Colors.black,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                icon,
-                const SizedBox(width: 24),
-                Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-              ],
-            ),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              icon,
+              const SizedBox(width: 24),
+              Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            ],
           ),
         ),
       ),
@@ -374,7 +383,8 @@ class _PrimaryButton extends StatelessWidget {
 }
 
 class _AuthBackdrop extends StatelessWidget {
-  const _AuthBackdrop();
+  final bool showCards;
+  const _AuthBackdrop({required this.showCards});
 
   @override
   Widget build(BuildContext context) {
@@ -385,12 +395,37 @@ class _AuthBackdrop extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           clipBehavior: Clip.none,
-          children: const [
-            _SigninGlow(),
-            _SigninCards(),
+          children: [
+            const _SigninGlow(),
+            if (showCards) const _SigninCards(),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _GlowWrapper extends StatelessWidget {
+  final Widget child;
+  const _GlowWrapper({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned.fill(
+          child: Opacity(
+            opacity: 0.6,
+            child: Image.asset(
+              'assets/mockups/light.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+            ),
+          ),
+        ),
+        child,
+      ],
     );
   }
 }

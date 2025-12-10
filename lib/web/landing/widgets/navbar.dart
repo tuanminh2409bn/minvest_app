@@ -5,7 +5,7 @@ import '../../theme/text_styles.dart';
 import '../../theme/gradients.dart';
 import '../../theme/spacing.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:minvest_forex_app/app/main_screen_web.dart';
+import 'package:minvest_forex_app/features/auth/screens/welcome/welcome_screen.dart';
 
 class LandingNavBar extends StatelessWidget {
   const LandingNavBar({super.key});
@@ -16,6 +16,7 @@ class LandingNavBar extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       final bool stacked = constraints.maxWidth < 720;
       final double padH = stacked ? 12 : 24;
+      final double padV = stacked ? 12 : 6;
       final navSpacing = stacked
           ? 10.0
           : constraints.maxWidth < 900
@@ -24,8 +25,8 @@ class LandingNavBar extends StatelessWidget {
       final fontSize = stacked
           ? 14.0
           : constraints.maxWidth < 900
-              ? 16.0
-              : 18.0;
+              ? 15.0
+              : 16.0;
 
       final navLinks = SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -71,7 +72,9 @@ class LandingNavBar extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             _outlineButton(
               'Sign in',
-              onTap: () => Navigator.of(context).pushNamed('/signin'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+              ),
             ),
           ] else ...[
             _userNameChip(
@@ -96,7 +99,7 @@ class LandingNavBar extends StatelessWidget {
       );
 
       return Padding(
-        padding: EdgeInsets.symmetric(horizontal: padH, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
         child: stacked
             ? _MobileNavBar(navLinks: navLinks, actions: actions)
             : Row(
@@ -105,7 +108,7 @@ class LandingNavBar extends StatelessWidget {
                     onTap: () => Navigator.of(context).pushNamed('/'),
                     child: Image.asset('assets/mockups/logo.png', height: 42, fit: BoxFit.contain),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 82),
                   Expanded(child: navLinks),
                   actions,
                 ],

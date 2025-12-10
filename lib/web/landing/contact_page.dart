@@ -121,27 +121,41 @@ class _ContactPageState extends State<ContactPage> {
   }
 
   Widget _contactCards() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
-        SizedBox(
-          width: 420,
-          child: _InfoCard(
-            title: 'Whatsapp',
-            subtitle: '0969 15 6969',
-            icon: Icons.chat_bubble_outline,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool stacked = constraints.maxWidth < 900;
+        final cards = const [
+          SizedBox(
+            width: 420,
+            child: _InfoCard(
+              title: 'Whatsapp',
+              subtitle: '0969 15 6969',
+              icon: Icons.chat_bubble_outline,
+            ),
           ),
-        ),
-        SizedBox(width: 16),
-        SizedBox(
-          width: 420,
-          child: _InfoCard(
-            title: 'Phone',
-            subtitle: '0969 15 6969',
-            icon: Icons.phone_in_talk_outlined,
+          SizedBox(width: 16, height: 16),
+          SizedBox(
+            width: 420,
+            child: _InfoCard(
+              title: 'Phone',
+              subtitle: '0969 15 6969',
+              icon: Icons.phone_in_talk_outlined,
+            ),
           ),
-        ),
-      ],
+        ];
+
+        if (stacked) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: cards,
+          );
+        }
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: cards,
+        );
+      },
     );
   }
 
@@ -166,49 +180,98 @@ class _ContactPageState extends State<ContactPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _textField(
-                          label: 'First Name',
-                          hint: 'Enter First Name',
-                          controller: _firstNameController,
-                          requiredField: true,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _textField(
-                          label: 'Last Name',
-                          hint: 'Enter Last Name',
-                          controller: _lastNameController,
-                          requiredField: true,
-                        ),
-                      ),
-                    ],
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final bool stacked = constraints.maxWidth < 640;
+                      if (stacked) {
+                        return Column(
+                          children: [
+                            _textField(
+                              label: 'First Name',
+                              hint: 'Enter First Name',
+                              controller: _firstNameController,
+                              requiredField: true,
+                            ),
+                            const SizedBox(height: 12),
+                            _textField(
+                              label: 'Last Name',
+                              hint: 'Enter Last Name',
+                              controller: _lastNameController,
+                              requiredField: true,
+                            ),
+                          ],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: _textField(
+                              label: 'First Name',
+                              hint: 'Enter First Name',
+                              controller: _firstNameController,
+                              requiredField: true,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _textField(
+                              label: 'Last Name',
+                              hint: 'Enter Last Name',
+                              controller: _lastNameController,
+                              requiredField: true,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _textField(
-                          label: 'Email',
-                          hint: 'example123@gmail.com',
-                          controller: _emailController,
-                          requiredField: true,
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _textField(
-                          label: 'Phone',
-                          hint: '+1 234 567 890',
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                        ),
-                      ),
-                    ],
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final bool stacked = constraints.maxWidth < 640;
+                      if (stacked) {
+                        return Column(
+                          children: [
+                            _textField(
+                              label: 'Email',
+                              hint: 'example123@gmail.com',
+                              controller: _emailController,
+                              requiredField: true,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            const SizedBox(height: 12),
+                            _textField(
+                              label: 'Phone',
+                              hint: '+1 234 567 890',
+                              controller: _phoneController,
+                              keyboardType: TextInputType.phone,
+                            ),
+                          ],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: _textField(
+                              label: 'Email',
+                              hint: 'example123@gmail.com',
+                              controller: _emailController,
+                              requiredField: true,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _textField(
+                              label: 'Phone',
+                              hint: '+1 234 567 890',
+                              controller: _phoneController,
+                              keyboardType: TextInputType.phone,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 18),
                   _textArea(
@@ -254,6 +317,7 @@ class _ContactPageState extends State<ContactPage> {
     bool requiredField = false,
     TextInputType keyboardType = TextInputType.text,
   }) {
+    final bool isNarrow = MediaQuery.of(context).size.width < 640;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -273,7 +337,7 @@ class _ContactPageState extends State<ContactPage> {
           },
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 13),
+            hintStyle: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: isNarrow ? 12 : 13),
             filled: true,
             fillColor: const Color(0xFF0F0F0F),
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -286,7 +350,7 @@ class _ContactPageState extends State<ContactPage> {
               borderSide: const BorderSide(color: Colors.white30),
             ),
           ),
-          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: isNarrow ? 13 : 14),
         ),
       ],
     );
