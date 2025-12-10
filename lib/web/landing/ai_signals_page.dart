@@ -499,32 +499,41 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
         final goldPaged = _paginate(sampleSignals, _goldPage);
         final hasPrevGold = _goldPage > 0;
         final hasNextGold = sampleSignals.length > (_goldPage + 1) * _pageSize;
+        final sampleColumns = [
+          SizedBox(
+            width: columnWidth,
+            child: _SignalColumnLive(
+              title: 'GOLD',
+              icon: Icons.emoji_events_outlined,
+              signals: goldPaged,
+              page: _goldPage,
+              onPageChanged: (p) => setState(() => _goldPage = p),
+              hasPrev: hasPrevGold,
+              hasNext: hasNextGold,
+            ),
+          ),
+          const SizedBox(width: 16, height: 16),
+          SizedBox(
+            width: columnWidth,
+            child: const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined),
+          ),
+          const SizedBox(width: 16, height: 16),
+          SizedBox(
+            width: columnWidth,
+            child: const _EmptyColumn(title: 'FOREX', icon: Icons.verified),
+          ),
+        ];
+
+        if (stacked) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: sampleColumns,
+          );
+        }
+
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: columnWidth,
-              child: _SignalColumnLive(
-                title: 'GOLD',
-                icon: Icons.emoji_events_outlined,
-                signals: goldPaged,
-                page: _goldPage,
-                onPageChanged: (p) => setState(() => _goldPage = p),
-                hasPrev: hasPrevGold,
-                hasNext: hasNextGold,
-              ),
-            ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: columnWidth,
-              child: const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined),
-            ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: columnWidth,
-              child: const _EmptyColumn(title: 'FOREX', icon: Icons.verified),
-            ),
-          ],
+          children: sampleColumns,
         );
       }
 
@@ -562,52 +571,61 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
           final hasNextCrypto = cryptoAll.length > (cryptoPage + 1) * _pageSize;
           final hasNextForex = forexAll.length > (forexPage + 1) * _pageSize;
 
+          final liveColumns = [
+            SizedBox(
+              width: columnWidth,
+              child: _SignalColumnLive(
+                title: 'GOLD',
+                icon: Icons.emoji_events_outlined,
+                signals: goldPaged,
+                page: goldPage,
+                onPageChanged: (p) => setState(() => _goldPage = p),
+                hasPrev: hasPrevGold,
+                hasNext: hasNextGold,
+              ),
+            ),
+            const SizedBox(width: 16, height: 16),
+            SizedBox(
+              width: columnWidth,
+              child: cryptoPaged.isEmpty
+                  ? const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined)
+                  : _SignalColumnLive(
+                      title: 'CRYPTO',
+                      icon: Icons.workspace_premium_outlined,
+                      signals: cryptoPaged,
+                      page: cryptoPage,
+                      onPageChanged: (p) => setState(() => _cryptoPage = p),
+                      hasPrev: hasPrevCrypto,
+                      hasNext: hasNextCrypto,
+                    ),
+            ),
+            const SizedBox(width: 16, height: 16),
+            SizedBox(
+              width: columnWidth,
+              child: forexPaged.isEmpty
+                  ? const _EmptyColumn(title: 'FOREX', icon: Icons.verified)
+                  : _SignalColumnLive(
+                      title: 'FOREX',
+                      icon: Icons.verified,
+                      signals: forexPaged,
+                      page: forexPage,
+                      onPageChanged: (p) => setState(() => _forexPage = p),
+                      hasPrev: hasPrevForex,
+                      hasNext: hasNextForex,
+                    ),
+            ),
+          ];
+
+          if (stacked) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: liveColumns,
+            );
+          }
+
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: columnWidth,
-                child: _SignalColumnLive(
-                  title: 'GOLD',
-                  icon: Icons.emoji_events_outlined,
-                  signals: goldPaged,
-                  page: goldPage,
-                  onPageChanged: (p) => setState(() => _goldPage = p),
-                  hasPrev: hasPrevGold,
-                  hasNext: hasNextGold,
-                ),
-              ),
-              const SizedBox(width: 16),
-              SizedBox(
-                width: columnWidth,
-                child: cryptoPaged.isEmpty
-                    ? const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined)
-                    : _SignalColumnLive(
-                        title: 'CRYPTO',
-                        icon: Icons.workspace_premium_outlined,
-                        signals: cryptoPaged,
-                        page: cryptoPage,
-                        onPageChanged: (p) => setState(() => _cryptoPage = p),
-                        hasPrev: hasPrevCrypto,
-                        hasNext: hasNextCrypto,
-                      ),
-              ),
-              const SizedBox(width: 16),
-              SizedBox(
-                width: columnWidth,
-                child: forexPaged.isEmpty
-                    ? const _EmptyColumn(title: 'FOREX', icon: Icons.verified)
-                    : _SignalColumnLive(
-                        title: 'FOREX',
-                        icon: Icons.verified,
-                        signals: forexPaged,
-                        page: forexPage,
-                        onPageChanged: (p) => setState(() => _forexPage = p),
-                        hasPrev: hasPrevForex,
-                        hasNext: hasNextForex,
-                      ),
-              ),
-            ],
+            children: liveColumns,
           );
         },
       );
@@ -1473,51 +1491,78 @@ class _HistoryTable extends StatelessWidget {
       9: const FlexColumnWidth(1.0),
     };
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: Table(
-        columnWidths: columnWidths,
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        border: const TableBorder(
-          horizontalInside: BorderSide(color: Colors.white12),
-          bottom: BorderSide(color: Colors.white12),
-        ),
-        children: [
-          TableRow(
-            decoration: const BoxDecoration(color: Color(0xFF0E0E0E)),
-            children: headers.map((h) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                child: Text(
-                  h,
-                  style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700),
-                ),
-              );
-            }).toList(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isNarrow = constraints.maxWidth < 900;
+        final table = Container(
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white12),
           ),
-          ...rows.map((row) {
-            return TableRow(
-              decoration: const BoxDecoration(),
-              children: [
-                _cellText(row.date),
-                _cellText(row.time),
-                _cellText(row.asset),
-                _orderTag(row.order),
-                _statusText(row.status),
-                _pipsText(row.pips),
-                _cellText(row.entry),
-                _cellText(row.sl),
-                _cellText(row.tp1),
-                _cellText(row.tp2),
-              ],
-            );
-          }),
-        ],
-      ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: isNarrow ? 1100 : constraints.maxWidth),
+              child: Table(
+                columnWidths: columnWidths,
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                border: const TableBorder(
+                  horizontalInside: BorderSide(color: Colors.white12),
+                  bottom: BorderSide(color: Colors.white12),
+                ),
+                children: [
+                  TableRow(
+                    decoration: const BoxDecoration(color: Color(0xFF0E0E0E)),
+                    children: headers.map((h) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                        child: Text(
+                          h,
+                          style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  ...rows.map((row) {
+                    return TableRow(
+                      decoration: const BoxDecoration(),
+                      children: [
+                        _cellText(row.date),
+                        _cellText(row.time),
+                        _cellText(row.asset),
+                        _orderTag(row.order),
+                        _statusText(row.status),
+                        _pipsText(row.pips),
+                        _cellText(row.entry),
+                        _cellText(row.sl),
+                        _cellText(row.tp1),
+                        _cellText(row.tp2),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        if (!isNarrow) return table;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                'Màn hình nhỏ: xoay ngang hoặc cuộn ngang để xem đầy đủ bảng.',
+                style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
+              ),
+            ),
+            table,
+          ],
+        );
+      },
     );
   }
 
