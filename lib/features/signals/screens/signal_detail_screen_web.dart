@@ -41,46 +41,36 @@ class SignalDetailScreen extends StatelessWidget {
     return [];
   }
 
-  // ▼▼▼ HÀM ĐÃ ĐƯỢC SỬA LẠI ĐỂ AN TOÀN TUYỆT ĐỐI ▼▼▼
   String _getTranslatedReason(BuildContext context, AppLocalizations l10n) {
     final currentLocale =
         Provider.of<LanguageProvider>(context, listen: false).locale;
-    final dynamic reasonData = signal.reason; // Giữ kiểu là dynamic
+    final dynamic reasonData = signal.reason;
 
-    // Trường hợp 1: Dữ liệu là dạng Map (cấu trúc mới)
-    // Kiểm tra tường minh `is Map` để Dart hiểu và cho phép truy cập key
     if (reasonData is Map) {
       final langCode = currentLocale?.languageCode ?? 'en';
-
-      // Lấy bản dịch và kiểm tra kiểu an toàn
       final translatedText = reasonData[langCode];
       if (translatedText is String && translatedText.isNotEmpty) {
         return translatedText;
       }
-
-      // Nếu không có, dự phòng về tiếng Anh
       final fallbackText = reasonData['en'];
       if (fallbackText is String && fallbackText.isNotEmpty) {
         return fallbackText;
       }
     }
 
-    // Trường hợp 2: Dữ liệu là String (tương thích ngược với tín hiệu cũ)
     if (reasonData is String && reasonData.isNotEmpty) {
       return reasonData;
     }
 
-    // Trường hợp 3: Dữ liệu null, rỗng hoặc không đúng định dạng
     return l10n.noReasonProvided;
   }
-  // ▲▲▲ KẾT THÚC SỬA LỖI ▲▲▲
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final List<String> flagPaths = _getFlagPathsFromSymbol(signal.symbol);
     final String statusText = signal.getTranslatedResult(l10n);
-    const Color statusColor = Color(0xFF289EFF);
+    final Color statusColor = signal.getStatusColor();
     final String reasonText = _getTranslatedReason(context, l10n);
 
     final DateTime created = _toDateTime(signal.createdAt);
@@ -124,12 +114,13 @@ class SignalDetailScreen extends StatelessWidget {
                     flagPaths: flagPaths,
                     symbol: signal.symbol,
                     statusText: statusText,
+                    statusColor: statusColor,
                     type: signal.type,
                     createdLabel: createdLabel,
                   ),
                   const SizedBox(height: 16),
                   _SectionCard(
-                    title: 'Price Levels',
+                    title: l10n.priceLevels,
                     child: _PriceGrid(
                       topItems: [
                         PriceCell(
@@ -159,7 +150,7 @@ class SignalDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   _SectionCard(
-                    title: 'Capital Management',
+                    title: l10n.capitalManagement,
                     child: Text(
                       reasonText,
                       style: const TextStyle(
@@ -187,15 +178,6 @@ class SignalDetailScreen extends StatelessWidget {
     if (value == null) return '—';
     return value.toStringAsFixed(5);
   }
-
-  Color _statusColor(String status) {
-    final lower = status.toLowerCase();
-    if (lower.contains('pending')) return const Color(0xFFFFA726);
-    if (lower.contains('run') || lower.contains('live'))
-      return const Color(0xFF18D46F);
-    if (lower.contains('sl')) return const Color(0xFFE54747);
-    return Colors.white;
-  }
 }
 
 class _TokenCounter extends StatelessWidget {
@@ -205,25 +187,25 @@ class _TokenCounter extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return const Text('10 free signals left', style: TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
+      return Text(AppLocalizations.of(context)!.freeSignalsLeft(10), style: const TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
     }
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Text('10 free signals left', style: TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
+          return Text(AppLocalizations.of(context)!.freeSignalsLeft(10), style: const TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
         }
         final data = snapshot.data!.data() ?? {};
         final tier = (data['subscriptionTier'] ?? 'free').toString().toLowerCase();
         if (tier == 'elite') {
-          return const Text('Unlimited signals', style: TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
+          return Text(AppLocalizations.of(context)!.unlimitedSignals, style: const TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
         }
         final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
         final storedDate = (data['freeTokensDate'] ?? '') as String;
         final used = (data['freeTokensUsed'] ?? 0) as int;
         final effectiveUsed = storedDate == todayKey ? used : 0;
         final left = (10 - effectiveUsed).clamp(0, 10);
-        return Text('$left free signals left', style: const TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
+        return Text(AppLocalizations.of(context)!.freeSignalsLeft(left), style: const TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
       },
     );
   }
@@ -233,12 +215,14 @@ class _Header extends StatelessWidget {
   final List<String> flagPaths;
   final String symbol;
   final String statusText;
+  final Color statusColor;
   final String type;
   final String createdLabel;
   const _Header({
     required this.flagPaths,
     required this.symbol,
     required this.statusText,
+    required this.statusColor,
     required this.type,
     required this.createdLabel,
   });
@@ -287,8 +271,8 @@ class _Header extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 statusText,
-                style: const TextStyle(
-                    color: Color(0xFF289EFF),
+                style: TextStyle(
+                    color: statusColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w700),
               ),
@@ -299,7 +283,7 @@ class _Header extends StatelessWidget {
                       color: typeColor, size: 16),
                   const SizedBox(width: 6),
                   Text(
-                    isBuy ? 'Buy' : 'Sell',
+                    isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell,
                     style: TextStyle(
                         color: typeColor,
                         fontSize: 14,
@@ -312,8 +296,8 @@ class _Header extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.arrow_back_ios_new,
                     color: Colors.white, size: 16),
-                label: const Text('Go back',
-                    style: TextStyle(
+                label: Text(AppLocalizations.of(context)!.goBack,
+                    style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.w600)),
@@ -471,13 +455,13 @@ class _UpgradeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const List<String> perks = [
-      'Continuously updating market data 24/7',
-      'Providing the best signals in real time',
-      'Includes Entry, SL, TP',
-      'Detailed analysis and evaluation of each signal',
-      'Real-time notifications via email',
-      'Signal performance statistics',
+    final List<String> perks = [
+      AppLocalizations.of(context)!.continuouslyUpdating,
+      AppLocalizations.of(context)!.providingBestSignals,
+      AppLocalizations.of(context)!.includesEntrySlTp,
+      AppLocalizations.of(context)!.detailedAnalysis,
+      AppLocalizations.of(context)!.realTimeNotifications,
+      AppLocalizations.of(context)!.signalPerformanceStats,
     ];
 
     return Container(
@@ -491,11 +475,11 @@ class _UpgradeSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
-              _TokenCounter(),
-              Spacer(),
-              Text('Gold Plan',
-                  style: TextStyle(
+            children: [
+              const _TokenCounter(),
+              const Spacer(),
+              Text(AppLocalizations.of(context)!.goldPlan,
+                  style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
                       fontWeight: FontWeight.w600)),
@@ -507,15 +491,15 @@ class _UpgradeSection extends StatelessWidget {
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text('\$78',
+                children: [
+                  const Text('\$78',
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 34,
                           fontWeight: FontWeight.w800)),
-                  SizedBox(height: 6),
-                  Text('/month',
-                      style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  const SizedBox(height: 6),
+                  Text(AppLocalizations.of(context)!.perMonth,
+                      style: const TextStyle(color: Colors.white70, fontSize: 12)),
                 ],
               ),
               const Spacer(),
@@ -539,11 +523,11 @@ class _UpgradeSection extends StatelessWidget {
                       ]),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Padding(
+                    child: Padding(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                      child: Text('Upgrade Now',
-                          style: TextStyle(
+                          const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                      child: Text(AppLocalizations.of(context)!.upgradeNow,
+                          style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 14)),

@@ -8,6 +8,13 @@ const translateClient = new translate.Translate();
 // Định nghĩa các loại thông báo mà chúng ta sẽ dịch
 type NotificationType = 'new_signal' | 'signal_matched' | 'tp1_hit' | 'tp2_hit' | 'tp3_hit' | 'sl_hit';
 
+// Các ngôn ngữ mục tiêu (ngoài tiếng Việt là gốc)
+// zh: Tiếng Trung (Giản thể - Google dùng 'zh' hoặc 'zh-CN')
+// fr: Tiếng Pháp
+// ja: Tiếng Nhật
+// ko: Tiếng Hàn
+const TARGET_LANGUAGES = ['en', 'zh', 'fr', 'ja', 'ko'];
+
 // Định nghĩa cấu trúc cho các mẫu câu
 interface Template {
     title: string;
@@ -15,7 +22,6 @@ interface Template {
 }
 
 // Chứa tất cả các mẫu câu gốc bằng tiếng Việt
-// Các số trong ngoặc nhọn {0}, {1},... là các tham số sẽ được thay thế sau này
 const templates: Record<NotificationType, Template> = {
     new_signal: {
         title: "⚡️ Tín hiệu mới: {0} {1}", // {0}: loại lệnh (MUA/BÁN), {1}: cặp tiền
@@ -45,10 +51,7 @@ const templates: Record<NotificationType, Template> = {
 
 /**
  * Hàm này nhận loại thông báo và dữ liệu, trả về một đối tượng chứa title và body
- * đã được dịch sang các ngôn ngữ được hỗ trợ (vi, en).
- * @param type Loại thông báo (ví dụ: 'new_signal').
- * @param args Danh sách các giá trị động để điền vào mẫu câu (ví dụ: 'BUY', 'XAU/USD', 1234.5).
- * @returns Một Promise chứa đối tượng payload đã được bản địa hóa.
+ * đã được dịch sang TẤT CẢ các ngôn ngữ được hỗ trợ.
  */
 export async function getLocalizedPayload(type: NotificationType, ...args: (string | number)[]) {
     const template = templates[type];
@@ -57,23 +60,48 @@ export async function getLocalizedPayload(type: NotificationType, ...args: (stri
     const titleVi = template.title.replace(/{(\d+)}/g, (match, index) => String(args[Number(index)] ?? ''));
     const bodyVi = template.body.replace(/{(\d+)}/g, (match, index) => String(args[Number(index)] ?? ''));
 
-    try {
-        // 2. Dịch đồng thời cả title và body sang tiếng Anh để tối ưu thời gian
-        const [translations] = await translateClient.translate([titleVi, bodyVi], 'en');
-        const [titleEn, bodyEn] = translations;
+    // Khởi tạo object kết quả với tiếng Việt trước
+    const titleLoc: Record<string, string> = { vi: titleVi };
+    const bodyLoc: Record<string, string> = { vi: bodyVi };
 
-        // 3. Trả về đối tượng chứa cả 2 ngôn ngữ
+    try {
+        // 2. Dịch đồng thời sang tất cả các ngôn ngữ mục tiêu
+        const translationPromises = TARGET_LANGUAGES.map(async (lang) => {
+            try {
+                // translateClient.translate trả về [string, metadata]
+                const [titleTranslated] = await translateClient.translate(titleVi, lang);
+                const [bodyTranslated] = await translateClient.translate(bodyVi, lang);
+                return { lang, title: titleTranslated, body: bodyTranslated };
+            } catch (err) {
+                console.error(`Lỗi dịch sang ngôn ngữ '${lang}':`, err);
+                // Nếu lỗi, fallback về tiếng Anh (nếu có) hoặc tiếng Việt
+                return { lang, title: titleVi, body: bodyVi }; 
+            }
+        });
+
+        const results = await Promise.all(translationPromises);
+
+        // 3. Gán kết quả vào object
+        results.forEach((res) => {
+            titleLoc[res.lang] = res.title;
+            bodyLoc[res.lang] = res.body;
+        });
+
         return {
-            title_loc: { vi: titleVi, en: titleEn },
-            body_loc: { vi: bodyVi, en: bodyEn },
+            title_loc: titleLoc,
+            body_loc: bodyLoc,
         };
     } catch (error) {
-        console.error(`Lỗi dịch thuật cho thông báo loại '${type}':`, error);
-        // Trong trường hợp dịch lỗi, sử dụng tiếng Việt làm ngôn ngữ dự phòng cho tiếng Anh
-        // để không làm gián đoạn luồng gửi thông báo.
+        console.error(`Lỗi tổng quan khi dịch thuật cho loại '${type}':`, error);
+        // Fallback an toàn: tất cả ngôn ngữ dùng tiếng Việt
+        TARGET_LANGUAGES.forEach(lang => {
+            titleLoc[lang] = titleVi;
+            bodyLoc[lang] = bodyVi;
+        });
+        
         return {
-            title_loc: { vi: titleVi, en: titleVi }, // Dự phòng
-            body_loc: { vi: bodyVi, en: bodyVi },   // Dự phòng
+            title_loc: titleLoc,
+            body_loc: bodyLoc,
         };
     }
 }

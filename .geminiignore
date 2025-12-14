@@ -1,0 +1,13 @@
+# Flutter/Dart
+**/*.g.dart
+**/*.freezed.dart
+**/build/
+**/.dart_tool/
+**/ios/Pods/
+**/android/.gradle/
+
+# Firebase/Node
+**/node_modules/
+**/functions/lib/
+**/.firebase/
+firebase-debug.log

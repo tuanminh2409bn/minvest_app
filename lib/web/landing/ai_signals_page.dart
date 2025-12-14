@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
@@ -16,6 +17,7 @@ import '../theme/gradients.dart';
 import 'widgets/navbar.dart';
 import 'sections/footer_section.dart';
 import 'sections/pricing_tab.dart';
+import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 
 enum AISignalsTab { aiSignals, performance, history, pricing }
 enum AssetFilter { all, gold, crypto, forex }
@@ -36,6 +38,8 @@ class _AISignalsPageState extends State<AISignalsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: const WebChatBubble(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
@@ -94,7 +98,7 @@ class _TitleSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'AI Signals',
+      AppLocalizations.of(context)!.aiSignal,
       style: AppTextStyles.h1.copyWith(
         fontSize: 34,
         fontWeight: FontWeight.w700,
@@ -116,22 +120,22 @@ class _TabBar extends StatelessWidget {
       runSpacing: AppSpacing.sm,
       children: [
         _TabChip(
-          label: 'AI Signals',
+          label: AppLocalizations.of(context)!.aiSignal,
           isActive: selected == AISignalsTab.aiSignals,
           onTap: () => onSelect(AISignalsTab.aiSignals),
         ),
         _TabChip(
-          label: 'Performance',
+          label: 'Performance', // Keep as English technical term or add to loc if needed
           isActive: selected == AISignalsTab.performance,
           onTap: () => onSelect(AISignalsTab.performance),
         ),
         _TabChip(
-          label: 'History',
+          label: AppLocalizations.of(context)!.history,
           isActive: selected == AISignalsTab.history,
           onTap: () => onSelect(AISignalsTab.history),
         ),
         _TabChip(
-          label: 'Pricing',
+          label: AppLocalizations.of(context)!.pricing,
           isActive: selected == AISignalsTab.pricing,
           onTap: () => onSelect(AISignalsTab.pricing),
         ),
@@ -200,7 +204,10 @@ class _FiltersRow extends StatelessWidget {
           value: assetFilter,
           onChanged: onAssetChanged,
         ),
-        const _FilterDropdown(label: 'Currency pairs', value: 'All Currency pairs'),
+        _FilterDropdown(
+          label: AppLocalizations.of(context)!.currencyPairs,
+          value: AppLocalizations.of(context)!.allCurrencyPairs,
+        ),
         _DateRangePicker(
           dateRange: dateRange,
           onChanged: onDateRangeChanged,
@@ -262,7 +269,7 @@ class _TimezoneDropdown extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Date Range',
+          AppLocalizations.of(context)!.dateRange,
           style: AppTextStyles.caption.copyWith(color: Colors.transparent, fontSize: 13),
         ),
         const SizedBox(height: 8),
@@ -296,26 +303,13 @@ class _AssetDropdown extends StatelessWidget {
   final ValueChanged<AssetFilter> onChanged;
   const _AssetDropdown({required this.value, required this.onChanged});
 
-  String _label(AssetFilter v) {
-    switch (v) {
-      case AssetFilter.gold:
-        return 'Gold';
-      case AssetFilter.crypto:
-        return 'Crypto';
-      case AssetFilter.forex:
-        return 'Forex';
-      default:
-        return 'All Assets';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Asset',
+          AppLocalizations.of(context)!.asset,
           style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
         ),
         const SizedBox(height: 8),
@@ -334,11 +328,11 @@ class _AssetDropdown extends StatelessWidget {
               dropdownColor: const Color(0xFF0D0D0D),
               icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
               style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
-              items: const [
-                DropdownMenuItem(value: AssetFilter.all, child: Text('All Assets')),
-                DropdownMenuItem(value: AssetFilter.gold, child: Text('Gold')),
-                DropdownMenuItem(value: AssetFilter.crypto, child: Text('Crypto')),
-                DropdownMenuItem(value: AssetFilter.forex, child: Text('Forex')),
+              items: [
+                DropdownMenuItem(value: AssetFilter.all, child: Text(AppLocalizations.of(context)!.allAssets)),
+                const DropdownMenuItem(value: AssetFilter.gold, child: Text('Gold')),
+                const DropdownMenuItem(value: AssetFilter.crypto, child: Text('Crypto')),
+                const DropdownMenuItem(value: AssetFilter.forex, child: Text('Forex')),
               ],
               onChanged: (v) {
                 if (v != null) onChanged(v);
@@ -360,7 +354,7 @@ class _DateRangePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     String label;
     if (dateRange == null) {
-      label = 'Select Date Range';
+      label = AppLocalizations.of(context)!.selectDateRange;
     } else {
       label =
           '${DateFormat('dd/MM/yyyy').format(dateRange!.start)} - ${DateFormat('dd/MM/yyyy').format(dateRange!.end)}';
@@ -369,7 +363,7 @@ class _DateRangePicker extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Date Range',
+          AppLocalizations.of(context)!.dateRange,
           style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
         ),
         const SizedBox(height: 8),
@@ -726,12 +720,12 @@ class _SignalColumnLive extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'No signals available',
+                    AppLocalizations.of(context)!.noSignalsAvailable,
                     style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Signals will appear here when available',
+                    AppLocalizations.of(context)!.signalsWillAppearHere,
                     style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 12),
                   ),
                 ],
@@ -754,7 +748,7 @@ class _SignalColumnLive extends StatelessWidget {
                 onTap: () => onPageChanged(page - 1),
               ),
               Text(
-                'Page ${page + 1}',
+                '${AppLocalizations.of(context)!.page} ${page + 1}',
                 style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 11),
               ),
               _NavButton(
@@ -829,15 +823,14 @@ class _EmptyColumn extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'No signals available',
+                  AppLocalizations.of(context)!.noSignalsAvailable,
                   style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'Signals will appear here when available',
-                  style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 12),
-                ),
-              ],
+                                  Text(
+                                    AppLocalizations.of(context)!.signalsWillAppearHere, // Add translation if needed
+                                    style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 12),
+                                  ),              ],
             ),
           ),
         ),
@@ -905,15 +898,15 @@ class _SignalWebCard extends StatelessWidget {
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF0F0F0F),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Token đã hết', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: const Text(
-          'Bạn đã dùng hết 10 tokens miễn phí hôm nay. Nâng cấp gói để xem thêm tín hiệu.',
-          style: TextStyle(color: Colors.white70),
+        title: Text(AppLocalizations.of(context)!.tokenExpired, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: Text(
+          AppLocalizations.of(context)!.tokenLimitReachedDesc,
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Để sau', style: TextStyle(color: Colors.white70)),
+            child: Text(AppLocalizations.of(context)!.later, style: const TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -921,7 +914,7 @@ class _SignalWebCard extends StatelessWidget {
               Navigator.of(context).pushNamed('/pricing');
             },
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E97FF)),
-            child: const Text('Nâng cấp'),
+            child: Text(AppLocalizations.of(context)!.upgrade),
           ),
         ],
       ),
@@ -976,6 +969,10 @@ class _SignalWebCard extends StatelessWidget {
       final dt = createdAt.toDate().toLocal().add(const Duration(hours: 0)); // assume local is GMT+7; adjust if needed
       createdText = DateFormat('dd/MM/yyyy HH:mm').format(dt);
     }
+    
+    // Localization for Buy/Sell
+    final typeText = isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell;
+    
     return GestureDetector(
       onTap: () => _openDetail(context),
       child: Container(
@@ -1007,14 +1004,14 @@ class _SignalWebCard extends StatelessWidget {
                     border: Border.all(color: Colors.white12),
                   ),
                   child: Text(
-                    signal.status,
+                    signal.status.toUpperCase(), // Consider localizing status too if fixed set
                     style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-            Text('Created:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
+            Text('${AppLocalizations.of(context)!.created}:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
             const SizedBox(height: 4),
             Text(
               createdText,
@@ -1033,7 +1030,7 @@ class _SignalWebCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    isBuy ? 'Buy' : 'Sell',
+                    typeText,
                     style: AppTextStyles.body.copyWith(
                       color: actionColor,
                       fontSize: 14,
@@ -1047,7 +1044,7 @@ class _SignalWebCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Detail',
+                  AppLocalizations.of(context)!.detail,
                   style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 13),
                 ),
                 const Spacer(),
@@ -1124,17 +1121,17 @@ class _PerformanceSection extends StatelessWidget {
       children: [
         const SizedBox(height: 8),
         Text(
-          'Performance Overview',
+          AppLocalizations.of(context)!.performanceOverview,
           style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 16),
         Wrap(
           spacing: 16,
           runSpacing: 12,
-          children: const [
-            _MetricCard(title: 'Total Profit (Pips)', value: '9,250.8'),
-            _MetricCard(title: 'Completion signal', value: '507'),
-            _MetricCard(title: 'Win Rate (%)', value: '62.7'),
+          children: [
+            _MetricCard(title: AppLocalizations.of(context)!.totalProfitPips, value: '9,250.8'),
+            _MetricCard(title: AppLocalizations.of(context)!.completionSignal, value: '507'),
+            _MetricCard(title: AppLocalizations.of(context)!.winRatePercent, value: '62.7'),
           ],
         ),
         const SizedBox(height: 24),
@@ -1351,7 +1348,7 @@ class _ComingSoonSection extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          'Coming soon',
+          AppLocalizations.of(context)!.comingSoon,
           style: AppTextStyles.h3.copyWith(color: Colors.white70, fontSize: 16),
         ),
       ),
@@ -1416,14 +1413,14 @@ class _HistorySectionState extends State<_HistorySection> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (hasError) {
-                return Text('Lỗi tải lịch sử: ${snapshot.error}', style: AppTextStyles.body.copyWith(color: Colors.white));
+                return Text('${AppLocalizations.of(context)!.errorLoadingHistory}: ${snapshot.error}', style: AppTextStyles.body.copyWith(color: Colors.white));
               }
               rows.addAll(signals.map(_mapSignalToRow));
             }
             if (rows.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text('Chưa có lịch sử tín hiệu', style: AppTextStyles.body.copyWith(color: Colors.white70)),
+                child: Text(AppLocalizations.of(context)!.noHistoryAvailable, style: AppTextStyles.body.copyWith(color: Colors.white70)),
               );
             }
             final totalPages = (rows.length / _pageSize).ceil().clamp(1, 9999);
@@ -1439,14 +1436,14 @@ class _HistorySectionState extends State<_HistorySection> {
                   children: [
                     TextButton(
                       onPressed: currentPage > 0 ? () => setState(() => _page = currentPage - 1) : null,
-                      child: const Text('Previous'),
+                      child: Text(AppLocalizations.of(context)!.previous),
                     ),
                     const SizedBox(width: 24),
-                    Text('Page ${currentPage + 1} of $totalPages', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
+                    Text('${AppLocalizations.of(context)!.page} ${currentPage + 1} of $totalPages', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
                     const SizedBox(width: 24),
                     TextButton(
                       onPressed: currentPage < totalPages - 1 ? () => setState(() => _page = currentPage + 1) : null,
-                      child: const Text('Next'),
+                      child: Text(AppLocalizations.of(context)!.next),
                     ),
                   ],
                 ),
@@ -1467,13 +1464,13 @@ class _HistoryTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final headers = [
-      'Date',
-      'Time (GMT +7)',
-      'Asset',
-      'Orders',
-      'Status',
-      'Pips',
-      'Entry',
+      AppLocalizations.of(context)!.date,
+      AppLocalizations.of(context)!.timeGmt7,
+      AppLocalizations.of(context)!.asset,
+      AppLocalizations.of(context)!.orders,
+      AppLocalizations.of(context)!.status,
+      AppLocalizations.of(context)!.pips,
+      AppLocalizations.of(context)!.entry,
       'SL',
       'TP1',
       'TP2',
@@ -1531,7 +1528,7 @@ class _HistoryTable extends StatelessWidget {
                         _cellText(row.date),
                         _cellText(row.time),
                         _cellText(row.asset),
-                        _orderTag(row.order),
+                        _orderTag(row.order, context),
                         _statusText(row.status),
                         _pipsText(row.pips),
                         _cellText(row.entry),
@@ -1555,7 +1552,7 @@ class _HistoryTable extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                'Màn hình nhỏ: xoay ngang hoặc cuộn ngang để xem đầy đủ bảng.',
+                AppLocalizations.of(context)!.smallScreenRotationHint,
                 style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
               ),
             ),
@@ -1579,9 +1576,11 @@ class _HistoryTable extends StatelessWidget {
     );
   }
 
-  Widget _orderTag(String order) {
+  Widget _orderTag(String order, BuildContext context) {
     final isBuy = order.toLowerCase() == 'buy';
     final color = isBuy ? const Color(0xFF17BF63) : const Color(0xFFE54747);
+    final text = isBuy ? AppLocalizations.of(context)!.buy : (order.toLowerCase() == 'sell' ? AppLocalizations.of(context)!.sell : order);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       child: Container(
@@ -1591,7 +1590,7 @@ class _HistoryTable extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
-          order.toUpperCase(),
+          text.toUpperCase(),
           style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
           textAlign: TextAlign.center,
         ),

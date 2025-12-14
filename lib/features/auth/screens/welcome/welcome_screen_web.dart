@@ -5,6 +5,7 @@ import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
 import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -145,7 +146,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 const SizedBox(height: 22),
                 _SocialSignInButton(
                   icon: Image.asset('assets/images/google_logo.png', height: 20, width: 20),
-                  text: 'Continue with Google',
+                  text: AppLocalizations.of(context)!.continueByGoogle,
                   onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
                 ),
                 const SizedBox(height: 12),
@@ -167,7 +168,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Align(alignment: Alignment.centerLeft, child: const Text('Forgot your password?', style: TextStyle(color: Colors.white70, fontSize: 12))),
                 const SizedBox(height: 16),
                 _PrimaryButton(
-                  text: 'Continue',
+                  text: AppLocalizations.of(context)!.signIn,
                   loading: _loading,
                   onPressed: _loading ? null : _signIn,
                 ),

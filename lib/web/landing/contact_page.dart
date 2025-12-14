@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../theme/gradients.dart';
 import '../theme/spacing.dart';
 import 'widgets/navbar.dart';
 import 'sections/footer_section.dart';
+import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 
 class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
@@ -47,7 +49,7 @@ class _ContactPageState extends State<ContactPage> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã gửi thông tin liên hệ thành công.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.contactInfoSentSuccess)),
         );
         _formKey.currentState!.reset();
         _firstNameController.clear();
@@ -59,7 +61,7 @@ class _ContactPageState extends State<ContactPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gửi thông tin thất bại: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.contactInfoSentFailed(e.toString()))),
         );
       }
     } finally {
@@ -71,6 +73,8 @@ class _ContactPageState extends State<ContactPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: const WebChatBubble(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
@@ -83,11 +87,11 @@ class _ContactPageState extends State<ContactPage> {
                   const SizedBox(height: 12),
                   const LandingNavBar(),
                   const SizedBox(height: 32),
-                  _header(),
+                  _header(context),
                   const SizedBox(height: 24),
-                  _contactCards(),
+                  _contactCards(context),
                   const SizedBox(height: 24),
-                  _contactForm(),
+                  _contactForm(context),
                   const SizedBox(height: 64),
                   const FooterSection(),
                 ],
@@ -99,11 +103,11 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-  Widget _header() {
+  Widget _header(BuildContext context) {
     return Column(
       children: [
         Text(
-          'Get in Touch with Us',
+          AppLocalizations.of(context)!.contactUs247,
           style: AppTextStyles.h1.copyWith(
             color: Colors.white,
             fontSize: 26,
@@ -112,7 +116,7 @@ class _ContactPageState extends State<ContactPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Have questions or need AI solutions? Let us know by filling out the form, and we\'ll be in touch!',
+          AppLocalizations.of(context)!.contactPageSubtitle,
           style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 14),
           textAlign: TextAlign.center,
         ),
@@ -120,25 +124,25 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-  Widget _contactCards() {
+  Widget _contactCards(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool stacked = constraints.maxWidth < 900;
-        final cards = const [
+        final cards = [
           SizedBox(
             width: 420,
             child: _InfoCard(
-              title: 'Whatsapp',
+              title: 'Whatsapp', // Keep as English technical term or add to loc if needed
               subtitle: '0969 15 6969',
               icon: Icons.chat_bubble_outline,
             ),
           ),
-          SizedBox(width: 16, height: 16),
+          const SizedBox(width: 16, height: 16),
           SizedBox(
             width: 420,
             child: _InfoCard(
-              title: 'Phone',
-              subtitle: '0969 15 6969',
+              title: AppLocalizations.of(context)!.phone,
+              subtitle: '0969 15 6969', // This is a number, not for localization
               icon: Icons.phone_in_talk_outlined,
             ),
           ),
@@ -159,7 +163,7 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-  Widget _contactForm() {
+  Widget _contactForm(BuildContext context) {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 860),
@@ -187,15 +191,17 @@ class _ContactPageState extends State<ContactPage> {
                         return Column(
                           children: [
                             _textField(
-                              label: 'First Name',
-                              hint: 'Enter First Name',
+                              context: context,
+                              label: AppLocalizations.of(context)!.firstName,
+                              hint: AppLocalizations.of(context)!.enterFirstName,
                               controller: _firstNameController,
                               requiredField: true,
                             ),
                             const SizedBox(height: 12),
                             _textField(
-                              label: 'Last Name',
-                              hint: 'Enter Last Name',
+                              context: context,
+                              label: AppLocalizations.of(context)!.lastName,
+                              hint: AppLocalizations.of(context)!.enterLastName,
                               controller: _lastNameController,
                               requiredField: true,
                             ),
@@ -206,8 +212,9 @@ class _ContactPageState extends State<ContactPage> {
                         children: [
                           Expanded(
                             child: _textField(
-                              label: 'First Name',
-                              hint: 'Enter First Name',
+                              context: context,
+                              label: AppLocalizations.of(context)!.firstName,
+                              hint: AppLocalizations.of(context)!.enterFirstName,
                               controller: _firstNameController,
                               requiredField: true,
                             ),
@@ -215,8 +222,9 @@ class _ContactPageState extends State<ContactPage> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: _textField(
-                              label: 'Last Name',
-                              hint: 'Enter Last Name',
+                              context: context,
+                              label: AppLocalizations.of(context)!.lastName,
+                              hint: AppLocalizations.of(context)!.enterLastName,
                               controller: _lastNameController,
                               requiredField: true,
                             ),
@@ -233,16 +241,18 @@ class _ContactPageState extends State<ContactPage> {
                         return Column(
                           children: [
                             _textField(
-                              label: 'Email',
-                              hint: 'example123@gmail.com',
+                              context: context,
+                              label: AppLocalizations.of(context)!.yourEmail, // Reusing existing key
+                              hint: 'example123@gmail.com', // Keep as example, not localized
                               controller: _emailController,
                               requiredField: true,
                               keyboardType: TextInputType.emailAddress,
                             ),
                             const SizedBox(height: 12),
                             _textField(
-                              label: 'Phone',
-                              hint: '+1 234 567 890',
+                              context: context,
+                              label: AppLocalizations.of(context)!.phone,
+                              hint: '+1 234 567 890', // Example number, not localized
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
                             ),
@@ -253,8 +263,9 @@ class _ContactPageState extends State<ContactPage> {
                         children: [
                           Expanded(
                             child: _textField(
-                              label: 'Email',
-                              hint: 'example123@gmail.com',
+                              context: context,
+                              label: AppLocalizations.of(context)!.yourEmail, // Reusing existing key
+                              hint: 'example123@gmail.com', // Keep as example, not localized
                               controller: _emailController,
                               requiredField: true,
                               keyboardType: TextInputType.emailAddress,
@@ -263,8 +274,9 @@ class _ContactPageState extends State<ContactPage> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: _textField(
-                              label: 'Phone',
-                              hint: '+1 234 567 890',
+                              context: context,
+                              label: AppLocalizations.of(context)!.phone,
+                              hint: '+1 234 567 890', // Example number, not localized
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
                             ),
@@ -275,8 +287,9 @@ class _ContactPageState extends State<ContactPage> {
                   ),
                   const SizedBox(height: 18),
                   _textArea(
-                    label: 'What Are Your Concerns?',
-                    hint: 'Write Concerns Here...',
+                    context: context,
+                    label: AppLocalizations.of(context)!.whatAreYourConcerns,
+                    hint: AppLocalizations.of(context)!.writeConcernsHere,
                     controller: _messageController,
                     requiredField: true,
                   ),
@@ -298,7 +311,7 @@ class _ContactPageState extends State<ContactPage> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
                             )
-                          : const Text('Submit'),
+                          : Text(AppLocalizations.of(context)!.send),
                     ),
                   ),
                 ],
@@ -311,6 +324,7 @@ class _ContactPageState extends State<ContactPage> {
   }
 
   Widget _textField({
+    required BuildContext context,
     required String label,
     required String hint,
     TextEditingController? controller,
@@ -331,7 +345,7 @@ class _ContactPageState extends State<ContactPage> {
           keyboardType: keyboardType,
           validator: (value) {
             if (requiredField && (value == null || value.trim().isEmpty)) {
-              return 'Vui lòng nhập $label';
+              return AppLocalizations.of(context)!.pleaseEnter(label);
             }
             return null;
           },
@@ -357,6 +371,7 @@ class _ContactPageState extends State<ContactPage> {
   }
 
   Widget _textArea({
+    required BuildContext context,
     required String label,
     required String hint,
     TextEditingController? controller,
@@ -375,7 +390,7 @@ class _ContactPageState extends State<ContactPage> {
           maxLines: 6,
           validator: (value) {
             if (requiredField && (value == null || value.trim().isEmpty)) {
-              return 'Vui lòng nhập $label';
+              return AppLocalizations.of(context)!.pleaseEnter(label);
             }
             return null;
           },

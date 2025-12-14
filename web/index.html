@@ -90,6 +90,17 @@
       }
       return appRunner.runApp();
     });
+
+    // Register Firebase Messaging Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then((registration) => {
+          console.log('Firebase Messaging Service Worker registered:', registration);
+        })
+        .catch((err) => {
+          console.error('Firebase Messaging Service Worker registration failed:', err);
+        });
+    }
   });
 </script>
 </body>

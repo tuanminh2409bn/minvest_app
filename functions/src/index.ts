@@ -505,9 +505,10 @@ const sendAndStoreNotifications = async (
     const messages: admin.messaging.Message[] = [];
     usersData.forEach((user) => {
         if (user.token) {
-            const lang = user.lang as "vi" | "en";
-            const title = payload.title_loc[lang];
-            const body = payload.body_loc[lang];
+            const lang = user.lang;
+            // Lấy nội dung theo ngôn ngữ của user, fallback về EN rồi về VI nếu thiếu
+            const title = payload.title_loc[lang] || payload.title_loc['en'] || payload.title_loc['vi'];
+            const body = payload.body_loc[lang] || payload.body_loc['en'] || payload.body_loc['vi'];
 
             const dataPayload: { [key: string]: string } = {
                 type: payload.type,
@@ -589,16 +590,26 @@ async function triggerNotifications(payload: any) {
       return;
   }
 
-  type UserNotificationData = { id: string; token?: string; lang: "vi" | "en"; tier: string; };
+  type UserNotificationData = { id: string; token?: string; lang: string; tier: string; };
 
   const usersData = allEligibleUsersDocs
       .map((doc): UserNotificationData | null => {
           const data = doc.data();
           if (!data) return null;
+          
+          let langCode = (data.languageCode || 'en').toLowerCase();
+          // Normalize language codes
+          if (langCode.startsWith('zh')) langCode = 'zh';
+          // Add other specific normalizations if needed, otherwise rely on 'en', 'vi', 'fr', 'ja', 'ko' match
+          const supportedLangs = ['vi', 'en', 'zh', 'fr', 'ja', 'ko'];
+          if (!supportedLangs.includes(langCode)) {
+              langCode = 'en'; // Default fallback
+          }
+
           return {
               id: doc.id,
               token: data.activeSession?.fcmToken,
-              lang: data.languageCode === "en" ? "en" : "vi",
+              lang: langCode,
               tier: data.subscriptionTier,
           };
       })

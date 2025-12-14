@@ -101,7 +101,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cannotCreatePaymentLink =>
-      'Could not create payment link.\nPlease try again.';
+      'Could not create payment link.\nTry again.';
 
   @override
   String get retry => 'Retry';
@@ -206,7 +206,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get symbol => 'SYMBOL';
 
   @override
-  String get aiSignal => 'AI SIGNAL';
+  String get aiSignal => 'AI Signal';
 
   @override
   String get ruleSignal => 'RULE SIGNAL';
@@ -545,7 +545,505 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ok => 'OK';
 
   @override
-  String get errorLoadingPackages => 'Error Loading Packages';
+  String get contactToUpgrade => 'Contact to upgrade';
+
+  @override
+  String get noNotificationsYet => 'No notifications yet.';
+
+  @override
+  String daysAgo(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count hours ago';
+  }
+
+  @override
+  String minutesAgo(int count) {
+    return '$count minutes ago';
+  }
+
+  @override
+  String get justNow => 'Just now';
+
+  @override
+  String get getSignalsNow => 'Get Signals Now';
+
+  @override
+  String get freeTrial => 'Free Trial';
+
+  @override
+  String get heroTitle => 'Guiding Traders & Growing Portfolios';
+
+  @override
+  String get heroSubtitle =>
+      'The Ultimate AI Engine – Designed by Expert Traders';
+
+  @override
+  String get globalAiInnovationTitle =>
+      'Global AI Innovation for the Next Generation of Trading Intelligence';
+
+  @override
+  String get globalAiInnovationDesc =>
+      'Transforming traditional trading with cloud-powered AI signals — adaptive to real-time market news and trends for faster, more precise, and emotion-free performance.';
+
+  @override
+  String get liveTradingSignalsTitle => 'LIVE – 24/7 AI Trading Signals';
+
+  @override
+  String get liveTradingSignalsDesc =>
+      'Real-time cloud analytics delivering high-probability, trend-following strategies with adaptive precision and emotion-free execution.';
+
+  @override
+  String get trendFollowing => 'Trend-Following';
+
+  @override
+  String get realtime => 'Real-time';
+
+  @override
+  String get orderExplanationEngineTitle => 'Order Explanation Engine';
+
+  @override
+  String get orderExplanationEngineDesc =>
+      'Explains trade setups in simple terms — showing how confluences form, why entries are made, and helping traders learn from each decision.';
+
+  @override
+  String get transparent => 'Transparent';
+
+  @override
+  String get educational => 'Educational';
+
+  @override
+  String get logical => 'Logical';
+
+  @override
+  String get transparentRealPerformanceTitle =>
+      'Transparent - Real Performance';
+
+  @override
+  String get transparentRealPerformanceDesc =>
+      'See real data on signal accuracy, success rate, and profitability — verified and traceable in every trade';
+
+  @override
+  String get results => 'Results';
+
+  @override
+  String get performanceTracking => 'Performance-Tracking';
+
+  @override
+  String get accurate => 'Accurate';
+
+  @override
+  String get predictiveAccuracy => 'Predictive Accuracy';
+
+  @override
+  String get improvementInProfitability => 'Improvement in Profitability';
+
+  @override
+  String get improvedRiskManagement => 'Improved Risk Management';
+
+  @override
+  String get signalsPerformanceTitle => 'Signals Performance';
+
+  @override
+  String get riskToRewardRatio => 'Risk-to-Reward Ratio';
+
+  @override
+  String get howRiskComparesToReward => 'How risk compares to reward';
+
+  @override
+  String get profitLossOverview => 'Profit/Loss Overview';
+
+  @override
+  String get netGainVsLoss => 'Net gain vs loss';
+
+  @override
+  String get winRate => 'Win Rate';
+
+  @override
+  String get percentageOfWinningTrades => 'Percentage of winning trades';
+
+  @override
+  String get accuracyRate => 'Accuracy Rate';
+
+  @override
+  String get howPreciseOurSignalsAre => 'How precise our signals are';
+
+  @override
+  String get realtimeMarketAnalysis => 'Real-Time Market Analysis';
+
+  @override
+  String get realtimeMarketAnalysisDesc =>
+      'Our AI monitors the market continuously, identifying technical convergence zones and reliable breakout points so you can enter trades at the right moment.';
+
+  @override
+  String get saveTimeOnAnalysis => 'Save Time on Analysis';
+
+  @override
+  String get saveTimeOnAnalysisDesc =>
+      'No more hours spent reading charts. Receive tailored investment strategies in just minutes a day.';
+
+  @override
+  String get minimizeEmotionalTrading => 'Minimize Emotional Trading';
+
+  @override
+  String get minimizeEmotionalTradingDesc =>
+      'With smart alerts, risk detection, and data-driven signals not emotions you stay disciplined and in control of every decision.';
+
+  @override
+  String get seizeEveryOpportunity => 'Seize Every Opportunity';
+
+  @override
+  String get seizeEveryOpportunityDesc =>
+      'Timely strategy updates delivered straight to your inbox ensure you ride market trends at the perfect time.';
+
+  @override
+  String get minvestAiCoreValueTitle => 'Minvest AI- Core value';
+
+  @override
+  String get minvestAiCoreValueDesc =>
+      'AI analyzes real-time market data continuously, filtering insights to identify fast, accurate investment opportunities';
+
+  @override
+  String get frequentlyAskedQuestions => 'Frequently Asked Questions';
+
+  @override
+  String get maximizeResultsTitle =>
+      'Maximize your results with Minvest AI advanced market analysis and precision-filtered signals';
+
+  @override
+  String get elevateTradingWithAiStrategies =>
+      'Elevate your trading with AI-enhanced strategies crafted for consistency and clarity';
+
+  @override
+  String get winMoreWithAiSignalsTitle =>
+      'Win More with AI-Powered Signals\nin Every Market';
+
+  @override
+  String get winMoreWithAiSignalsDesc =>
+      'Our multi-market AI scans Forex, Crypto, and Metals in real-time,\n\' \'delivering expert-validated trading signals —\n\' \'with clear entry, stop-loss, and take-profit levels';
+
+  @override
+  String get buyLimit => 'Buy limit';
+
+  @override
+  String get sellLimit => 'Sell limit';
+
+  @override
+  String get smarterToolsTitle => 'Smarter Tools - Better Investments';
+
+  @override
+  String get smarterToolsDesc =>
+      'Discover the features that help you minimize risks, seize opportunities, and grow your wealth';
+
+  @override
+  String get performanceOverviewTitle => 'Performance Overview';
+
+  @override
+  String get performanceOverviewDesc =>
+      'Our multi-market AI scans Forex, Crypto, and Metals in real-time, delivering expert-validated trading signals - with clear entry, stop-loss, and take-profit levels';
+
+  @override
+  String get totalProfit => 'Total Profit';
+
+  @override
+  String get completionSignal => 'Completion signal';
+
+  @override
+  String get onDemandFinancialExpertTitle => 'Your On-Demand Financial Expert';
+
+  @override
+  String get onDemandFinancialExpertDesc =>
+      'AI platform suggests trading signals - self-learning, analyses the market 24/7, unaffected by emotions. Minvest has supported over 10,000 financial analysts\nin their journey to find accurate, stable, and easy-to-apply signals';
+
+  @override
+  String get aiPoweredSignalPlatform => 'AI-Powered Trading Signal Platform';
+
+  @override
+  String get selfLearningSystems =>
+      'Self-Learning Systems, Sharper Insights, Stronger Trades';
+
+  @override
+  String get emotionlessExecution =>
+      'Emotionless Execution For Smarter,\nMore Disciplined Trading';
+
+  @override
+  String get analysingMarket247 => 'Analysing the market 24/7';
+
+  @override
+  String get maximizeResultsFeaturesTitle =>
+      'Maximize your results with Minvest AI\nadvanced market analysis and precision-filtered signals';
+
+  @override
+  String get minvestAiRegistrationDesc =>
+      'Minvest AI registration is now open — spots may close soon as we review and approve new members';
+
+  @override
+  String get currencyPairs => 'Currency pairs';
+
+  @override
+  String get allCurrencyPairs => 'All Currency pairs';
+
+  @override
+  String get dateRange => 'Date Range';
+
+  @override
+  String get selectDateRange => 'Select Date Range';
+
+  @override
+  String get allAssets => 'All Assets';
+
+  @override
+  String get asset => 'Asset';
+
+  @override
+  String get tokenExpired => 'Token expired';
+
+  @override
+  String get tokenLimitReachedDesc =>
+      'You have used up your 10 free tokens today. Upgrade your package to view more signals.';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String get created => 'Created';
+
+  @override
+  String get detail => 'Detail';
+
+  @override
+  String get performanceOverview => 'Performance Overview';
+
+  @override
+  String get totalProfitPips => 'Total Profit (Pips)';
+
+  @override
+  String get winRatePercent => 'Win Rate (%)';
+
+  @override
+  String get comingSoon => 'Coming soon';
+
+  @override
+  String get errorLoadingHistory => 'Error loading history';
+
+  @override
+  String get noHistoryAvailable => 'No signal history available';
+
+  @override
+  String get previous => 'Previous';
+
+  @override
+  String get page => 'Page';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get timeGmt7 => 'Time (GMT +7)';
+
+  @override
+  String get orders => 'Orders';
+
+  @override
+  String get pips => 'Pips';
+
+  @override
+  String get smallScreenRotationHint =>
+      'Small screen: rotate landscape or scroll horizontally to view the full table.';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get signalsWillAppearHere => 'Signals will appear here when available';
+
+  @override
+  String get pricing => 'Pricing';
+
+  @override
+  String get choosePlanSubtitle => 'Choose a plan that works for you';
+
+  @override
+  String get financialNewsHub => 'Financial News Hub';
+
+  @override
+  String get financialNewsHubDesc =>
+      'Critical updates. Market reactions. No noise – just what investors need to know.';
+
+  @override
+  String get newsTabAllArticles => 'All Articles';
+
+  @override
+  String get newsTabInvestor => 'Investor';
+
+  @override
+  String get newsTabKnowledge => 'Knowledge';
+
+  @override
+  String get newsTabTechnicalAnalysis => 'Technical Analysis';
+
+  @override
+  String noArticlesForCategory(Object category) {
+    return 'No articles for category $category';
+  }
+
+  @override
+  String get mostPopular => 'Most popular';
+
+  @override
+  String get noPosts => 'No posts';
+
+  @override
+  String get relatedArticles => 'Related articles';
+
+  @override
+  String get contactInfoSentSuccess => 'Contact information sent successfully.';
+
+  @override
+  String contactInfoSentFailed(Object error) {
+    return 'Failed to send information: $error';
+  }
+
+  @override
+  String get contactPageSubtitle =>
+      'Have questions or need AI solutions? Let us know by filling out the form, and we\'ll be in touch!';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get firstName => 'First Name';
+
+  @override
+  String get enterFirstName => 'Enter First Name';
+
+  @override
+  String get lastName => 'Last Name';
+
+  @override
+  String get enterLastName => 'Enter Last Name';
+
+  @override
+  String get whatAreYourConcerns => 'What Are Your Concerns?';
+
+  @override
+  String get writeConcernsHere => 'Write Concerns Here...';
+
+  @override
+  String pleaseEnter(Object field) {
+    return 'Please enter $field';
+  }
+
+  @override
+  String get faqQuestion1 => 'Do the signals ensure a 100% success rate?';
+
+  @override
+  String get faqAnswer1 =>
+      'While no signal can be guaranteed 100%, Minvest AI strives to maintain a stable 60–80% success rate, supported by detailed analysis and risk management so you can make the final decision with greater confidence.';
+
+  @override
+  String get faqQuestion2 =>
+      'If I don’t want to deposit right away, can I still receive signal suggestions?';
+
+  @override
+  String get faqAnswer2 =>
+      'Yes. Simply create an Exness account through the Minvest link, and you’ll get access to our free demo signal group (Community VIP).';
+
+  @override
+  String get faqQuestion3 =>
+      'If I’ve signed up but haven’t received any signals, what steps should I take?';
+
+  @override
+  String get faqAnswer3 =>
+      'Processing is typically automatic. If you still don’t see any signal suggestions, please contact us via Whatsapp for instant assistance.';
+
+  @override
+  String get faqQuestion4 =>
+      'Can I still join if I don’t sign up for an Exness account?';
+
+  @override
+  String get faqAnswer4 =>
+      'Please contact us via WhatsApp or Live Chat for assistance.';
+
+  @override
+  String get priceLevels => 'Price Levels';
+
+  @override
+  String get capitalManagement => 'Capital Management';
+
+  @override
+  String freeSignalsLeft(Object count) {
+    return '$count free signals left';
+  }
+
+  @override
+  String get unlimitedSignals => 'Unlimited signals';
+
+  @override
+  String get goBack => 'Go back';
+
+  @override
+  String get goldPlan => 'Gold Plan';
+
+  @override
+  String get perMonth => '/month';
+
+  @override
+  String get continuouslyUpdating => 'Continuously updating market data 24/7';
+
+  @override
+  String get providingBestSignals => 'Providing the best signals in real time';
+
+  @override
+  String get includesEntrySlTp => 'Includes Entry, SL, TP';
+
+  @override
+  String get detailedAnalysis =>
+      'Detailed analysis and evaluation of each signal';
+
+  @override
+  String get realTimeNotifications => 'Real-time notifications via email';
+
+  @override
+  String get signalPerformanceStats => 'Signal performance statistics';
+
+  @override
+  String get enterpriseCodeDetails =>
+      'Enterprise code: 0107136243 is issued by the Hanoi Department of Finance on 24/11/2015; 6th amendment registered by the Hanoi Department of Finance on 05/08/2025.';
+
+  @override
+  String get addressDetails =>
+      'Address: C2810, 18th Floor, C2 Building, HH Lot, Dong Nam Urban Area, Tran Duy Hung St., Yen Hoa Ward, Hanoi, Vietnam.';
+
+  @override
+  String get pagesTitle => 'Pages';
+
+  @override
+  String get legalRegulatoryTitle => 'Legal & Regulatory';
+
+  @override
+  String get termsOfRegistration => 'Terms Of Registration';
+
+  @override
+  String get operatingPrinciples => 'Operating Principles';
+
+  @override
+  String get termsConditions => 'Terms & Conditions';
+
+  @override
+  String get contactTitle => 'Contact';
+
+  @override
+  String get navFeatures => 'Features';
+
+  @override
+  String get navNews => 'News';
 
   @override
   String get tp1Hit => 'TP1 Hit';
@@ -569,26 +1067,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signalClosed => 'Closed';
 
   @override
-  String get contactToUpgrade => 'Contact to upgrade';
-
-  @override
-  String get noNotificationsYet => 'No notifications yet.';
-
-  @override
-  String daysAgo(int count) {
-    return '$count days ago';
-  }
-
-  @override
-  String hoursAgo(int count) {
-    return '$count hours ago';
-  }
-
-  @override
-  String minutesAgo(int count) {
-    return '$count minutes ago';
-  }
-
-  @override
-  String get justNow => 'Just now';
+  String get errorLoadingPackages => 'Error Loading Packages';
 }

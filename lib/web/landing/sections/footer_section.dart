@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/text_styles.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
@@ -28,12 +29,12 @@ class FooterSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Enterprise code: 0107136243 is issued by the Hanoi Department of Finance on 24/11/2015; 6th amendment registered by the Hanoi Department of Finance on 05/08/2025.',
+            AppLocalizations.of(context)!.enterpriseCodeDetails,
             style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Address: C2810, 18th Floor, C2 Building, HH Lot, Dong Nam Urban Area, Tran Duy Hung St., Yen Hoa Ward, Hanoi, Vietnam.)',
+            AppLocalizations.of(context)!.addressDetails,
             style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
           ),
         ],
@@ -42,31 +43,31 @@ class FooterSection extends StatelessWidget {
       final pagesCol = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Pages', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(AppLocalizations.of(context)!.pagesTitle, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: AppSpacing.sm),
-          _navLink(context, 'Features', '/features'),
-          _navLink(context, 'AI Signals', '/ai-signals'),
-          _navLink(context, 'Pricing', '/pricing'),
-          _navLink(context, 'News', '/news'),
-          _navLink(context, 'Contact Us', '/contact-us'),
+          _navLink(context, AppLocalizations.of(context)!.feature, '/features'),
+          _navLink(context, AppLocalizations.of(context)!.aiSignal, '/ai-signals'),
+          _navLink(context, AppLocalizations.of(context)!.pricing, '/pricing'),
+          _navLink(context, AppLocalizations.of(context)!.newAnnouncement, '/news'), // Reusing newAnnouncement for News tab text
+          _navLink(context, AppLocalizations.of(context)!.contactUs, '/contact-us'),
         ],
       );
 
       final legalCol = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Legal & Regulatory', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(AppLocalizations.of(context)!.legalRegulatoryTitle, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: AppSpacing.sm),
-          _textOnlyLink('Terms Of Registration'),
-          _textOnlyLink('Operating Principles'),
-          _textOnlyLink('Terms & Conditions'),
+          _textOnlyLink(context, AppLocalizations.of(context)!.termsOfRegistration),
+          _textOnlyLink(context, AppLocalizations.of(context)!.operatingPrinciples),
+          _textOnlyLink(context, AppLocalizations.of(context)!.termsConditions),
         ],
       );
 
       final contactCol = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Contact', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(AppLocalizations.of(context)!.contactTitle, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: 8,
@@ -74,7 +75,7 @@ class FooterSection extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               const Icon(Icons.phone, color: Colors.white, size: 18),
-              Text('+84 969 15 6969', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16)),
+              Text('+84 969 15 6969', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16)), // Number, not localized
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -84,7 +85,7 @@ class FooterSection extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               const Icon(Icons.email, color: Colors.white, size: 18),
-              Text('email@gmail.com', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16)),
+              Text('email@gmail.com', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16)), // Email, not localized
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -154,7 +155,7 @@ class FooterSection extends StatelessWidget {
     );
   }
 
-  Widget _textOnlyLink(String text) {
+  Widget _textOnlyLink(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Text(

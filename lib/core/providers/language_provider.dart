@@ -13,6 +13,15 @@ class LanguageProvider with ChangeNotifier {
 
   Locale? get locale => _locale;
 
+  static const List<Locale> supportedLocales = [
+    Locale('en'),
+    Locale('vi'),
+    Locale('zh'),
+    Locale('fr'),
+    Locale('ja'),
+    Locale('ko'),
+  ];
+
   void setLocale(Locale newLocale) async {
     if (_locale != newLocale) {
       _locale = newLocale;

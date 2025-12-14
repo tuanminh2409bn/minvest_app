@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import '../../theme/colors.dart';
-import '../../theme/content.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/gradients.dart';
 import '../../theme/spacing.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/features/auth/screens/welcome/welcome_screen.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class LandingNavBar extends StatelessWidget {
   const LandingNavBar({super.key});
@@ -13,6 +15,16 @@ class LandingNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    final l10n = AppLocalizations.of(context)!;
+
+    final List<Map<String, String>> navItems = [
+      {'title': l10n.navFeatures, 'route': '/features'},
+      {'title': l10n.aiSignal, 'route': '/ai-signals'},
+      {'title': l10n.pricing, 'route': '/pricing'},
+      {'title': l10n.navNews, 'route': '/news'},
+      {'title': l10n.contactUs, 'route': '/contact-us'},
+    ];
+
     return LayoutBuilder(builder: (context, constraints) {
       final bool stacked = constraints.maxWidth < 720;
       final double padH = stacked ? 12 : 24;
@@ -32,25 +44,17 @@ class LandingNavBar extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            ...LandingContent.navItems.map(
+            ...navItems.map(
               (item) => Padding(
                 padding: EdgeInsets.symmetric(horizontal: navSpacing / 2),
                 child: InkWell(
                   onTap: () {
-                    if (item == 'Features') {
-                      Navigator.of(context).pushNamed('/features');
-                    } else if (item == 'AI Signals') {
-                      Navigator.of(context).pushNamed('/ai-signals');
-                    } else if (item == 'Pricing') {
-                      Navigator.of(context).pushNamed('/pricing');
-                    } else if (item == 'News') {
-                      Navigator.of(context).pushNamed('/news');
-                    } else if (item == 'Contact Us') {
-                      Navigator.of(context).pushNamed('/contact-us');
+                    if (item['route'] != null) {
+                      Navigator.of(context).pushNamed(item['route']!);
                     }
                   },
                   child: Text(
-                    item,
+                    item['title']!,
                     style: AppTextStyles.h3.copyWith(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w700,
@@ -68,10 +72,11 @@ class LandingNavBar extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (user == null) ...[
-            _ctaButton('Get Signals now'),
+            _ctaButton(context, l10n.getSignalsNow),
             const SizedBox(width: AppSpacing.sm),
             _outlineButton(
-              'Sign in',
+              context,
+              l10n.signIn,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const WelcomeScreen()),
               ),
@@ -83,18 +88,7 @@ class LandingNavBar extends StatelessWidget {
             ),
           ],
           const SizedBox(width: AppSpacing.sm),
-          Container(
-            width: 44,
-            height: 30,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.white24),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image.asset('assets/images/us_flag.png', fit: BoxFit.cover),
-            ),
-          ),
+          const _LanguageSelector(),
         ],
       );
 
@@ -116,7 +110,8 @@ class LandingNavBar extends StatelessWidget {
       );
     });
   }
-  Widget _ctaButton(String text) {
+
+  Widget _ctaButton(BuildContext context, String text) {
     return Builder(
       builder: (context) => GestureDetector(
         onTap: () => Navigator.of(context).pushNamed('/signup'),
@@ -134,7 +129,7 @@ class LandingNavBar extends StatelessWidget {
             ],
           ),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               color: Colors.transparent,
@@ -142,7 +137,7 @@ class LandingNavBar extends StatelessWidget {
             child: Text(
               text,
               style: AppTextStyles.h3.copyWith(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
               ),
@@ -153,7 +148,7 @@ class LandingNavBar extends StatelessWidget {
     );
   }
 
-  Widget _outlineButton(String text, {VoidCallback? onTap}) {
+  Widget _outlineButton(BuildContext context, String text, {VoidCallback? onTap}) {
     return Builder(
       builder: (context) => GestureDetector(
         onTap: onTap,
@@ -164,7 +159,7 @@ class LandingNavBar extends StatelessWidget {
             gradient: AppGradients.cta,
           ),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               color: Colors.black,
@@ -172,7 +167,7 @@ class LandingNavBar extends StatelessWidget {
             child: Text(
               text,
               style: AppTextStyles.h3.copyWith(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
               ),
@@ -229,6 +224,113 @@ class LandingNavBar extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _LanguageSelector extends StatelessWidget {
+  const _LanguageSelector();
+
+  String _getFlagAsset(String code) {
+    switch (code) {
+      case 'en': return 'assets/images/us_flag.png';
+      case 'vi': return 'assets/images/vn_flag.png';
+      case 'ja': return 'assets/images/jp_flag.png';
+      case 'fr': return 'assets/images/fr_flag.png';
+      case 'zh': return 'assets/images/cn_flag.png';
+      case 'ko': return 'assets/images/kr_flag.png';
+      default: return '';
+    }
+  }
+
+  Widget _buildFlag(String code) {
+    final asset = _getFlagAsset(code);
+    if (asset.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Image.asset(asset, width: 24, height: 16, fit: BoxFit.cover),
+      );
+    }
+    return Text(
+      code.toUpperCase(),
+      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LanguageProvider>(
+      builder: (context, provider, child) {
+        return PopupMenuButton<Locale>(
+          onSelected: (Locale newLocale) {
+            provider.setLocale(newLocale);
+          },
+          offset: const Offset(0, 40),
+          color: const Color(0xFF1E1E1E),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          itemBuilder: (BuildContext context) {
+            return LanguageProvider.supportedLocales.map((Locale locale) {
+              return PopupMenuItem<Locale>(
+                value: locale,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32, 
+                      height: 20, 
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white12),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: _buildFlag(locale.languageCode),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      _getLanguageName(locale.languageCode),
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ],
+                ),
+              );
+            }).toList();
+          },
+          child: Container(
+            height: 32,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.white24),
+              color: Colors.white.withOpacity(0.05),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 32, 
+                  height: 20, 
+                  alignment: Alignment.center,
+                  child: _buildFlag(provider.locale?.languageCode ?? 'en'),
+                ),
+                const SizedBox(width: 6),
+                const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 12),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _getLanguageName(String code) {
+    switch (code) {
+      case 'en': return 'English';
+      case 'vi': return 'Tiếng Việt';
+      case 'zh': return '中文';
+      case 'fr': return 'Français';
+      case 'ja': return '日本語';
+      case 'ko': return '한국어';
+      default: return code.toUpperCase();
+    }
   }
 }
 
