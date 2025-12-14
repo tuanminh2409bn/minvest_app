@@ -1,13 +1,14 @@
 import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:minvest_forex_app/web/theme/colors.dart';
 import 'package:minvest_forex_app/web/theme/spacing.dart';
 import 'package:minvest_forex_app/web/theme/text_styles.dart';
 import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
 import 'package:minvest_forex_app/web/theme/gradients.dart';
+import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 
 class FeaturesPage extends StatelessWidget {
   const FeaturesPage({super.key});
@@ -16,6 +17,8 @@ class FeaturesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: const WebChatBubble(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
@@ -92,7 +95,7 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
       child: Column(
         children: [
           Text(
-            'Win More with AI-Powered Signals\nin Every Market',
+            AppLocalizations.of(context)!.winMoreWithAiSignalsTitle,
             style: AppTextStyles.h1.copyWith(fontSize: 28, fontWeight: FontWeight.w700),
             textAlign: TextAlign.center,
           ),
@@ -157,9 +160,7 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Our multi-market AI scans Forex, Crypto, and Metals in real-time,\n'
-                'delivering expert-validated trading signals —\n'
-                'with clear entry, stop-loss, and take-profit levels.',
+            AppLocalizations.of(context)!.winMoreWithAiSignalsDesc,
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
@@ -184,7 +185,7 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
                     color: Colors.black,
                   ),
                   child: Text(
-                    'Get Signals now',
+                    AppLocalizations.of(context)!.startNow,
                     style: AppTextStyles.h3.copyWith(fontSize: 16, color: Colors.white),
                   ),
                 ),
@@ -284,7 +285,7 @@ class _GlowBackground extends StatelessWidget {
 class _PhoneMockup extends StatelessWidget {
   final void Function(int index) onHoverStart;
   final void Function(int index) onHoverEnd;
-  const _PhoneMockup({required this.onHoverStart, required this.onHoverEnd});
+  const _PhoneMockup({super.key, required this.onHoverStart, required this.onHoverEnd});
 
   @override
   Widget build(BuildContext context) {
@@ -366,19 +367,19 @@ class _PhoneScreenHolder extends StatelessWidget {
 class _PhoneScreen extends StatelessWidget {
   final void Function(int index) onHoverStart;
   final void Function(int index) onHoverEnd;
-  final List<_SignalRowData> rows = const [
-    _SignalRowData(icon: Icons.water_drop, pair: 'WTI', side: 'Buy limit'),
-    _SignalRowData(icon: Icons.currency_bitcoin, pair: 'XAU/USD', side: 'Sell limit'),
-    _SignalRowData(icon: Icons.currency_exchange, pair: 'DXY/USDT', side: 'Buy limit'),
-    _SignalRowData(icon: Icons.account_balance, pair: 'XAU/USD', side: 'Sell limit'),
-    _SignalRowData(icon: Icons.euro, pair: 'EUR/USD', side: 'Buy limit'),
-    _SignalRowData(icon: Icons.currency_bitcoin, pair: 'BTC/USDT', side: 'Sell limit'),
-  ];
 
   const _PhoneScreen({required this.onHoverStart, required this.onHoverEnd});
 
   @override
   Widget build(BuildContext context) {
+    final List<_SignalRowData> rows = [
+      _SignalRowData(icon: Icons.water_drop, pair: 'WTI', side: AppLocalizations.of(context)!.buyLimit),
+      _SignalRowData(icon: Icons.currency_bitcoin, pair: 'XAU/USD', side: AppLocalizations.of(context)!.sellLimit),
+      _SignalRowData(icon: Icons.currency_exchange, pair: 'DXY/USDT', side: AppLocalizations.of(context)!.buyLimit),
+      _SignalRowData(icon: Icons.account_balance, pair: 'XAU/USD', side: AppLocalizations.of(context)!.sellLimit),
+      _SignalRowData(icon: Icons.euro, pair: 'EUR/USD', side: AppLocalizations.of(context)!.buyLimit),
+      _SignalRowData(icon: Icons.currency_bitcoin, pair: 'BTC/USDT', side: AppLocalizations.of(context)!.sellLimit),
+    ];
     return LayoutBuilder(
       builder: (context, constraints) {
         final horizontalPad = constraints.maxWidth * 0.035; // co giãn theo khung
@@ -514,13 +515,13 @@ class SmartToolsSection extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'Smarter Tools - Better Investments',
+            AppLocalizations.of(context)!.smarterToolsTitle,
             style: AppTextStyles.h1.copyWith(fontSize: 30, fontWeight: FontWeight.w700),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Discover the features that help you minimize risks, seize opportunities, and grow your wealth.',
+            AppLocalizations.of(context)!.smarterToolsDesc,
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 14),
             textAlign: TextAlign.center,
           ),
@@ -578,12 +579,12 @@ class SmartToolsSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Performance Overview',
+                        AppLocalizations.of(context)!.performanceOverviewTitle,
                         style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        'Our multi-market AI scans Forex, Crypto, and Metals in real-time, delivering expert-validated trading signals - with clear entry, stop-loss, and take-profit levels.',
+                        AppLocalizations.of(context)!.performanceOverviewDesc,
                         style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
                       ),
                       const SizedBox(height: 24),
@@ -592,43 +593,43 @@ class SmartToolsSection extends StatelessWidget {
                           final bool isNarrow = constraints.maxWidth < 720;
                           if (isNarrow) {
                             return Column(
-                              children: const [
+                              children: [
                                 _StatCard(
-                                  title: 'Total Profit',
+                                  title: AppLocalizations.of(context)!.totalProfit,
                                   value: '9,250.8 pips',
                                 ),
                                 SizedBox(height: 12),
                                 _StatCard(
-                                  title: 'Completion signal',
+                                  title: AppLocalizations.of(context)!.completionSignal,
                                   value: '507',
                                 ),
                                 SizedBox(height: 12),
                                 _StatCard(
-                                  title: 'Win Rate',
+                                  title: AppLocalizations.of(context)!.winRate,
                                   value: '62.7%',
                                 ),
                               ],
                             );
                           }
                           return Row(
-                            children: const [
+                            children: [
                               Expanded(
                                 child: _StatCard(
-                                  title: 'Total Profit',
+                                  title: AppLocalizations.of(context)!.totalProfit,
                                   value: '9,250.8 pips',
                                 ),
                               ),
                               SizedBox(width: 16),
                               Expanded(
                                 child: _StatCard(
-                                  title: 'Completion signal',
+                                  title: AppLocalizations.of(context)!.completionSignal,
                                   value: '507',
                                 ),
                               ),
                               SizedBox(width: 16),
                               Expanded(
                                 child: _StatCard(
-                                  title: 'Win Rate',
+                                  title: AppLocalizations.of(context)!.winRate,
                                   value: '62.7%',
                                 ),
                               ),
@@ -701,13 +702,13 @@ class YourOnDemandSection extends StatelessWidget {
         Column(
           children: [
             Text(
-              'Your On-Demand Financial Expert',
+              AppLocalizations.of(context)!.onDemandFinancialExpertTitle,
               style: AppTextStyles.h1.copyWith(fontSize: 26, fontWeight: FontWeight.w700),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'AI platform suggests trading signals - self-learning, analyses the market 24/7, unaffected by emotions. Minvest has supported over 10,000 financial analysts\nin their journey to find accurate, stable, and easy-to-apply signals.',
+              AppLocalizations.of(context)!.onDemandFinancialExpertDesc,
               style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
               textAlign: TextAlign.center,
             ),
@@ -843,7 +844,7 @@ class _LaptopCards extends StatelessWidget {
                 SizedBox(
                   width: cardWidth,
                   child: _AnimatedInfoCard(
-                    text: 'AI-Powered Trading Signal Platform',
+                    text: AppLocalizations.of(context)!.aiPoweredSignalPlatform,
                     slideFromLeft: true,
                     width: cardWidth,
                     height: cardHeight,
@@ -853,7 +854,7 @@ class _LaptopCards extends StatelessWidget {
                 SizedBox(
                   width: cardWidth,
                   child: _AnimatedInfoCard(
-                    text: 'Self-Learning Systems, Sharper Insights, Stronger Trades',
+                    text: AppLocalizations.of(context)!.selfLearningSystems,
                     slideFromLeft: false,
                     width: cardWidth,
                     height: cardHeight,
@@ -863,7 +864,7 @@ class _LaptopCards extends StatelessWidget {
                 SizedBox(
                   width: cardWidth,
                   child: _AnimatedInfoCard(
-                    text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading',
+                    text: AppLocalizations.of(context)!.emotionlessExecution,
                     slideFromLeft: true,
                     width: cardWidth,
                     height: cardHeight,
@@ -873,7 +874,7 @@ class _LaptopCards extends StatelessWidget {
                 SizedBox(
                   width: cardWidth,
                   child: _AnimatedInfoCard(
-                    text: 'Analysing the market 24/7',
+                    text: AppLocalizations.of(context)!.analysingMarket247,
                     slideFromLeft: false,
                     width: cardWidth,
                     height: cardHeight,
@@ -887,17 +888,17 @@ class _LaptopCards extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  _AnimatedInfoCard(text: 'AI-Powered Trading Signal Platform', slideFromLeft: true, width: cardWidth, height: cardHeight),
+                  _AnimatedInfoCard(text: AppLocalizations.of(context)!.aiPoweredSignalPlatform, slideFromLeft: true, width: cardWidth, height: cardHeight),
                   SizedBox(width: 16),
-                  _AnimatedInfoCard(text: 'Self-Learning Systems, Sharper Insights, Stronger Trades', slideFromLeft: false, width: cardWidth, height: cardHeight),
+                  _AnimatedInfoCard(text: AppLocalizations.of(context)!.selfLearningSystems, slideFromLeft: false, width: cardWidth, height: cardHeight),
                 ],
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _AnimatedInfoCard(text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading', slideFromLeft: true, width: cardWidth, height: cardHeight),
+                  _AnimatedInfoCard(text: AppLocalizations.of(context)!.emotionlessExecution, slideFromLeft: true, width: cardWidth, height: cardHeight),
                   SizedBox(width: 16),
-                  _AnimatedInfoCard(text: 'Analysing the market 24/7', slideFromLeft: false, width: cardWidth, height: cardHeight),
+                  _AnimatedInfoCard(text: AppLocalizations.of(context)!.analysingMarket247, slideFromLeft: false, width: cardWidth, height: cardHeight),
                 ],
               ),
             ],
@@ -921,7 +922,7 @@ class _LaptopCardsInline extends StatelessWidget {
         SizedBox(
           width: cardWidth,
           child: _AnimatedInfoCard(
-            text: 'AI-Powered Trading Signal Platform',
+            text: AppLocalizations.of(context)!.aiPoweredSignalPlatform,
             slideFromLeft: true,
             width: cardWidth,
             height: cardHeight,
@@ -931,7 +932,7 @@ class _LaptopCardsInline extends StatelessWidget {
         SizedBox(
           width: cardWidth,
           child: _AnimatedInfoCard(
-            text: 'Self-Learning Systems, Sharper Insights, Stronger Trades',
+            text: AppLocalizations.of(context)!.selfLearningSystems,
             slideFromLeft: false,
             width: cardWidth,
             height: cardHeight,
@@ -941,7 +942,7 @@ class _LaptopCardsInline extends StatelessWidget {
         SizedBox(
           width: cardWidth,
           child: _AnimatedInfoCard(
-            text: 'Emotionless Execution For Smarter,\nMore Disciplined Trading',
+            text: AppLocalizations.of(context)!.emotionlessExecution,
             slideFromLeft: true,
             width: cardWidth,
             height: cardHeight,
@@ -951,7 +952,7 @@ class _LaptopCardsInline extends StatelessWidget {
         SizedBox(
           width: cardWidth,
           child: _AnimatedInfoCard(
-            text: 'Analysing the market 24/7',
+            text: AppLocalizations.of(context)!.analysingMarket247,
             slideFromLeft: false,
             width: cardWidth,
             height: cardHeight,
@@ -1088,13 +1089,13 @@ class MaximizeResultsSection extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'Maximize your results with Minvest AI\nadvanced market analysis and precision-filtered signals',
+            AppLocalizations.of(context)!.maximizeResultsFeaturesTitle,
             style: AppTextStyles.h1.copyWith(fontSize: 30, fontWeight: FontWeight.w700),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Minvest AI registration is now open — spots may close soon as we review and approve new members.',
+            AppLocalizations.of(context)!.minvestAiRegistrationDesc,
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -1129,7 +1130,7 @@ class MaximizeResultsSection extends StatelessWidget {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             child: Text(
-              'Get Signals now',
+              AppLocalizations.of(context)!.startNow,
               style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
             ),
           ),

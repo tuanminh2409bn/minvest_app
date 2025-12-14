@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
 import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
 import 'package:provider/provider.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class SignupScreenWeb extends StatefulWidget {
   const SignupScreenWeb({super.key});
@@ -123,7 +124,7 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
                 const SizedBox(height: 24),
                 _SocialSignInButton(
                   icon: Image.asset('assets/images/google_logo.png', height: 20, width: 20),
-                  text: 'Continue with Google',
+                  text: AppLocalizations.of(context)!.continueByGoogle,
                   onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
                 ),
                 const SizedBox(height: 12),

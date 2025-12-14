@@ -8,6 +8,8 @@ import '../theme/text_styles.dart';
 import 'widgets/navbar.dart';
 import 'sections/footer_section.dart';
 import 'news_detail_screen.dart';
+import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -23,10 +25,27 @@ class _NewsPageState extends State<NewsPage> {
 
   String? get _categoryFilter => _selectedTab == 'All Articles' ? null : _selectedTab;
 
+  String _getTabTitle(BuildContext context, String tab) {
+    switch (tab) {
+      case 'All Articles':
+        return AppLocalizations.of(context)!.newsTabAllArticles;
+      case 'Investor':
+        return AppLocalizations.of(context)!.newsTabInvestor;
+      case 'Knowledge':
+        return AppLocalizations.of(context)!.newsTabKnowledge;
+      case 'Technical Analysis':
+        return AppLocalizations.of(context)!.newsTabTechnicalAnalysis;
+      default:
+        return tab;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: const WebChatBubble(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
@@ -39,9 +58,9 @@ class _NewsPageState extends State<NewsPage> {
                   const SizedBox(height: 12),
                   const LandingNavBar(),
                   const SizedBox(height: 32),
-                  _header(),
+                  _header(context),
                   const SizedBox(height: 24),
-                  _categoryTabs(),
+                  _categoryTabs(context),
                   const SizedBox(height: 12),
                   const Divider(color: Colors.white12, height: 1),
                   const SizedBox(height: 24),
@@ -55,6 +74,7 @@ class _NewsPageState extends State<NewsPage> {
                       return _NewsLayout(
                         articles: articles,
                         selectedCategory: _selectedTab,
+                        getTabTitle: (tab) => _getTabTitle(context, tab),
                       );
                     },
                   ),
@@ -69,11 +89,11 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
-  Widget _header() {
+  Widget _header(BuildContext context) {
     return Column(
       children: [
         Text(
-          'Financial News Hub',
+          AppLocalizations.of(context)!.financialNewsHub,
           style: AppTextStyles.h1.copyWith(
             color: Colors.white,
             fontSize: 36,
@@ -83,7 +103,7 @@ class _NewsPageState extends State<NewsPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Critical updates. Market reactions. No noise – just what investors need to know.',
+          AppLocalizations.of(context)!.financialNewsHubDesc,
           style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 14),
           textAlign: TextAlign.center,
         ),
@@ -91,7 +111,7 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
-  Widget _categoryTabs() {
+  Widget _categoryTabs(BuildContext context) {
     return Wrap(
       spacing: 20,
       runSpacing: 10,
@@ -104,7 +124,7 @@ class _NewsPageState extends State<NewsPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
             child: Text(
-              t,
+              _getTabTitle(context, t),
               style: AppTextStyles.body.copyWith(
                 color: isActive ? const Color(0xFF3FA9F5) : Colors.white,
                 fontSize: 14,
@@ -121,7 +141,12 @@ class _NewsPageState extends State<NewsPage> {
 class _NewsLayout extends StatelessWidget {
   final List<NewsArticle> articles;
   final String selectedCategory;
-  const _NewsLayout({required this.articles, required this.selectedCategory});
+  final String Function(String) getTabTitle;
+  const _NewsLayout({
+    required this.articles,
+    required this.selectedCategory,
+    required this.getTabTitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +154,7 @@ class _NewsLayout extends StatelessWidget {
       return Column(
         children: [
           Text(
-            'Chưa có bài viết cho mục $selectedCategory',
+            AppLocalizations.of(context)!.noArticlesForCategory(getTabTitle(selectedCategory)),
             style: AppTextStyles.body.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 24),
@@ -264,7 +289,7 @@ class _FeaturedArticleCard extends StatelessWidget {
                 ),
               const SizedBox(height: 10),
               Text(
-                'Read more →',
+                AppLocalizations.of(context)!.seeDetails,
                 style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 12),
               ),
             ],
@@ -346,7 +371,7 @@ class _ArticleCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Read more →',
+              AppLocalizations.of(context)!.seeDetails,
               style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: bodySize),
             ),
           ],

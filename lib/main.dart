@@ -25,7 +25,7 @@ import 'package:minvest_forex_app/features/chat/providers/chat_provider.dart';
 import 'package:minvest_forex_app/features/chat/screens/support_chat_screen.dart';
 import 'package:minvest_forex_app/features/chat/screens/chat_screen.dart';
 import 'package:minvest_forex_app/features/chat/services/chat_service.dart';
-import 'package:minvest_forex_app/app/main_screen_mobile.dart';
+import 'package:minvest_forex_app/app/main_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'web/landing/features_page.dart';
 import 'web/landing/landing_page.dart';
@@ -250,6 +250,7 @@ class _MyAppState extends State<MyApp> {
             debugShowCheckedModeBanner: false,
             title: 'Minvest Forex App',
             theme: _buildAppTheme(),
+            locale: languageProvider.locale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             routes: {

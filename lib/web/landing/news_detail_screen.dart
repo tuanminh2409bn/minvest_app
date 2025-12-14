@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/features/news/models/news_model.dart';
 import 'package:minvest_forex_app/features/news/services/news_service.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import 'widgets/navbar.dart';
@@ -21,6 +23,8 @@ class NewsDetailScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: const WebChatBubble(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Center(
@@ -40,7 +44,7 @@ class NewsDetailScreen extends StatelessWidget {
                         children: [
                           const Icon(Icons.arrow_back_ios_new, color: Colors.white70, size: 14),
                           const SizedBox(width: 6),
-                          Text('Back', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                          Text(AppLocalizations.of(context)!.returnToHomePage, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
                         ],
                       ),
                     ),
@@ -168,11 +172,7 @@ class _MostPopularList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Most popular',
-          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 12),
+        Text(AppLocalizations.of(context)!.mostPopular, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),), const SizedBox(height: 12),
         StreamBuilder<List<NewsArticle>>(
           stream: newsService.streamNews(limit: 5),
           builder: (context, snapshot) {
@@ -181,7 +181,7 @@ class _MostPopularList extends StatelessWidget {
             }
             final articles = (snapshot.data ?? []).where((a) => a.id != currentId).toList();
             if (articles.isEmpty) {
-              return Text('No posts', style: AppTextStyles.caption.copyWith(color: Colors.white54));
+              return Text(AppLocalizations.of(context)!.noPosts, style: AppTextStyles.caption.copyWith(color: Colors.white54));
             }
             return Column(
               children: articles.map((a) => _PopularItem(article: a)).toList(),
@@ -270,7 +270,7 @@ class _RelatedArticles extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Related articles',
+              AppLocalizations.of(context)!.relatedArticles,
               style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 12),
@@ -351,7 +351,7 @@ class _RelatedCard extends StatelessWidget {
             ),
           const SizedBox(height: 4),
           Text(
-            'Read more →',
+            AppLocalizations.of(context)!.seeDetails,
             style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 11.5),
           ),
         ],

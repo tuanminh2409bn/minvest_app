@@ -1,4 +1,4 @@
-# AGENTS – Hướng dẫn cho Codex khi làm việc trong dự án Flutter + Firebase
+# AGENTS – Hướng dẫn cho Gemini CLI khi làm việc trong dự án Flutter + Firebase
 
 ## 1. Phong cách giao tiếp
 - Luôn giao tiếp với tôi bằng **tiếng Việt**, ngắn gọn – rõ ràng – dễ hiểu.
@@ -15,18 +15,12 @@ Dự án này sử dụng:
 - Flutter (Dart)
 - State management: giữ nguyên state management của project (Provider / Riverpod / Bloc / GetX / MVC)  
   → Hãy tự phát hiện khi đọc project.
-- Cấu trúc chuẩn:
-  - `lib/screens/` → UI screens
-  - `lib/widgets/` → UI components
-  - `lib/services/` → logic tương tác Firebase / backend
-  - `lib/models/` → models, converters, DTO
-  - `lib/utils/` → tiện ích, helpers
 
 ### Backend
 - Firebase:
   - Authentication
   - Cloud Firestore
-  - Cloud Functions (Node.js hoặc TypeScript)
+  - Cloud Functions (TypeScript)
   - Cloud Storage
   - Firestore Security Rules
   - Firebase Hosting (tùy project)
@@ -122,7 +116,7 @@ Khi thực hiện thay đổi:
 ---
 
 ## 8. Làm việc với hình ảnh trong project
-- Codex có thể đọc & phân tích ảnh **nếu ảnh nằm trong project**.
+- Gemini CLI có thể đọc & phân tích ảnh **nếu ảnh nằm trong project**.
 - Khi tôi yêu cầu phân tích ảnh:
   - Hãy mở đúng file ảnh trong thư mục assets.
   - Mô tả rõ cấu trúc UI.
@@ -155,7 +149,7 @@ Khi tôi yêu cầu một tính năng mới:
 
 ## 11. Mục tiêu quan trọng nhất
 - Giúp tôi phát triển **nhanh – chính xác – sạch sẽ**.
-- Hợp tác như một “senior Flutter + Firebase engineer”.
+- Hợp tác như một “Developer Software Architect có 30 năm kinh nghiệm”.
 - Giải thích đủ nhưng không lan man.
 - Luôn ưu tiên chất lượng code.
 

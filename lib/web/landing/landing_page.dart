@@ -16,6 +16,8 @@ import 'widgets/navbar.dart';
 import 'widgets/gradient_button.dart';
 import 'sections/pricing_section.dart';
 import 'sections/footer_section.dart';
+import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
@@ -24,6 +26,8 @@ class LandingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: const WebChatBubble(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isTablet = constraints.maxWidth < Breakpoints.desktop && constraints.maxWidth >= Breakpoints.tablet;
@@ -274,7 +278,7 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                   child: FadeTransition(
                     opacity: _titleFade,
                     child: Text(
-                      'Guiding Traders & Growing Portfolios',
+                      AppLocalizations.of(context)!.heroTitle,
                       textAlign: TextAlign.center,
                       style: AppTextStyles.h1.copyWith(fontSize: 44),
                     ),
@@ -286,7 +290,7 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                   child: FadeTransition(
                     opacity: _subtitleFade,
                     child: Text(
-                      'The Ultimate AI Engine – Designed by Expert Traders.',
+                      AppLocalizations.of(context)!.heroSubtitle,
                       textAlign: TextAlign.center,
                       style: AppTextStyles.body.copyWith(fontSize: 16, color: Colors.white70),
                     ),
@@ -303,7 +307,7 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                       alignment: WrapAlignment.center,
                       children: [
                         GradientButton(
-                          label: 'Get Signal Now',
+                          label: AppLocalizations.of(context)!.getSignalsNow,
                           width: 188,
                           height: 38,
                           borderRadius: 6,
@@ -338,13 +342,8 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                                   color: Colors.black,
                                 ),
                                 alignment: Alignment.center,
-                                child: Text(
-                                  'Free Trial',
-                                  style: AppTextStyles.body.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 14,
-                                  ),
+                                child: Text(AppLocalizations.of(context)!.freeTrial,
+                                  style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
                                 ),
                               ),
                             ),
@@ -383,13 +382,13 @@ class HeroSubtitleSection extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'Global AI Innovation for the Next Generation of Trading Intelligence',
+            AppLocalizations.of(context)!.globalAiInnovationTitle,
             textAlign: TextAlign.center,
             style: AppTextStyles.h3.copyWith(color: Colors.white),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Transforming traditional trading with cloud-powered AI signals — adaptive to real-time market news and trends for faster, more precise, and emotion-free performance.',
+            AppLocalizations.of(context)!.globalAiInnovationDesc,
             textAlign: TextAlign.center,
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
           ),
@@ -485,7 +484,7 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection> with SingleTick
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        'AI Signals',
+        AppLocalizations.of(context)!.aiSignal,
         style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
       ),
     );
@@ -966,8 +965,14 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
   late final Animation<double> _fadeIn;
   bool _hasPlayed = false;
   late final AnimationController _typeController;
+  late String _fullText; // Changed to late String
   String _typedText = '';
-  static const String _fullText = 'LIVE – 24/7 AI Trading Signals';
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fullText = AppLocalizations.of(context)!.liveTradingSignalsTitle;
+  }
 
   @override
   void initState() {
@@ -1024,12 +1029,12 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _chip(context, 'AI Signals'),
+                  _chip(context, AppLocalizations.of(context)!.aiSignal),
                   const SizedBox(height: AppSpacing.lg),
                   _buildTypingTitle(),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'Real-time cloud analytics delivering high-probability, trend-following strategies with adaptive precision and emotion-free execution.',
+                    AppLocalizations.of(context)!.liveTradingSignalsDesc,
                     style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18),
                   ),
                   const SizedBox(height: AppSpacing.lg),
@@ -1037,9 +1042,9 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
                     spacing: AppSpacing.md,
                     runSpacing: AppSpacing.sm,
                     children: [
-                      _outlinedChip('AI Signals'),
-                      _outlinedChip('Trend-Following'),
-                      _outlinedChip('Real-time'),
+                      _outlinedChip(AppLocalizations.of(context)!.aiSignal),
+                      _outlinedChip(AppLocalizations.of(context)!.trendFollowing),
+                      _outlinedChip(AppLocalizations.of(context)!.realtime),
                     ],
                   ),
                 ],
@@ -1243,8 +1248,14 @@ class _OrderCard extends StatefulWidget {
 
 class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
   late final AnimationController _typeController;
+  late String _fullText; // Changed to late String
   String _typedText = '';
-  static const String _fullText = 'Order Explanation Engine';
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fullText = AppLocalizations.of(context)!.orderExplanationEngineTitle;
+  }
 
   @override
   void initState() {
@@ -1283,7 +1294,7 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
           _buildTypingTitle(),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Explains trade setups in simple terms — showing how confluences form, why entries are made, and helping traders learn from each decision.',
+            AppLocalizations.of(context)!.orderExplanationEngineDesc,
             style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 17),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -1291,9 +1302,9 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
             spacing: AppSpacing.md,
             runSpacing: AppSpacing.sm,
             children: [
-              _pill('Transparent'),
-              _pill('Educational'),
-              _pill('Logical'),
+              _pill(AppLocalizations.of(context)!.transparent),
+              _pill(AppLocalizations.of(context)!.educational),
+              _pill(AppLocalizations.of(context)!.logical),
             ],
           ),
         ],
@@ -1335,7 +1346,7 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
             color: Colors.black,
           ),
           child: Text(
-            'AI Signals',
+            AppLocalizations.of(context)!.aiSignal,
             style: AppTextStyles.body.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,
@@ -1380,9 +1391,15 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
   late final Animation<double> _fadeIn;
   bool _hasPlayed = false;
   late final AnimationController _typeController;
+  late String _fullText; // Changed to late String
   String _typedText = '';
   bool _typingStarted = false;
-  static const String _fullText = 'Transparent - Real Performance';
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fullText = AppLocalizations.of(context)!.transparentRealPerformanceTitle;
+  }
 
   @override
   void initState() {
@@ -1442,7 +1459,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
                 _buildTypingTitle(),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'See real data on signal accuracy, success rate, and profitability — verified and traceable in every trade',
+                  AppLocalizations.of(context)!.transparentRealPerformanceDesc,
                   style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 17),
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -1450,9 +1467,9 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
                   spacing: AppSpacing.md,
                   runSpacing: AppSpacing.sm,
                   children: [
-                    _TransparentCard()._pill('Results'),
-                    _TransparentCard()._pill('Performance-Tracking'),
-                    _TransparentCard()._pill('Accurate'),
+                    _TransparentCard()._pill(AppLocalizations.of(context)!.results),
+                    _TransparentCard()._pill(AppLocalizations.of(context)!.performanceTracking),
+                    _TransparentCard()._pill(AppLocalizations.of(context)!.accurate),
                   ],
                 ),
               ],
@@ -1547,10 +1564,10 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard> with SingleTickerPro
                 const SizedBox(height: AppSpacing.lg),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    _Metric(label: 'Predictive Accuracy', value: '+81%'),
-                    _Metric(label: 'Improvement in Profitability', value: '+37%'),
-                    _Metric(label: 'Improved Risk Management', value: '+63%'),
+                  children: [
+                    _Metric(label: AppLocalizations.of(context)!.predictiveAccuracy, value: '+81%'),
+                    _Metric(label: AppLocalizations.of(context)!.improvementInProfitability, value: '+37%'),
+                    _Metric(label: AppLocalizations.of(context)!.improvedRiskManagement, value: '+63%'),
                   ],
                 ),
               ],
@@ -1777,12 +1794,12 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
                       end: Alignment.bottomRight,
                     ),
                   ),
-                  child: Text('Signals Performance', style: AppTextStyles.h3.copyWith(color: Colors.white)),
+                  child: Text(AppLocalizations.of(context)!.signalsPerformanceTitle, style: AppTextStyles.h3.copyWith(color: Colors.white)),
                 ),
-                _staggerItem(0, Icons.balance, 'Risk-to-Reward Ratio', 'How risk compares to reward'),
-                _staggerItem(1, Icons.attach_money, 'Profit/Loss Overview', 'Net gain vs loss'),
-                _staggerItem(2, Icons.emoji_events, 'Win Rate', 'Percentage of winning trades'),
-                _staggerItem(3, Icons.track_changes, 'Accuracy Rate', 'How precise our signals are'),
+                _staggerItem(0, Icons.balance, AppLocalizations.of(context)!.riskToRewardRatio, AppLocalizations.of(context)!.howRiskComparesToReward),
+                _staggerItem(1, Icons.attach_money, AppLocalizations.of(context)!.profitLossOverview, AppLocalizations.of(context)!.netGainVsLoss),
+                _staggerItem(2, Icons.emoji_events, AppLocalizations.of(context)!.winRate, AppLocalizations.of(context)!.percentageOfWinningTrades),
+                _staggerItem(3, Icons.track_changes, AppLocalizations.of(context)!.accuracyRate, AppLocalizations.of(context)!.howPreciseOurSignalsAre),
               ],
             ),
           ),
@@ -1897,7 +1914,7 @@ class _TransparentCard extends StatelessWidget {
             color: Colors.black,
           ),
           child: Text(
-            'AI Signals',
+            AppLocalizations.of(context)!.aiSignal,
             style: AppTextStyles.body.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,
@@ -1936,24 +1953,20 @@ class CoreValueSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       (
-        title: 'Real-Time Market Analysis',
-        desc:
-            'Our AI monitors the market continuously, identifying technical convergence zones and reliable breakout points so you can enter trades at the right moment.'
+        title: AppLocalizations.of(context)!.realtimeMarketAnalysis,
+        desc: AppLocalizations.of(context)!.realtimeMarketAnalysisDesc,
       ),
       (
-        title: 'Save Time on Analysis',
-        desc:
-            'No more hours spent reading charts. Receive tailored investment strategies in just minutes a day.'
+        title: AppLocalizations.of(context)!.saveTimeOnAnalysis,
+        desc: AppLocalizations.of(context)!.saveTimeOnAnalysisDesc,
       ),
       (
-        title: 'Minimize Emotional Trading',
-        desc:
-            'With smart alerts, risk detection, and data-driven signals not emotions you stay disciplined and in control of every decision.'
+        title: AppLocalizations.of(context)!.minimizeEmotionalTrading,
+        desc: AppLocalizations.of(context)!.minimizeEmotionalTradingDesc,
       ),
       (
-        title: 'Seize Every Opportunity',
-        desc:
-            'Timely strategy updates delivered straight to your inbox ensure you ride market trends at the perfect time.'
+        title: AppLocalizations.of(context)!.seizeEveryOpportunity,
+        desc: AppLocalizations.of(context)!.seizeEveryOpportunityDesc,
       ),
     ];
 
@@ -1962,13 +1975,13 @@ class CoreValueSection extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'Minvest AI- Core value',
+            AppLocalizations.of(context)!.minvestAiCoreValueTitle,
             style: AppTextStyles.h1.copyWith(fontSize: 36, fontWeight: FontWeight.w700),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'AI analyzes real-time market data continuously, filtering insights to identify fast, accurate investment opportunities',
+            AppLocalizations.of(context)!.minvestAiCoreValueDesc,
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -2100,14 +2113,35 @@ class FaqSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = LandingContent.faqItems;
+    final List<Map<String, String>> faqItems = [
+      {
+        'question': AppLocalizations.of(context)!.faqQuestion1,
+        'answer': AppLocalizations.of(context)!.faqAnswer1,
+      },
+      {
+        'question': AppLocalizations.of(context)!.faqQuestion2,
+        'answer': AppLocalizations.of(context)!.faqAnswer2,
+      },
+      {
+        'question': AppLocalizations.of(context)!.faqQuestion3,
+        'answer': AppLocalizations.of(context)!.faqAnswer3,
+      },
+      {
+        'question': AppLocalizations.of(context)!.faqQuestion4,
+        'answer': AppLocalizations.of(context)!.faqAnswer4,
+      },
+    ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Column(
         children: [
-          Text('Frequently Asked Questions', style: AppTextStyles.h1.copyWith(fontSize: 28)),
+          Text(
+            AppLocalizations.of(context)!.frequentlyAskedQuestions,
+            style: AppTextStyles.h1.copyWith(fontSize: 36, fontWeight: FontWeight.w700),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: AppSpacing.md),
-          ...items.map((item) => _FaqItem(question: item['question']!, answer: item['answer']!)),
+          ...faqItems.map((item) => _FaqItem(question: item['question']!, answer: item['answer']!)),
         ],
       ),
     );
@@ -2164,17 +2198,17 @@ class CtaSection extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(
-              'Maximize your results with Minvest AI advanced market analysis and precision-filtered signals',
-              style: AppTextStyles.h3.copyWith(fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
+          Text(
+            AppLocalizations.of(context)!.maximizeResultsTitle,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.h1.copyWith(fontSize: 36, fontWeight: FontWeight.w700),
+          ),
             const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Elevate your trading with AI-enhanced strategies crafted for consistency and clarity.',
-              style: AppTextStyles.caption,
-              textAlign: TextAlign.center,
-            ),
+          Text(
+            AppLocalizations.of(context)!.elevateTradingWithAiStrategies,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 16),
+          ),
             const SizedBox(height: AppSpacing.md),
             Wrap(
               alignment: WrapAlignment.center,
@@ -2182,7 +2216,7 @@ class CtaSection extends StatelessWidget {
               runSpacing: AppSpacing.md,
               children: [
                 GradientButton(
-                  label: 'Get Signals Now',
+                  label: AppLocalizations.of(context)!.startNow,
                   width: 200,
                   onPressed: () => Navigator.of(context).pushNamed('/signup'),
                 ),

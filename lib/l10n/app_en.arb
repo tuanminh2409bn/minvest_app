@@ -25,7 +25,7 @@
     "errorWithMessage": "Error: {message}",
     "cannotConnectToServer": "Cannot connect to the server. Please try again.",
     "transactionCancelledOrFailed": "Transaction has been cancelled or failed.",
-    "cannotCreatePaymentLink": "Could not create payment link.\nPlease try again.",
+    "cannotCreatePaymentLink": "Could not create payment link.\nTry again.",
     "retry": "Retry",
     "serverErrorRetry": "Server error: {message}. Please try again.",
     "redirectingToPayment": "Redirecting to payment page...",
@@ -58,7 +58,7 @@
     "live": "LIVE",
     "end": "END",
     "symbol": "SYMBOL",
-    "aiSignal": "AI SIGNAL",
+    "aiSignal": "AI Signal",
     "ruleSignal": "RULE SIGNAL",
     "all": "ALL",
     "upgradeToSeeMore": "Upgrade to see more",
@@ -171,8 +171,181 @@
     "logoutDialogTitle": "Session Expired",
     "logoutDialogDefaultReason": "Your account has been logged in on another device.",
     "ok": "OK",
-    "errorLoadingPackages": "Error Loading Packages",
-    "retry": "Retry",
+    "bankTransferToUpgrade": "Bank Transfer to Upgrade",
+    "@bankTransferToUpgrade": {
+        "description": "Button text for upgrading via bank transfer"
+    },
+    "contactToUpgrade": "Contact to upgrade",
+    "noNotificationsYet": "No notifications yet.",
+    "daysAgo": "{count} days ago",
+    "@daysAgo": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "hoursAgo": "{count} hours ago",
+    "@hoursAgo": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "minutesAgo": "{count} minutes ago",
+    "@minutesAgo": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "justNow": "Just now",
+    "getSignalsNow": "Get Signals Now",
+    "freeTrial": "Free Trial",
+    "heroTitle": "Guiding Traders & Growing Portfolios",
+    "heroSubtitle": "The Ultimate AI Engine – Designed by Expert Traders",
+    "globalAiInnovationTitle": "Global AI Innovation for the Next Generation of Trading Intelligence",
+    "globalAiInnovationDesc": "Transforming traditional trading with cloud-powered AI signals — adaptive to real-time market news and trends for faster, more precise, and emotion-free performance.",
+    "liveTradingSignalsTitle": "LIVE – 24/7 AI Trading Signals",
+    "liveTradingSignalsDesc": "Real-time cloud analytics delivering high-probability, trend-following strategies with adaptive precision and emotion-free execution.",
+    "trendFollowing": "Trend-Following",
+    "realtime": "Real-time",
+    "orderExplanationEngineTitle": "Order Explanation Engine",
+    "orderExplanationEngineDesc": "Explains trade setups in simple terms — showing how confluences form, why entries are made, and helping traders learn from each decision.",
+    "transparent": "Transparent",
+    "educational": "Educational",
+    "logical": "Logical",
+    "transparentRealPerformanceTitle": "Transparent - Real Performance",
+    "transparentRealPerformanceDesc": "See real data on signal accuracy, success rate, and profitability — verified and traceable in every trade",
+    "results": "Results",
+    "performanceTracking": "Performance-Tracking",
+    "accurate": "Accurate",
+    "predictiveAccuracy": "Predictive Accuracy",
+    "improvementInProfitability": "Improvement in Profitability",
+    "improvedRiskManagement": "Improved Risk Management",
+    "signalsPerformanceTitle": "Signals Performance",
+    "riskToRewardRatio": "Risk-to-Reward Ratio",
+    "howRiskComparesToReward": "How risk compares to reward",
+    "profitLossOverview": "Profit/Loss Overview",
+    "netGainVsLoss": "Net gain vs loss",
+    "winRate": "Win Rate",
+    "percentageOfWinningTrades": "Percentage of winning trades",
+    "accuracyRate": "Accuracy Rate",
+    "howPreciseOurSignalsAre": "How precise our signals are",
+    "realtimeMarketAnalysis": "Real-Time Market Analysis",
+    "realtimeMarketAnalysisDesc": "Our AI monitors the market continuously, identifying technical convergence zones and reliable breakout points so you can enter trades at the right moment.",
+    "saveTimeOnAnalysis": "Save Time on Analysis",
+    "saveTimeOnAnalysisDesc": "No more hours spent reading charts. Receive tailored investment strategies in just minutes a day.",
+    "minimizeEmotionalTrading": "Minimize Emotional Trading",
+    "minimizeEmotionalTradingDesc": "With smart alerts, risk detection, and data-driven signals not emotions you stay disciplined and in control of every decision.",
+    "seizeEveryOpportunity": "Seize Every Opportunity",
+    "seizeEveryOpportunityDesc": "Timely strategy updates delivered straight to your inbox ensure you ride market trends at the perfect time.",
+    "minvestAiCoreValueTitle": "Minvest AI- Core value",
+    "minvestAiCoreValueDesc": "AI analyzes real-time market data continuously, filtering insights to identify fast, accurate investment opportunities",
+    "frequentlyAskedQuestions": "Frequently Asked Questions",
+    "maximizeResultsTitle": "Maximize your results with Minvest AI advanced market analysis and precision-filtered signals",
+    "elevateTradingWithAiStrategies": "Elevate your trading with AI-enhanced strategies crafted for consistency and clarity",
+    "winMoreWithAiSignalsTitle": "Win More with AI-Powered Signals\nin Every Market",
+    "winMoreWithAiSignalsDesc": "Our multi-market AI scans Forex, Crypto, and Metals in real-time,\n' 'delivering expert-validated trading signals —\n' 'with clear entry, stop-loss, and take-profit levels",
+    "buyLimit": "Buy limit",
+    "sellLimit": "Sell limit",
+    "smarterToolsTitle": "Smarter Tools - Better Investments",
+    "smarterToolsDesc": "Discover the features that help you minimize risks, seize opportunities, and grow your wealth",
+    "performanceOverviewTitle": "Performance Overview",
+    "performanceOverviewDesc": "Our multi-market AI scans Forex, Crypto, and Metals in real-time, delivering expert-validated trading signals - with clear entry, stop-loss, and take-profit levels",
+    "totalProfit": "Total Profit",
+    "completionSignal": "Completion signal",
+    "onDemandFinancialExpertTitle": "Your On-Demand Financial Expert",
+    "onDemandFinancialExpertDesc": "AI platform suggests trading signals - self-learning, analyses the market 24/7, unaffected by emotions. Minvest has supported over 10,000 financial analysts\nin their journey to find accurate, stable, and easy-to-apply signals",
+    "aiPoweredSignalPlatform": "AI-Powered Trading Signal Platform",
+    "selfLearningSystems": "Self-Learning Systems, Sharper Insights, Stronger Trades",
+    "emotionlessExecution": "Emotionless Execution For Smarter,\nMore Disciplined Trading",
+    "analysingMarket247": "Analysing the market 24/7",
+    "maximizeResultsFeaturesTitle": "Maximize your results with Minvest AI\nadvanced market analysis and precision-filtered signals",
+    "minvestAiRegistrationDesc": "Minvest AI registration is now open — spots may close soon as we review and approve new members",
+    "currencyPairs": "Currency pairs",
+    "allCurrencyPairs": "All Currency pairs",
+    "dateRange": "Date Range",
+    "selectDateRange": "Select Date Range",
+    "allAssets": "All Assets",
+    "asset": "Asset",
+    "tokenExpired": "Token expired",
+    "tokenLimitReachedDesc": "You have used up your 10 free tokens today. Upgrade your package to view more signals.",
+    "later": "Later",
+    "created": "Created",
+    "detail": "Detail",
+    "performanceOverview": "Performance Overview",
+    "totalProfitPips": "Total Profit (Pips)",
+    "winRatePercent": "Win Rate (%)",
+    "comingSoon": "Coming soon",
+    "errorLoadingHistory": "Error loading history",
+    "noHistoryAvailable": "No signal history available",
+    "previous": "Previous",
+    "page": "Page",
+    "next": "Next",
+    "date": "Date",
+    "timeGmt7": "Time (GMT +7)",
+    "orders": "Orders",
+    "pips": "Pips",
+    "smallScreenRotationHint": "Small screen: rotate landscape or scroll horizontally to view the full table.",
+    "history": "History",
+    "signalsWillAppearHere": "Signals will appear here when available",
+    "pricing": "Pricing",
+    "choosePlanSubtitle": "Choose a plan that works for you",
+    "financialNewsHub": "Financial News Hub",
+    "financialNewsHubDesc": "Critical updates. Market reactions. No noise – just what investors need to know.",
+    "newsTabAllArticles": "All Articles",
+    "newsTabInvestor": "Investor",
+    "newsTabKnowledge": "Knowledge",
+    "newsTabTechnicalAnalysis": "Technical Analysis",
+    "noArticlesForCategory": "No articles for category {category}",
+    "mostPopular": "Most popular",
+    "noPosts": "No posts",
+    "relatedArticles": "Related articles",
+    "contactInfoSentSuccess": "Contact information sent successfully.",
+    "contactInfoSentFailed": "Failed to send information: {error}",
+    "contactPageSubtitle": "Have questions or need AI solutions? Let us know by filling out the form, and we'll be in touch!",
+    "phone": "Phone",
+    "firstName": "First Name",
+    "enterFirstName": "Enter First Name",
+    "lastName": "Last Name",
+    "enterLastName": "Enter Last Name",
+    "whatAreYourConcerns": "What Are Your Concerns?",
+    "writeConcernsHere": "Write Concerns Here...",
+    "pleaseEnter": "Please enter {field}",
+    "faqQuestion1": "Do the signals ensure a 100% success rate?",
+    "faqAnswer1": "While no signal can be guaranteed 100%, Minvest AI strives to maintain a stable 60–80% success rate, supported by detailed analysis and risk management so you can make the final decision with greater confidence.",
+    "faqQuestion2": "If I don’t want to deposit right away, can I still receive signal suggestions?",
+    "faqAnswer2": "Yes. Simply create an Exness account through the Minvest link, and you’ll get access to our free demo signal group (Community VIP).",
+    "faqQuestion3": "If I’ve signed up but haven’t received any signals, what steps should I take?",
+    "faqAnswer3": "Processing is typically automatic. If you still don’t see any signal suggestions, please contact us via Whatsapp for instant assistance.",
+    "faqQuestion4": "Can I still join if I don’t sign up for an Exness account?",
+    "faqAnswer4": "Please contact us via WhatsApp or Live Chat for assistance.",
+    "priceLevels": "Price Levels",
+    "capitalManagement": "Capital Management",
+    "freeSignalsLeft": "{count} free signals left",
+    "unlimitedSignals": "Unlimited signals",
+    "goBack": "Go back",
+    "goldPlan": "Gold Plan",
+    "perMonth": "/month",
+    "continuouslyUpdating": "Continuously updating market data 24/7",
+    "providingBestSignals": "Providing the best signals in real time",
+    "includesEntrySlTp": "Includes Entry, SL, TP",
+    "detailedAnalysis": "Detailed analysis and evaluation of each signal",
+    "realTimeNotifications": "Real-time notifications via email",
+    "signalPerformanceStats": "Signal performance statistics",
+    "enterpriseCodeDetails": "Enterprise code: 0107136243 is issued by the Hanoi Department of Finance on 24/11/2015; 6th amendment registered by the Hanoi Department of Finance on 05/08/2025.",
+    "addressDetails": "Address: C2810, 18th Floor, C2 Building, HH Lot, Dong Nam Urban Area, Tran Duy Hung St., Yen Hoa Ward, Hanoi, Vietnam.",
+    "pagesTitle": "Pages",
+    "legalRegulatoryTitle": "Legal & Regulatory",
+    "termsOfRegistration": "Terms Of Registration",
+    "operatingPrinciples": "Operating Principles",
+    "termsConditions": "Terms & Conditions",
+    "contactTitle": "Contact",
+    "navFeatures": "Features",
+    "navNews": "News",
     "tp1Hit": "TP1 Hit",
     "tp2Hit": "TP2 Hit",
     "tp3Hit": "TP3 Hit",
@@ -180,35 +353,5 @@
     "cancelled": "Cancelled",
     "exitedByAdmin": "Exited by Admin",
     "signalClosed": "Closed",
-    "bankTransferToUpgrade": "Bank Transfer to Upgrade",
-        "@bankTransferToUpgrade": {
-            "description": "Button text for upgrading via bank transfer"
-        },
-        "contactToUpgrade": "Contact to upgrade",
-        "noNotificationsYet": "No notifications yet.",
-        "daysAgo": "{count} days ago",
-        "@daysAgo": {
-            "placeholders": {
-                "count": {
-                    "type": "int"
-                }
-            }
-        },
-        "hoursAgo": "{count} hours ago",
-        "@hoursAgo": {
-            "placeholders": {
-                "count": {
-                    "type": "int"
-                }
-            }
-        },
-        "minutesAgo": "{count} minutes ago",
-        "@minutesAgo": {
-            "placeholders": {
-                "count": {
-                    "type": "int"
-                }
-            }
-        },
-        "justNow": "Just now"
+    "errorLoadingPackages": "Error Loading Packages"
 }

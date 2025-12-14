@@ -6,7 +6,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_ko.dart';
 import 'app_localizations_vi.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -63,7 +67,7 @@ import 'app_localizations_vi.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -86,16 +90,20 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('vi')
+    Locale('fr'),
+    Locale('ja'),
+    Locale('ko'),
+    Locale('vi'),
+    Locale('zh'),
   ];
 
   /// No description provided for @accountUpgradedSuccessfully.
@@ -251,7 +259,7 @@ abstract class AppLocalizations {
   /// No description provided for @cannotCreatePaymentLink.
   ///
   /// In en, this message translates to:
-  /// **'Could not create payment link.\nPlease try again.'**
+  /// **'Could not create payment link.\nTry again.'**
   String get cannotCreatePaymentLink;
 
   /// No description provided for @retry.
@@ -449,7 +457,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiSignal.
   ///
   /// In en, this message translates to:
-  /// **'AI SIGNAL'**
+  /// **'AI Signal'**
   String get aiSignal;
 
   /// No description provided for @ruleSignal.
@@ -1100,11 +1108,905 @@ abstract class AppLocalizations {
   /// **'OK'**
   String get ok;
 
-  /// No description provided for @errorLoadingPackages.
+  /// No description provided for @contactToUpgrade.
   ///
   /// In en, this message translates to:
-  /// **'Error Loading Packages'**
-  String get errorLoadingPackages;
+  /// **'Contact to upgrade'**
+  String get contactToUpgrade;
+
+  /// No description provided for @noNotificationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet.'**
+  String get noNotificationsYet;
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String daysAgo(int count);
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hours ago'**
+  String hoursAgo(int count);
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} minutes ago'**
+  String minutesAgo(int count);
+
+  /// No description provided for @justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// No description provided for @getSignalsNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Signals Now'**
+  String get getSignalsNow;
+
+  /// No description provided for @freeTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Trial'**
+  String get freeTrial;
+
+  /// No description provided for @heroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guiding Traders & Growing Portfolios'**
+  String get heroTitle;
+
+  /// No description provided for @heroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The Ultimate AI Engine – Designed by Expert Traders'**
+  String get heroSubtitle;
+
+  /// No description provided for @globalAiInnovationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Global AI Innovation for the Next Generation of Trading Intelligence'**
+  String get globalAiInnovationTitle;
+
+  /// No description provided for @globalAiInnovationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Transforming traditional trading with cloud-powered AI signals — adaptive to real-time market news and trends for faster, more precise, and emotion-free performance.'**
+  String get globalAiInnovationDesc;
+
+  /// No description provided for @liveTradingSignalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE – 24/7 AI Trading Signals'**
+  String get liveTradingSignalsTitle;
+
+  /// No description provided for @liveTradingSignalsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-time cloud analytics delivering high-probability, trend-following strategies with adaptive precision and emotion-free execution.'**
+  String get liveTradingSignalsDesc;
+
+  /// No description provided for @trendFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Trend-Following'**
+  String get trendFollowing;
+
+  /// No description provided for @realtime.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-time'**
+  String get realtime;
+
+  /// No description provided for @orderExplanationEngineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Explanation Engine'**
+  String get orderExplanationEngineTitle;
+
+  /// No description provided for @orderExplanationEngineDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Explains trade setups in simple terms — showing how confluences form, why entries are made, and helping traders learn from each decision.'**
+  String get orderExplanationEngineDesc;
+
+  /// No description provided for @transparent.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent'**
+  String get transparent;
+
+  /// No description provided for @educational.
+  ///
+  /// In en, this message translates to:
+  /// **'Educational'**
+  String get educational;
+
+  /// No description provided for @logical.
+  ///
+  /// In en, this message translates to:
+  /// **'Logical'**
+  String get logical;
+
+  /// No description provided for @transparentRealPerformanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent - Real Performance'**
+  String get transparentRealPerformanceTitle;
+
+  /// No description provided for @transparentRealPerformanceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'See real data on signal accuracy, success rate, and profitability — verified and traceable in every trade'**
+  String get transparentRealPerformanceDesc;
+
+  /// No description provided for @results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get results;
+
+  /// No description provided for @performanceTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance-Tracking'**
+  String get performanceTracking;
+
+  /// No description provided for @accurate.
+  ///
+  /// In en, this message translates to:
+  /// **'Accurate'**
+  String get accurate;
+
+  /// No description provided for @predictiveAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Predictive Accuracy'**
+  String get predictiveAccuracy;
+
+  /// No description provided for @improvementInProfitability.
+  ///
+  /// In en, this message translates to:
+  /// **'Improvement in Profitability'**
+  String get improvementInProfitability;
+
+  /// No description provided for @improvedRiskManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Improved Risk Management'**
+  String get improvedRiskManagement;
+
+  /// No description provided for @signalsPerformanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signals Performance'**
+  String get signalsPerformanceTitle;
+
+  /// No description provided for @riskToRewardRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk-to-Reward Ratio'**
+  String get riskToRewardRatio;
+
+  /// No description provided for @howRiskComparesToReward.
+  ///
+  /// In en, this message translates to:
+  /// **'How risk compares to reward'**
+  String get howRiskComparesToReward;
+
+  /// No description provided for @profitLossOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit/Loss Overview'**
+  String get profitLossOverview;
+
+  /// No description provided for @netGainVsLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Net gain vs loss'**
+  String get netGainVsLoss;
+
+  /// No description provided for @winRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Win Rate'**
+  String get winRate;
+
+  /// No description provided for @percentageOfWinningTrades.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage of winning trades'**
+  String get percentageOfWinningTrades;
+
+  /// No description provided for @accuracyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy Rate'**
+  String get accuracyRate;
+
+  /// No description provided for @howPreciseOurSignalsAre.
+  ///
+  /// In en, this message translates to:
+  /// **'How precise our signals are'**
+  String get howPreciseOurSignalsAre;
+
+  /// No description provided for @realtimeMarketAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-Time Market Analysis'**
+  String get realtimeMarketAnalysis;
+
+  /// No description provided for @realtimeMarketAnalysisDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Our AI monitors the market continuously, identifying technical convergence zones and reliable breakout points so you can enter trades at the right moment.'**
+  String get realtimeMarketAnalysisDesc;
+
+  /// No description provided for @saveTimeOnAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Time on Analysis'**
+  String get saveTimeOnAnalysis;
+
+  /// No description provided for @saveTimeOnAnalysisDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No more hours spent reading charts. Receive tailored investment strategies in just minutes a day.'**
+  String get saveTimeOnAnalysisDesc;
+
+  /// No description provided for @minimizeEmotionalTrading.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize Emotional Trading'**
+  String get minimizeEmotionalTrading;
+
+  /// No description provided for @minimizeEmotionalTradingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'With smart alerts, risk detection, and data-driven signals not emotions you stay disciplined and in control of every decision.'**
+  String get minimizeEmotionalTradingDesc;
+
+  /// No description provided for @seizeEveryOpportunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Seize Every Opportunity'**
+  String get seizeEveryOpportunity;
+
+  /// No description provided for @seizeEveryOpportunityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Timely strategy updates delivered straight to your inbox ensure you ride market trends at the perfect time.'**
+  String get seizeEveryOpportunityDesc;
+
+  /// No description provided for @minvestAiCoreValueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Minvest AI- Core value'**
+  String get minvestAiCoreValueTitle;
+
+  /// No description provided for @minvestAiCoreValueDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'AI analyzes real-time market data continuously, filtering insights to identify fast, accurate investment opportunities'**
+  String get minvestAiCoreValueDesc;
+
+  /// No description provided for @frequentlyAskedQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently Asked Questions'**
+  String get frequentlyAskedQuestions;
+
+  /// No description provided for @maximizeResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize your results with Minvest AI advanced market analysis and precision-filtered signals'**
+  String get maximizeResultsTitle;
+
+  /// No description provided for @elevateTradingWithAiStrategies.
+  ///
+  /// In en, this message translates to:
+  /// **'Elevate your trading with AI-enhanced strategies crafted for consistency and clarity'**
+  String get elevateTradingWithAiStrategies;
+
+  /// No description provided for @winMoreWithAiSignalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Win More with AI-Powered Signals\nin Every Market'**
+  String get winMoreWithAiSignalsTitle;
+
+  /// No description provided for @winMoreWithAiSignalsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Our multi-market AI scans Forex, Crypto, and Metals in real-time,\n\' \'delivering expert-validated trading signals —\n\' \'with clear entry, stop-loss, and take-profit levels'**
+  String get winMoreWithAiSignalsDesc;
+
+  /// No description provided for @buyLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy limit'**
+  String get buyLimit;
+
+  /// No description provided for @sellLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell limit'**
+  String get sellLimit;
+
+  /// No description provided for @smarterToolsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Smarter Tools - Better Investments'**
+  String get smarterToolsTitle;
+
+  /// No description provided for @smarterToolsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover the features that help you minimize risks, seize opportunities, and grow your wealth'**
+  String get smarterToolsDesc;
+
+  /// No description provided for @performanceOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance Overview'**
+  String get performanceOverviewTitle;
+
+  /// No description provided for @performanceOverviewDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Our multi-market AI scans Forex, Crypto, and Metals in real-time, delivering expert-validated trading signals - with clear entry, stop-loss, and take-profit levels'**
+  String get performanceOverviewDesc;
+
+  /// No description provided for @totalProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Profit'**
+  String get totalProfit;
+
+  /// No description provided for @completionSignal.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion signal'**
+  String get completionSignal;
+
+  /// No description provided for @onDemandFinancialExpertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your On-Demand Financial Expert'**
+  String get onDemandFinancialExpertTitle;
+
+  /// No description provided for @onDemandFinancialExpertDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'AI platform suggests trading signals - self-learning, analyses the market 24/7, unaffected by emotions. Minvest has supported over 10,000 financial analysts\nin their journey to find accurate, stable, and easy-to-apply signals'**
+  String get onDemandFinancialExpertDesc;
+
+  /// No description provided for @aiPoweredSignalPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-Powered Trading Signal Platform'**
+  String get aiPoweredSignalPlatform;
+
+  /// No description provided for @selfLearningSystems.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-Learning Systems, Sharper Insights, Stronger Trades'**
+  String get selfLearningSystems;
+
+  /// No description provided for @emotionlessExecution.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotionless Execution For Smarter,\nMore Disciplined Trading'**
+  String get emotionlessExecution;
+
+  /// No description provided for @analysingMarket247.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysing the market 24/7'**
+  String get analysingMarket247;
+
+  /// No description provided for @maximizeResultsFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize your results with Minvest AI\nadvanced market analysis and precision-filtered signals'**
+  String get maximizeResultsFeaturesTitle;
+
+  /// No description provided for @minvestAiRegistrationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Minvest AI registration is now open — spots may close soon as we review and approve new members'**
+  String get minvestAiRegistrationDesc;
+
+  /// No description provided for @currencyPairs.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency pairs'**
+  String get currencyPairs;
+
+  /// No description provided for @allCurrencyPairs.
+  ///
+  /// In en, this message translates to:
+  /// **'All Currency pairs'**
+  String get allCurrencyPairs;
+
+  /// No description provided for @dateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Date Range'**
+  String get dateRange;
+
+  /// No description provided for @selectDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date Range'**
+  String get selectDateRange;
+
+  /// No description provided for @allAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'All Assets'**
+  String get allAssets;
+
+  /// No description provided for @asset.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset'**
+  String get asset;
+
+  /// No description provided for @tokenExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Token expired'**
+  String get tokenExpired;
+
+  /// No description provided for @tokenLimitReachedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You have used up your 10 free tokens today. Upgrade your package to view more signals.'**
+  String get tokenLimitReachedDesc;
+
+  /// No description provided for @later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
+
+  /// No description provided for @created.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get created;
+
+  /// No description provided for @detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail'**
+  String get detail;
+
+  /// No description provided for @performanceOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance Overview'**
+  String get performanceOverview;
+
+  /// No description provided for @totalProfitPips.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Profit (Pips)'**
+  String get totalProfitPips;
+
+  /// No description provided for @winRatePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Win Rate (%)'**
+  String get winRatePercent;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get comingSoon;
+
+  /// No description provided for @errorLoadingHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading history'**
+  String get errorLoadingHistory;
+
+  /// No description provided for @noHistoryAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No signal history available'**
+  String get noHistoryAvailable;
+
+  /// No description provided for @previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previous;
+
+  /// No description provided for @page.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get page;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// No description provided for @timeGmt7.
+  ///
+  /// In en, this message translates to:
+  /// **'Time (GMT +7)'**
+  String get timeGmt7;
+
+  /// No description provided for @orders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get orders;
+
+  /// No description provided for @pips.
+  ///
+  /// In en, this message translates to:
+  /// **'Pips'**
+  String get pips;
+
+  /// No description provided for @smallScreenRotationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Small screen: rotate landscape or scroll horizontally to view the full table.'**
+  String get smallScreenRotationHint;
+
+  /// No description provided for @history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get history;
+
+  /// No description provided for @signalsWillAppearHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Signals will appear here when available'**
+  String get signalsWillAppearHere;
+
+  /// No description provided for @pricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing'**
+  String get pricing;
+
+  /// No description provided for @choosePlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a plan that works for you'**
+  String get choosePlanSubtitle;
+
+  /// No description provided for @financialNewsHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial News Hub'**
+  String get financialNewsHub;
+
+  /// No description provided for @financialNewsHubDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical updates. Market reactions. No noise – just what investors need to know.'**
+  String get financialNewsHubDesc;
+
+  /// No description provided for @newsTabAllArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'All Articles'**
+  String get newsTabAllArticles;
+
+  /// No description provided for @newsTabInvestor.
+  ///
+  /// In en, this message translates to:
+  /// **'Investor'**
+  String get newsTabInvestor;
+
+  /// No description provided for @newsTabKnowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge'**
+  String get newsTabKnowledge;
+
+  /// No description provided for @newsTabTechnicalAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical Analysis'**
+  String get newsTabTechnicalAnalysis;
+
+  /// No description provided for @noArticlesForCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No articles for category {category}'**
+  String noArticlesForCategory(Object category);
+
+  /// No description provided for @mostPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Most popular'**
+  String get mostPopular;
+
+  /// No description provided for @noPosts.
+  ///
+  /// In en, this message translates to:
+  /// **'No posts'**
+  String get noPosts;
+
+  /// No description provided for @relatedArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'Related articles'**
+  String get relatedArticles;
+
+  /// No description provided for @contactInfoSentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact information sent successfully.'**
+  String get contactInfoSentSuccess;
+
+  /// No description provided for @contactInfoSentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send information: {error}'**
+  String contactInfoSentFailed(Object error);
+
+  /// No description provided for @contactPageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Have questions or need AI solutions? Let us know by filling out the form, and we\'ll be in touch!'**
+  String get contactPageSubtitle;
+
+  /// No description provided for @phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phone;
+
+  /// No description provided for @firstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstName;
+
+  /// No description provided for @enterFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter First Name'**
+  String get enterFirstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastName;
+
+  /// No description provided for @enterLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Last Name'**
+  String get enterLastName;
+
+  /// No description provided for @whatAreYourConcerns.
+  ///
+  /// In en, this message translates to:
+  /// **'What Are Your Concerns?'**
+  String get whatAreYourConcerns;
+
+  /// No description provided for @writeConcernsHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Write Concerns Here...'**
+  String get writeConcernsHere;
+
+  /// No description provided for @pleaseEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter {field}'**
+  String pleaseEnter(Object field);
+
+  /// No description provided for @faqQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'Do the signals ensure a 100% success rate?'**
+  String get faqQuestion1;
+
+  /// No description provided for @faqAnswer1.
+  ///
+  /// In en, this message translates to:
+  /// **'While no signal can be guaranteed 100%, Minvest AI strives to maintain a stable 60–80% success rate, supported by detailed analysis and risk management so you can make the final decision with greater confidence.'**
+  String get faqAnswer1;
+
+  /// No description provided for @faqQuestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'If I don’t want to deposit right away, can I still receive signal suggestions?'**
+  String get faqQuestion2;
+
+  /// No description provided for @faqAnswer2.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes. Simply create an Exness account through the Minvest link, and you’ll get access to our free demo signal group (Community VIP).'**
+  String get faqAnswer2;
+
+  /// No description provided for @faqQuestion3.
+  ///
+  /// In en, this message translates to:
+  /// **'If I’ve signed up but haven’t received any signals, what steps should I take?'**
+  String get faqQuestion3;
+
+  /// No description provided for @faqAnswer3.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing is typically automatic. If you still don’t see any signal suggestions, please contact us via Whatsapp for instant assistance.'**
+  String get faqAnswer3;
+
+  /// No description provided for @faqQuestion4.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I still join if I don’t sign up for an Exness account?'**
+  String get faqQuestion4;
+
+  /// No description provided for @faqAnswer4.
+  ///
+  /// In en, this message translates to:
+  /// **'Please contact us via WhatsApp or Live Chat for assistance.'**
+  String get faqAnswer4;
+
+  /// No description provided for @priceLevels.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Levels'**
+  String get priceLevels;
+
+  /// No description provided for @capitalManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Capital Management'**
+  String get capitalManagement;
+
+  /// No description provided for @freeSignalsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} free signals left'**
+  String freeSignalsLeft(Object count);
+
+  /// No description provided for @unlimitedSignals.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited signals'**
+  String get unlimitedSignals;
+
+  /// No description provided for @goBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get goBack;
+
+  /// No description provided for @goldPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold Plan'**
+  String get goldPlan;
+
+  /// No description provided for @perMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'/month'**
+  String get perMonth;
+
+  /// No description provided for @continuouslyUpdating.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuously updating market data 24/7'**
+  String get continuouslyUpdating;
+
+  /// No description provided for @providingBestSignals.
+  ///
+  /// In en, this message translates to:
+  /// **'Providing the best signals in real time'**
+  String get providingBestSignals;
+
+  /// No description provided for @includesEntrySlTp.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes Entry, SL, TP'**
+  String get includesEntrySlTp;
+
+  /// No description provided for @detailedAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed analysis and evaluation of each signal'**
+  String get detailedAnalysis;
+
+  /// No description provided for @realTimeNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-time notifications via email'**
+  String get realTimeNotifications;
+
+  /// No description provided for @signalPerformanceStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Signal performance statistics'**
+  String get signalPerformanceStats;
+
+  /// No description provided for @enterpriseCodeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Enterprise code: 0107136243 is issued by the Hanoi Department of Finance on 24/11/2015; 6th amendment registered by the Hanoi Department of Finance on 05/08/2025.'**
+  String get enterpriseCodeDetails;
+
+  /// No description provided for @addressDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Address: C2810, 18th Floor, C2 Building, HH Lot, Dong Nam Urban Area, Tran Duy Hung St., Yen Hoa Ward, Hanoi, Vietnam.'**
+  String get addressDetails;
+
+  /// No description provided for @pagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get pagesTitle;
+
+  /// No description provided for @legalRegulatoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal & Regulatory'**
+  String get legalRegulatoryTitle;
+
+  /// No description provided for @termsOfRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms Of Registration'**
+  String get termsOfRegistration;
+
+  /// No description provided for @operatingPrinciples.
+  ///
+  /// In en, this message translates to:
+  /// **'Operating Principles'**
+  String get operatingPrinciples;
+
+  /// No description provided for @termsConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Conditions'**
+  String get termsConditions;
+
+  /// No description provided for @contactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contactTitle;
+
+  /// No description provided for @navFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Features'**
+  String get navFeatures;
+
+  /// No description provided for @navNews.
+  ///
+  /// In en, this message translates to:
+  /// **'News'**
+  String get navNews;
 
   /// No description provided for @tp1Hit.
   ///
@@ -1148,41 +2050,11 @@ abstract class AppLocalizations {
   /// **'Closed'**
   String get signalClosed;
 
-  /// No description provided for @contactToUpgrade.
+  /// No description provided for @errorLoadingPackages.
   ///
   /// In en, this message translates to:
-  /// **'Contact to upgrade'**
-  String get contactToUpgrade;
-
-  /// No description provided for @noNotificationsYet.
-  ///
-  /// In en, this message translates to:
-  /// **'No notifications yet.'**
-  String get noNotificationsYet;
-
-  /// No description provided for @daysAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} days ago'**
-  String daysAgo(int count);
-
-  /// No description provided for @hoursAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} hours ago'**
-  String hoursAgo(int count);
-
-  /// No description provided for @minutesAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} minutes ago'**
-  String minutesAgo(int count);
-
-  /// No description provided for @justNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Just now'**
-  String get justNow;
+  /// **'Error Loading Packages'**
+  String get errorLoadingPackages;
 }
 
 class _AppLocalizationsDelegate
@@ -1195,8 +2067,14 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'vi'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'en',
+    'fr',
+    'ja',
+    'ko',
+    'vi',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1207,13 +2085,22 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'ko':
+      return AppLocalizationsKo();
     case 'vi':
       return AppLocalizationsVi();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }
