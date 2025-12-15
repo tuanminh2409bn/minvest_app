@@ -348,5 +348,72 @@
     "cancelled": "취소됨",
     "exitedByAdmin": "관리자에 의해 종료됨",
     "signalClosed": "종료됨",
-    "errorLoadingPackages": "패키지 로드 오류"
+    "errorLoadingPackages": "패키지 로드 오류",
+    "monthly": "월간",
+    "annually": "연간",
+    "whatsIncluded": "포함 내용:",
+    "chooseThisPlan": "이 플랜 선택",
+    "bestPricesForPremiumAccess": "프리미엄 액세스를 위한 최적의 가격",
+    "choosePlanFitsNeeds": "비즈니스 요구에 맞는 플랜을 선택하고 AI로 자동화를 시작하세요",
+    "save50Percent": "50% 절약",
+    "tryDemo": "데모 체험",
+    "pleaseEnterEmailPassword": "이메일과 비밀번호를 입력하세요",
+    "loginFailed": "로그인 실패: {error}",
+    "@loginFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "welcomeBack": "환영합니다",
+    "signInToContinue": "계속하려면 계정에 로그인하세요",
+    "or": "또는",
+    "email": "이메일",
+    "emailHint": "example123@gmail.com",
+    "password": "비밀번호",
+    "enterPassword": "비밀번호 입력",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "createNewAccount": "여기서 새 계정을 만드세요!",
+    "signUp": "가입하기",
+    "signUpAccount": "계정 가입",
+    "enterPersonalData": "계정을 만들려면 개인 정보를 입력하세요",
+    "nameLabel": "이름 *",
+    "enterNameHint": "이름 입력",
+    "emailLabel": "이메일 *",
+    "passwordLabel": "비밀번호 *",
+    "phoneLabel": "전화번호",
+    "continueButton": "계속",
+    "fillAllFields": "모든 필수 입력란을 채워주세요.",
+    "accountCreatedSuccess": "계정이 성공적으로 생성되었습니다.",
+    "signUpFailed": "가입 실패: {error}",
+    "@signUpFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "nationality": "국적:",
+    "overview": "개요",
+    "setting": "설정",
+    "paymentHistory": "결제 내역",
+    "signalsPlan": "신호 플랜",
+    "aiMinvest": "AI Minvest",
+    "yourTokens": "내 토큰",
+    "emailNotificationPreferences": "이메일 알림 기본 설정",
+    "chooseSignalNotificationTypes": "이메일로 받고 싶은 신호 알림 유형을 선택하세요",
+    "allSignalNotifications": "모든 신호 알림",
+    "cryptoSignals": "암호화폐 신호",
+    "forexSignals": "외환 신호",
+    "goldSignals": "금 신호",
+    "updatePasswordSecure": "계정 보안을 위해 비밀번호를 업데이트하세요",
+    "searchLabel": "검색:",
+    "filterBy": "필터 기준:",
+    "allTime": "전체 시간",
+    "startDate": "시작일:",
+    "endDate": "종료일:",
+    "deactivate": "비활성화",
+    "unlimited": "무제한",
+    "tenLeft": "10개 남음"
 }

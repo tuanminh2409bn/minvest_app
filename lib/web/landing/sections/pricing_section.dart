@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/spacing.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class PricingSection extends StatefulWidget {
-  final String heading;
-  final String subheading;
+  final String? heading;
+  final String? subheading;
   final double headingFontSize;
 
   const PricingSection({
     super.key,
-    this.heading = 'Best Prices for Premium Access',
-    this.subheading = 'Choose a plan that fits your business needs and start automating with AI',
+    this.heading,
+    this.subheading,
     this.headingFontSize = 28,
   });
 
@@ -24,15 +24,17 @@ class PricingSection extends StatefulWidget {
 class _PricingSectionState extends State<PricingSection> {
   bool _isAnnual = true;
 
-  List<_PlanData> _buildPlans() {
+  List<_PlanData> _buildPlans(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     final price = _isAnnual ? '\$460' : '\$78';
     final oldPrice = _isAnnual ? '\$920' : null;
+    final badge = appLocalizations.save50Percent;
     return [
       _PlanData(
         title: 'GOLD',
         price: price,
         oldPrice: oldPrice,
-        badge: 'SAVE 50%',
+        badge: badge,
         gradient: const LinearGradient(
           colors: [Color(0xFF00BFFF), Color(0xFF7B61FF)],
           begin: Alignment.topLeft,
@@ -43,7 +45,7 @@ class _PricingSectionState extends State<PricingSection> {
         title: 'FOREX',
         price: price,
         oldPrice: oldPrice,
-        badge: 'SAVE 50%',
+        badge: badge,
         gradient: const LinearGradient(
           colors: [Color(0xFF00BFFF), Color(0xFF7B61FF)],
           begin: Alignment.topLeft,
@@ -54,7 +56,7 @@ class _PricingSectionState extends State<PricingSection> {
         title: 'CRYPTO',
         price: price,
         oldPrice: oldPrice,
-        badge: 'SAVE 50%',
+        badge: badge,
         gradient: const LinearGradient(
           colors: [Color(0xFFB81EE3), Color(0xFF0ED4FF)],
           begin: Alignment.topLeft,
@@ -66,15 +68,18 @@ class _PricingSectionState extends State<PricingSection> {
 
   @override
   Widget build(BuildContext context) {
-    final plans = _buildPlans();
+    final appLocalizations = AppLocalizations.of(context)!;
+    final plans = _buildPlans(context);
+    final heading = widget.heading ?? appLocalizations.bestPricesForPremiumAccess;
+    final subheading = widget.subheading ?? appLocalizations.choosePlanFitsNeeds;
 
-    const features = [
-      'Includes Entry, SL, TP',
-      'Detailed analysis and evaluation of each signal',
-      'Signal performance statistics',
-      'Real-time notifications via email',
-      'Continuously updating market data 24/7',
-      'Providing the best signals in real time',
+    final features = [
+      appLocalizations.includesEntrySlTp,
+      appLocalizations.detailedAnalysis,
+      appLocalizations.signalPerformanceStats,
+      appLocalizations.realTimeNotifications,
+      appLocalizations.continuouslyUpdating,
+      appLocalizations.providingBestSignals,
     ];
 
     return Padding(
@@ -83,18 +88,18 @@ class _PricingSectionState extends State<PricingSection> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            widget.heading,
+            heading,
             style: AppTextStyles.h1.copyWith(fontSize: widget.headingFontSize, fontWeight: FontWeight.w700),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            widget.subheading,
+            subheading,
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.lg),
-          _toggle(),
+          _toggle(context),
           const SizedBox(height: AppSpacing.lg),
           Wrap(
             spacing: 16,
@@ -118,7 +123,8 @@ class _PricingSectionState extends State<PricingSection> {
     );
   }
 
-  Widget _toggle() {
+  Widget _toggle(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
@@ -130,12 +136,12 @@ class _PricingSectionState extends State<PricingSection> {
         mainAxisSize: MainAxisSize.min,
         children: [
           _toggleItem(
-            'Monthly',
+            appLocalizations.monthly,
             selected: !_isAnnual,
             onTap: () => setState(() => _isAnnual = false),
           ),
           _toggleItem(
-            'Annually',
+            appLocalizations.annually,
             selected: _isAnnual,
             onTap: () => setState(() => _isAnnual = true),
           ),
@@ -325,6 +331,7 @@ class _PricingCardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     return _AnimatedBorderCard(
       child: Container(
         width: 300,
@@ -356,7 +363,7 @@ class _PricingCardContent extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: AppSpacing.md),
-            Text("What's included:", style: AppTextStyles.body.copyWith(color: Colors.white70)),
+            Text(appLocalizations.whatsIncluded, style: AppTextStyles.body.copyWith(color: Colors.white70)),
             const SizedBox(height: AppSpacing.sm),
             ...features.map((f) => _feature(f)).toList(),
             const SizedBox(height: AppSpacing.md),
@@ -370,7 +377,7 @@ class _PricingCardContent extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: () {},
-                child: const Text('Choose this plan'),
+                child: Text(appLocalizations.chooseThisPlan),
               ),
             ),
           ],

@@ -30,85 +30,104 @@ class LandingPage extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isTablet = constraints.maxWidth < Breakpoints.desktop && constraints.maxWidth >= Breakpoints.tablet;
-          final isMobile = constraints.maxWidth < Breakpoints.tablet;
-          final horizontalPadding = isMobile ? 16.0 : isTablet ? 24.0 : 32.0;
+          try {
+            // Debug check for localization
+            if (AppLocalizations.of(context) == null) {
+              throw Exception("AppLocalizations is null!");
+            }
+            
+            final isTablet = constraints.maxWidth < Breakpoints.desktop && constraints.maxWidth >= Breakpoints.tablet;
+            final isMobile = constraints.maxWidth < Breakpoints.tablet;
+            final horizontalPadding = isMobile ? 16.0 : isTablet ? 24.0 : 32.0;
 
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1200),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(height: 12),
-                      LandingNavBar(),
-                      HeroSection(),
-                      SizedBox(height: 100),
-                      HeroSubtitleSection(),
-                      SizedBox(height: 100),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final bool isNarrow = constraints.maxWidth < 900;
-                          if (isNarrow) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+            return Container(
+              color: AppColors.background,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: 12),
+                        LandingNavBar(),
+                        HeroSection(),
+                        SizedBox(height: 100),
+                        HeroSubtitleSection(),
+                        SizedBox(height: 100),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final bool isNarrow = constraints.maxWidth < 900;
+                            if (isNarrow) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: const [
+                                  LiveSignalsSection(),
+                                  SizedBox(height: 24),
+                                  HeroSignalsSection(),
+                                ],
+                              );
+                            }
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: const [
-                                LiveSignalsSection(),
-                                SizedBox(height: 24),
-                                HeroSignalsSection(),
+                                Expanded(child: HeroSignalsSection()),
+                                SizedBox(width: 16),
+                                Expanded(child: LiveSignalsSection()),
                               ],
                             );
-                          }
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Expanded(child: HeroSignalsSection()),
-                              SizedBox(width: 16),
-                              Expanded(child: LiveSignalsSection()),
-                            ],
-                          );
-                        },
-                      ),
-                      SizedBox(height: isMobile ? 32 : 80),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final bool isNarrow = constraints.maxWidth < 900;
-                          if (isNarrow) {
+                          },
+                        ),
+                        SizedBox(height: isMobile ? 32 : 80),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final bool isNarrow = constraints.maxWidth < 900;
+                            if (isNarrow) {
+                              return Column(
+                                children: const [
+                                  OrderEngineSection(),
+                                  SizedBox(height: 24),
+                                  _TransparentCardAnimated(),
+                                  SizedBox(height: 24),
+                                  _SignalsPerformanceCard(),
+                                ],
+                              );
+                            }
                             return Column(
                               children: const [
                                 OrderEngineSection(),
-                                SizedBox(height: 24),
-                                _TransparentCardAnimated(),
-                                SizedBox(height: 24),
-                                _SignalsPerformanceCard(),
+                                SizedBox(height: 72),
+                                _SignalsPerformanceRow(),
                               ],
                             );
-                          }
-                          return Column(
-                            children: const [
-                              OrderEngineSection(),
-                              SizedBox(height: 72),
-                              _SignalsPerformanceRow(),
-                            ],
-                          );
-                        },
-                      ),
-                      SizedBox(height: 96),
-                      CoreValueSection(),
-                      SizedBox(height: 96),
-                      PricingSection(),
-                      FaqSection(),
-                      CtaSection(),
-                      FooterSection(),
-                    ],
+                          },
+                        ),
+                        SizedBox(height: 96),
+                        CoreValueSection(),
+                        SizedBox(height: 96),
+                        PricingSection(),
+                        FaqSection(),
+                        CtaSection(),
+                        FooterSection(),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           );
+          } catch (e, stackTrace) {
+            print("CRASH in LandingPage: $e\n$stackTrace");
+            return Center(
+              child: SelectableText(
+                "Error rendering LandingPage:\n$e",
+                style: const TextStyle(color: Colors.red, fontSize: 20),
+              ),
+            );
+          }
         },
       ),
     );
@@ -126,13 +145,15 @@ class HeroSection extends StatelessWidget {
       final Size baseSize = Size(constraints.maxWidth, heroHeight);
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 24),
-        child: SizedBox(
-          width: double.infinity,
-          height: heroHeight,
-          child: _HeroInteractive(
-            enableHover: !isNarrow,
-            baseSize: baseSize,
-            expandToWidth: true,
+        child: ClipRect(
+          child: SizedBox(
+            width: double.infinity,
+            height: heroHeight,
+            child: _HeroInteractive(
+              enableHover: !isNarrow,
+              baseSize: baseSize,
+              expandToWidth: true,
+            ),
           ),
         ),
       );
@@ -182,6 +203,10 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
     _ctaFade = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _contentController, curve: const Interval(0.35, 1.0, curve: Curves.easeOut)),
     );
+    
+    // Start animation immediately since this is the Hero section (Above the fold)
+    // Avoiding VisibilityDetector here prevents "invisible content" issues on initial load
+    _contentController.forward();
   }
 
   @override
@@ -259,102 +284,98 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
 
   Widget _buildContent() {
     return Positioned.fill(
-      child: VisibilityDetector(
-        key: const Key('hero_content'),
-        onVisibilityChanged: (info) {
-          if (!_contentPlayed && info.visibleFraction > 0.12) {
-            _contentPlayed = true;
-            _contentController.forward();
-          }
-        },
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SlideTransition(
-                  position: _titleSlide,
-                  child: FadeTransition(
-                    opacity: _titleFade,
-                    child: Text(
-                      AppLocalizations.of(context)!.heroTitle,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.h1.copyWith(fontSize: 44),
-                    ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SlideTransition(
+                position: _titleSlide,
+                child: FadeTransition(
+                  opacity: _titleFade,
+                  child: Text(
+                    AppLocalizations.of(context)!.heroTitle,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.h1.copyWith(fontSize: 44),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                SlideTransition(
-                  position: _subtitleSlide,
-                  child: FadeTransition(
-                    opacity: _subtitleFade,
-                    child: Text(
-                      AppLocalizations.of(context)!.heroSubtitle,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.body.copyWith(fontSize: 16, color: Colors.white70),
-                    ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              SlideTransition(
+                position: _subtitleSlide,
+                child: FadeTransition(
+                  opacity: _subtitleFade,
+                  child: Text(
+                    AppLocalizations.of(context)!.heroSubtitle,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.body.copyWith(fontSize: 16, color: Colors.white70),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                SlideTransition(
-                  position: _ctaSlide,
-                  child: FadeTransition(
-                    opacity: _ctaFade,
-                    child: Wrap(
-                      spacing: AppSpacing.md,
-                      runSpacing: AppSpacing.sm,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        GradientButton(
-                          label: AppLocalizations.of(context)!.getSignalsNow,
-                          width: 188,
-                          height: 38,
-                          borderRadius: 6,
-                          padding: EdgeInsets.zero,
-                          textStyle: AppTextStyles.body.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                            height: 1.1,
-                          ),
-                          onPressed: () => Navigator.of(context).pushNamed('/signup'),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              SlideTransition(
+                position: _ctaSlide,
+                child: FadeTransition(
+                  opacity: _ctaFade,
+                  child: Wrap(
+                    spacing: AppSpacing.md,
+                    runSpacing: AppSpacing.sm,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      GradientButton(
+                        label: AppLocalizations.of(context)!.getSignalsNow,
+                        width: 188,
+                        height: 38,
+                        borderRadius: 6,
+                        padding: EdgeInsets.zero,
+                        textStyle: AppTextStyles.body.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          height: 1.1,
                         ),
-                        SizedBox(
-                          width: 138,
-                          height: 38,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(8),
-                            onTap: () => context.read<AuthBloc>().add(SignInAnonymouslyRequested()),
+                        onPressed: () => Navigator.of(context).pushNamed('/signup'),
+                      ),
+                      SizedBox(
+                        width: 138,
+                        height: 38,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: () => context.read<AuthBloc>().add(SignInAnonymouslyRequested()),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(1),
                             child: Container(
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
+                                borderRadius: BorderRadius.circular(7),
+                                color: Colors.black,
                               ),
-                              padding: const EdgeInsets.all(1),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(7),
-                                  color: Colors.black,
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(AppLocalizations.of(context)!.freeTrial,
-                                  style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
+                              alignment: Alignment.center,
+                              child: Text(
+                                AppLocalizations.of(context)!.freeTrial,
+                                style: AppTextStyles.body.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

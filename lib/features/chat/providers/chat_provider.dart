@@ -2,16 +2,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 
 class ChatProvider with ChangeNotifier {
   int _unreadRoomsCount = 0;
   StreamSubscription<QuerySnapshot>? _chatRoomsSubscription;
+  final AuthService _authService;
 
   int get unreadRoomsCount => _unreadRoomsCount;
 
-  ChatProvider() {
-    // Lắng nghe sự thay đổi trạng thái đăng nhập
-    FirebaseAuth.instance.authStateChanges().listen(_onAuthStateChanged);
+  ChatProvider(this._authService) {
+    // Lắng nghe sự thay đổi trạng thái đăng nhập từ AuthService (an toàn)
+    _authService.authStateChanges.listen(_onAuthStateChanged);
   }
 
   void _onAuthStateChanged(User? user) {

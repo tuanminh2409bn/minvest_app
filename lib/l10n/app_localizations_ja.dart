@@ -761,90 +761,90 @@ class AppLocalizationsJa extends AppLocalizations {
       'Minvest AIの登録が開始されました — 新しいメンバーを審査および承認しているため、枠がすぐに埋まる可能性があります';
 
   @override
-  String get currencyPairs => 'Currency pairs';
+  String get currencyPairs => '通貨ペア';
 
   @override
-  String get allCurrencyPairs => 'All Currency pairs';
+  String get allCurrencyPairs => '全ての通貨ペア';
 
   @override
-  String get dateRange => 'Date Range';
+  String get dateRange => '日付範囲';
 
   @override
-  String get selectDateRange => 'Select Date Range';
+  String get selectDateRange => '日付範囲を選択';
 
   @override
-  String get allAssets => 'All Assets';
+  String get allAssets => '全ての資産';
 
   @override
-  String get asset => 'Asset';
+  String get asset => '資産';
 
   @override
-  String get tokenExpired => 'Token expired';
+  String get tokenExpired => 'トークンの有効期限切れ';
 
   @override
   String get tokenLimitReachedDesc =>
-      'You have used up your 10 free tokens today. Upgrade your package to view more signals.';
+      '本日の無料トークン10個を使い切りました。より多くのシグナルを表示するにはプランをアップグレードしてください。';
 
   @override
-  String get later => 'Later';
+  String get later => '後で';
 
   @override
-  String get created => 'Created';
+  String get created => '作成日時';
 
   @override
-  String get detail => 'Detail';
+  String get detail => '詳細';
 
   @override
-  String get performanceOverview => 'Performance Overview';
+  String get performanceOverview => 'パフォーマンス概要';
 
   @override
-  String get totalProfitPips => 'Total Profit (Pips)';
+  String get totalProfitPips => '総利益 (Pips)';
 
   @override
-  String get winRatePercent => 'Win Rate (%)';
+  String get winRatePercent => '勝率 (%)';
 
   @override
-  String get comingSoon => 'Coming soon';
+  String get comingSoon => '近日公開';
 
   @override
-  String get errorLoadingHistory => 'Error loading history';
+  String get errorLoadingHistory => '履歴の読み込みエラー';
 
   @override
-  String get noHistoryAvailable => 'No signal history available';
+  String get noHistoryAvailable => 'シグナル履歴はありません';
 
   @override
-  String get previous => 'Previous';
+  String get previous => '前へ';
 
   @override
-  String get page => 'Page';
+  String get page => 'ページ';
 
   @override
-  String get next => 'Next';
+  String get next => '次へ';
 
   @override
-  String get date => 'Date';
+  String get date => '日付';
 
   @override
-  String get timeGmt7 => 'Time (GMT +7)';
+  String get timeGmt7 => '時間 (GMT +7)';
 
   @override
-  String get orders => 'Orders';
+  String get orders => '注文';
 
   @override
   String get pips => 'Pips';
 
   @override
   String get smallScreenRotationHint =>
-      'Small screen: rotate landscape or scroll horizontally to view the full table.';
+      '小さな画面：横向きに回転するか、水平方向にスクロールして完全な表を表示してください。';
 
   @override
-  String get history => 'History';
+  String get history => '履歴';
 
   @override
   String get signalsWillAppearHere => '利用可能なシグナルがここに表示されます';
 
   @override
-  String get pricing => 'Pricing';
+  String get pricing => '料金';
 
   @override
   String get choosePlanSubtitle => 'あなたに合ったプランを選択してください';
@@ -1042,4 +1042,167 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get errorLoadingPackages => 'パッケージの読み込みエラー';
+
+  @override
+  String get monthly => '毎月';
+
+  @override
+  String get annually => '毎年';
+
+  @override
+  String get whatsIncluded => '含まれるもの：';
+
+  @override
+  String get chooseThisPlan => 'このプランを選択';
+
+  @override
+  String get bestPricesForPremiumAccess => 'プレミアムアクセスのベストプライス';
+
+  @override
+  String get choosePlanFitsNeeds => 'ビジネスニーズに合ったプランを選択し、AIで自動化を開始しましょう';
+
+  @override
+  String get save50Percent => '50%オフ';
+
+  @override
+  String get tryDemo => 'デモを試す';
+
+  @override
+  String get pleaseEnterEmailPassword => 'メールアドレスとパスワードを入力してください';
+
+  @override
+  String loginFailed(String error) {
+    return 'ログインに失敗しました: $error';
+  }
+
+  @override
+  String get welcomeBack => 'お帰りなさい';
+
+  @override
+  String get signInToContinue => '続行するにはアカウントにサインインしてください';
+
+  @override
+  String get or => 'または';
+
+  @override
+  String get email => 'メール';
+
+  @override
+  String get emailHint => 'example123@gmail.com';
+
+  @override
+  String get password => 'パスワード';
+
+  @override
+  String get enterPassword => 'パスワードを入力';
+
+  @override
+  String get forgotPassword => 'パスワードをお忘れですか？';
+
+  @override
+  String get createNewAccount => 'ここで新しいアカウントを作成！';
+
+  @override
+  String get signUp => 'サインアップ';
+
+  @override
+  String get signUpAccount => 'アカウント登録';
+
+  @override
+  String get enterPersonalData => '個人データを入力してアカウントを作成してください';
+
+  @override
+  String get nameLabel => '名前 *';
+
+  @override
+  String get enterNameHint => '名前を入力';
+
+  @override
+  String get emailLabel => 'メール *';
+
+  @override
+  String get passwordLabel => 'パスワード *';
+
+  @override
+  String get phoneLabel => '電話番号';
+
+  @override
+  String get continueButton => '続行';
+
+  @override
+  String get fillAllFields => '必須項目をすべて入力してください。';
+
+  @override
+  String get accountCreatedSuccess => 'アカウントが正常に作成されました。';
+
+  @override
+  String signUpFailed(String error) {
+    return 'サインアップに失敗しました: $error';
+  }
+
+  @override
+  String get nationality => '国籍：';
+
+  @override
+  String get overview => '概要';
+
+  @override
+  String get setting => '設定';
+
+  @override
+  String get paymentHistory => '支払い履歴';
+
+  @override
+  String get signalsPlan => 'シグナルプラン';
+
+  @override
+  String get aiMinvest => 'AI Minvest';
+
+  @override
+  String get yourTokens => 'あなたのトークン';
+
+  @override
+  String get emailNotificationPreferences => 'メール通知設定';
+
+  @override
+  String get chooseSignalNotificationTypes => 'メールで受け取りたいシグナル通知のタイプを選択してください';
+
+  @override
+  String get allSignalNotifications => 'すべてのシグナル通知';
+
+  @override
+  String get cryptoSignals => '仮想通貨シグナル';
+
+  @override
+  String get forexSignals => '外国為替シグナル';
+
+  @override
+  String get goldSignals => 'ゴールドシグナル';
+
+  @override
+  String get updatePasswordSecure => 'アカウントを安全に保つためにパスワードを更新してください';
+
+  @override
+  String get searchLabel => '検索：';
+
+  @override
+  String get filterBy => 'フィルター：';
+
+  @override
+  String get allTime => '全期間';
+
+  @override
+  String get startDate => '開始日：';
+
+  @override
+  String get endDate => '終了日：';
+
+  @override
+  String get deactivate => '無効化';
+
+  @override
+  String get unlimited => '無制限';
+
+  @override
+  String get tenLeft => '残り10';
 }

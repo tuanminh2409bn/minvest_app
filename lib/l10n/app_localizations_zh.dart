@@ -755,90 +755,88 @@ class AppLocalizationsZh extends AppLocalizations {
       'Minvest AI 注册现已开放 — 随着我们审核和批准新成员，名额可能会很快关闭';
 
   @override
-  String get currencyPairs => 'Currency pairs';
+  String get currencyPairs => '货币对';
 
   @override
-  String get allCurrencyPairs => 'All Currency pairs';
+  String get allCurrencyPairs => '所有货币对';
 
   @override
-  String get dateRange => 'Date Range';
+  String get dateRange => '日期范围';
 
   @override
-  String get selectDateRange => 'Select Date Range';
+  String get selectDateRange => '选择日期范围';
 
   @override
-  String get allAssets => 'All Assets';
+  String get allAssets => '所有资产';
 
   @override
-  String get asset => 'Asset';
+  String get asset => '资产';
 
   @override
-  String get tokenExpired => 'Token expired';
+  String get tokenExpired => '代币已过期';
 
   @override
-  String get tokenLimitReachedDesc =>
-      'You have used up your 10 free tokens today. Upgrade your package to view more signals.';
+  String get tokenLimitReachedDesc => '您今天已用完 10 个免费代币。升级您的套餐以查看更多信号。';
 
   @override
-  String get later => 'Later';
+  String get later => '稍后';
 
   @override
-  String get created => 'Created';
+  String get created => '已创建';
 
   @override
-  String get detail => 'Detail';
+  String get detail => '详情';
 
   @override
-  String get performanceOverview => 'Performance Overview';
+  String get performanceOverview => '绩效概览';
 
   @override
-  String get totalProfitPips => 'Total Profit (Pips)';
+  String get totalProfitPips => '总利润 (点)';
 
   @override
-  String get winRatePercent => 'Win Rate (%)';
+  String get winRatePercent => '胜率 (%)';
 
   @override
-  String get comingSoon => 'Coming soon';
+  String get comingSoon => '即将推出';
 
   @override
-  String get errorLoadingHistory => 'Error loading history';
+  String get errorLoadingHistory => '加载历史记录时出错';
 
   @override
-  String get noHistoryAvailable => 'No signal history available';
+  String get noHistoryAvailable => '暂无信号历史记录';
 
   @override
-  String get previous => 'Previous';
+  String get previous => '上一页';
 
   @override
-  String get page => 'Page';
+  String get page => '页';
 
   @override
-  String get next => 'Next';
+  String get next => '下一页';
 
   @override
-  String get date => 'Date';
+  String get date => '日期';
 
   @override
-  String get timeGmt7 => 'Time (GMT +7)';
+  String get timeGmt7 => '时间 (GMT +7)';
 
   @override
-  String get orders => 'Orders';
+  String get orders => '订单';
 
   @override
-  String get pips => 'Pips';
+  String get pips => '点';
 
   @override
-  String get smallScreenRotationHint =>
-      'Small screen: rotate landscape or scroll horizontally to view the full table.';
+  String get smallScreenRotationHint => '小屏幕：请横屏旋转或水平滚动以查看完整表格。';
 
   @override
-  String get history => 'History';
+  String get history => '历史';
 
   @override
   String get signalsWillAppearHere => '信号将在可用时显示在此处';
 
   @override
-  String get pricing => 'Pricing';
+  String get pricing => '价格';
 
   @override
   String get choosePlanSubtitle => '选择适合您的计划';
@@ -1033,4 +1031,167 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errorLoadingPackages => '加载套餐错误';
+
+  @override
+  String get monthly => '每月';
+
+  @override
+  String get annually => '每年';
+
+  @override
+  String get whatsIncluded => '包含内容：';
+
+  @override
+  String get chooseThisPlan => '选择此计划';
+
+  @override
+  String get bestPricesForPremiumAccess => '高级访问的最佳价格';
+
+  @override
+  String get choosePlanFitsNeeds => '选择适合您业务需求的计划并开始使用 AI 自动化';
+
+  @override
+  String get save50Percent => '节省 50%';
+
+  @override
+  String get tryDemo => '试用演示';
+
+  @override
+  String get pleaseEnterEmailPassword => '请输入电子邮件和密码';
+
+  @override
+  String loginFailed(String error) {
+    return '登录失败：$error';
+  }
+
+  @override
+  String get welcomeBack => '欢迎回来';
+
+  @override
+  String get signInToContinue => '登录您的帐户以继续';
+
+  @override
+  String get or => '或';
+
+  @override
+  String get email => '电子邮件';
+
+  @override
+  String get emailHint => 'example123@gmail.com';
+
+  @override
+  String get password => '密码';
+
+  @override
+  String get enterPassword => '输入密码';
+
+  @override
+  String get forgotPassword => '忘记密码？';
+
+  @override
+  String get createNewAccount => '在此处创建新帐户！';
+
+  @override
+  String get signUp => '注册';
+
+  @override
+  String get signUpAccount => '注册帐户';
+
+  @override
+  String get enterPersonalData => '输入您的个人数据以创建您的帐户';
+
+  @override
+  String get nameLabel => '姓名 *';
+
+  @override
+  String get enterNameHint => '输入姓名';
+
+  @override
+  String get emailLabel => '电子邮件 *';
+
+  @override
+  String get passwordLabel => '密码 *';
+
+  @override
+  String get phoneLabel => '电话';
+
+  @override
+  String get continueButton => '继续';
+
+  @override
+  String get fillAllFields => '请填写所有必填字段。';
+
+  @override
+  String get accountCreatedSuccess => '帐户创建成功。';
+
+  @override
+  String signUpFailed(String error) {
+    return '注册失败：$error';
+  }
+
+  @override
+  String get nationality => '国籍：';
+
+  @override
+  String get overview => '概览';
+
+  @override
+  String get setting => '设置';
+
+  @override
+  String get paymentHistory => '支付历史';
+
+  @override
+  String get signalsPlan => '信号计划';
+
+  @override
+  String get aiMinvest => 'AI Minvest';
+
+  @override
+  String get yourTokens => '您的代币';
+
+  @override
+  String get emailNotificationPreferences => '电子邮件通知偏好';
+
+  @override
+  String get chooseSignalNotificationTypes => '选择您希望通过电子邮件接收的信号通知类型';
+
+  @override
+  String get allSignalNotifications => '所有信号通知';
+
+  @override
+  String get cryptoSignals => '加密信号';
+
+  @override
+  String get forexSignals => '外汇信号';
+
+  @override
+  String get goldSignals => '黄金信号';
+
+  @override
+  String get updatePasswordSecure => '更新您的密码以确保您的帐户安全';
+
+  @override
+  String get searchLabel => '搜索：';
+
+  @override
+  String get filterBy => '筛选：';
+
+  @override
+  String get allTime => '所有时间';
+
+  @override
+  String get startDate => '开始日期：';
+
+  @override
+  String get endDate => '结束日期：';
+
+  @override
+  String get deactivate => '停用';
+
+  @override
+  String get unlimited => '无限';
+
+  @override
+  String get tenLeft => '剩余 10';
 }

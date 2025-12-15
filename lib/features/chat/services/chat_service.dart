@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:minvest_forex_app/features/chat/models/chat_message_model.dart';
 import 'package:minvest_forex_app/features/chat/models/chat_room_model.dart';
@@ -31,14 +31,13 @@ class ChatService {
 
       if (image == null) return; // Người dùng không chọn ảnh
 
-      final File imageFile = File(image.path);
-
       // 2. Tạo đường dẫn lưu trữ duy nhất
       final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
       final Reference storageRef = _storage.ref('chat_images/$chatRoomId/$fileName');
 
-      // 3. Tải file lên Firebase Storage
-      final UploadTask uploadTask = storageRef.putFile(imageFile);
+      // 3. Tải file lên Firebase Storage (hỗ trợ cả Web và Mobile)
+      final Uint8List imageData = await image.readAsBytes();
+      final UploadTask uploadTask = storageRef.putData(imageData, SettableMetadata(contentType: 'image/jpeg'));
 
       // 4. Lấy URL của ảnh sau khi tải lên thành công
       final TaskSnapshot snapshot = await uploadTask;

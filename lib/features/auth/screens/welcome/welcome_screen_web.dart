@@ -31,7 +31,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final password = _passwordController.text.trim();
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập email và mật khẩu')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseEnterEmailPassword)),
       );
       return;
     }
@@ -44,7 +44,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đăng nhập thất bại: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.loginFailed(e.toString()))),
         );
       }
     } finally {
@@ -140,9 +140,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Welcome Back', textAlign: TextAlign.center, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
+                Text(AppLocalizations.of(context)!.welcomeBack, textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
                 const SizedBox(height: 6),
-                const Text('Sign in to your account to continue', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)),
+                Text(AppLocalizations.of(context)!.signInToContinue, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
                 const SizedBox(height: 22),
                 _SocialSignInButton(
                   icon: Image.asset('assets/images/google_logo.png', height: 20, width: 20),
@@ -151,21 +151,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 const SizedBox(height: 12),
                 Row(
-                  children: const [
-                    Expanded(child: Divider(color: Colors.white12, thickness: 1)),
+                  children: [
+                    const Expanded(child: Divider(color: Colors.white12, thickness: 1)),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('or', style: TextStyle(color: Colors.white70)),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(AppLocalizations.of(context)!.or, style: const TextStyle(color: Colors.white70)),
                     ),
-                    Expanded(child: Divider(color: Colors.white12, thickness: 1)),
+                    const Expanded(child: Divider(color: Colors.white12, thickness: 1)),
                   ],
                 ),
                 const SizedBox(height: 12),
-                _TextField(label: 'Email', hint: 'example123@gmail.com', controller: _emailController),
+                _TextField(label: AppLocalizations.of(context)!.email, hint: AppLocalizations.of(context)!.emailHint, controller: _emailController),
                 const SizedBox(height: 12),
-                _TextField(label: 'Password', hint: 'Enter Password', controller: _passwordController, obscure: true),
+                _TextField(label: AppLocalizations.of(context)!.password, hint: AppLocalizations.of(context)!.enterPassword, controller: _passwordController, obscure: true),
                 const SizedBox(height: 10),
-                Align(alignment: Alignment.centerLeft, child: const Text('Forgot your password?', style: TextStyle(color: Colors.white70, fontSize: 12))),
+                Align(alignment: Alignment.centerLeft, child: Text(AppLocalizations.of(context)!.forgotPassword, style: const TextStyle(color: Colors.white70, fontSize: 12))),
                 const SizedBox(height: 16),
                 _PrimaryButton(
                   text: AppLocalizations.of(context)!.signIn,
@@ -179,10 +179,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 4,
                     children: [
-                      const Text('Create new account here!', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text(AppLocalizations.of(context)!.createNewAccount, style: const TextStyle(color: Colors.white70, fontSize: 12)),
                       GestureDetector(
                         onTap: () => Navigator.of(context).pushNamed('/signup'),
-                        child: const Text('Sign Up', style: TextStyle(color: Color(0xFF3FA9F5), fontWeight: FontWeight.w700, fontSize: 12)),
+                        child: Text(AppLocalizations.of(context)!.signUp, style: const TextStyle(color: Color(0xFF3FA9F5), fontWeight: FontWeight.w700, fontSize: 12)),
                       ),
                     ],
                   ),

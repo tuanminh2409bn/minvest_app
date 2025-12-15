@@ -1,15 +1,14 @@
 // lib/services/session_service.dart
 
-import 'dart:io' show Platform;
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:minvest_forex_app/services/device_info_service.dart';
 
 class SessionService {
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final FirebaseFunctions _functions =
-  FirebaseFunctions.instanceFor(region: 'asia-southeast1');
+  FirebaseMessaging get _firebaseMessaging => FirebaseMessaging.instance;
+  FirebaseFunctions get _functions =>
+      FirebaseFunctions.instanceFor(region: 'asia-southeast1');
   Future<void> updateUserSession() async {
     String? fcmToken;
     bool isSimulator = false;
@@ -24,7 +23,7 @@ class SessionService {
         }
 
       } else {
-        if (Platform.isIOS) {
+        if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
           final apnsToken = await _firebaseMessaging.getAPNSToken();
           if (apnsToken == null) {
             isSimulator = true;

@@ -1074,4 +1074,172 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get errorLoadingPackages => 'Lỗi tải gói dịch vụ';
+
+  @override
+  String get monthly => 'Hàng tháng';
+
+  @override
+  String get annually => 'Hàng năm';
+
+  @override
+  String get whatsIncluded => 'Bao gồm những gì:';
+
+  @override
+  String get chooseThisPlan => 'Chọn gói này';
+
+  @override
+  String get bestPricesForPremiumAccess =>
+      'Giá tốt nhất cho Quyền truy cập Cao cấp';
+
+  @override
+  String get choosePlanFitsNeeds =>
+      'Chọn một gói phù hợp với nhu cầu doanh nghiệp của bạn và bắt đầu tự động hóa với AI';
+
+  @override
+  String get save50Percent => 'TIẾT KIỆM 50%';
+
+  @override
+  String get tryDemo => 'Dùng thử demo';
+
+  @override
+  String get pleaseEnterEmailPassword => 'Vui lòng nhập email và mật khẩu';
+
+  @override
+  String loginFailed(String error) {
+    return 'Đăng nhập thất bại: $error';
+  }
+
+  @override
+  String get welcomeBack => 'Chào mừng trở lại';
+
+  @override
+  String get signInToContinue => 'Đăng nhập vào tài khoản của bạn để tiếp tục';
+
+  @override
+  String get or => 'hoặc';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get emailHint => 'example123@gmail.com';
+
+  @override
+  String get password => 'Mật khẩu';
+
+  @override
+  String get enterPassword => 'Nhập mật khẩu';
+
+  @override
+  String get forgotPassword => 'Quên mật khẩu?';
+
+  @override
+  String get createNewAccount => 'Tạo tài khoản mới tại đây!';
+
+  @override
+  String get signUp => 'Đăng ký';
+
+  @override
+  String get signUpAccount => 'Đăng Ký Tài Khoản';
+
+  @override
+  String get enterPersonalData =>
+      'Nhập dữ liệu cá nhân của bạn để tạo tài khoản';
+
+  @override
+  String get nameLabel => 'Tên *';
+
+  @override
+  String get enterNameHint => 'Nhập Tên';
+
+  @override
+  String get emailLabel => 'Email *';
+
+  @override
+  String get passwordLabel => 'Mật khẩu *';
+
+  @override
+  String get phoneLabel => 'Điện thoại';
+
+  @override
+  String get continueButton => 'Tiếp tục';
+
+  @override
+  String get fillAllFields => 'Vui lòng điền tất cả các trường bắt buộc.';
+
+  @override
+  String get accountCreatedSuccess => 'Tạo tài khoản thành công.';
+
+  @override
+  String signUpFailed(String error) {
+    return 'Đăng ký thất bại: $error';
+  }
+
+  @override
+  String get nationality => 'Quốc tịch:';
+
+  @override
+  String get overview => 'Tổng quan';
+
+  @override
+  String get setting => 'Cài đặt';
+
+  @override
+  String get paymentHistory => 'Lịch sử thanh toán';
+
+  @override
+  String get signalsPlan => 'Gói tín hiệu';
+
+  @override
+  String get aiMinvest => 'AI Minvest';
+
+  @override
+  String get yourTokens => 'Token của bạn';
+
+  @override
+  String get emailNotificationPreferences => 'Tùy chọn thông báo qua email';
+
+  @override
+  String get chooseSignalNotificationTypes =>
+      'Chọn loại thông báo tín hiệu bạn muốn nhận qua email';
+
+  @override
+  String get allSignalNotifications => 'Tất cả thông báo tín hiệu';
+
+  @override
+  String get cryptoSignals => 'Tín hiệu Crypto';
+
+  @override
+  String get forexSignals => 'Tín hiệu Forex';
+
+  @override
+  String get goldSignals => 'Tín hiệu Vàng';
+
+  @override
+  String get updatePasswordSecure =>
+      'Cập nhật mật khẩu để giữ tài khoản của bạn an toàn';
+
+  @override
+  String get searchLabel => 'Tìm kiếm:';
+
+  @override
+  String get filterBy => 'Lọc theo:';
+
+  @override
+  String get allTime => 'Mọi lúc';
+
+  @override
+  String get startDate => 'Ngày bắt đầu:';
+
+  @override
+  String get endDate => 'Ngày kết thúc:';
+
+  @override
+  String get deactivate => 'Vô hiệu hóa';
+
+  @override
+  String get unlimited => 'Không giới hạn';
+
+  @override
+  String get tenLeft => 'Còn 10';
 }

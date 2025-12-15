@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:minvest_forex_app/services/session_service.dart';
@@ -16,17 +16,28 @@ import 'package:minvest_forex_app/services/device_info_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:io';
 
 class AuthService {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseFunctions _functions = FirebaseFunctions.instanceFor(region: "asia-southeast1");
+  FirebaseAuth get _firebaseAuth => FirebaseAuth.instance;
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
+  FirebaseFunctions get _functions => FirebaseFunctions.instanceFor(region: "asia-southeast1");
+  
   final _forceLogoutController = StreamController<String>.broadcast();
   Stream<String> get forceLogoutStream => _forceLogoutController.stream;
   StreamSubscription<DocumentSnapshot>? _sessionSubscription;
 
-  Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
+  // StreamController để an toàn khi khởi tạo trước Firebase
+  final StreamController<User?> _authStateController = StreamController<User?>.broadcast();
+  Stream<User?> get authStateChanges => _authStateController.stream;
+
+  // Hàm khởi tạo service, gọi sau khi Firebase.initializeApp() hoàn tất
+  Future<void> initialize() async {
+    _firebaseAuth.authStateChanges().listen((user) {
+      if (!_authStateController.isClosed) {
+        _authStateController.add(user);
+      }
+    });
+  }
 
   Future<String> sendPhoneOtp(String phoneNumber) async {
     final completer = Completer<String>();
@@ -178,7 +189,7 @@ class AuthService {
   }
 
   Future<void> _requestTrackingPermission() async {
-    if (Platform.isIOS) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       final status = await AppTrackingTransparency.trackingAuthorizationStatus;
       if (status == TrackingStatus.notDetermined) {
         await AppTrackingTransparency.requestTrackingAuthorization();
@@ -334,7 +345,7 @@ class AuthService {
       String? appleFullName;
       if (kIsWeb) {
         userCredential = await _firebaseAuth.signInWithPopup(AppleAuthProvider());
-      } else if (Platform.isIOS || Platform.isMacOS) {
+      } else if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS)) {
         final rawNonce = _generateNonce();
         final nonce = _sha256(rawNonce);
         final appleCredential = await SignInWithApple.getAppleIDCredential(

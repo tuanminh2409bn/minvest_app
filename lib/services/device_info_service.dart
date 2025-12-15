@@ -1,7 +1,5 @@
-import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -22,10 +20,10 @@ class DeviceInfoService {
         return deviceId;
       } else {
         // Xử lý cho nền tảng Mobile
-        if (Platform.isAndroid) {
+        if (defaultTargetPlatform == TargetPlatform.android) {
           final androidInfo = await _deviceInfoPlugin.androidInfo;
           return androidInfo.id; // Sử dụng androidId đã được xác minh
-        } else if (Platform.isIOS) {
+        } else if (defaultTargetPlatform == TargetPlatform.iOS) {
           final iosInfo = await _deviceInfoPlugin.iosInfo;
           return iosInfo.identifierForVendor ?? 'ios_device_unknown';
         }

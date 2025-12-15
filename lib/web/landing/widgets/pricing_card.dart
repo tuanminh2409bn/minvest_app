@@ -3,6 +3,7 @@ import '../../theme/colors.dart';
 import '../../theme/gradients.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/spacing.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class PricingCard extends StatelessWidget {
   final String label;
@@ -19,6 +20,7 @@ class PricingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: AnimatedContainer(
@@ -59,7 +61,7 @@ class PricingCard extends StatelessWidget {
                 children: [
                   TextSpan(text: price, style: AppTextStyles.h3),
                   TextSpan(
-                    text: ' / month',
+                    text: appLocalizations.perMonth,
                     style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
                   ),
                 ],
@@ -88,7 +90,7 @@ class PricingCard extends StatelessWidget {
                 ),
                 child: TextButton(
                   onPressed: () {},
-                  child: Text('Get Signals Now', style: AppTextStyles.caption.copyWith(color: Colors.white)),
+                  child: Text(appLocalizations.getSignalsNow, style: AppTextStyles.caption.copyWith(color: Colors.white)),
                 ),
               ),
             ),
@@ -96,7 +98,7 @@ class PricingCard extends StatelessWidget {
             Center(
               child: TextButton(
                 onPressed: () {},
-                child: Text('Try demo', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                child: Text(appLocalizations.tryDemo, style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
               ),
             )
           ],
