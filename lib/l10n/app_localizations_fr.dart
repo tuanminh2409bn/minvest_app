@@ -208,7 +208,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get symbol => 'SYMBOLE';
 
   @override
-  String get aiSignal => 'SIGNAL IA';
+  String get aiSignal => 'Signal IA';
 
   @override
   String get ruleSignal => 'SIGNAL RÈGLE';

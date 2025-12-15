@@ -210,7 +210,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get symbol => 'CẶP TIỀN';
 
   @override
-  String get aiSignal => 'TÍN HIỆU AI';
+  String get aiSignal => 'Tín hiệu AI';
 
   @override
   String get ruleSignal => 'TÍN HIỆU RULE';

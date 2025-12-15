@@ -152,7 +152,7 @@ class HeroSection extends StatelessWidget {
             child: _HeroInteractive(
               enableHover: !isNarrow,
               baseSize: baseSize,
-              expandToWidth: true,
+              expandToWidth: false,
             ),
           ),
         ),
@@ -219,7 +219,9 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
   Widget build(BuildContext context) {
     final size = widget.baseSize;
     final viewportWidth = MediaQuery.of(context).size.width;
-    final double targetWidth = widget.expandToWidth ? viewportWidth : viewportWidth.clamp(320, size.width);
+    final double targetWidth = widget.expandToWidth 
+        ? viewportWidth 
+        : viewportWidth.clamp(320, math.max(320.0, size.width));
     final double scaleFactor = targetWidth / size.width;
     final content = SizedBox(
       width: size.width,
