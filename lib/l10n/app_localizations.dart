@@ -67,7 +67,7 @@ import 'app_localizations_zh.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -90,11 +90,11 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -103,7 +103,7 @@ abstract class AppLocalizations {
     Locale('ja'),
     Locale('ko'),
     Locale('vi'),
-    Locale('zh'),
+    Locale('zh')
   ];
 
   /// No description provided for @accountUpgradedSuccessfully.
@@ -1909,7 +1909,7 @@ abstract class AppLocalizations {
   /// No description provided for @perMonth.
   ///
   /// In en, this message translates to:
-  /// **'/month'**
+  /// **'/ month'**
   String get perMonth;
 
   /// No description provided for @continuouslyUpdating.
@@ -2055,6 +2055,324 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error Loading Packages'**
   String get errorLoadingPackages;
+
+  /// No description provided for @monthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get monthly;
+
+  /// No description provided for @annually.
+  ///
+  /// In en, this message translates to:
+  /// **'Annually'**
+  String get annually;
+
+  /// No description provided for @whatsIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s included:'**
+  String get whatsIncluded;
+
+  /// No description provided for @chooseThisPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose this plan'**
+  String get chooseThisPlan;
+
+  /// No description provided for @bestPricesForPremiumAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Best Prices for Premium Access'**
+  String get bestPricesForPremiumAccess;
+
+  /// No description provided for @choosePlanFitsNeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a plan that fits your business needs and start automating with AI'**
+  String get choosePlanFitsNeeds;
+
+  /// No description provided for @save50Percent.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE 50%'**
+  String get save50Percent;
+
+  /// No description provided for @tryDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Try demo'**
+  String get tryDemo;
+
+  /// No description provided for @pleaseEnterEmailPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter email and password'**
+  String get pleaseEnterEmailPassword;
+
+  /// No description provided for @loginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Login failed: {error}'**
+  String loginFailed(String error);
+
+  /// No description provided for @welcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome Back'**
+  String get welcomeBack;
+
+  /// No description provided for @signInToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to your account to continue'**
+  String get signInToContinue;
+
+  /// No description provided for @or.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get or;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @emailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'example123@gmail.com'**
+  String get emailHint;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @enterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Password'**
+  String get enterPassword;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your password?'**
+  String get forgotPassword;
+
+  /// No description provided for @createNewAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new account here!'**
+  String get createNewAccount;
+
+  /// No description provided for @signUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get signUp;
+
+  /// No description provided for @signUpAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up Account'**
+  String get signUpAccount;
+
+  /// No description provided for @enterPersonalData.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your personal data to create your account'**
+  String get enterPersonalData;
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name *'**
+  String get nameLabel;
+
+  /// No description provided for @enterNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Name'**
+  String get enterNameHint;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email *'**
+  String get emailLabel;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password *'**
+  String get passwordLabel;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phoneLabel;
+
+  /// No description provided for @continueButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
+
+  /// No description provided for @fillAllFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all required fields.'**
+  String get fillAllFields;
+
+  /// No description provided for @accountCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created successfully.'**
+  String get accountCreatedSuccess;
+
+  /// No description provided for @signUpFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up failed: {error}'**
+  String signUpFailed(String error);
+
+  /// No description provided for @nationality.
+  ///
+  /// In en, this message translates to:
+  /// **'Nationality:'**
+  String get nationality;
+
+  /// No description provided for @overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overview;
+
+  /// No description provided for @setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting'**
+  String get setting;
+
+  /// No description provided for @paymentHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment History'**
+  String get paymentHistory;
+
+  /// No description provided for @signalsPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Signals Plan'**
+  String get signalsPlan;
+
+  /// No description provided for @aiMinvest.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Minvest'**
+  String get aiMinvest;
+
+  /// No description provided for @yourTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Tokens'**
+  String get yourTokens;
+
+  /// No description provided for @emailNotificationPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Notification Preferences'**
+  String get emailNotificationPreferences;
+
+  /// No description provided for @chooseSignalNotificationTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which types of signal notifications you want to receive via email'**
+  String get chooseSignalNotificationTypes;
+
+  /// No description provided for @allSignalNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'All Signal Notifications'**
+  String get allSignalNotifications;
+
+  /// No description provided for @cryptoSignals.
+  ///
+  /// In en, this message translates to:
+  /// **'Crypto Signals'**
+  String get cryptoSignals;
+
+  /// No description provided for @forexSignals.
+  ///
+  /// In en, this message translates to:
+  /// **'Forex Signals'**
+  String get forexSignals;
+
+  /// No description provided for @goldSignals.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold Signals'**
+  String get goldSignals;
+
+  /// No description provided for @updatePasswordSecure.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your password to keep your account secure'**
+  String get updatePasswordSecure;
+
+  /// No description provided for @searchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search:'**
+  String get searchLabel;
+
+  /// No description provided for @filterBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by:'**
+  String get filterBy;
+
+  /// No description provided for @allTime.
+  ///
+  /// In en, this message translates to:
+  /// **'All Time'**
+  String get allTime;
+
+  /// No description provided for @startDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date:'**
+  String get startDate;
+
+  /// No description provided for @endDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date:'**
+  String get endDate;
+
+  /// No description provided for @deactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get deactivate;
+
+  /// No description provided for @unlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get unlimited;
+
+  /// No description provided for @tenLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'10 left'**
+  String get tenLeft;
 }
 
 class _AppLocalizationsDelegate
@@ -2068,13 +2386,13 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) => <String>[
-    'en',
-    'fr',
-    'ja',
-    'ko',
-    'vi',
-    'zh',
-  ].contains(locale.languageCode);
+        'en',
+        'fr',
+        'ja',
+        'ko',
+        'vi',
+        'zh'
+      ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -2098,9 +2416,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

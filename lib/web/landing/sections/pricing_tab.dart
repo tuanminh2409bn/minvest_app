@@ -3,6 +3,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../theme/colors.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/gradients.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class PricingTab extends StatefulWidget {
   const PricingTab({super.key});
@@ -15,13 +16,14 @@ class _PricingTabState extends State<PricingTab> {
 
   @override
   Widget build(BuildContext context) {
-    const features = [
-      'Includes Entry, SL, TP',
-      'Detailed analysis and evaluation of each signal',
-      'Signal performance statistics',
-      'Real-time notifications via email',
-      'Continuously updating market data 24/7',
-      'Providing the best signals in real time',
+    final AppLocalizations appLocalizations = AppLocalizations.of(context)!;
+    final features = [
+      appLocalizations.includesEntrySlTp,
+      appLocalizations.detailedAnalysis,
+      appLocalizations.signalPerformanceStats,
+      appLocalizations.realTimeNotifications,
+      appLocalizations.continuouslyUpdating,
+      appLocalizations.providingBestSignals,
     ];
 
     final String price = _isAnnual ? '\$460' : '\$78';
@@ -113,6 +115,7 @@ class _BillingToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations appLocalizations = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
@@ -123,8 +126,8 @@ class _BillingToggle extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _ToggleItem(label: 'Monthly', selected: !isAnnual, onTap: () => onChanged(false)),
-          _ToggleItem(label: 'Annually', selected: isAnnual, onTap: () => onChanged(true)),
+          _ToggleItem(label: appLocalizations.monthly, selected: !isAnnual, onTap: () => onChanged(false)),
+          _ToggleItem(label: appLocalizations.annually, selected: isAnnual, onTap: () => onChanged(true)),
         ],
       ),
     );
@@ -310,6 +313,7 @@ class _PricingCardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations appLocalizations = AppLocalizations.of(context)!;
     return _AnimatedBorderCard(
       colors: plan.borderGradient.colors,
       child: Container(
@@ -350,7 +354,7 @@ class _PricingCardContent extends StatelessWidget {
               ),
             const SizedBox(height: 12),
             Text(
-              "What's included:",
+              appLocalizations.whatsIncluded,
               style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 13),
             ),
             const SizedBox(height: 10),
@@ -387,7 +391,7 @@ class _PricingCardContent extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {},
-                child: const Text('Choose this plan'),
+                child: Text(appLocalizations.chooseThisPlan),
               ),
             ),
           ],

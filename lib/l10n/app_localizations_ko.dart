@@ -763,90 +763,90 @@ class AppLocalizationsKo extends AppLocalizations {
       'Minvest AI 등록이 시작되었습니다 — 신규 회원을 검토하고 승인함에 따라 자리가 곧 마감될 수 있습니다';
 
   @override
-  String get currencyPairs => 'Currency pairs';
+  String get currencyPairs => '통화 쌍';
 
   @override
-  String get allCurrencyPairs => 'All Currency pairs';
+  String get allCurrencyPairs => '모든 통화 쌍';
 
   @override
-  String get dateRange => 'Date Range';
+  String get dateRange => '날짜 범위';
 
   @override
-  String get selectDateRange => 'Select Date Range';
+  String get selectDateRange => '날짜 범위 선택';
 
   @override
-  String get allAssets => 'All Assets';
+  String get allAssets => '모든 자산';
 
   @override
-  String get asset => 'Asset';
+  String get asset => '자산';
 
   @override
-  String get tokenExpired => 'Token expired';
+  String get tokenExpired => '토큰 만료됨';
 
   @override
   String get tokenLimitReachedDesc =>
-      'You have used up your 10 free tokens today. Upgrade your package to view more signals.';
+      '오늘 무료 토큰 10개를 모두 사용했습니다. 더 많은 신호를 보려면 패키지를 업그레이드하세요.';
 
   @override
-  String get later => 'Later';
+  String get later => '나중에';
 
   @override
-  String get created => 'Created';
+  String get created => '생성됨';
 
   @override
-  String get detail => 'Detail';
+  String get detail => '상세';
 
   @override
-  String get performanceOverview => 'Performance Overview';
+  String get performanceOverview => '성과 개요';
 
   @override
-  String get totalProfitPips => 'Total Profit (Pips)';
+  String get totalProfitPips => '총 이익 (Pips)';
 
   @override
-  String get winRatePercent => 'Win Rate (%)';
+  String get winRatePercent => '승률 (%)';
 
   @override
-  String get comingSoon => 'Coming soon';
+  String get comingSoon => '곧 출시 예정';
 
   @override
-  String get errorLoadingHistory => 'Error loading history';
+  String get errorLoadingHistory => '기록 로드 오류';
 
   @override
-  String get noHistoryAvailable => 'No signal history available';
+  String get noHistoryAvailable => '신호 기록 없음';
 
   @override
-  String get previous => 'Previous';
+  String get previous => '이전';
 
   @override
-  String get page => 'Page';
+  String get page => '페이지';
 
   @override
-  String get next => 'Next';
+  String get next => '다음';
 
   @override
-  String get date => 'Date';
+  String get date => '날짜';
 
   @override
-  String get timeGmt7 => 'Time (GMT +7)';
+  String get timeGmt7 => '시간 (GMT +7)';
 
   @override
-  String get orders => 'Orders';
+  String get orders => '주문';
 
   @override
-  String get pips => 'Pips';
+  String get pips => '핍';
 
   @override
   String get smallScreenRotationHint =>
-      'Small screen: rotate landscape or scroll horizontally to view the full table.';
+      '작은 화면: 전체 표를 보려면 가로로 회전하거나 수평으로 스크롤하세요.';
 
   @override
-  String get history => 'History';
+  String get history => '기록';
 
   @override
   String get signalsWillAppearHere => '신호가 제공되면 여기에 표시됩니다';
 
   @override
-  String get pricing => 'Pricing';
+  String get pricing => '가격';
 
   @override
   String get choosePlanSubtitle => '당신에게 맞는 요금제를 선택하세요';
@@ -1044,4 +1044,167 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get errorLoadingPackages => '패키지 로드 오류';
+
+  @override
+  String get monthly => '월간';
+
+  @override
+  String get annually => '연간';
+
+  @override
+  String get whatsIncluded => '포함 내용:';
+
+  @override
+  String get chooseThisPlan => '이 플랜 선택';
+
+  @override
+  String get bestPricesForPremiumAccess => '프리미엄 액세스를 위한 최적의 가격';
+
+  @override
+  String get choosePlanFitsNeeds => '비즈니스 요구에 맞는 플랜을 선택하고 AI로 자동화를 시작하세요';
+
+  @override
+  String get save50Percent => '50% 절약';
+
+  @override
+  String get tryDemo => '데모 체험';
+
+  @override
+  String get pleaseEnterEmailPassword => '이메일과 비밀번호를 입력하세요';
+
+  @override
+  String loginFailed(String error) {
+    return '로그인 실패: $error';
+  }
+
+  @override
+  String get welcomeBack => '환영합니다';
+
+  @override
+  String get signInToContinue => '계속하려면 계정에 로그인하세요';
+
+  @override
+  String get or => '또는';
+
+  @override
+  String get email => '이메일';
+
+  @override
+  String get emailHint => 'example123@gmail.com';
+
+  @override
+  String get password => '비밀번호';
+
+  @override
+  String get enterPassword => '비밀번호 입력';
+
+  @override
+  String get forgotPassword => '비밀번호를 잊으셨나요?';
+
+  @override
+  String get createNewAccount => '여기서 새 계정을 만드세요!';
+
+  @override
+  String get signUp => '가입하기';
+
+  @override
+  String get signUpAccount => '계정 가입';
+
+  @override
+  String get enterPersonalData => '계정을 만들려면 개인 정보를 입력하세요';
+
+  @override
+  String get nameLabel => '이름 *';
+
+  @override
+  String get enterNameHint => '이름 입력';
+
+  @override
+  String get emailLabel => '이메일 *';
+
+  @override
+  String get passwordLabel => '비밀번호 *';
+
+  @override
+  String get phoneLabel => '전화번호';
+
+  @override
+  String get continueButton => '계속';
+
+  @override
+  String get fillAllFields => '모든 필수 입력란을 채워주세요.';
+
+  @override
+  String get accountCreatedSuccess => '계정이 성공적으로 생성되었습니다.';
+
+  @override
+  String signUpFailed(String error) {
+    return '가입 실패: $error';
+  }
+
+  @override
+  String get nationality => '국적:';
+
+  @override
+  String get overview => '개요';
+
+  @override
+  String get setting => '설정';
+
+  @override
+  String get paymentHistory => '결제 내역';
+
+  @override
+  String get signalsPlan => '신호 플랜';
+
+  @override
+  String get aiMinvest => 'AI Minvest';
+
+  @override
+  String get yourTokens => '내 토큰';
+
+  @override
+  String get emailNotificationPreferences => '이메일 알림 기본 설정';
+
+  @override
+  String get chooseSignalNotificationTypes => '이메일로 받고 싶은 신호 알림 유형을 선택하세요';
+
+  @override
+  String get allSignalNotifications => '모든 신호 알림';
+
+  @override
+  String get cryptoSignals => '암호화폐 신호';
+
+  @override
+  String get forexSignals => '외환 신호';
+
+  @override
+  String get goldSignals => '금 신호';
+
+  @override
+  String get updatePasswordSecure => '계정 보안을 위해 비밀번호를 업데이트하세요';
+
+  @override
+  String get searchLabel => '검색:';
+
+  @override
+  String get filterBy => '필터 기준:';
+
+  @override
+  String get allTime => '전체 시간';
+
+  @override
+  String get startDate => '시작일:';
+
+  @override
+  String get endDate => '종료일:';
+
+  @override
+  String get deactivate => '비활성화';
+
+  @override
+  String get unlimited => '무제한';
+
+  @override
+  String get tenLeft => '10개 남음';
 }

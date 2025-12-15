@@ -8,16 +8,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:minvest_forex_app/firebase_options.dart';
 import 'dart:convert';
 
-final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-const AndroidNotificationChannel channel = AndroidNotificationChannel(
-  'minvest_channel_id',
-  'Minvest Forex Signals',
-  description: 'Kênh nhận thông báo tín hiệu từ Minvest.',
-  importance: Importance.max,
-  playSound: true,
-);
-
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -29,7 +19,18 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  // Đưa vào trong class để tránh khởi tạo sớm gây lỗi trên Web
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  
+  static const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'minvest_channel_id',
+    'Minvest Forex Signals',
+    description: 'Kênh nhận thông báo tín hiệu từ Minvest.',
+    importance: Importance.max,
+    playSound: true,
+  );
+
+  FirebaseMessaging get _firebaseMessaging => FirebaseMessaging.instance;
   bool _isInitialized = false;
 
   Future<void> initialize({

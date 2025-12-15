@@ -348,5 +348,72 @@
     "cancelled": "Annulé",
     "exitedByAdmin": "Sorti par Admin",
     "signalClosed": "Fermé",
-    "errorLoadingPackages": "Erreur de chargement des forfaits"
+    "errorLoadingPackages": "Erreur de chargement des forfaits",
+    "monthly": "Mensuel",
+    "annually": "Annuel",
+    "whatsIncluded": "Ce qui est inclus :",
+    "chooseThisPlan": "Choisir ce plan",
+    "bestPricesForPremiumAccess": "Meilleurs prix pour un accès premium",
+    "choosePlanFitsNeeds": "Choisissez un plan adapté aux besoins de votre entreprise et commencez à automatiser avec l'IA",
+    "save50Percent": "ÉCONOMISEZ 50%",
+    "tryDemo": "Essayer la démo",
+    "pleaseEnterEmailPassword": "Veuillez saisir l'e-mail et le mot de passe",
+    "loginFailed": "Échec de la connexion : {error}",
+    "@loginFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "welcomeBack": "Bon retour",
+    "signInToContinue": "Connectez-vous à votre compte pour continuer",
+    "or": "ou",
+    "email": "E-mail",
+    "emailHint": "exemple123@gmail.com",
+    "password": "Mot de passe",
+    "enterPassword": "Entrez le mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "createNewAccount": "Créer un nouveau compte ici !",
+    "signUp": "S'inscrire",
+    "signUpAccount": "Créer un compte",
+    "enterPersonalData": "Saisissez vos données personnelles pour créer votre compte",
+    "nameLabel": "Nom *",
+    "enterNameHint": "Entrez le nom",
+    "emailLabel": "E-mail *",
+    "passwordLabel": "Mot de passe *",
+    "phoneLabel": "Téléphone",
+    "continueButton": "Continuer",
+    "fillAllFields": "Veuillez remplir tous les champs obligatoires.",
+    "accountCreatedSuccess": "Compte créé avec succès.",
+    "signUpFailed": "Échec de l'inscription : {error}",
+    "@signUpFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "nationality": "Nationalité :",
+    "overview": "Aperçu",
+    "setting": "Paramètres",
+    "paymentHistory": "Historique des paiements",
+    "signalsPlan": "Plan de signaux",
+    "aiMinvest": "AI Minvest",
+    "yourTokens": "Vos jetons",
+    "emailNotificationPreferences": "Préférences de notification par e-mail",
+    "chooseSignalNotificationTypes": "Choisissez les types de notifications de signaux que vous souhaitez recevoir par e-mail",
+    "allSignalNotifications": "Toutes les notifications de signaux",
+    "cryptoSignals": "Signaux Crypto",
+    "forexSignals": "Signaux Forex",
+    "goldSignals": "Signaux Or",
+    "updatePasswordSecure": "Mettez à jour votre mot de passe pour sécuriser votre compte",
+    "searchLabel": "Rechercher :",
+    "filterBy": "Filtrer par :",
+    "allTime": "Tout le temps",
+    "startDate": "Date de début :",
+    "endDate": "Date de fin :",
+    "deactivate": "Désactiver",
+    "unlimited": "Illimité",
+    "tenLeft": "10 restants"
 }

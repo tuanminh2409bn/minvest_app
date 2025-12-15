@@ -1,7 +1,6 @@
 // lib/core/services/purchase_service.dart
 
 import 'dart:async';
-import 'dart:io';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -9,7 +8,7 @@ import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 
 class PurchaseService extends ChangeNotifier {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
-  final FirebaseFunctions _functions = FirebaseFunctions.instanceFor(region: 'asia-southeast1');
+  FirebaseFunctions get _functions => FirebaseFunctions.instanceFor(region: 'asia-southeast1');
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
   final Set<String> _androidIds = {'elite_1_month', 'elite_12_months'};
@@ -27,7 +26,7 @@ class PurchaseService extends ChangeNotifier {
     debugPrint("Store khả dụng: $_isStoreAvailable");
     if (_isStoreAvailable) {
       await _loadProducts();
-      if (Platform.isIOS) {
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
         await _clearStuckTransactions();
       }
       _subscription = _inAppPurchase.purchaseStream.listen((purchaseDetailsList) {
@@ -44,7 +43,8 @@ class PurchaseService extends ChangeNotifier {
   }
 
   Future<void> _loadProducts() async {
-    final Set<String> kIds = Platform.isIOS ? _iosIds : _androidIds;
+    final bool isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+    final Set<String> kIds = isIOS ? _iosIds : _androidIds;
     final ProductDetailsResponse response = await _inAppPurchase.queryProductDetails(kIds);
     if (response.notFoundIDs.isNotEmpty) {}
     _products = response.productDetails;
@@ -83,7 +83,6 @@ class PurchaseService extends ChangeNotifier {
   Future<void> _handleSuccessfulPurchase(PurchaseDetails purchaseDetails) async {
     _setPurchasePending(true);
 
-    // --- THAY ĐỔI QUAN TRỌNG: GỬI ĐI BIÊN LAI KIỂU MỚI (JWS) ---
     final String verificationData = purchaseDetails.verificationData.serverVerificationData;
 
     if (verificationData.isEmpty) {
@@ -97,7 +96,7 @@ class PurchaseService extends ChangeNotifier {
     debugPrint('🧾 Lấy được biên lai kiểu mới (JWS), độ dài: ${verificationData.length} ký tự.');
 
     try {
-      final String platform = Platform.isIOS ? 'ios' : 'android';
+      final String platform = (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) ? 'ios' : 'android';
       final payload = {
         'platform': platform,
         'productId': purchaseDetails.productID,
@@ -139,7 +138,7 @@ class PurchaseService extends ChangeNotifier {
   }
 
   Future<void> _clearStuckTransactions() async {
-    if (Platform.isIOS) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       try {
         final transactions = await SKPaymentQueueWrapper().transactions();
         if (transactions.isEmpty) { return; }

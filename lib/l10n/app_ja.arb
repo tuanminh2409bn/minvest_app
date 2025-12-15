@@ -348,5 +348,72 @@
     "cancelled": "キャンセル済み",
     "exitedByAdmin": "管理者により終了",
     "signalClosed": "終了",
-    "errorLoadingPackages": "パッケージの読み込みエラー"
+    "errorLoadingPackages": "パッケージの読み込みエラー",
+    "monthly": "毎月",
+    "annually": "毎年",
+    "whatsIncluded": "含まれるもの：",
+    "chooseThisPlan": "このプランを選択",
+    "bestPricesForPremiumAccess": "プレミアムアクセスのベストプライス",
+    "choosePlanFitsNeeds": "ビジネスニーズに合ったプランを選択し、AIで自動化を開始しましょう",
+    "save50Percent": "50%オフ",
+    "tryDemo": "デモを試す",
+    "pleaseEnterEmailPassword": "メールアドレスとパスワードを入力してください",
+    "loginFailed": "ログインに失敗しました: {error}",
+    "@loginFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "welcomeBack": "お帰りなさい",
+    "signInToContinue": "続行するにはアカウントにサインインしてください",
+    "or": "または",
+    "email": "メール",
+    "emailHint": "example123@gmail.com",
+    "password": "パスワード",
+    "enterPassword": "パスワードを入力",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "createNewAccount": "ここで新しいアカウントを作成！",
+    "signUp": "サインアップ",
+    "signUpAccount": "アカウント登録",
+    "enterPersonalData": "個人データを入力してアカウントを作成してください",
+    "nameLabel": "名前 *",
+    "enterNameHint": "名前を入力",
+    "emailLabel": "メール *",
+    "passwordLabel": "パスワード *",
+    "phoneLabel": "電話番号",
+    "continueButton": "続行",
+    "fillAllFields": "必須項目をすべて入力してください。",
+    "accountCreatedSuccess": "アカウントが正常に作成されました。",
+    "signUpFailed": "サインアップに失敗しました: {error}",
+    "@signUpFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "nationality": "国籍：",
+    "overview": "概要",
+    "setting": "設定",
+    "paymentHistory": "支払い履歴",
+    "signalsPlan": "シグナルプラン",
+    "aiMinvest": "AI Minvest",
+    "yourTokens": "あなたのトークン",
+    "emailNotificationPreferences": "メール通知設定",
+    "chooseSignalNotificationTypes": "メールで受け取りたいシグナル通知のタイプを選択してください",
+    "allSignalNotifications": "すべてのシグナル通知",
+    "cryptoSignals": "仮想通貨シグナル",
+    "forexSignals": "外国為替シグナル",
+    "goldSignals": "ゴールドシグナル",
+    "updatePasswordSecure": "アカウントを安全に保つためにパスワードを更新してください",
+    "searchLabel": "検索：",
+    "filterBy": "フィルター：",
+    "allTime": "全期間",
+    "startDate": "開始日：",
+    "endDate": "終了日：",
+    "deactivate": "無効化",
+    "unlimited": "無制限",
+    "tenLeft": "残り10"
 }

@@ -992,7 +992,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goldPlan => 'Gold Plan';
 
   @override
-  String get perMonth => '/month';
+  String get perMonth => '/ month';
 
   @override
   String get continuouslyUpdating => 'Continuously updating market data 24/7';
@@ -1068,4 +1068,171 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLoadingPackages => 'Error Loading Packages';
+
+  @override
+  String get monthly => 'Monthly';
+
+  @override
+  String get annually => 'Annually';
+
+  @override
+  String get whatsIncluded => 'What\'s included:';
+
+  @override
+  String get chooseThisPlan => 'Choose this plan';
+
+  @override
+  String get bestPricesForPremiumAccess => 'Best Prices for Premium Access';
+
+  @override
+  String get choosePlanFitsNeeds =>
+      'Choose a plan that fits your business needs and start automating with AI';
+
+  @override
+  String get save50Percent => 'SAVE 50%';
+
+  @override
+  String get tryDemo => 'Try demo';
+
+  @override
+  String get pleaseEnterEmailPassword => 'Please enter email and password';
+
+  @override
+  String loginFailed(String error) {
+    return 'Login failed: $error';
+  }
+
+  @override
+  String get welcomeBack => 'Welcome Back';
+
+  @override
+  String get signInToContinue => 'Sign in to your account to continue';
+
+  @override
+  String get or => 'or';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get emailHint => 'example123@gmail.com';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get enterPassword => 'Enter Password';
+
+  @override
+  String get forgotPassword => 'Forgot your password?';
+
+  @override
+  String get createNewAccount => 'Create new account here!';
+
+  @override
+  String get signUp => 'Sign Up';
+
+  @override
+  String get signUpAccount => 'Sign Up Account';
+
+  @override
+  String get enterPersonalData =>
+      'Enter your personal data to create your account';
+
+  @override
+  String get nameLabel => 'Name *';
+
+  @override
+  String get enterNameHint => 'Enter Name';
+
+  @override
+  String get emailLabel => 'Email *';
+
+  @override
+  String get passwordLabel => 'Password *';
+
+  @override
+  String get phoneLabel => 'Phone';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
+  String get fillAllFields => 'Please fill all required fields.';
+
+  @override
+  String get accountCreatedSuccess => 'Account created successfully.';
+
+  @override
+  String signUpFailed(String error) {
+    return 'Sign up failed: $error';
+  }
+
+  @override
+  String get nationality => 'Nationality:';
+
+  @override
+  String get overview => 'Overview';
+
+  @override
+  String get setting => 'Setting';
+
+  @override
+  String get paymentHistory => 'Payment History';
+
+  @override
+  String get signalsPlan => 'Signals Plan';
+
+  @override
+  String get aiMinvest => 'AI Minvest';
+
+  @override
+  String get yourTokens => 'Your Tokens';
+
+  @override
+  String get emailNotificationPreferences => 'Email Notification Preferences';
+
+  @override
+  String get chooseSignalNotificationTypes =>
+      'Choose which types of signal notifications you want to receive via email';
+
+  @override
+  String get allSignalNotifications => 'All Signal Notifications';
+
+  @override
+  String get cryptoSignals => 'Crypto Signals';
+
+  @override
+  String get forexSignals => 'Forex Signals';
+
+  @override
+  String get goldSignals => 'Gold Signals';
+
+  @override
+  String get updatePasswordSecure =>
+      'Update your password to keep your account secure';
+
+  @override
+  String get searchLabel => 'Search:';
+
+  @override
+  String get filterBy => 'Filter by:';
+
+  @override
+  String get allTime => 'All Time';
+
+  @override
+  String get startDate => 'Start Date:';
+
+  @override
+  String get endDate => 'End Date:';
+
+  @override
+  String get deactivate => 'Deactivate';
+
+  @override
+  String get unlimited => 'Unlimited';
+
+  @override
+  String get tenLeft => '10 left';
 }

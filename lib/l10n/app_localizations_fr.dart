@@ -793,91 +793,92 @@ class AppLocalizationsFr extends AppLocalizations {
       'L\'inscription à Minvest AI est maintenant ouverte — les places peuvent se fermer bientôt car nous examinons et approuvons les nouveaux membres';
 
   @override
-  String get currencyPairs => 'Currency pairs';
+  String get currencyPairs => 'Paires de devises';
 
   @override
-  String get allCurrencyPairs => 'All Currency pairs';
+  String get allCurrencyPairs => 'Toutes les paires de devises';
 
   @override
-  String get dateRange => 'Date Range';
+  String get dateRange => 'Plage de dates';
 
   @override
-  String get selectDateRange => 'Select Date Range';
+  String get selectDateRange => 'Sélectionner une plage de dates';
 
   @override
-  String get allAssets => 'All Assets';
+  String get allAssets => 'Tous les actifs';
 
   @override
-  String get asset => 'Asset';
+  String get asset => 'Actif';
 
   @override
-  String get tokenExpired => 'Token expired';
+  String get tokenExpired => 'Jeton expiré';
 
   @override
   String get tokenLimitReachedDesc =>
-      'You have used up your 10 free tokens today. Upgrade your package to view more signals.';
+      'Vous avez utilisé vos 10 jetons gratuits aujourd\'hui. Mettez à niveau votre forfait pour voir plus de signaux.';
 
   @override
-  String get later => 'Later';
+  String get later => 'Plus tard';
 
   @override
-  String get created => 'Created';
+  String get created => 'Créé';
 
   @override
-  String get detail => 'Detail';
+  String get detail => 'Détail';
 
   @override
-  String get performanceOverview => 'Performance Overview';
+  String get performanceOverview => 'Aperçu des performances';
 
   @override
-  String get totalProfitPips => 'Total Profit (Pips)';
+  String get totalProfitPips => 'Profit total (Pips)';
 
   @override
-  String get winRatePercent => 'Win Rate (%)';
+  String get winRatePercent => 'Taux de réussite (%)';
 
   @override
-  String get comingSoon => 'Coming soon';
+  String get comingSoon => 'Bientôt disponible';
 
   @override
-  String get errorLoadingHistory => 'Error loading history';
+  String get errorLoadingHistory =>
+      'Erreur lors du chargement de l\'historique';
 
   @override
-  String get noHistoryAvailable => 'No signal history available';
+  String get noHistoryAvailable => 'Aucun historique de signal disponible';
 
   @override
-  String get previous => 'Previous';
+  String get previous => 'Précédent';
 
   @override
   String get page => 'Page';
 
   @override
-  String get next => 'Next';
+  String get next => 'Suivant';
 
   @override
   String get date => 'Date';
 
   @override
-  String get timeGmt7 => 'Time (GMT +7)';
+  String get timeGmt7 => 'Heure (GMT +7)';
 
   @override
-  String get orders => 'Orders';
+  String get orders => 'Ordres';
 
   @override
   String get pips => 'Pips';
 
   @override
   String get smallScreenRotationHint =>
-      'Small screen: rotate landscape or scroll horizontally to view the full table.';
+      'Petit écran : tournez en paysage ou faites défiler horizontalement pour voir le tableau complet.';
 
   @override
-  String get history => 'History';
+  String get history => 'Historique';
 
   @override
   String get signalsWillAppearHere =>
       'Les signaux apparaîtront ici lorsqu\'ils seront disponibles';
 
   @override
-  String get pricing => 'Pricing';
+  String get pricing => 'Tarification';
 
   @override
   String get choosePlanSubtitle => 'Choisissez un plan qui vous convient';
@@ -1086,4 +1087,174 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errorLoadingPackages => 'Erreur de chargement des forfaits';
+
+  @override
+  String get monthly => 'Mensuel';
+
+  @override
+  String get annually => 'Annuel';
+
+  @override
+  String get whatsIncluded => 'Ce qui est inclus :';
+
+  @override
+  String get chooseThisPlan => 'Choisir ce plan';
+
+  @override
+  String get bestPricesForPremiumAccess =>
+      'Meilleurs prix pour un accès premium';
+
+  @override
+  String get choosePlanFitsNeeds =>
+      'Choisissez un plan adapté aux besoins de votre entreprise et commencez à automatiser avec l\'IA';
+
+  @override
+  String get save50Percent => 'ÉCONOMISEZ 50%';
+
+  @override
+  String get tryDemo => 'Essayer la démo';
+
+  @override
+  String get pleaseEnterEmailPassword =>
+      'Veuillez saisir l\'e-mail et le mot de passe';
+
+  @override
+  String loginFailed(String error) {
+    return 'Échec de la connexion : $error';
+  }
+
+  @override
+  String get welcomeBack => 'Bon retour';
+
+  @override
+  String get signInToContinue => 'Connectez-vous à votre compte pour continuer';
+
+  @override
+  String get or => 'ou';
+
+  @override
+  String get email => 'E-mail';
+
+  @override
+  String get emailHint => 'exemple123@gmail.com';
+
+  @override
+  String get password => 'Mot de passe';
+
+  @override
+  String get enterPassword => 'Entrez le mot de passe';
+
+  @override
+  String get forgotPassword => 'Mot de passe oublié ?';
+
+  @override
+  String get createNewAccount => 'Créer un nouveau compte ici !';
+
+  @override
+  String get signUp => 'S\'inscrire';
+
+  @override
+  String get signUpAccount => 'Créer un compte';
+
+  @override
+  String get enterPersonalData =>
+      'Saisissez vos données personnelles pour créer votre compte';
+
+  @override
+  String get nameLabel => 'Nom *';
+
+  @override
+  String get enterNameHint => 'Entrez le nom';
+
+  @override
+  String get emailLabel => 'E-mail *';
+
+  @override
+  String get passwordLabel => 'Mot de passe *';
+
+  @override
+  String get phoneLabel => 'Téléphone';
+
+  @override
+  String get continueButton => 'Continuer';
+
+  @override
+  String get fillAllFields => 'Veuillez remplir tous les champs obligatoires.';
+
+  @override
+  String get accountCreatedSuccess => 'Compte créé avec succès.';
+
+  @override
+  String signUpFailed(String error) {
+    return 'Échec de l\'inscription : $error';
+  }
+
+  @override
+  String get nationality => 'Nationalité :';
+
+  @override
+  String get overview => 'Aperçu';
+
+  @override
+  String get setting => 'Paramètres';
+
+  @override
+  String get paymentHistory => 'Historique des paiements';
+
+  @override
+  String get signalsPlan => 'Plan de signaux';
+
+  @override
+  String get aiMinvest => 'AI Minvest';
+
+  @override
+  String get yourTokens => 'Vos jetons';
+
+  @override
+  String get emailNotificationPreferences =>
+      'Préférences de notification par e-mail';
+
+  @override
+  String get chooseSignalNotificationTypes =>
+      'Choisissez les types de notifications de signaux que vous souhaitez recevoir par e-mail';
+
+  @override
+  String get allSignalNotifications => 'Toutes les notifications de signaux';
+
+  @override
+  String get cryptoSignals => 'Signaux Crypto';
+
+  @override
+  String get forexSignals => 'Signaux Forex';
+
+  @override
+  String get goldSignals => 'Signaux Or';
+
+  @override
+  String get updatePasswordSecure =>
+      'Mettez à jour votre mot de passe pour sécuriser votre compte';
+
+  @override
+  String get searchLabel => 'Rechercher :';
+
+  @override
+  String get filterBy => 'Filtrer par :';
+
+  @override
+  String get allTime => 'Tout le temps';
+
+  @override
+  String get startDate => 'Date de début :';
+
+  @override
+  String get endDate => 'Date de fin :';
+
+  @override
+  String get deactivate => 'Désactiver';
+
+  @override
+  String get unlimited => 'Illimité';
+
+  @override
+  String get tenLeft => '10 restants';
 }

@@ -103,7 +103,7 @@
     "contactUs247": "Contact Us 24/7",
     "newAnnouncement": "NEW ANNOUNCEMENT",
     "profile": "Profile",
-    "upgradeNow": "UPGRADE NOW",
+    "upgradeNow": "Upgrade Now",
     "followMinvest": "Follow MInvest",
     "tabSignal": "Signal",
     "tabChart": "Chart",
@@ -329,7 +329,7 @@
     "unlimitedSignals": "Unlimited signals",
     "goBack": "Go back",
     "goldPlan": "Gold Plan",
-    "perMonth": "/month",
+    "perMonth": "/ month",
     "continuouslyUpdating": "Continuously updating market data 24/7",
     "providingBestSignals": "Providing the best signals in real time",
     "includesEntrySlTp": "Includes Entry, SL, TP",
@@ -353,5 +353,73 @@
     "cancelled": "Cancelled",
     "exitedByAdmin": "Exited by Admin",
     "signalClosed": "Closed",
-    "errorLoadingPackages": "Error Loading Packages"
+    "errorLoadingPackages": "Error Loading Packages",
+    "monthly": "Monthly",
+    "annually": "Annually",
+    "whatsIncluded": "What's included:",
+    "chooseThisPlan": "Choose this plan",
+    "bestPricesForPremiumAccess": "Best Prices for Premium Access",
+    "choosePlanFitsNeeds": "Choose a plan that fits your business needs and start automating with AI",
+    "save50Percent": "SAVE 50%",
+    "tryDemo": "Try demo",
+    "perMonth": "/ month",
+    "pleaseEnterEmailPassword": "Please enter email and password",
+    "loginFailed": "Login failed: {error}",
+    "@loginFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "welcomeBack": "Welcome Back",
+    "signInToContinue": "Sign in to your account to continue",
+    "or": "or",
+    "email": "Email",
+    "emailHint": "example123@gmail.com",
+    "password": "Password",
+    "enterPassword": "Enter Password",
+    "forgotPassword": "Forgot your password?",
+    "createNewAccount": "Create new account here!",
+    "signUp": "Sign Up",
+    "signUpAccount": "Sign Up Account",
+    "enterPersonalData": "Enter your personal data to create your account",
+    "nameLabel": "Name *",
+    "enterNameHint": "Enter Name",
+    "emailLabel": "Email *",
+    "passwordLabel": "Password *",
+    "phoneLabel": "Phone",
+    "continueButton": "Continue",
+    "fillAllFields": "Please fill all required fields.",
+    "accountCreatedSuccess": "Account created successfully.",
+    "signUpFailed": "Sign up failed: {error}",
+    "@signUpFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "nationality": "Nationality:",
+    "overview": "Overview",
+    "setting": "Setting",
+    "paymentHistory": "Payment History",
+    "signalsPlan": "Signals Plan",
+    "aiMinvest": "AI Minvest",
+    "yourTokens": "Your Tokens",
+    "emailNotificationPreferences": "Email Notification Preferences",
+    "chooseSignalNotificationTypes": "Choose which types of signal notifications you want to receive via email",
+    "allSignalNotifications": "All Signal Notifications",
+    "cryptoSignals": "Crypto Signals",
+    "forexSignals": "Forex Signals",
+    "goldSignals": "Gold Signals",
+    "updatePasswordSecure": "Update your password to keep your account secure",
+    "searchLabel": "Search:",
+    "filterBy": "Filter by:",
+    "allTime": "All Time",
+    "startDate": "Start Date:",
+    "endDate": "End Date:",
+    "deactivate": "Deactivate",
+    "unlimited": "Unlimited",
+    "tenLeft": "10 left"
 }

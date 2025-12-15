@@ -348,5 +348,72 @@
     "cancelled": "已取消",
     "exitedByAdmin": "管理员退出",
     "signalClosed": "已关闭",
-    "errorLoadingPackages": "加载套餐错误"
+    "errorLoadingPackages": "加载套餐错误",
+    "monthly": "每月",
+    "annually": "每年",
+    "whatsIncluded": "包含内容：",
+    "chooseThisPlan": "选择此计划",
+    "bestPricesForPremiumAccess": "高级访问的最佳价格",
+    "choosePlanFitsNeeds": "选择适合您业务需求的计划并开始使用 AI 自动化",
+    "save50Percent": "节省 50%",
+    "tryDemo": "试用演示",
+    "pleaseEnterEmailPassword": "请输入电子邮件和密码",
+    "loginFailed": "登录失败：{error}",
+    "@loginFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "welcomeBack": "欢迎回来",
+    "signInToContinue": "登录您的帐户以继续",
+    "or": "或",
+    "email": "电子邮件",
+    "emailHint": "example123@gmail.com",
+    "password": "密码",
+    "enterPassword": "输入密码",
+    "forgotPassword": "忘记密码？",
+    "createNewAccount": "在此处创建新帐户！",
+    "signUp": "注册",
+    "signUpAccount": "注册帐户",
+    "enterPersonalData": "输入您的个人数据以创建您的帐户",
+    "nameLabel": "姓名 *",
+    "enterNameHint": "输入姓名",
+    "emailLabel": "电子邮件 *",
+    "passwordLabel": "密码 *",
+    "phoneLabel": "电话",
+    "continueButton": "继续",
+    "fillAllFields": "请填写所有必填字段。",
+    "accountCreatedSuccess": "帐户创建成功。",
+    "signUpFailed": "注册失败：{error}",
+    "@signUpFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "nationality": "国籍：",
+    "overview": "概览",
+    "setting": "设置",
+    "paymentHistory": "支付历史",
+    "signalsPlan": "信号计划",
+    "aiMinvest": "AI Minvest",
+    "yourTokens": "您的代币",
+    "emailNotificationPreferences": "电子邮件通知偏好",
+    "chooseSignalNotificationTypes": "选择您希望通过电子邮件接收的信号通知类型",
+    "allSignalNotifications": "所有信号通知",
+    "cryptoSignals": "加密信号",
+    "forexSignals": "外汇信号",
+    "goldSignals": "黄金信号",
+    "updatePasswordSecure": "更新您的密码以确保您的帐户安全",
+    "searchLabel": "搜索：",
+    "filterBy": "筛选：",
+    "allTime": "所有时间",
+    "startDate": "开始日期：",
+    "endDate": "结束日期：",
+    "deactivate": "停用",
+    "unlimited": "无限",
+    "tenLeft": "剩余 10"
 }

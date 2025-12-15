@@ -8,6 +8,11 @@ import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
 import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
 import 'package:minvest_forex_app/web/theme/colors.dart';
 import 'package:minvest_forex_app/web/theme/text_styles.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
+import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/features/admin/screens/admin_panel_screen_web.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -21,10 +26,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     final name = user?.displayName?.trim().isNotEmpty == true
         ? user!.displayName!
-        : 'User';
+        : appLocalizations.yourName; // Localize 'User'
     final email = user?.email ?? '';
 
     return Scaffold(
@@ -49,6 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           email: email,
                           tabIndex: _tabIndex,
                           onTabChanged: (i) => setState(() => _tabIndex = i),
+                          appLocalizations: appLocalizations, // Pass appLocalizations
                         ),
                         const SizedBox(width: 24),
                         Expanded(
@@ -87,15 +94,20 @@ class _ProfileSidebar extends StatelessWidget {
   final String email;
   final int tabIndex;
   final ValueChanged<int> onTabChanged;
+  final AppLocalizations appLocalizations; // Added AppLocalizations
   const _ProfileSidebar({
     required this.name,
     required this.email,
     required this.tabIndex,
     required this.onTabChanged,
+    required this.appLocalizations, // Added to constructor
   });
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final userRole = userProvider.role ?? 'user';
+
     return Container(
       width: 260,
       padding: const EdgeInsets.all(16),
@@ -131,11 +143,17 @@ class _ProfileSidebar extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Text('Nationality:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
+          Text(appLocalizations.nationality, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
           const SizedBox(height: 24),
-          _tabButton('Overview', 0),
-          _tabButton('Setting', 1),
-          _tabButton('Payment History', 2),
+          _tabButton(appLocalizations.overview, 0),
+          _tabButton(appLocalizations.setting, 1),
+          _tabButton(appLocalizations.paymentHistory, 2),
+          const SizedBox(height: 24),
+          if (userRole == 'admin') ...[
+            const _AdminPanelButton(),
+            const SizedBox(height: 10),
+          ],
+          const _LogoutButton(),
         ],
       ),
     );
@@ -171,11 +189,97 @@ class _ProfileSidebar extends StatelessWidget {
   }
 }
 
+class _AdminPanelButton extends StatelessWidget {
+  const _AdminPanelButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminPanelScreen()),
+        );
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E2C),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+        ),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: [
+            const Icon(Icons.admin_panel_settings, color: Colors.blueAccent, size: 20),
+            const SizedBox(width: 12),
+            Text(
+              l10n.adminPanel,
+              style: AppTextStyles.body.copyWith(
+                color: Colors.blueAccent,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LogoutButton extends StatelessWidget {
+  const _LogoutButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        context.read<AuthBloc>().add(SignOutRequested(providersToReset: [
+          context.read<UserProvider>(),
+          context.read<NotificationProvider>(),
+        ]));
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E0A0A),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+        ),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: [
+            const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+            const SizedBox(width: 12),
+            Text(
+              AppLocalizations.of(context)!.logout,
+              style: AppTextStyles.body.copyWith(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
 class _OverviewContent extends StatelessWidget {
   const _OverviewContent();
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -184,15 +288,15 @@ class _OverviewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Signals Plan', style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
+              Text(appLocalizations.signalsPlan, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
               const SizedBox(height: 12),
               Row(
-                children: const [
-                  Expanded(child: _PlanTile(title: 'Gold Signals')),
-                  SizedBox(width: 12),
-                  Expanded(child: _PlanTile(title: 'Forex Signals')),
-                  SizedBox(width: 12),
-                  Expanded(child: _PlanTile(title: 'Crypto Signals')),
+                children: [
+                  Expanded(child: _PlanTile(title: appLocalizations.goldSignals)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _PlanTile(title: appLocalizations.forexSignals)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _PlanTile(title: appLocalizations.cryptoSignals)),
                 ],
               ),
             ],
@@ -203,7 +307,7 @@ class _OverviewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('AI Minvest', style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
+              Text(appLocalizations.aiMinvest, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -214,7 +318,7 @@ class _OverviewContent extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Text('Your Tokens', style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                    Text(appLocalizations.yourTokens, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
                     const SizedBox(width: 12),
                     _TokenBadge(uid: user?.uid),
                     const SizedBox(width: 8),
@@ -245,6 +349,7 @@ class _SettingContentState extends State<_SettingContent> {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -252,33 +357,33 @@ class _SettingContentState extends State<_SettingContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Email Notification Preferences', style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
+              Text(appLocalizations.emailNotificationPreferences, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
               const SizedBox(height: 6),
               Text(
-                'Choose which types of signal notifications you want to receive via email',
+                appLocalizations.chooseSignalNotificationTypes,
                 style: AppTextStyles.caption.copyWith(color: Colors.white70),
               ),
               const SizedBox(height: 14),
               _SettingTile(
-                label: 'All Signal Notifications',
+                label: appLocalizations.allSignalNotifications,
                 value: all,
                 onChanged: (v) => setState(() => all = v),
               ),
               const SizedBox(height: 10),
               _SettingTile(
-                label: 'Crypto Signals',
+                label: appLocalizations.cryptoSignals,
                 value: crypto,
                 onChanged: (v) => setState(() => crypto = v),
               ),
               const SizedBox(height: 10),
               _SettingTile(
-                label: 'Forex Signals',
+                label: appLocalizations.forexSignals,
                 value: forex,
                 onChanged: (v) => setState(() => forex = v),
               ),
               const SizedBox(height: 10),
               _SettingTile(
-                label: 'Gold Signals',
+                label: appLocalizations.goldSignals,
                 value: gold,
                 onChanged: (v) => setState(() => gold = v),
               ),
@@ -288,7 +393,7 @@ class _SettingContentState extends State<_SettingContent> {
         const SizedBox(height: 16),
         _CardContainer(
           child: Text(
-            'Update your password to keep your account secure',
+            appLocalizations.updatePasswordSecure,
             style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
@@ -335,6 +440,7 @@ class _PaymentContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -342,16 +448,16 @@ class _PaymentContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Payment History', style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
+              Text(appLocalizations.paymentHistory, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
               const SizedBox(height: 6),
               Text(
-                'Choose which types of signal notifications you want to receive via email',
+                appLocalizations.chooseSignalNotificationTypes,
                 style: AppTextStyles.caption.copyWith(color: Colors.white70),
               ),
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Text('Search:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
+                  Text(appLocalizations.searchLabel, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Container(
@@ -364,13 +470,13 @@ class _PaymentContent extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Write Concerns Here...',
+                        appLocalizations.writeConcernsHere,
                         style: AppTextStyles.caption.copyWith(color: Colors.white38),
                       ),
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Text('Filter by:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
+                  Text(appLocalizations.filterBy, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
                   const SizedBox(width: 8),
                   Container(
                     height: 44,
@@ -382,7 +488,7 @@ class _PaymentContent extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Text('All Time', style: AppTextStyles.caption.copyWith(color: Colors.white)),
+                        Text(appLocalizations.allTime, style: AppTextStyles.caption.copyWith(color: Colors.white)),
                         const SizedBox(width: 8),
                         const Icon(Icons.arrow_drop_down, color: Colors.white70),
                       ],
@@ -413,6 +519,7 @@ class _PlanTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -431,10 +538,10 @@ class _PlanTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text('Start Date:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
+          Text(appLocalizations.startDate, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
           Text('...', style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13)),
           const SizedBox(height: 4),
-          Text('End Date:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
+          Text(appLocalizations.endDate, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
           Text('...', style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13)),
         ],
       ),
@@ -443,8 +550,11 @@ class _PlanTile extends StatelessWidget {
 }
 
 class _DeactivateButton extends StatelessWidget {
+  const _DeactivateButton();
+
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -453,7 +563,7 @@ class _DeactivateButton extends StatelessWidget {
         border: Border.all(color: Colors.white24),
       ),
       child: Text(
-        'Deactivate',
+        appLocalizations.deactivate,
         style: AppTextStyles.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
       ),
     );
@@ -504,19 +614,20 @@ class _TokenBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     final userTier = Provider.of<UserProvider?>(context, listen: false)?.userTier?.toLowerCase() ?? 'free';
     final isElite = userTier == 'elite';
     if (isElite) {
-      return _badge(text: 'Unlimited', color: Colors.greenAccent);
+      return _badge(text: appLocalizations.unlimited, color: Colors.greenAccent);
     }
     if (uid == null) {
-      return _badge(text: '10 left', color: Colors.greenAccent);
+      return _badge(text: appLocalizations.tenLeft, color: Colors.greenAccent);
     }
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return _badge(text: '10 left', color: Colors.greenAccent);
+          return _badge(text: appLocalizations.tenLeft, color: Colors.greenAccent);
         }
         final data = snapshot.data!.data() ?? {};
         final storedDate = (data['freeTokensDate'] ?? '') as String;

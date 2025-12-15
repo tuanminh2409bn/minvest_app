@@ -118,9 +118,9 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Sign Up Account', textAlign: TextAlign.center, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
+                Text(AppLocalizations.of(context)!.signUpAccount, textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
                 const SizedBox(height: 6),
-                const Text('Enter your personal data to create your account', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)),
+                Text(AppLocalizations.of(context)!.enterPersonalData, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
                 const SizedBox(height: 24),
                 _SocialSignInButton(
                   icon: Image.asset('assets/images/google_logo.png', height: 20, width: 20),
@@ -129,21 +129,21 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
                 ),
                 const SizedBox(height: 12),
                 Row(
-                  children: const [
-                    Expanded(child: Divider(color: Colors.white12, thickness: 1)),
+                  children: [
+                    const Expanded(child: Divider(color: Colors.white12, thickness: 1)),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('or', style: TextStyle(color: Colors.white70)),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(AppLocalizations.of(context)!.or, style: const TextStyle(color: Colors.white70)),
                     ),
-                    Expanded(child: Divider(color: Colors.white12, thickness: 1)),
+                    const Expanded(child: Divider(color: Colors.white12, thickness: 1)),
                   ],
                 ),
                 const SizedBox(height: 12),
-                _TextField(label: 'Name *', hint: 'Enter Name', controller: _nameController),
+                _TextField(label: AppLocalizations.of(context)!.nameLabel, hint: AppLocalizations.of(context)!.enterNameHint, controller: _nameController),
                 const SizedBox(height: 12),
-                _TextField(label: 'Email *', hint: 'example123@gmail.com', controller: _emailController),
+                _TextField(label: AppLocalizations.of(context)!.emailLabel, hint: AppLocalizations.of(context)!.emailHint, controller: _emailController),
                 const SizedBox(height: 12),
-                _TextField(label: 'Password *', hint: 'Enter Password', controller: _passwordController, obscure: true),
+                _TextField(label: AppLocalizations.of(context)!.passwordLabel, hint: AppLocalizations.of(context)!.enterPassword, controller: _passwordController, obscure: true),
                 const SizedBox(height: 12),
                 _PhoneField(
                   countryCode: _countryCode,
@@ -152,7 +152,7 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
                 ),
                 const SizedBox(height: 16),
                 _PrimaryButton(
-                  text: 'Continue',
+                  text: AppLocalizations.of(context)!.continueButton,
                   onPressed: _submit,
                   loading: _isVerifying,
                 ),
@@ -171,7 +171,7 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
     final phone = _phoneController.text.trim();
     if (email.isEmpty || password.isEmpty || name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.fillAllFields)),
       );
       return;
     }
@@ -189,13 +189,15 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
       // Auth state changes will navigate via AuthGate; show success
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created successfully.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.accountCreatedSuccess)),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sign up failed: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.signUpFailed(e.toString()))),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isVerifying = false);
     }
@@ -298,7 +300,7 @@ class _PhoneField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Phone', style: TextStyle(color: Colors.white70, fontSize: 13)),
+        Text(AppLocalizations.of(context)!.phoneLabel, style: const TextStyle(color: Colors.white70, fontSize: 13)),
         const SizedBox(height: 6),
         Row(
           children: [
@@ -321,7 +323,10 @@ class _PhoneField extends StatelessWidget {
                 items: const [
                   DropdownMenuItem(value: 'VN(+84)', child: Text('VN(+84)')),
                   DropdownMenuItem(value: 'US(+1)', child: Text('US(+1)')),
-                  DropdownMenuItem(value: 'SG(+65)', child: Text('SG(+65)')),
+                  DropdownMenuItem(value: 'ZH(+86)', child: Text('ZH(+86)')),
+                  DropdownMenuItem(value: 'FR(+33)', child: Text('FR(+33)')),
+                  DropdownMenuItem(value: 'JA(+81)', child: Text('JA(+81)')),
+                  DropdownMenuItem(value: 'KO(+82)', child: Text('FR(+82)')),
                 ],
                 onChanged: (value) {
                   if (value != null) onChangedCode(value);
