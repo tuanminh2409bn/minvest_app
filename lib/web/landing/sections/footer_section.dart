@@ -3,6 +3,7 @@ import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/text_styles.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
@@ -48,7 +49,7 @@ class FooterSection extends StatelessWidget {
           _navLink(context, AppLocalizations.of(context)!.feature, '/features'),
           _navLink(context, AppLocalizations.of(context)!.aiSignal, '/ai-signals'),
           _navLink(context, AppLocalizations.of(context)!.pricing, '/pricing'),
-          _navLink(context, AppLocalizations.of(context)!.newAnnouncement, '/news'), // Reusing newAnnouncement for News tab text
+          _navLink(context, AppLocalizations.of(context)!.navNews, '/news'),
           _navLink(context, AppLocalizations.of(context)!.contactUs, '/contact-us'),
         ],
       );
@@ -90,19 +91,15 @@ class FooterSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: List.generate(
-              6,
-              (_) => Container(
-                width: 22,
-                height: 22,
-                decoration: const BoxDecoration(
-                  color: Colors.white70,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
+            spacing: 12,
+            runSpacing: 12,
+            children: const [
+              _SocialIcon(iconPath: 'assets/images/facebook_logo.png', url: 'https://www.facebook.com/minvest.vn'),
+              _SocialIcon(iconPath: 'assets/images/tiktok_logo.png', url: 'https://www.tiktok.com/@minvest.minh'),
+              _SocialIcon(iconPath: 'assets/images/youtube_logo.png', url: 'https://www.youtube.com/@minvestvn'),
+              _SocialIcon(iconPath: 'assets/images/telegram_logo.png', url: 'https://t.me/minvest_free', size: 32),
+              _SocialIcon(iconPath: 'assets/images/web_logo.png', url: 'https://minvest.vn/'),
+            ],
           ),
         ],
       );
@@ -161,6 +158,43 @@ class FooterSection extends StatelessWidget {
       child: Text(
         text,
         style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
+      ),
+    );
+  }
+}
+
+class _SocialIcon extends StatelessWidget {
+  final String iconPath;
+  final String url;
+  final double size;
+
+  const _SocialIcon({
+    required this.iconPath,
+    required this.url,
+    this.size = 32.0,
+  });
+
+  Future<void> _launchURL() async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _launchURL,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(4.0),
+        child: Image.asset(
+          iconPath,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }

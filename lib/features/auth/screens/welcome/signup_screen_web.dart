@@ -34,57 +34,68 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final double verticalGap = (constraints.maxHeight * 0.16).clamp(70.0, 130.0);
-          final bool isNarrow = constraints.maxWidth < 900;
-          final double effectiveGap = isNarrow ? 40 : verticalGap;
-          final double formPadding = isNarrow ? 24 : verticalGap;
-          final double stackHeight = (670 + (effectiveGap * 2)).clamp(720.0, 1050.0);
-          final bool showCards = constraints.maxWidth > 900;
-          final double topSpace = isNarrow ? 32 : 96;
-          final double bottomSpace = isNarrow ? 32 : effectiveGap;
-
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Column(
-                children: [
-                  const SizedBox(height: 12),
-                  Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1200),
-                      child: const LandingNavBar(),
-                    ),
-                  ),
-                  SizedBox(height: topSpace),
-                  if (isNarrow)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: _GlowWrapper(
-                        child: _buildWebLayout(context, formPadding),
-                      ),
-                    )
-                  else
-                    SizedBox(
-                      height: stackHeight,
-                      child: Stack(
-                        children: [
-                          Positioned.fill(child: Container(color: Colors.black)),
-                          _AuthBackdrop(showCards: showCards),
-                          Positioned.fill(child: _buildWebLayout(context, formPadding)),
-                        ],
-                      ),
-                    ),
-                  SizedBox(height: bottomSpace),
-                  const FooterSection(),
-                ],
-              ),
-            ),
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        } else if (state.status == AuthStatus.unauthenticated && state.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.errorMessage!)),
           );
-        },
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final double verticalGap = (constraints.maxHeight * 0.16).clamp(70.0, 130.0);
+            final bool isNarrow = constraints.maxWidth < 900;
+            final double effectiveGap = isNarrow ? 40 : verticalGap;
+            final double formPadding = isNarrow ? 24 : verticalGap;
+            final double stackHeight = (670 + (effectiveGap * 2)).clamp(720.0, 1050.0);
+            final bool showCards = constraints.maxWidth > 900;
+            final double topSpace = isNarrow ? 32 : 96;
+            final double bottomSpace = isNarrow ? 32 : effectiveGap;
+
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1200),
+                        child: const LandingNavBar(),
+                      ),
+                    ),
+                    SizedBox(height: topSpace),
+                    if (isNarrow)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _GlowWrapper(
+                          child: _buildWebLayout(context, formPadding),
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        height: stackHeight,
+                        child: Stack(
+                          children: [
+                            Positioned.fill(child: Container(color: Colors.black)),
+                            _AuthBackdrop(showCards: showCards),
+                            Positioned.fill(child: _buildWebLayout(context, formPadding)),
+                          ],
+                        ),
+                      ),
+                    SizedBox(height: bottomSpace),
+                    const FooterSection(),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

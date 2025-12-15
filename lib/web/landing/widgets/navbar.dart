@@ -27,18 +27,28 @@ class LandingNavBar extends StatelessWidget {
 
     return LayoutBuilder(builder: (context, constraints) {
       final bool stacked = constraints.maxWidth < 720;
+      // Tăng ngưỡng breakpoint lên 1250 để xử lý sớm các ngôn ngữ dài như tiếng Pháp
+      final bool isCompact = constraints.maxWidth < 1250; 
+      
       final double padH = stacked ? 12 : 24;
       final double padV = stacked ? 12 : 6;
+      
+      // Tinh chỉnh khoảng cách giữa các item: Nhỏ hơn khi ở chế độ Compact
       final navSpacing = stacked
           ? 10.0
-          : constraints.maxWidth < 900
-              ? 12.0
-              : 20.0;
+          : isCompact
+              ? 14.0 
+              : 24.0;
+              
+      // Giảm nhẹ font size khi không gian hẹp
       final fontSize = stacked
           ? 14.0
-          : constraints.maxWidth < 900
-              ? 15.0
+          : isCompact
+              ? 14.5
               : 16.0;
+
+      // Khoảng cách giữa Logo và Menu: Giảm đáng kể khi ở chế độ Compact (từ 82 -> 32)
+      final double logoGap = isCompact ? 32.0 : 64.0;
 
       final navLinks = SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -102,7 +112,7 @@ class LandingNavBar extends StatelessWidget {
                     onTap: () => Navigator.of(context).pushNamed('/'),
                     child: Image.asset('assets/mockups/logo.png', height: 42, fit: BoxFit.contain),
                   ),
-                  const SizedBox(width: 82),
+                  SizedBox(width: logoGap), // Sử dụng khoảng cách linh hoạt
                   Expanded(child: navLinks),
                   actions,
                 ],
