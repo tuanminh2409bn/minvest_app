@@ -5,12 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
+import 'package:web/web.dart' as web;
+import 'dart:js_interop';
+import 'dart:convert'; // Thêm dòng này
 import '../theme/colors.dart';
 import '../theme/breakpoints.dart';
 import '../theme/text_styles.dart';
 import '../theme/spacing.dart';
 import 'widgets/navbar.dart';
 import 'widgets/gradient_button.dart';
+import 'widgets/orb_effect.dart';
 import 'sections/pricing_section.dart';
 import 'sections/footer_section.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
@@ -226,7 +230,51 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
       child: Stack(
         alignment: Alignment.center,
         children: [
-          _buildBlob(size),
+          // Thay thế _buildBlob bằng OrbEffect
+          const Positioned.fill(child: OrbEffect()),
+          
+          // Lớp bắt sự kiện chuột (Catcher)
+          Positioned.fill(
+            child: MouseRegion(
+              hitTestBehavior: HitTestBehavior.opaque, // Bắt sự kiện chắc chắn
+              onHover: (event) {
+                // Logic tính toán tọa độ
+                final width = size.width;
+                final height = size.height;
+                final minSize = math.min(width, height);
+                final centerX = width / 2;
+                final centerY = height / 2;
+                
+                // Vì MouseRegion nằm trong SizedBox(size), local position chính là tọa độ trong khung 1200x800
+                final local = event.localPosition; 
+                
+                final uvX = ((local.dx - centerX) / minSize) * 2.0;
+                final uvY = ((local.dy - centerY) / minSize) * 2.0;
+
+                final iframe = web.document.getElementById('orb-iframe') as web.HTMLIFrameElement?;
+                if (iframe != null && iframe.contentWindow != null) {
+                   final jsonStr = jsonEncode({'uvX': uvX, 'uvY': uvY});
+                   iframe.contentWindow!.postMessage(jsonStr.toJS, '*'.toJS);
+                }
+
+                setState(() {
+                  _pointer = Offset(
+                    (local.dx / width - 0.5).clamp(-1, 1),
+                    (local.dy / height - 0.5).clamp(-1, 1),
+                  );
+                });
+              },
+              onExit: (_) {
+                final iframe = web.document.getElementById('orb-iframe') as web.HTMLIFrameElement?;
+                if (iframe != null && iframe.contentWindow != null) {
+                    iframe.contentWindow!.postMessage('mouseleave'.toJS, '*'.toJS);
+                }
+                setState(() => _pointer = Offset.zero);
+              },
+              child: Container(color: Colors.transparent),
+            ),
+          ), 
+          
           _buildContent(),
         ],
       ),
@@ -238,47 +286,7 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
       return scaled;
     }
 
-    return MouseRegion(
-      onHover: (event) {
-        final renderBox = context.findRenderObject() as RenderBox?;
-        if (renderBox != null) {
-          final local = renderBox.globalToLocal(event.position);
-          setState(() {
-            _pointer = Offset(
-              (local.dx / size.width - 0.5).clamp(-1, 1),
-              (local.dy / size.height - 0.5).clamp(-1, 1),
-            );
-          });
-        }
-      },
-      onExit: (_) => setState(() => _pointer = Offset.zero),
-      child: scaled,
-    );
-  }
-
-  Widget _buildBlob(Size size) {
-    final dx = _pointer.dx * 12;
-    final dy = _pointer.dy * 12;
-    final scale = 1 + (_pointer.distance * 0.05);
-    final rotateX = _pointer.dy * -0.12;
-    final rotateY = _pointer.dx * 0.12;
-    final skewX = _pointer.dx * 0.06;
-    final skewY = _pointer.dy * 0.06;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 140),
-      transform: _addSkew(Matrix4.identity()
-        ..translate(dx, dy)
-        ..rotateX(rotateX)
-        ..rotateY(rotateY)
-        ..scale(scale, scale)
-        ..setEntry(3, 2, 0.0008), skewX, skewY),
-      child: Image.asset(
-        'assets/mockups/hero.png',
-        width: size.width,
-        height: size.height,
-        fit: BoxFit.cover,
-      ),
-    );
+    return scaled;
   }
 
   Widget _buildContent() {
