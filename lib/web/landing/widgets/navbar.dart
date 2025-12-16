@@ -8,13 +8,13 @@ import '../../theme/spacing.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/features/auth/screens/welcome/welcome_screen.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/core/providers/user_provider.dart'; // Thêm dòng này
 
 class LandingNavBar extends StatelessWidget {
   const LandingNavBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
     final l10n = AppLocalizations.of(context)!;
 
     final List<Map<String, String>> navItems = [
@@ -25,100 +25,107 @@ class LandingNavBar extends StatelessWidget {
       {'title': l10n.contactUs, 'route': '/contact-us'},
     ];
 
-    return LayoutBuilder(builder: (context, constraints) {
-      final bool stacked = constraints.maxWidth < 720;
-      // Tăng ngưỡng breakpoint lên 1250 để xử lý sớm các ngôn ngữ dài như tiếng Pháp
-      final bool isCompact = constraints.maxWidth < 1250; 
-      
-      final double padH = stacked ? 12 : 24;
-      final double padV = stacked ? 12 : 6;
-      
-      // Tinh chỉnh khoảng cách giữa các item: Nhỏ hơn khi ở chế độ Compact
-      final navSpacing = stacked
-          ? 10.0
-          : isCompact
-              ? 14.0 
-              : 24.0;
-              
-      // Giảm nhẹ font size khi không gian hẹp
-      final fontSize = stacked
-          ? 14.0
-          : isCompact
-              ? 14.5
-              : 16.0;
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        return LayoutBuilder(builder: (context, constraints) {
+          final bool stacked = constraints.maxWidth < 720;
+          // Tăng ngưỡng breakpoint lên 1250 để xử lý sớm các ngôn ngữ dài như tiếng Pháp
+          final bool isCompact = constraints.maxWidth < 1250; 
+          
+          final double padH = stacked ? 12 : 24;
+          final double padV = stacked ? 12 : 6;
+          
+          // Tinh chỉnh khoảng cách giữa các item: Nhỏ hơn khi ở chế độ Compact
+          final navSpacing = stacked
+              ? 10.0
+              : isCompact
+                  ? 14.0 
+                  : 24.0;
+                  
+          // Giảm nhẹ font size khi không gian hẹp
+          final fontSize = stacked
+              ? 14.0
+              : isCompact
+                  ? 14.5
+                  : 16.0;
 
-      // Khoảng cách giữa Logo và Menu: Giảm đáng kể khi ở chế độ Compact (từ 82 -> 32)
-      final double logoGap = isCompact ? 32.0 : 64.0;
+          // Khoảng cách giữa Logo và Menu: Giảm đáng kể khi ở chế độ Compact (từ 82 -> 32)
+          final double logoGap = isCompact ? 32.0 : 64.0;
 
-      final navLinks = SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            ...navItems.map(
-              (item) => Padding(
-                padding: EdgeInsets.symmetric(horizontal: navSpacing / 2),
-                child: InkWell(
-                  onTap: () {
-                    if (item['route'] != null) {
-                      Navigator.of(context).pushNamed(item['route']!);
-                    }
-                  },
-                  child: Text(
-                    item['title']!,
-                    style: AppTextStyles.h3.copyWith(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+          final navLinks = SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ...navItems.map(
+                  (item) => Padding(
+                    padding: EdgeInsets.symmetric(horizontal: navSpacing / 2),
+                    child: InkWell(
+                      onTap: () {
+                        if (item['route'] != null) {
+                          Navigator.of(context).pushNamed(item['route']!);
+                        }
+                      },
+                      child: Text(
+                        item['title']!,
+                        style: AppTextStyles.h3.copyWith(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      );
+          );
 
-      final actions = Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (user == null) ...[
-            _ctaButton(context, l10n.getSignalsNow),
-            const SizedBox(width: AppSpacing.sm),
-            _outlineButton(
-              context,
-              l10n.signIn,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-              ),
-            ),
-          ] else ...[
-            _userNameChip(
-              user,
-              onTap: () => Navigator.of(context).pushNamed('/profile'),
-            ),
-          ],
-          const SizedBox(width: AppSpacing.sm),
-          const _LanguageSelector(),
-        ],
-      );
-
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
-        child: stacked
-            ? _MobileNavBar(navLinks: navLinks, actions: actions)
-            : Row(
-                children: [
-                  InkWell(
-                    onTap: () => Navigator.of(context).pushNamed('/'),
-                    child: Image.asset('assets/mockups/logo.png', height: 42, fit: BoxFit.contain),
+          final actions = Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (user == null) ...[
+                _ctaButton(context, l10n.getSignalsNow),
+                const SizedBox(width: AppSpacing.sm),
+                _outlineButton(
+                  context,
+                  l10n.signIn,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const WelcomeScreen()),
                   ),
-                  SizedBox(width: logoGap), // Sử dụng khoảng cách linh hoạt
-                  Expanded(child: navLinks),
-                  actions,
-                ],
-              ),
-      );
-    });
+                ),
+              ] else ...[
+                _userNameChip(
+                  context,
+                  user,
+                  onTap: () => Navigator.of(context).pushNamed('/profile'),
+                ),
+              ],
+              const SizedBox(width: AppSpacing.sm),
+              const _LanguageSelector(),
+            ],
+          );
+
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
+            child: stacked
+                ? _MobileNavBar(navLinks: navLinks, actions: actions)
+                : Row(
+                    children: [
+                      InkWell(
+                        onTap: () => Navigator.of(context).pushNamed('/'),
+                        child: Image.asset('assets/mockups/logo.png', height: 42, fit: BoxFit.contain),
+                      ),
+                      SizedBox(width: logoGap), // Sử dụng khoảng cách linh hoạt
+                      Expanded(child: navLinks),
+                      actions,
+                    ],
+                  ),
+          );
+        });
+      },
+    );
   }
 
   Widget _ctaButton(BuildContext context, String text) {
@@ -210,8 +217,11 @@ class LandingNavBar extends StatelessWidget {
     );
   }
 
-  Widget _userNameChip(User user, {VoidCallback? onTap}) {
-    final name = (user.displayName ?? user.email ?? 'User').trim();
+  Widget _userNameChip(BuildContext context, User user, {VoidCallback? onTap}) {
+    // Lấy displayName từ UserProvider (Firestore) ưu tiên hơn, sau đó mới đến Auth
+    final userProvider = Provider.of<UserProvider>(context);
+    final String name = (userProvider.displayName ?? user.displayName ?? user.email ?? 'User').trim();
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(

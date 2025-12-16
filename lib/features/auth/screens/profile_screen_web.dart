@@ -107,6 +107,7 @@ class _ProfileSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final userRole = userProvider.role ?? 'user';
+    debugPrint('Current User Role: "$userRole"'); // Debug print
 
     return Container(
       width: 260,
@@ -137,6 +138,7 @@ class _ProfileSidebar extends StatelessWidget {
                     Text(name, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
                     if (email.isNotEmpty)
                       Text(email, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
+
                   ],
                 ),
               ),
@@ -149,7 +151,7 @@ class _ProfileSidebar extends StatelessWidget {
           _tabButton(appLocalizations.setting, 1),
           _tabButton(appLocalizations.paymentHistory, 2),
           const SizedBox(height: 24),
-          if (userRole == 'admin') ...[
+          if (userRole.toLowerCase().trim() == 'admin') ...[
             const _AdminPanelButton(),
             const SizedBox(height: 10),
           ],

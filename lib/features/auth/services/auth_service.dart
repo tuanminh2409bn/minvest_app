@@ -26,17 +26,11 @@ class AuthService {
   Stream<String> get forceLogoutStream => _forceLogoutController.stream;
   StreamSubscription<DocumentSnapshot>? _sessionSubscription;
 
-  // StreamController để an toàn khi khởi tạo trước Firebase
-  final StreamController<User?> _authStateController = StreamController<User?>.broadcast();
-  Stream<User?> get authStateChanges => _authStateController.stream;
+  Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
   // Hàm khởi tạo service, gọi sau khi Firebase.initializeApp() hoàn tất
   Future<void> initialize() async {
-    _firebaseAuth.authStateChanges().listen((user) {
-      if (!_authStateController.isClosed) {
-        _authStateController.add(user);
-      }
-    });
+    // Không cần logic listen thủ công nữa vì đã dùng trực tiếp stream của Firebase
   }
 
   Future<String> sendPhoneOtp(String phoneNumber) async {

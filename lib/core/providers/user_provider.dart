@@ -16,16 +16,19 @@ class UserProvider with ChangeNotifier {
   String? _verificationStatus;
   String? _verificationError;
   String? _role;
+  String? _displayName; // Thêm trường displayName
   UserDataStatus _status = UserDataStatus.initial;
 
   // --- THAY ĐỔI 1: Thay thế các trường cũ bằng trường mới chung hơn ---
   bool _requiresSessionReset = false;
   String? _sessionResetReason;
 
+  String? get uid => _uid;
   String? get userTier => _userTier;
   String? get verificationStatus => _verificationStatus;
   String? get verificationError => _verificationError;
   String? get role => _role;
+  String? get displayName => _displayName; // Getter cho displayName
   UserDataStatus get status => _status;
 
   // --- THAY ĐỔI 2: Cung cấp getter cho các thuộc tính mới ---
@@ -49,6 +52,7 @@ class UserProvider with ChangeNotifier {
   }
 
   void _listenToUserDocument(String uid) {
+    print("DEBUG: UserProvider started listening to UID: $uid"); // Debug UID
     _uid = uid;
     _userSubscription?.cancel();
     _status = UserDataStatus.loading;
@@ -60,12 +64,17 @@ class UserProvider with ChangeNotifier {
         .snapshots(includeMetadataChanges: true)
         .listen((snapshot) {
       final bool isFromCache = snapshot.metadata.isFromCache;
+      print("DEBUG: Firestore snapshot received. Source: ${isFromCache ? 'Cache' : 'Server'}. Exists: ${snapshot.exists}"); // Debug Source
+      
       if (snapshot.exists) {
         final data = snapshot.data() as Map<String, dynamic>;
+        print("DEBUG: Firestore Data for $uid: $data"); // Debug FULL Data
+        
         _userTier = data['subscriptionTier'];
         _verificationStatus = data['verificationStatus'];
         _verificationError = data['verificationError'];
         _role = data['role'] ?? 'user';
+        _displayName = data['displayName']; // Đọc displayName từ Firestore
 
         // --- THAY ĐỔI 3: Đọc dữ liệu từ các trường mới trên Firestore ---
         _requiresSessionReset = data['requiresSessionReset'] ?? false;
@@ -116,6 +125,7 @@ class UserProvider with ChangeNotifier {
     _verificationStatus = null;
     _verificationError = null;
     _role = null;
+    _displayName = null; // Reset displayName
     // --- THAY ĐỔI 5: Reset các trường mới ---
     _requiresSessionReset = false;
     _sessionResetReason = null;
