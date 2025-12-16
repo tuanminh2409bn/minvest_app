@@ -1,0 +1,82 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- FUNCTIONS ---
+    function isAdmin() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             'role' in userDoc.data &&
+             userDoc.data.role == 'admin';
+    }
+
+    function isSupport() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             'role' in userDoc.data &&
+             userDoc.data.role == 'support';
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // --- COLLECTIONS ---
+
+    match /signals/{signalId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Collection `users`
+    match /users/{userId} {
+      // ▼▼▼ BẮT ĐẦU SỬA LỖI: THÊM `isSupport()` VÀO QUY TẮC ĐỌC ▼▼▼
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin() || isSupport());
+      // ▲▲▲ KẾT THÚC SỬA LỖI ▲▲▲
+      
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if false;
+
+      match /notifications/{notificationId} {
+        allow read, update: if isSignedIn() && request.auth.uid == userId;
+        allow create: if isSignedIn() && request.auth.uid == userId;
+        allow delete: if false;
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if isSignedIn() && request.auth.uid == userId;
+        allow write: if false;
+      }
+    }
+
+    // =======================================================
+    // THÊM RULES CHO COLLECTION 'news' Ở ĐÂY
+    // =======================================================
+    match /news/{articleId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    // =======================================================
+
+
+    match /verifiedExnessIds/{exnessId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /processedTransactions/{transactionId} {
+      allow read, write: if false;
+    }
+
+    match /chat_rooms/{userId} {
+      allow read, write: if isSignedIn() && (request.auth.uid == userId || isSupport());
+
+      match /messages/{messageId} {
+        allow read, create: if isSignedIn() && (request.auth.uid == userId || isSupport());
+        allow update, delete: if false;
+      }
+    }
+  }
+}

@@ -31,6 +31,7 @@ class NewsService {
       final docRef = await _firestore.collection('news').add(article.toJson());
       return docRef.id;
     } catch (e) {
+      print("Lỗi createNews: $e"); // Debug error
       return null;
     }
   }

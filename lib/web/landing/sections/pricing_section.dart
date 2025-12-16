@@ -376,7 +376,9 @@ class _PricingCardContent extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/signup');
+                },
                 child: Text(appLocalizations.chooseThisPlan),
               ),
             ),

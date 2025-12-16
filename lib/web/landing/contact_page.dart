@@ -4,7 +4,6 @@ import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../theme/gradients.dart';
-import '../theme/spacing.dart';
 import 'widgets/navbar.dart';
 import 'sections/footer_section.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
