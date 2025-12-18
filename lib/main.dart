@@ -31,6 +31,9 @@ import 'web/landing/ai_signals_page.dart';
 import 'web/landing/pricing_page.dart';
 import 'web/landing/news_page.dart';
 import 'web/landing/contact_page.dart';
+import 'web/landing/legal/terms_of_registration_page.dart';
+import 'web/landing/legal/operating_principles_page.dart';
+import 'web/landing/legal/terms_conditions_page.dart';
 import 'features/auth/screens/welcome/signup_screen_web.dart';
 import 'features/auth/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -298,6 +301,9 @@ class _MyAppState extends State<MyApp> {
               '/signin': (context) => const AuthGate(),
               '/signup': (context) => const SignupScreenWeb(),
               '/profile': (context) => const ProfileScreen(),
+              '/terms-of-registration': (context) => const TermsOfRegistrationPage(),
+              '/operating-principles': (context) => const OperatingPrinciplesPage(),
+              '/terms-conditions': (context) => const TermsConditionsPage(),
             },
             initialRoute: '/',
           );
@@ -320,8 +326,33 @@ class _MyAppState extends State<MyApp> {
 
 ThemeData _buildAppTheme() {
   final base = ThemeData.dark();
+  final textTheme = GoogleFonts.beVietnamProTextTheme(base.textTheme);
+
+  TextStyle? applySpacing(TextStyle? style) {
+    if (style == null) return null;
+    return style.copyWith(letterSpacing: (style.fontSize ?? 14.0) * 0.02);
+  }
+
+  final newTextTheme = textTheme.copyWith(
+    displayLarge: applySpacing(textTheme.displayLarge),
+    displayMedium: applySpacing(textTheme.displayMedium),
+    displaySmall: applySpacing(textTheme.displaySmall),
+    headlineLarge: applySpacing(textTheme.headlineLarge),
+    headlineMedium: applySpacing(textTheme.headlineMedium),
+    headlineSmall: applySpacing(textTheme.headlineSmall),
+    titleLarge: applySpacing(textTheme.titleLarge),
+    titleMedium: applySpacing(textTheme.titleMedium),
+    titleSmall: applySpacing(textTheme.titleSmall),
+    bodyLarge: applySpacing(textTheme.bodyLarge),
+    bodyMedium: applySpacing(textTheme.bodyMedium),
+    bodySmall: applySpacing(textTheme.bodySmall),
+    labelLarge: applySpacing(textTheme.labelLarge),
+    labelMedium: applySpacing(textTheme.labelMedium),
+    labelSmall: applySpacing(textTheme.labelSmall),
+  );
+
   return base.copyWith(
-    textTheme: GoogleFonts.beVietnamProTextTheme(base.textTheme),
+    textTheme: newTextTheme,
     scaffoldBackgroundColor: const Color(0xFF121212),
     appBarTheme: const AppBarTheme(
       elevation: 0,

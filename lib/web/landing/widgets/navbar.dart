@@ -8,7 +8,7 @@ import '../../theme/spacing.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/features/auth/screens/welcome/welcome_screen.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
-import 'package:minvest_forex_app/core/providers/user_provider.dart'; // Thêm dòng này
+import 'package:minvest_forex_app/core/providers/user_provider.dart';
 
 class LandingNavBar extends StatelessWidget {
   const LandingNavBar({super.key});
@@ -61,20 +61,10 @@ class LandingNavBar extends StatelessWidget {
                 ...navItems.map(
                   (item) => Padding(
                     padding: EdgeInsets.symmetric(horizontal: navSpacing / 2),
-                    child: InkWell(
-                      onTap: () {
-                        if (item['route'] != null) {
-                          Navigator.of(context).pushNamed(item['route']!);
-                        }
-                      },
-                      child: Text(
-                        item['title']!,
-                        style: AppTextStyles.h3.copyWith(
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
+                    child: _NavBarItem(
+                      title: item['title']!,
+                      route: item['route']!,
+                      fontSize: fontSize,
                     ),
                   ),
                 ),
@@ -135,7 +125,7 @@ class LandingNavBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(6),
             gradient: const LinearGradient(
               colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
               begin: Alignment.topLeft,
@@ -148,7 +138,7 @@ class LandingNavBar extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(5),
               color: Colors.transparent,
             ),
             child: Text(
@@ -172,13 +162,13 @@ class LandingNavBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(6),
             gradient: AppGradients.cta,
           ),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(5),
               color: Colors.black,
             ),
             child: Text(
@@ -218,7 +208,6 @@ class LandingNavBar extends StatelessWidget {
   }
 
   Widget _userNameChip(BuildContext context, User user, {VoidCallback? onTap}) {
-    // Lấy displayName từ UserProvider (Firestore) ưu tiên hơn, sau đó mới đến Auth
     final userProvider = Provider.of<UserProvider>(context);
     final String name = (userProvider.displayName ?? user.displayName ?? user.email ?? 'User').trim();
     
@@ -391,6 +380,55 @@ class _MobileNavBarState extends State<_MobileNavBar> {
           Align(alignment: Alignment.center, child: widget.actions),
         ],
       ],
+    );
+  }
+}
+
+class _NavBarItem extends StatefulWidget {
+  final String title;
+  final String route;
+  final double fontSize;
+
+  const _NavBarItem({
+    required this.title,
+    required this.route,
+    required this.fontSize,
+  });
+
+  @override
+  State<_NavBarItem> createState() => _NavBarItemState();
+}
+
+class _NavBarItemState extends State<_NavBarItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    final isActive = currentRoute == widget.route;
+    
+    // Yêu cầu: Active color = Hover color = 0xFF04B3E9
+    final color = (isActive || _isHovered) 
+        ? const Color(0xFF04B3E9) 
+        : Colors.white;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pushNamed(widget.route);
+        },
+        child: Text(
+          widget.title,
+          style: AppTextStyles.h3.copyWith(
+            fontSize: widget.fontSize,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+      ),
     );
   }
 }

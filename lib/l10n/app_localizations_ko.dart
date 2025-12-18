@@ -124,7 +124,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get accountNotLinkedDesc =>
-      '독점 신호를 받으려면 Exness 계정이 Minvest 파트너 링크를 통해 등록되어야 합니다. 아래 링크를 사용하여 새 계정을 만드세요.';
+      '독점 신호를 받으려면 Exness 계정이 Minvest 파트너 링크를 통해 등록되어야 합니다. 아래 링크를 사용하여 새  계정을 만드세요.';
 
   @override
   String get registerExnessViaMinvest => 'Minvest를 통해 Exness 등록';
@@ -310,7 +310,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get package => '패키지';
 
   @override
-  String get startNow => '지금 시작';
+  String get startNow => '지금 시그널 받기';
 
   @override
   String get bankTransfer => '계좌 이체';
@@ -359,11 +359,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get outOfGoldenHoursVipDesc =>
-      'VIP 신호는 오전 8:00부터 오후 5:00 (GMT+7)까지 이용 가능합니다.\n24시간 신호를 받으려면 Elite로 업그레이드하세요!';
+      'VIP 신호는 오전 8:00부터 오후 5:00 (GMT+7)까지 이용 가능합니다.\n24시간 신호를 받으려면 Elite로 업그레 이드하세요!';
 
   @override
   String get outOfGoldenHoursDemoDesc =>
-      '데모 신호는 오전 8:00부터 오후 5:00 (GMT+7)까지 이용 가능합니다.\n더 많은 혜택을 받으려면 계정을 업그레이드하세요!';
+      '데모 신호는 오전 8:00부터 오후 5:00 (GMT+7)까지 이용 가능합니다.\n더 많은 혜택을 받으려면 계정을 업그 레이드하세요!';
 
   @override
   String get yourName => '이름';
@@ -593,13 +593,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get orderExplanationEngineDesc =>
-      '거래 설정을 쉬운 용어로 설명 — 합류점이 어떻게 형성되는지, 진입이 왜 이루어지는지 보여주고 트레이더가 각 결정에서 배울 수 있도록 돕습니다.';
+      '거래 설정을 쉬운 용어로 설명 — 합류점이 어떻게 형성되는지, 진입이 왜 이루어지는지 보여주고 트레이더 가 각 결정에서 배울 수 있도록 돕습니다。';
 
   @override
   String get transparent => '투명성';
 
   @override
-  String get educational => '교육적';
+  String get educational => '教育的';
 
   @override
   String get logical => '논리적';
@@ -682,7 +682,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get seizeEveryOpportunityDesc =>
-      '받은 편지함으로 직접 전달되는 시기적절한 전략 업데이트를 통해 완벽한 시기에 시장 트렌드를 탈 수 있습니다.';
+      '받은 편지함으로 직접 전달되는 시기적절한 전략 업데이트를 통해 완벽한 시기에 시장 트렌드를 탈 수 있습 니다.';
 
   @override
   String get minvestAiCoreValueTitle => 'Minvest AI - 핵심 가치';
@@ -692,11 +692,15 @@ class AppLocalizationsKo extends AppLocalizations {
       'AI는 실시간 시장 데이터를 지속적으로 분석하고 통찰력을 필터링하여 빠르고 정확한 투자 기회를 식별합니다';
 
   @override
-  String get frequentlyAskedQuestions => '자주 묻는 질문';
+  String get frequentlyAskedQuestions => '자주 묻는 질문 (FAQ)';
+
+  @override
+  String get faqSubtitle =>
+      '가입 방법부터 혜택, AI 작동 방식에 이르기까지 모든 질문에 대한 답변이 바로 아래에 있습니다. 여전히 궁금한 점이 있으면 언제든지 Whatsapp으로 메시지를 보내주세요';
 
   @override
   String get maximizeResultsTitle =>
-      'Minvest AI의 고급 시장 분석과 정밀 필터링된 신호로 결과를 극대화하세요';
+      'Minvest AI로 결과 극대화\n고급 시장 분석 및 정밀 필터링된 신호';
 
   @override
   String get elevateTradingWithAiStrategies =>
@@ -760,7 +764,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get minvestAiRegistrationDesc =>
-      'Minvest AI 등록이 시작되었습니다 — 신규 회원을 검토하고 승인함에 따라 자리가 곧 마감될 수 있습니다';
+      'Minvest AI 등록이 시작되었습니다 — 신규 회원을 검토하고 승인함에 따라 자리가 조기 마감될 수 있습니다.';
 
   @override
   String get currencyPairs => '통화 쌍';
@@ -855,356 +859,367 @@ class AppLocalizationsKo extends AppLocalizations {
   String get financialNewsHub => '금융 뉴스 허브';
 
   @override
-  String get financialNewsHubDesc => '중요 업데이트. 시장 반응. 소음 없음 – 투자자가 알아야 할 내용만.';
+  String get financialNewsHubDesc => '중요 업데이트. 시장 반응. 소음 없음 – 투자자가 알아야 할 내용만。';
 
   @override
-  String get newsTabAllArticles => '모든 기사';
+  String get newsTabAllArticles => '所有文章';
 
   @override
-  String get newsTabInvestor => '투자자';
+  String get newsTabInvestor => '投资者';
 
   @override
-  String get newsTabKnowledge => '지식';
+  String get newsTabKnowledge => '知识';
 
   @override
-  String get newsTabTechnicalAnalysis => '기술적 분석';
+  String get newsTabTechnicalAnalysis => '技术分析';
 
   @override
   String noArticlesForCategory(Object category) {
-    return '$category 카테고리에 대한 기사가 없습니다';
+    return '类别 $category 暂无文章';
   }
 
   @override
-  String get mostPopular => '가장 인기 있는';
+  String get mostPopular => '最受欢迎';
 
   @override
-  String get noPosts => '게시물 없음';
+  String get noPosts => '暂无帖子';
 
   @override
-  String get relatedArticles => '관련 기사';
+  String get relatedArticles => '相关文章';
 
   @override
-  String get contactInfoSentSuccess => '연락처 정보가 성공적으로 전송되었습니다.';
+  String get contactInfoSentSuccess => '联系信息发送成功。';
 
   @override
   String contactInfoSentFailed(Object error) {
-    return '정보 전송 실패: $error';
+    return '发送信息失败：$error';
   }
 
   @override
-  String get contactPageSubtitle =>
-      '질문이 있거나 AI 솔루션이 필요하십니까? 양식을 작성하여 알려주시면 연락드리겠습니다!';
+  String get contactPageSubtitle => '有疑问或需要 AI 解决方案？请填写表格告诉我们，我们会尽快与您联系！';
 
   @override
-  String get phone => '전화';
+  String get phone => '电话';
 
   @override
-  String get firstName => '이름';
+  String get firstName => '名';
 
   @override
-  String get enterFirstName => '이름 입력';
+  String get enterFirstName => '输入名';
 
   @override
-  String get lastName => '성';
+  String get lastName => '姓';
 
   @override
-  String get enterLastName => '성 입력';
+  String get enterLastName => '输入姓';
 
   @override
-  String get whatAreYourConcerns => '귀하의 우려 사항은 무엇입니까?';
+  String get whatAreYourConcerns => '您有什么顾虑？';
 
   @override
-  String get writeConcernsHere => '여기에 우려 사항을 작성하십시오...';
+  String get writeConcernsHere => '在此处写下您的顾虑...';
 
   @override
   String pleaseEnter(Object field) {
-    return '$field을(를) 입력하십시오';
+    return '请输入 $field';
   }
 
   @override
-  String get faqQuestion1 => '신호가 100% 성공률을 보장합니까?';
+  String get faqQuestion1 => '信号能保证100%成功率吗？';
 
   @override
   String get faqAnswer1 =>
-      '어떤 신호도 100% 보장할 수는 없지만, Minvest AI는 상세한 분석과 위험 관리를 통해 60-80%의 안정적인 성공률을 유지하기 위해 노력하고 있으므로 더 큰 확신을 가지고 최종 결정을 내릴 수 있습니다.';
+      '虽然不能保证100%的信号成功率，但Minvest AI努力保持60-80%的稳定成功率，并辅以详细的分析和风险管理，让您更有信心地做出最终决定。';
 
   @override
-  String get faqQuestion2 => '바로 입금하고 싶지 않은 경우에도 신호 제안을 받을 수 있습니까?';
+  String get faqQuestion2 => '如果我不想立即入金，还能收到信号建议吗？';
 
   @override
   String get faqAnswer2 =>
-      '네. Minvest 링크를 통해 Exness 계정을 만들기만 하면 무료 데모 신호 그룹(커뮤니티 VIP)에 액세스할 수 있습니다.';
+      '是的。只需通过Minvest链接创建一个Exness账户，即可访问我们的免费模拟信号群（社区VIP）。';
 
   @override
-  String get faqQuestion3 => '가입했지만 신호를 받지 못한 경우 어떻게 해야 합니까?';
+  String get faqQuestion3 => '如果我已注册但未收到任何信号，我该怎么办？';
 
   @override
-  String get faqAnswer3 =>
-      '처리는 일반적으로 자동입니다. 여전히 신호 제안을 볼 수 없다면 Whatsapp을 통해 문의하여 즉각적인 지원을 받으십시오.';
+  String get faqAnswer3 => '处理通常是自动的。如果您仍未看到任何信号建议，请通过Whatsapp联系我们寻求即时帮助。';
 
   @override
-  String get faqQuestion4 => 'Exness 계정에 가입하지 않아도 참여할 수 있습니까?';
+  String get faqQuestion4 => '如果我不注册Exness账户，还能加入吗？';
 
   @override
-  String get faqAnswer4 => '지원을 위해 WhatsApp 또는 라이브 채팅을 통해 문의하십시오.';
+  String get faqAnswer4 => '请通过WhatsApp或在线聊天联系我们寻求帮助。';
 
   @override
-  String get priceLevels => '가격 수준';
+  String get priceLevels => '价格水平';
 
   @override
-  String get capitalManagement => '자본 관리';
+  String get capitalManagement => '资金管理';
 
   @override
   String freeSignalsLeft(Object count) {
-    return '무료 신호 $count개 남음';
+    return '剩余 $count 个免费信号';
   }
 
   @override
-  String get unlimitedSignals => '무제한 신호';
+  String get unlimitedSignals => '无限信号';
 
   @override
-  String get goBack => '뒤로 가기';
+  String get goBack => '返回';
 
   @override
-  String get goldPlan => '골드 플랜';
+  String get goldPlan => '黄金计划';
 
   @override
-  String get perMonth => '/월';
+  String get perMonth => '/月';
 
   @override
-  String get continuouslyUpdating => '24/7 시장 데이터 지속 업데이트';
+  String get continuouslyUpdating => '24/7 持续更新市场数据';
 
   @override
-  String get providingBestSignals => '실시간 최고의 신호 제공';
+  String get providingBestSignals => '实时提供最佳信号';
 
   @override
-  String get includesEntrySlTp => '진입, 손절, 익절 포함';
+  String get includesEntrySlTp => '包含入场、止损、止盈';
 
   @override
-  String get detailedAnalysis => '각 신호에 대한 상세 분석 및 평가';
+  String get detailedAnalysis => '详细分析和评估每个信号';
 
   @override
-  String get realTimeNotifications => '이메일을 통한 실시간 알림';
+  String get realTimeNotifications => '通过电子邮件实时通知';
 
   @override
-  String get signalPerformanceStats => '신호 성과 통계';
+  String get signalPerformanceStats => '信号表现统计';
 
   @override
-  String get enterpriseCodeDetails =>
-      '사업자 코드: 0107136243, 하노이 재정부에서 2015년 11월 24일 발행; 2025년 08월 05일 하노이 재정부에 의해 6차 개정 등록.';
+  String get companyName => 'EZTRADE 技术投资有限公司';
 
   @override
-  String get addressDetails =>
-      '주소: 베트남 하노이시 옌호아구 쩐두이흥 거리 동남 도시 지역 HH 블록 C2 빌딩 18층 C2810.';
+  String get enterpriseCodeDetails => '企业代码: 0110057263';
 
   @override
-  String get pagesTitle => '페이지';
+  String get addressDetails => '地址: 越南河内市海柏征坊杜汉街8号';
 
   @override
-  String get legalRegulatoryTitle => '법률 및 규정';
+  String get pagesTitle => '页面';
 
   @override
-  String get termsOfRegistration => '등록 약관';
+  String get legalRegulatoryTitle => '法律与法规';
 
   @override
-  String get operatingPrinciples => '운영 원칙';
+  String get termsOfRegistration => '注册条款';
 
   @override
-  String get termsConditions => '이용 약관';
+  String get operatingPrinciples => '运营原则';
 
   @override
-  String get contactTitle => '문의';
+  String get termsConditions => '条款与条件';
 
   @override
-  String get navFeatures => '기능';
+  String get contactTitle => '联系方式';
 
   @override
-  String get navNews => '뉴스';
+  String get navFeatures => '功能';
 
   @override
-  String get tp1Hit => 'TP1 도달';
+  String get navNews => '新闻';
 
   @override
-  String get tp2Hit => 'TP2 도달';
+  String get tp1Hit => '达到止盈1';
 
   @override
-  String get tp3Hit => 'TP3 도달';
+  String get tp2Hit => '达到止盈2';
 
   @override
-  String get slHit => 'SL 도달';
+  String get tp3Hit => '达到止盈3';
 
   @override
-  String get cancelled => '취소됨';
+  String get slHit => '达到止损';
 
   @override
-  String get exitedByAdmin => '관리자에 의해 종료됨';
+  String get cancelled => '已取消';
 
   @override
-  String get signalClosed => '종료됨';
+  String get exitedByAdmin => '管理员退出';
 
   @override
-  String get errorLoadingPackages => '패키지 로드 오류';
+  String get signalClosed => '已关闭';
 
   @override
-  String get monthly => '월간';
+  String get errorLoadingPackages => '加载套餐错误';
 
   @override
-  String get annually => '연간';
+  String get monthly => '每月';
 
   @override
-  String get whatsIncluded => '포함 내용:';
+  String get annually => '每年';
 
   @override
-  String get chooseThisPlan => '이 플랜 선택';
+  String get whatsIncluded => '包含内容：';
 
   @override
-  String get bestPricesForPremiumAccess => '프리미엄 액세스를 위한 최적의 가격';
+  String get chooseThisPlan => '选择此计划';
 
   @override
-  String get choosePlanFitsNeeds => '비즈니스 요구에 맞는 플랜을 선택하고 AI로 자동화를 시작하세요';
+  String get bestPricesForPremiumAccess => '高级访问的最佳价格';
 
   @override
-  String get save50Percent => '50% 절약';
+  String get choosePlanFitsNeeds => '选择适合您业务需求的计划并开始使用 AI 自动化';
 
   @override
-  String get tryDemo => '데모 체험';
+  String get save50Percent => '节省 50%';
 
   @override
-  String get pleaseEnterEmailPassword => '이메일과 비밀번호를 입력하세요';
+  String get tryDemo => '试用演示';
+
+  @override
+  String get pleaseEnterEmailPassword => '请输入电子邮件和密码';
 
   @override
   String loginFailed(String error) {
-    return '로그인 실패: $error';
+    return '登录失败：$error';
   }
 
   @override
-  String get welcomeBack => '환영합니다';
+  String get welcomeBack => '欢迎回来';
 
   @override
-  String get signInToContinue => '계속하려면 계정에 로그인하세요';
+  String get signInToContinue => '登录您的帐户以继续';
 
   @override
-  String get or => '또는';
+  String get or => '或';
 
   @override
-  String get email => '이메일';
+  String get email => '电子邮件';
 
   @override
   String get emailHint => 'example123@gmail.com';
 
   @override
-  String get password => '비밀번호';
+  String get password => '密码';
 
   @override
-  String get enterPassword => '비밀번호 입력';
+  String get enterPassword => '输入密码';
 
   @override
-  String get forgotPassword => '비밀번호를 잊으셨나요?';
+  String get forgotPassword => '忘记密码？';
 
   @override
-  String get createNewAccount => '여기서 새 계정을 만드세요!';
+  String get createNewAccount => '在此处创建新帐户！';
 
   @override
-  String get signUp => '가입하기';
+  String get signUp => '注册';
 
   @override
-  String get signUpAccount => '계정 가입';
+  String get signUpAccount => '注册帐户';
 
   @override
-  String get enterPersonalData => '계정을 만들려면 개인 정보를 입력하세요';
+  String get enterPersonalData => '输入您的个人数据以创建您的帐户';
 
   @override
-  String get nameLabel => '이름 *';
+  String get nameLabel => '姓名 *';
 
   @override
-  String get enterNameHint => '이름 입력';
+  String get enterNameHint => '输入姓名';
 
   @override
-  String get emailLabel => '이메일 *';
+  String get emailLabel => '电子邮件 *';
 
   @override
-  String get passwordLabel => '비밀번호 *';
+  String get passwordLabel => '密码 *';
 
   @override
-  String get phoneLabel => '전화번호';
+  String get phoneLabel => '电话';
 
   @override
-  String get continueButton => '계속';
+  String get continueButton => '继续';
 
   @override
-  String get fillAllFields => '모든 필수 입력란을 채워주세요.';
+  String get fillAllFields => '请填写所有必填字段。';
 
   @override
-  String get accountCreatedSuccess => '계정이 성공적으로 생성되었습니다.';
+  String get accountCreatedSuccess => '帐户创建成功。';
 
   @override
   String signUpFailed(String error) {
-    return '가입 실패: $error';
+    return '注册失败：$error';
   }
 
   @override
-  String get nationality => '국적:';
+  String get nationality => '国籍：';
 
   @override
-  String get overview => '개요';
+  String get overview => '概览';
 
   @override
-  String get setting => '설정';
+  String get setting => '设置';
 
   @override
-  String get paymentHistory => '결제 내역';
+  String get paymentHistory => '支付历史';
 
   @override
-  String get signalsPlan => '신호 플랜';
+  String get signalsPlan => '信号计划';
 
   @override
   String get aiMinvest => 'AI Minvest';
 
   @override
-  String get yourTokens => '내 토큰';
+  String get yourTokens => '您的代币';
 
   @override
-  String get emailNotificationPreferences => '이메일 알림 기본 설정';
+  String get emailNotificationPreferences => '电子邮件通知偏好';
 
   @override
-  String get chooseSignalNotificationTypes => '이메일로 받고 싶은 신호 알림 유형을 선택하세요';
+  String get chooseSignalNotificationTypes => '选择您希望通过电子邮件接收的信号通知类型';
 
   @override
-  String get allSignalNotifications => '모든 신호 알림';
+  String get allSignalNotifications => '所有信号通知';
 
   @override
-  String get cryptoSignals => '암호화폐 신호';
+  String get cryptoSignals => '加密信号';
 
   @override
-  String get forexSignals => '외환 신호';
+  String get forexSignals => '外汇信号';
 
   @override
-  String get goldSignals => '금 신호';
+  String get goldSignals => '黄金信号';
 
   @override
-  String get updatePasswordSecure => '계정 보안을 위해 비밀번호를 업데이트하세요';
+  String get updatePasswordSecure => '更新您的密码以确保您的帐户安全';
 
   @override
-  String get searchLabel => '검색:';
+  String get searchLabel => '搜索：';
 
   @override
-  String get filterBy => '필터 기준:';
+  String get filterBy => '筛选：';
 
   @override
-  String get allTime => '전체 시간';
+  String get allTime => '所有时间';
 
   @override
-  String get startDate => '시작일:';
+  String get startDate => '开始日期：';
 
   @override
-  String get endDate => '종료일:';
+  String get endDate => '结束日期：';
 
   @override
-  String get deactivate => '비활성화';
+  String get deactivate => '停用';
 
   @override
-  String get unlimited => '무제한';
+  String get unlimited => '无限';
 
   @override
-  String get tenLeft => '10개 남음';
+  String get tenLeft => '剩余 10';
+
+  @override
+  String get termsOfRegistrationContent =>
+      'Please read all the terms and agreements below carefully before proceeding with the next steps in our system.\nBy registering an account on the mInvest AI system, you confirm and understand that you have read and fully agreed to all the terms stated in these Terms and Conditions.\n\n1. Introduction and Scope of Application\n\nThis policy regulates the collection, use, sharing, and protection of users’ personal information when accessing and using the products and services of the mInvest AI system – a technology and artificial intelligence platform owned and operated by EZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED (hereinafter referred to as “we” or “us”).\nBy registering an account or using mInvest AI’s products, you agree that such action constitutes a legally binding commitment between you and us, equivalent to an electronic contract.\n\n2. Account Registration\n\nTo access and use certain services on mInvest AI, you must register a valid account.\nWhen registering, you are required to provide complete and accurate personal information, including your full name, email address, phone number, or any other information as requested.\nAfter registration, you must confirm your email to activate the account. All notifications about your account, promotions, or system updates will be sent to this email address.\nIf the information you provide is inaccurate or incomplete, you will be solely responsible for any incidents or damages arising from it.\n\n3. Terms of Use\n\nWhen participating in the mInvest AI system, you are obligated to comply with all of the following:\nThe operating principles of the platform;\nPayment terms;\nPersonal data privacy policy;\nRelevant laws and regulations in effect.\nIn the event of a violation, EZTRADE reserves the right to temporarily suspend or permanently delete your account, and may transfer the case to competent authorities if necessary.\n\n4. Personal Data Privacy Policy\n\n4.1. Purpose and Scope of Collection\n\nTo provide its services, mInvest AI collects necessary information including: full name, email, phone number, means of contact, and technical data such as IP address, browser type, access time, language, and accessed pages.\nThis information is used for the following purposes:\nTo verify accounts and manage users;\nTo provide services and customer support;\nTo send notifications, offers, or important updates;\nTo improve system quality and user experience.\nAll declared information must be accurate and lawful. We are not responsible for any disputes or damages resulting from false declarations.\n\n4.2. Scope of Information Use\n\nmInvest AI only uses your personal information for internal purposes and in compliance with Vietnamese laws.\nWe may contact you via email, phone, SMS, or other communication channels for technical support, order confirmation, or promotional updates.\n\n4.3. Data Retention Period\n\nYour personal information will be stored until one of the following occurs:\nYou request account deletion; or\nThe mInvest AI system ceases operation in accordance with regulations.\nDuring this period, your data will be securely protected on EZTRADE’s servers.\n\n4.4. Rights and Obligations of Data Subjects\n\nUser Rights:\nTo be informed of, consent to, or refuse the processing of their personal data;\nTo access, edit, delete, or request restriction of data processing;\nTo object, file complaints, initiate legal proceedings, or request compensation for damages as provided by law.\nUser Obligations:\nTo provide truthful and accurate information;\nTo protect their own personal data and respect the privacy of others;\nTo comply with applicable laws and mInvest AI’s privacy policy.\n\n4.5. Information of the Personal Data Processor\n\nEZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED\nAddress: No. 8 Do Hanh Street, Hai Ba Trung Ward, Hanoi City, Vietnam\nBusiness Registration Number: 0110057263\nPhone: 0862 600 626\n\n4.6. Means and Tools for Editing Information\n\nYou can access the “Account Settings” section to update or edit your personal information.\nIn case you need assistance, you may contact us through the official communication channels of mInvest AI as published on our website.\n\n4.7. Data Protection Measures\n\nmInvest AI applies advanced technical and administrative measures such as:\nData encryption, firewalls, and internal access control;\nLimiting access rights;\nEmployee training on data security.\nAny unauthorized access, disclosure, destruction, or alteration of data will be handled in accordance with the law.\n\n4.8. Entities Authorized to Access Your Information\n\nThe mInvest AI system administration team;\nYou, the customer (when logging into your own account);\nVietnamese legal authorities upon receipt of a valid written request.\n\n4.9. Complaints and Dispute Resolution\n\nAny complaints or feedback related to the protection of personal data or the use of services on the mInvest AI system may be submitted through the official support channels published on our website.\nWe will receive, review, and respond as soon as possible to ensure the lawful rights and interests of customers in accordance with legal regulations.\n\n5. Effectiveness and Updates\n\nThis policy takes effect from November 14, 2025.\nWe may change, update, or supplement this content to comply with legal requirements and operational realities.\nAll changes will be publicly announced on the mInvest.ai website prior to implementation.';
+
+  @override
+  String get operatingPrinciplesContent =>
+      'Please read all terms and agreements below carefully before proceeding with the next steps in our system. \nBy registering an account on the mInvest AI system, you confirm and understand that you have read and fully agreed to all the terms stated in these Terms and Conditions.\n\nOPERATING RULES\n\n1. Legal Information\n\nSystem Owner:\nEZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED\nAddress: No. 8 Do Hanh Street, Hai Ba Trung Ward, Hanoi City, Vietnam\nBusiness/Tax Code: 0110057263\nPhone: 0862 600 626\n\n2. Scope of Application\n\nThese Operating Principles apply to all users, learners, partners, and collaborators who participate in or use the products and services within the mInvest AI system, including websites, applications, training platforms, and other online channels managed by EZTRADE.\nBy registering an account or using the services of mInvest AI, users are deemed to have read, understood, and agreed to all the terms set forth in these regulations.\n\n3. Definitions\n\n“mInvest AI” refers to the technology and artificial intelligence platform owned by EZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED.\n“Customer” / “User” / “Learner” refers to any individual or organization that registers, accesses, or uses the services and products on the mInvest AI system.\n“We” / “Administration” refers to the management team representing EZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED, responsible for operating and managing the system.\n“Products” / “Services” include learning packages, analytical newsletters, AI trading signals, analytical tools, or any digital content provided by mInvest AI.\n\n4. Usage Rules and Information Security\n\nUsers must provide accurate and complete information when registering an account.\nmInvest AI is committed to protecting personal information and will not disclose it to third parties unless required by competent authorities.\nUsers are responsible for maintaining the confidentiality of their account and password. Any damages arising from personal security negligence shall not be the responsibility of EZTRADE.\nmInvest AI reserves the right to suspend or terminate accounts found to be in violation of the terms, including but not limited to: account sharing, content distribution, or infringement of intellectual property rights.\n\n5. Refund Policy and Service Usage\n\nAll payments, once confirmed, are non-refundable under any circumstances, except in cases of system errors originating from mInvest AI.\nUsers may discontinue service use at any time; however, any paid fees will not be retained or converted.\nmInvest AI reserves the right to adjust service prices, promotional policies, or special offers without prior notice. Users are responsible for regularly reviewing and staying updated.\n\n6. Conduct and Content Usage Regulations\n\nThe following actions are strictly prohibited:\nCopying, downloading, distributing, or sharing content, videos, or materials belonging to the mInvest AI system;\nUsing software or tools to interfere with or illegally collect data;\nImpersonating mInvest AI, EZTRADE, or any of its representatives for the purpose of fraud, deception, or brand defamation;\nSharing accounts with multiple users;\nPosting, speaking, or engaging in actions containing offensive, defamatory, or harmful content toward the system.\nAny violation of the above may result in permanent account suspension and could be subject to legal action under Vietnamese law.\n\n7. Commitment and Limitation of Liability\n\nmInvest AI provides products based on knowledge, data, and AI algorithms developed by the EZTRADE team.\nThe effectiveness of use depends on each individual’s capability, experience, and actions. mInvest AI makes no guarantee of profit or specific investment results.\nEZTRADE shall be exempt from all liability for indirect risks or damages arising during service use, except in cases where direct system errors are proven.\n\n8. Rights of the mInvest AI Administration\n\nmInvest AI reserves the right to modify, update, or supplement the operating terms at any time without prior notice.\nWe have the right to suspend or terminate the provision of services in cases of legal violations, policy breaches, or for technical or system maintenance reasons.\nWe may cooperate with competent authorities in handling complaints, investigating violations, and providing necessary information as required by law.\n\n9. Acknowledgment of Consent\n\nBy registering and using the mInvest AI system, you hereby confirm that:\nYou have read carefully, fully understood, and agreed to all the contents of these Operating Principles;\nYou consent to allow EZTRADE to use your contact information (phone, email, SMS, Zalo, etc.) to send notifications, product updates, promotions, or new program announcements.';
+
+  @override
+  String get termsAndConditionsContent =>
+      'By registering an account to participate in the mInvest AI system, you confirm that you have read, understood, and agreed to all the contents of these Account Opening Terms and Conditions.\nThe latest updates (if any) will be published here, and mInvest AI will not send separate notifications to each customer. Therefore, please visit this page regularly to stay informed about the most recent policies.\n\n1. General Agreement\n\nmInvest AI is a technology and artificial intelligence platform owned by EZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED. By opening an account on this system, you agree to participate in and use the services and products provided by EZTRADE.\nAccount registration and activation are considered an electronic contract between you and mInvest AI, which has the same legal validity as a civil contract under the laws of Vietnam.\n\n2. Personal Account Information and Privacy\n\n2.1. Purpose and Scope of Information Collection\n\nTo access and use certain mInvest AI services, you must provide basic personal information, including:\nFull name;\nEmail address;\nContact phone number;\nOther information (if any) necessary for verification, support, or access authorization.\nAll information provided must be accurate, truthful, and lawful. mInvest AI shall not be responsible for any losses or disputes arising from false, missing, or fraudulent information provided by the user.\nAdditionally, the system may automatically collect certain technical data, such as:\nIP address, browser type, and language used;\nAccess time and pages viewed within the system.\nThis information helps mInvest AI improve performance, enhance security, and optimize user experience.\n\n2.2. Scope of Information Use\n\nYour personal information is collected and used for legitimate purposes, including:\nManaging accounts, verifying users, and maintaining services;\nSending notifications related to services, accounts, promotions, or policy changes;\nProviding technical support, customer service, and dispute resolution (if any);\nData analysis to improve product quality and user experience.\nWe are committed to protecting your personal information and will not share it with third parties unless required by law or competent authorities.\n\n2.3. Data Retention Period\n\nYour information will be stored until one of the following occurs:\nYou request account deletion; or\nThe mInvest AI system ceases operation in accordance with applicable laws.\nIn all cases, your data will be securely stored and strictly protected on EZTRADE’s servers.\n\n2.4. Entity Responsible for Collecting and Managing Personal Information\n\nEZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED\nAddress: No. 8 Do Hanh Street, Hai Ba Trung Ward, Hanoi City, Vietnam\nBusiness Registration Number: 0110057263\n\n2.5. Methods and Tools for Editing Information\n\nYou can access the “Account Settings” section within the system to edit or update your personal information. If you encounter difficulties while doing so, please contact us through the official support channels of mInvest AI as published on the website.\n\n2.6. Information Provision and Verification\n\nTo ensure account security and protect your rights, you must:\nProvide accurate full name, email, and phone number during registration;\nVerify your information via the confirmation email sent by the system;\nReceive activation, password reset, or other important notifications from mInvest AI.\nIf the provided information is inaccurate or incomplete, you shall be solely responsible for any related risks (e.g., account activation failure, loss of access, or missed notifications).\n\n2.7. User Confidentiality Obligations and Responsibilities\n\nYou are responsible for safeguarding your login credentials and password.\nIf your password is lost, disclosed, or accessed without authorization, mInvest AI shall not be liable for any resulting damages.\nYou agree to allow EZTRADE to store, manage, and process your personal information in accordance with the laws of Vietnam.\n\n2.8. Access Rights to Your Information\n\nYour personal information may only be accessed by:\nThe mInvest AI system administration team (for management and technical purposes);\nThe account owner (via the personal information management section);\nVietnamese authorities, upon receipt of a valid and lawful request as prescribed by law.\n\n2.9. Complaint and Resolution Mechanism\n\nFor any complaints or feedback related to account registration, usage, or information security, you may submit a request through the official Contact page of mInvest AI.\nWe will receive, process, and respond as soon as possible to ensure the customer’s lawful rights and interests in accordance with applicable legal regulations.\n\n3. Effectiveness and Updates\n\nThese Account Opening Terms and Conditions take effect from November 14, 2025. mInvest AI reserves the right to update, modify, or supplement the contents at any time without prior notice. All changes will be publicly announced on the mInvest.ai website prior to implementation.';
 }

@@ -96,7 +96,7 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
         children: [
           Text(
             AppLocalizations.of(context)!.winMoreWithAiSignalsTitle,
-            style: AppTextStyles.h1.copyWith(fontSize: 28, fontWeight: FontWeight.w700),
+            style: AppTextStyles.h2.copyWith(fontSize: 36),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -161,7 +161,7 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
           const SizedBox(height: AppSpacing.lg),
           Text(
             AppLocalizations.of(context)!.winMoreWithAiSignalsDesc,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.body.copyWith(color: Colors.white),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -171,9 +171,9 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
               child: Container(
                 padding: const EdgeInsets.all(1.2),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(6),
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
+                    colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -181,7 +181,7 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(5),
                     color: Colors.black,
                   ),
                   child: Text(
@@ -516,13 +516,13 @@ class SmartToolsSection extends StatelessWidget {
         children: [
           Text(
             AppLocalizations.of(context)!.smarterToolsTitle,
-            style: AppTextStyles.h1.copyWith(fontSize: 30, fontWeight: FontWeight.w700),
+            style: AppTextStyles.h1.copyWith(fontSize: 36),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppLocalizations.of(context)!.smarterToolsDesc,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 14),
+            style: AppTextStyles.body.copyWith(color: Colors.white),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 48),
@@ -585,7 +585,7 @@ class SmartToolsSection extends StatelessWidget {
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         AppLocalizations.of(context)!.performanceOverviewDesc,
-                        style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                        style: AppTextStyles.body.copyWith(color: Colors.white),
                       ),
                       const SizedBox(height: 24),
                       LayoutBuilder(
@@ -703,13 +703,13 @@ class YourOnDemandSection extends StatelessWidget {
           children: [
             Text(
               AppLocalizations.of(context)!.onDemandFinancialExpertTitle,
-              style: AppTextStyles.h1.copyWith(fontSize: 26, fontWeight: FontWeight.w700),
+              style: AppTextStyles.h1.copyWith(fontSize: 36),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               AppLocalizations.of(context)!.onDemandFinancialExpertDesc,
-              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
+              style: AppTextStyles.body.copyWith(color: Colors.white),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1090,13 +1090,13 @@ class MaximizeResultsSection extends StatelessWidget {
         children: [
           Text(
             AppLocalizations.of(context)!.maximizeResultsFeaturesTitle,
-            style: AppTextStyles.h1.copyWith(fontSize: 30, fontWeight: FontWeight.w700),
+            style: AppTextStyles.h1.copyWith(fontSize: 36),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
             AppLocalizations.of(context)!.minvestAiRegistrationDesc,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 16),
+            style: AppTextStyles.body.copyWith(color: Colors.white),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 28),
@@ -1113,9 +1113,9 @@ class MaximizeResultsSection extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(1.2),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(6),
             gradient: const LinearGradient(
-              colors: [Color(0xFF00BFFF), Color(0xFF2E60FF), Color(0xFFD500F9)],
+              colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -1125,7 +1125,7 @@ class MaximizeResultsSection extends StatelessWidget {
           ),
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(5),
               color: Colors.black,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

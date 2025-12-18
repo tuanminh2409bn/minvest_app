@@ -316,7 +316,7 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                   child: Text(
                     AppLocalizations.of(context)!.heroSubtitle,
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.body.copyWith(fontSize: 16, color: Colors.white70),
+                    style: AppTextStyles.h3.copyWith(color: Colors.white),
                   ),
                 ),
               ),
@@ -412,13 +412,13 @@ class HeroSubtitleSection extends StatelessWidget {
           Text(
             AppLocalizations.of(context)!.globalAiInnovationTitle,
             textAlign: TextAlign.center,
-            style: AppTextStyles.h3.copyWith(color: Colors.white),
+            style: AppTextStyles.h2.copyWith(fontSize: 28, color: Colors.white),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppLocalizations.of(context)!.globalAiInnovationDesc,
             textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.body.copyWith(color: Colors.white),
           ),
         ],
       ),
@@ -1063,7 +1063,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     AppLocalizations.of(context)!.liveTradingSignalsDesc,
-                    style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18),
+                    style: AppTextStyles.body.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Wrap(
@@ -1094,7 +1094,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(fontSize: 42, fontWeight: FontWeight.w800),
+      style: AppTextStyles.h1.copyWith(fontSize: 34, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1102,41 +1102,47 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
   Widget _chip(BuildContext context, String text) {
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed('/ai-signals'),
-      child: Container(
-        padding: const EdgeInsets.all(1.2),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(9),
-            color: Colors.black,
-          ),
-          child: Text(
-            text,
-            style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
+      child: Row( // Added Row with mainAxisSize.min
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(1.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                color: Colors.black,
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                text,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _outlinedChip(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white, width: 2),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.white, width: 1),
         color: Colors.black,
       ),
       child: Text(
@@ -1144,7 +1150,6 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
         style: AppTextStyles.body.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w700,
-          fontSize: 18,
         ),
       ),
     );
@@ -1323,7 +1328,7 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppLocalizations.of(context)!.orderExplanationEngineDesc,
-            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 17),
+            style: AppTextStyles.body.copyWith(color: Colors.white),
           ),
           const SizedBox(height: AppSpacing.lg),
           Wrap(
@@ -1349,7 +1354,7 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(fontSize: 40, fontWeight: FontWeight.w800),
+      style: AppTextStyles.h1.copyWith(fontSize: 34, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1357,41 +1362,47 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
   Widget _chip(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed('/ai-signals'),
-      child: Container(
-        padding: const EdgeInsets.all(1.2),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(9),
-            color: Colors.black,
-          ),
-          child: Text(
-            AppLocalizations.of(context)!.aiSignal,
-            style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(1.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                color: Colors.black,
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                AppLocalizations.of(context)!.aiSignal,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _pill(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white, width: 2),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.white, width: 1),
         color: Colors.black,
       ),
       child: Text(
@@ -1399,7 +1410,6 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
         style: AppTextStyles.body.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w700,
-          fontSize: 18,
         ),
       ),
     );
@@ -1488,7 +1498,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   AppLocalizations.of(context)!.transparentRealPerformanceDesc,
-                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 17),
+                  style: AppTextStyles.body.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Wrap(
@@ -1517,7 +1527,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(fontSize: 40, fontWeight: FontWeight.w800),
+      style: AppTextStyles.h1.copyWith(fontSize: 33, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1812,7 +1822,6 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
@@ -1860,9 +1869,9 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             gradient: const LinearGradient(
@@ -1903,16 +1912,14 @@ class _SignalsPerformanceRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: const [
-        Expanded(child: _SignalsPerformanceCard()),
-        SizedBox(width: 16),
-        Expanded(child: _TransparentCardAnimated()),
+        Expanded(flex: 5, child: _SignalsPerformanceCard()),
+        SizedBox(width: 25),
+        Expanded(flex: 5, child: _TransparentCardAnimated()),
       ],
     );
-  }
-}
-
-class _TransparentCard extends StatelessWidget {
-  const _TransparentCard();
+   }
+ } class _TransparentCard extends StatelessWidget {
+   const _TransparentCard();
 
   @override
   Widget build(BuildContext context) {
@@ -1925,41 +1932,47 @@ class _TransparentCard extends StatelessWidget {
   Widget _chip(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed('/ai-signals'),
-      child: Container(
-        padding: const EdgeInsets.all(1.2),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(9),
-            color: Colors.black,
-          ),
-          child: Text(
-            AppLocalizations.of(context)!.aiSignal,
-            style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(1.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                color: Colors.black,
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                AppLocalizations.of(context)!.aiSignal,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _pill(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white, width: 2),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.white, width: 1),
         color: Colors.black,
       ),
       child: Text(
@@ -1967,7 +1980,6 @@ class _TransparentCard extends StatelessWidget {
         style: AppTextStyles.body.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w700,
-          fontSize: 18,
         ),
       ),
     );
@@ -2002,15 +2014,15 @@ class CoreValueSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
       child: Column(
         children: [
-          Text(
-            AppLocalizations.of(context)!.minvestAiCoreValueTitle,
-            style: AppTextStyles.h1.copyWith(fontSize: 36, fontWeight: FontWeight.w700),
-            textAlign: TextAlign.center,
-          ),
+        Text(
+          AppLocalizations.of(context)!.minvestAiCoreValueTitle,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.h1.copyWith(color: Colors.white, fontSize: 36),
+        ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppLocalizations.of(context)!.minvestAiCoreValueDesc,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 16),
+            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -2045,7 +2057,7 @@ class _CoreValueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 520,
+      width: 550.0,
       constraints: const BoxConstraints(minHeight: 200),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
@@ -2165,10 +2177,19 @@ class FaqSection extends StatelessWidget {
         children: [
           Text(
             AppLocalizations.of(context)!.frequentlyAskedQuestions,
-            style: AppTextStyles.h1.copyWith(fontSize: 36, fontWeight: FontWeight.w700),
+            style: AppTextStyles.h1.copyWith(fontSize: 32, fontWeight: FontWeight.w700),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Text(
+              AppLocalizations.of(context)!.faqSubtitle,
+              style: AppTextStyles.body.copyWith(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
           ...faqItems.map((item) => _FaqItem(question: item['question']!, answer: item['answer']!)),
         ],
       ),
@@ -2186,7 +2207,7 @@ class _FaqItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: const Color(0xFF1C1C1C),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.cardBorder),
       ),
@@ -2229,30 +2250,30 @@ class CtaSection extends StatelessWidget {
           Text(
             AppLocalizations.of(context)!.maximizeResultsTitle,
             textAlign: TextAlign.center,
-            style: AppTextStyles.h1.copyWith(fontSize: 36, fontWeight: FontWeight.w700),
+            style: AppTextStyles.h1.copyWith(fontSize: 32, fontWeight: FontWeight.w700),
           ),
             const SizedBox(height: AppSpacing.sm),
-          Text(
-            AppLocalizations.of(context)!.elevateTradingWithAiStrategies,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 16),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 800), // Thêm constraint cho mô tả
+            child: Text(
+              AppLocalizations.of(context)!.minvestAiRegistrationDesc,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body.copyWith(color: Colors.white),
+            ),
           ),
-            const SizedBox(height: AppSpacing.md),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.md,
-              children: [
-                GradientButton(
-                  label: AppLocalizations.of(context)!.startNow,
-                  width: 200,
-                  onPressed: () => Navigator.of(context).pushNamed('/signup'),
+            const SizedBox(height: AppSpacing.lg),
+            Center(
+              child: GradientButton(
+                label: AppLocalizations.of(context)!.startNow,
+                height: 38,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                borderRadius: 6,
+                textStyle: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
                 ),
-                //TextButton(
-                  //onPressed: () => context.read<AuthBloc>().add(SignInAnonymouslyRequested()),
-                  //child: Text('Try demo', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
-                //),
-              ],
+                onPressed: () => Navigator.of(context).pushNamed('/signup'),
+              ),
             ),
           ],
         ),

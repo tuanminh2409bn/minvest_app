@@ -14,7 +14,7 @@ class PricingSection extends StatefulWidget {
     super.key,
     this.heading,
     this.subheading,
-    this.headingFontSize = 28,
+    this.headingFontSize = 32,
   });
 
   @override
@@ -95,28 +95,54 @@ class _PricingSectionState extends State<PricingSection> {
           const SizedBox(height: AppSpacing.sm),
           Text(
             subheading,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.body.copyWith(color: Colors.white),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.lg),
           _toggle(context),
           const SizedBox(height: AppSpacing.lg),
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            alignment: WrapAlignment.center,
-            children: [
-              for (int i = 0; i < plans.length; i++)
-                _AnimatedPricingCard(
-                  plan: plans[i],
-                  features: features,
-                  slideDirection: i == 0
-                      ? _SlideDirection.fromLeft
-                      : i == 1
-                          ? _SlideDirection.fromBottom
-                          : _SlideDirection.fromRight,
-                ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 800) {
+                return IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (int i = 0; i < plans.length; i++) ...[
+                        if (i > 0) const SizedBox(width: 16),
+                        Expanded(
+                          child: _AnimatedPricingCard(
+                            plan: plans[i],
+                            features: features,
+                            slideDirection: i == 0
+                                ? _SlideDirection.fromLeft
+                                : i == 1
+                                    ? _SlideDirection.fromBottom
+                                    : _SlideDirection.fromRight,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              } else {
+                return Column(
+                  children: [
+                    for (int i = 0; i < plans.length; i++) ...[
+                      if (i > 0) const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: _AnimatedPricingCard(
+                          plan: plans[i],
+                          features: features,
+                          slideDirection: _SlideDirection.fromBottom,
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              }
+            },
           ),
         ],
       ),
@@ -306,7 +332,7 @@ class _AnimatedBorderCardState extends State<_AnimatedBorderCard> with SingleTic
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(6),
             boxShadow: [
               BoxShadow(
                 color: colors[1].withOpacity(0.25),
@@ -334,55 +360,59 @@ class _PricingCardContent extends StatelessWidget {
     final appLocalizations = AppLocalizations.of(context)!;
     return _AnimatedBorderCard(
       child: Container(
-        width: 300,
+        width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(6),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.workspace_premium, color: Colors.white, size: 22),
-                const SizedBox(width: 8),
-                Text(plan.title, style: AppTextStyles.h3.copyWith(color: Colors.white)),
-                const Spacer(),
-                _saveBadge(plan.badge),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(plan.price, style: AppTextStyles.h1.copyWith(fontSize: 34, color: const Color(0xFF00B2FF))),
-            if (plan.oldPrice != null && plan.oldPrice!.isNotEmpty)
-              Text(
-                plan.oldPrice!,
-                style: AppTextStyles.body.copyWith(
-                  color: Colors.white54,
-                  decoration: TextDecoration.lineThrough,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.workspace_premium, color: Colors.white, size: 22),
+                  const SizedBox(width: 8),
+                  Text(plan.title, style: AppTextStyles.h3.copyWith(color: Colors.white)),
+                  const Spacer(),
+                  _saveBadge(plan.badge),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(plan.price, style: AppTextStyles.h1.copyWith(fontSize: 34, color: const Color(0xFF00B2FF))),
+              if (plan.oldPrice != null && plan.oldPrice!.isNotEmpty)
+                Text(
+                  plan.oldPrice!,
+                  style: AppTextStyles.body.copyWith(
+                    color: Colors.white54,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.md),
+              Text(appLocalizations.whatsIncluded, style: AppTextStyles.body.copyWith(color: Colors.white70)),
+              const SizedBox(height: AppSpacing.sm),
+              ...features.map((f) => _feature(f)).toList(),
+              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/signup');
+                  },
+                  child: Text(appLocalizations.chooseThisPlan),
                 ),
               ),
-            const SizedBox(height: AppSpacing.md),
-            Text(appLocalizations.whatsIncluded, style: AppTextStyles.body.copyWith(color: Colors.white70)),
-            const SizedBox(height: AppSpacing.sm),
-            ...features.map((f) => _feature(f)).toList(),
-            const SizedBox(height: AppSpacing.md),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/signup');
-                },
-                child: Text(appLocalizations.chooseThisPlan),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -412,7 +442,7 @@ class _PricingCardContent extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: AppTextStyles.caption.copyWith(color: Colors.white),
+              style: AppTextStyles.body.copyWith(color: Colors.white),
             ),
           ),
         ],
