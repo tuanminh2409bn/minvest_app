@@ -42,19 +42,37 @@ class GradientButton extends StatelessWidget {
         child: SizedBox(
           width: width,
           height: height,
-          child: Center(
-            child: Padding(
-              padding: padding,
-              child: Text(
-                label,
-                style: textStyle ??
-                    AppTextStyles.body.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+          child: width == null
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: padding,
+                      child: Text(
+                        label,
+                        style: textStyle ??
+                            AppTextStyles.body.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
                     ),
-              ),
-            ),
-          ),
+                  ],
+                )
+              : Center(
+                  child: Padding(
+                    padding: padding,
+                    child: Text(
+                      label,
+                      style: textStyle ??
+                          AppTextStyles.body.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ),
         ),
       ),
     );

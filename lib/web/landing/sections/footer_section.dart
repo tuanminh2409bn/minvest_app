@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/text_styles.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
@@ -11,32 +10,31 @@ class FooterSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final bool stacked = constraints.maxWidth < 900;
-      final double padH = stacked ? 16 : 32;
-
-      Widget _bounded(Widget child, double maxWidth) {
-        return ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: child,
-        );
-      }
+      // Breakpoint cho mobile/tablet tăng lên 1100 để đảm bảo không gian cho các cột
+      final bool isMobile = constraints.maxWidth < 1100;
+      final double padH = isMobile ? 24 : 64; // Tăng padding ngang cho desktop để thoáng hơn
 
       final logoCol = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
             onTap: () => Navigator.of(context).pushNamed('/'),
-            child: Image.asset('assets/mockups/logo.png', height: 70),
+            child: Image.asset('assets/mockups/logo.png', height: 60, fit: BoxFit.contain),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            AppLocalizations.of(context)!.enterpriseCodeDetails,
-            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
+            AppLocalizations.of(context)!.companyName,
+            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             AppLocalizations.of(context)!.addressDetails,
-            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
+            style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 14),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            AppLocalizations.of(context)!.enterpriseCodeDetails,
+            style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 14),
           ),
         ],
       );
@@ -44,54 +42,41 @@ class FooterSection extends StatelessWidget {
       final pagesCol = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context)!.pagesTitle, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: AppSpacing.sm),
-          _navLink(context, AppLocalizations.of(context)!.feature, '/features'),
-          _navLink(context, AppLocalizations.of(context)!.aiSignal, '/ai-signals'),
-          _navLink(context, AppLocalizations.of(context)!.pricing, '/pricing'),
-          _navLink(context, AppLocalizations.of(context)!.navNews, '/news'),
-          _navLink(context, AppLocalizations.of(context)!.contactUs, '/contact-us'),
+          Text(AppLocalizations.of(context)!.pagesTitle, 
+              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+          const SizedBox(height: AppSpacing.md),
+          _FooterLink(text: AppLocalizations.of(context)!.feature, route: '/features'),
+          _FooterLink(text: AppLocalizations.of(context)!.aiSignal, route: '/ai-signals'),
+          _FooterLink(text: AppLocalizations.of(context)!.pricing, route: '/pricing'),
+          _FooterLink(text: AppLocalizations.of(context)!.navNews, route: '/news'),
+          _FooterLink(text: AppLocalizations.of(context)!.contactUs, route: '/contact-us'),
         ],
       );
 
       final legalCol = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context)!.legalRegulatoryTitle, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: AppSpacing.sm),
-          _textOnlyLink(context, AppLocalizations.of(context)!.termsOfRegistration),
-          _textOnlyLink(context, AppLocalizations.of(context)!.operatingPrinciples),
-          _textOnlyLink(context, AppLocalizations.of(context)!.termsConditions),
+          Text(AppLocalizations.of(context)!.legalRegulatoryTitle, 
+              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700, overflow: TextOverflow.visible), softWrap: false),
+          const SizedBox(height: AppSpacing.md),
+          _FooterLink(text: AppLocalizations.of(context)!.termsOfRegistration, route: '/terms-of-registration'),
+          _FooterLink(text: AppLocalizations.of(context)!.operatingPrinciples, route: '/operating-principles'),
+          _FooterLink(text: AppLocalizations.of(context)!.termsConditions, route: '/terms-conditions'),
         ],
       );
 
       final contactCol = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context)!.contactTitle, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              const Icon(Icons.phone, color: Colors.white, size: 18),
-              Text('+84 969 15 6969', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16)), // Number, not localized
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              const Icon(Icons.email, color: Colors.white, size: 18),
-              Text('email@gmail.com', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16)), // Email, not localized
-            ],
-          ),
+          Text(AppLocalizations.of(context)!.contactTitle, 
+              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: AppSpacing.md),
+          _ContactItem(icon: Icons.phone, text: '+84 969.15.6969'),
+          const SizedBox(height: 8),
+          _ContactItem(icon: Icons.email, text: 'contact@minvest.vn'),
+          const SizedBox(height: AppSpacing.lg),
           Wrap(
-            spacing: 12,
+            spacing: 16,
             runSpacing: 12,
             children: const [
               _SocialIcon(iconPath: 'assets/images/facebook_logo.png', url: 'https://www.facebook.com/minvest.vn'),
@@ -104,61 +89,68 @@ class FooterSection extends StatelessWidget {
         ],
       );
 
-      final List<Widget> items = [
-        _bounded(logoCol, 460),
-        _bounded(pagesCol, 220),
-        _bounded(legalCol, 220),
-        _bounded(contactCol, 260),
-      ];
-
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: padH, vertical: 48),
-        child: stacked
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: padH, vertical: 64),
+        color: Colors.black, // Đảm bảo nền đen nếu cần
+        child: isMobile
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: items
-                    .map(
-                      (w) => Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: w,
-                      ),
-                    )
-                    .toList(),
+                children: [
+                  logoCol,
+                  const SizedBox(height: 40),
+                  pagesCol,
+                  const SizedBox(height: 40),
+                  legalCol,
+                  const SizedBox(height: 40),
+                  contactCol,
+                ],
               )
-            : Wrap(
-                spacing: 32,
-                runSpacing: 24,
-                crossAxisAlignment: WrapCrossAlignment.start,
-                children: items,
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Cột 1: Logo & Info (Giảm flex xuống 3)
+                  Expanded(
+                    flex: 5,
+                    child: logoCol,
+                  ),
+                  const SizedBox(width: 40),
+                  // Cột 2: Pages (Giữ nguyên flex 2)
+                  Expanded(
+                    flex: 2,
+                    child: pagesCol,
+                  ),
+                  // Cột 3: Legal (Tăng flex lên 4 để chứa chữ dài)
+                  Expanded(
+                    flex: 3,
+                    child: legalCol,
+                  ),
+                  // Cột 4: Contact (Flex 3)
+                  Expanded(
+                    flex: 3,
+                    child: contactCol,
+                  ),
+                ],
               ),
       );
     });
   }
+}
 
-  Widget _navLink(BuildContext context, String text, String? route) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: InkWell(
-        onTap: route != null
-            ? () {
-                Navigator.of(context).pushNamed(route);
-              }
-            : null,
-        child: Text(
-          text,
-          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
-        ),
-      ),
-    );
-  }
+class _ContactItem extends StatelessWidget {
+  final IconData icon;
+  final String text;
 
-  Widget _textOnlyLink(BuildContext context, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Text(
-        text,
-        style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
-      ),
+  const _ContactItem({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: Colors.white70, size: 18),
+        const SizedBox(width: 12),
+        Text(text, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16)),
+      ],
     );
   }
 }
@@ -181,19 +173,94 @@ class _SocialIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _launchURL,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: _launchURL,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.all(4.0),
+          child: Image.asset(
+            iconPath,
+            fit: BoxFit.contain,
+          ),
         ),
-        padding: const EdgeInsets.all(4.0),
-        child: Image.asset(
-          iconPath,
-          fit: BoxFit.contain,
+      ),
+    );
+  }
+}
+
+class _FooterLink extends StatefulWidget {
+  final String text;
+  final String? route;
+
+  const _FooterLink({required this.text, this.route});
+
+  @override
+  State<_FooterLink> createState() => _FooterLinkState();
+}
+
+class _FooterLinkState extends State<_FooterLink> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8), // Tăng khoảng cách dọc
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: widget.route != null
+              ? () {
+                  Navigator.of(context).pushNamed(widget.route!);
+                }
+              : null,
+          child: IntrinsicWidth(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4), 
+                  child: Text(
+                    widget.text,
+                    softWrap: false,
+                    overflow: TextOverflow.visible,
+                    style: AppTextStyles.body.copyWith(
+                      color: _isHovered ? Colors.white : Colors.white70, // Đổi màu text khi hover để rõ hơn
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Stack(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                            height: 1.5,
+                            width: _isHovered ? constraints.maxWidth : 0,
+                            color: Colors.white,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
