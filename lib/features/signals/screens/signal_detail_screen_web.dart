@@ -176,7 +176,16 @@ class SignalDetailScreen extends StatelessWidget {
 
   String _formatPrice(num? value) {
     if (value == null) return '—';
-    return value.toStringAsFixed(5);
+    double val = value.toDouble();
+    if (val >= 1000) {
+      return val.toStringAsFixed(2); // e.g. 1234.56
+    } else if (val >= 100) {
+      return val.toStringAsFixed(3); // e.g. 123.456
+    } else if (val >= 10) {
+      return val.toStringAsFixed(4); // e.g. 12.3456
+    } else {
+      return val.toStringAsFixed(5); // e.g. 1.23456
+    }
   }
 }
 

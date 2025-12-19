@@ -12,7 +12,7 @@ class FooterSection extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       // Breakpoint cho mobile/tablet tăng lên 1100 để đảm bảo không gian cho các cột
       final bool isMobile = constraints.maxWidth < 1100;
-      final double padH = isMobile ? 24 : 64; // Tăng padding ngang cho desktop để thoáng hơn
+      final double padH = 0; // Đã loại bỏ padding ngang nội bộ để thẳng hàng với body
 
       final logoCol = Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -20,35 +20,22 @@ class FeaturesPage extends StatelessWidget {
       floatingActionButton: const WebChatBubble(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SingleChildScrollView(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final bool isNarrow = constraints.maxWidth < 900;
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: isNarrow ? 12 : 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 12),
-                      const LandingNavBar(),
-                      const SizedBox(height: 24),
-                      const WinMoreSection(),
-                      SizedBox(height: isNarrow ? 64 : 96),
-                      const SmartToolsSection(),
-                      SizedBox(height: isNarrow ? 64 : 96),
-                      const YourOnDemandSection(),
-                      SizedBox(height: isNarrow ? 64 : 96),
-                      const MaximizeResultsSection(),
-                      const SizedBox(height: 48),
-                      const FooterSection(),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 12),
+            const _ContentWrapper(child: LandingNavBar()),
+            const SizedBox(height: 24),
+            const WinMoreSection(),
+            const SizedBox(height: 96),
+            const _ContentWrapper(child: SmartToolsSection()),
+            const SizedBox(height: 96),
+            const _ContentWrapper(child: YourOnDemandSection()),
+            const SizedBox(height: 96),
+            const _ContentWrapper(child: MaximizeResultsSection()),
+            const SizedBox(height: 48),
+            const _ContentWrapper(child: FooterSection()),
+          ],
         ),
       ),
     );
@@ -64,28 +51,40 @@ class WinMoreSection extends StatefulWidget {
 
 class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProviderStateMixin {
   int hoveredIndex = -1;
-  late final AnimationController _hoverController;
   int _textHoverIndex = -1;
 
-  final List<_CardData> cards = const [
-    _CardData(image: 'assets/mockups/card1.png', rotation: -2),
-    _CardData(image: 'assets/mockups/card2.png', rotation: 1),
-    _CardData(image: 'assets/mockups/card3.png', rotation: -3),
-    _CardData(image: 'assets/mockups/card4.png', rotation: -5),
-    _CardData(image: 'assets/mockups/card5.png', rotation: -10),
-    _CardData(image: 'assets/mockups/card6.png', rotation: -8),
+  // Initial rotation values for the 6 positions
+  final List<double> _rotations = [-2, 1, -3, -2, 1, -3];
+
+  // Pool of signal data to cycle through
+  final List<_SignalCardData> _signalPool = const [
+    _SignalCardData(pair: 'XAU/USD', side: 'Sell Limit', isBuy: false, icon: Icons.monetization_on),
+    _SignalCardData(pair: 'BTC/USD', side: 'Buy Limit', isBuy: true, icon: Icons.currency_bitcoin),
+    _SignalCardData(pair: 'EUR/USD', side: 'Buy Limit', isBuy: true, icon: Icons.euro),
+    _SignalCardData(pair: 'GBP/JPY', side: 'Sell Limit', isBuy: false, icon: Icons.currency_pound),
+    _SignalCardData(pair: 'US30', side: 'Buy Limit', isBuy: true, icon: Icons.show_chart),
+    _SignalCardData(pair: 'ETH/USD', side: 'Sell Limit', isBuy: false, icon: Icons.token),
   ];
+
+  // State to track which data index is currently showing for each card position
+  late List<int> _currentDataIndices;
 
   @override
   void initState() {
     super.initState();
-    _hoverController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
+    // Initialize with 0, 1, 2, 3, 4, 5
+    _currentDataIndices = List.generate(6, (index) => index % _signalPool.length);
   }
 
   @override
   void dispose() {
-    _hoverController.dispose();
     super.dispose();
+  }
+
+  void _cycleCardContent(int cardIndex) {
+    setState(() {
+      _currentDataIndices[cardIndex] = (_currentDataIndices[cardIndex] + 1) % _signalPool.length;
+    });
   }
 
   @override
@@ -94,64 +93,93 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
       padding: const EdgeInsets.symmetric(vertical: 48),
       child: Column(
         children: [
-          Text(
-            AppLocalizations.of(context)!.winMoreWithAiSignalsTitle,
-            style: AppTextStyles.h2.copyWith(fontSize: 36),
-            textAlign: TextAlign.center,
+          _ContentWrapper(
+            child: Text(
+              AppLocalizations.of(context)!.winMoreWithAiSignalsTitle,
+              style: AppTextStyles.h2.copyWith(fontSize: 36),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           LayoutBuilder(
             builder: (context, constraints) {
-              final bool isNarrow = constraints.maxWidth < 900;
+              final double screenWidth = constraints.maxWidth;
+              final double contentWidth = math.min(screenWidth, 1200.0);
+              final bool isNarrow = contentWidth < 900;
+              
+              // Calculate positions
+              // Moving cards significantly inside to be partially behind the phone (+380)
+              final double cardOffset = (screenWidth - contentWidth) / 2 + 150;
+
               return SizedBox(
                 height: isNarrow ? 520 : 640,
                 child: Stack(
                   alignment: Alignment.center,
                   clipBehavior: Clip.none,
                   children: [
-                    const _GlowBackground(),
+                    // 1. Glow Background (Bottom)
+                    _GlowBackground(width: contentWidth * 1.5),
+
+                    // 2. Interactive Cards (Middle) - Behind phone, above glow
                     if (!isNarrow)
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          ignoring: false,
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Positioned(
-                                left: -220,
-                                top: 120,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _floatingCard(0, offsetY: -60),
-                                    const SizedBox(height: 16),
-                                    _floatingCard(1, offsetY: 0),
-                                    const SizedBox(height: 16),
-                                    _floatingCard(2, offsetY: 40),
-                                  ],
-                                ),
-                              ),
-                              Positioned(
-                                right: -220,
-                                top: 100,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _floatingCard(3, offsetY: -60),
-                                    const SizedBox(height: 16),
-                                    _floatingCard(4, offsetY: 0),
-                                    const SizedBox(height: 16),
-                                    _floatingCard(5, offsetY: 40),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                      Positioned(
+                        top: 160,
+                        left: cardOffset,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _InteractiveSignalCard(
+                              data: _signalPool[_currentDataIndices[0]],
+                              rotation: _rotations[0],
+                              onTap: () => _cycleCardContent(0),
+                            ),
+                            const SizedBox(height: 64),
+                            _InteractiveSignalCard(
+                              data: _signalPool[_currentDataIndices[1]],
+                              rotation: _rotations[1],
+                              onTap: () => _cycleCardContent(1),
+                            ),
+                            const SizedBox(height: 64),
+                            _InteractiveSignalCard(
+                              data: _signalPool[_currentDataIndices[2]],
+                              rotation: _rotations[2],
+                              onTap: () => _cycleCardContent(2),
+                            ),
+                          ],
                         ),
                       ),
+                    if (!isNarrow)
+                      Positioned(
+                        top: 160,
+                        right: cardOffset,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _InteractiveSignalCard(
+                              data: _signalPool[_currentDataIndices[3]],
+                              rotation: _rotations[3],
+                              onTap: () => _cycleCardContent(3),
+                            ),
+                            const SizedBox(height: 64),
+                            _InteractiveSignalCard(
+                              data: _signalPool[_currentDataIndices[4]],
+                              rotation: _rotations[4],
+                              onTap: () => _cycleCardContent(4),
+                            ),
+                            const SizedBox(height: 64),
+                            _InteractiveSignalCard(
+                              data: _signalPool[_currentDataIndices[5]],
+                              rotation: _rotations[5],
+                              onTap: () => _cycleCardContent(5),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // 3. Phone Mockup (Top)
                     _PhoneMockup(
-                      onHoverStart: (index) => _startTextHover(index),
-                      onHoverEnd: (index) => _endTextHover(index),
+                      onHoverStart: (index) {},
+                      onHoverEnd: (index) {},
                     ),
                   ],
                 ),
@@ -159,34 +187,38 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
             },
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text(
-            AppLocalizations.of(context)!.winMoreWithAiSignalsDesc,
-            style: AppTextStyles.body.copyWith(color: Colors.white),
-            textAlign: TextAlign.center,
+          _ContentWrapper(
+            child: Text(
+              AppLocalizations.of(context)!.winMoreWithAiSignalsDesc,
+              style: AppTextStyles.body.copyWith(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Builder(
-            builder: (context) => GestureDetector(
-              onTap: () => Navigator.of(context).pushNamed('/signup'),
-              child: Container(
-                padding: const EdgeInsets.all(1.2),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
+          _ContentWrapper(
+            child: Builder(
+              builder: (context) => GestureDetector(
+                onTap: () => Navigator.of(context).pushNamed('/signup'),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  padding: const EdgeInsets.all(1.2),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(6),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                   ),
-                  child: Text(
-                    AppLocalizations.of(context)!.startNow,
-                    style: AppTextStyles.h3.copyWith(fontSize: 16, color: Colors.white),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.black,
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.startNow,
+                      style: AppTextStyles.h3.copyWith(fontSize: 16, color: Colors.white),
+                    ),
                   ),
                 ),
               ),
@@ -196,84 +228,164 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
       ),
     );
   }
+}
 
-  Widget _floatingCard(int index, {double offsetY = 0}) {
-    final data = cards[index];
-    final activeIndex = hoveredIndex != -1 ? hoveredIndex : _textHoverIndex;
-    final isActive = activeIndex == index;
+class _SignalCardData {
+  final String pair;
+  final String side;
+  final bool isBuy;
+  final IconData icon;
+
+  const _SignalCardData({
+    required this.pair,
+    required this.side,
+    required this.isBuy,
+    required this.icon,
+  });
+}
+
+class _InteractiveSignalCard extends StatefulWidget {
+  final _SignalCardData data;
+  final double rotation;
+  final VoidCallback onTap;
+
+  const _InteractiveSignalCard({
+    required this.data,
+    required this.rotation,
+    required this.onTap,
+  });
+
+  @override
+  State<_InteractiveSignalCard> createState() => _InteractiveSignalCardState();
+}
+
+class _InteractiveSignalCardState extends State<_InteractiveSignalCard> with SingleTickerProviderStateMixin {
+  bool _isHovered = false;
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Determine rotation: if hovered, slightly adjust rotation for effect
+    final currentRotation = _isHovered ? widget.rotation + 2.0 : widget.rotation;
+
     return MouseRegion(
       onEnter: (_) {
-        setState(() => hoveredIndex = index);
-        _hoverController.forward(from: 0);
+        setState(() => _isHovered = true);
+        _controller.forward();
       },
       onExit: (_) {
-        setState(() => hoveredIndex = -1);
-        if (_textHoverIndex == -1) {
-          _hoverController.reverse(from: _hoverController.value);
-        }
+        setState(() => _isHovered = false);
+        _controller.reverse();
       },
-      child: AnimatedBuilder(
-        animation: _hoverController,
-        builder: (context, child) {
-          final t = isActive ? Curves.easeOutBack.transform(_hoverController.value) : 0.0;
-          final extraTilt = t * 0.12; // ~7 deg
-          final extraY = t * -24; // bập một nhịp xuống
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            transform: Matrix4.identity()
-              ..translate(0.0, isActive ? offsetY + extraY : offsetY)
-              ..rotateZ((data.rotation * math.pi / 180) + extraTilt),
-            child: child,
-          );
-        },
-        child: Image.asset(
-          data.image,
-          width: 320,
-          fit: BoxFit.contain,
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform(
+              transform: Matrix4.identity()
+                ..rotateZ(currentRotation * math.pi / 180)
+                ..scale(_scaleAnimation.value),
+              alignment: Alignment.center,
+              child: Container(
+                width: 320,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF141414),
+                  borderRadius: BorderRadius.circular(6), // Changed to 6px
+                  border: Border.all(
+                    color: _isHovered ? const Color(0xFF289EFF) : Colors.white12,
+                    width: _isHovered ? 2.0 : 1.0,
+                  ),
+                  boxShadow: [
+                    if (_isHovered)
+                      BoxShadow(
+                        color: const Color(0xFF289EFF).withOpacity(0.3),
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                      ),
+                    const BoxShadow(
+                      color: Colors.black45,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // Icon color #289EFF
+                    Icon(widget.data.icon, color: const Color(0xFF289EFF), size: 28),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.data.pair,
+                            style: AppTextStyles.h3.copyWith(fontSize: 15, color: Colors.white, fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Update: dd/mm/yyyy',
+                            style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 10),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      widget.data.side,
+                      style: AppTextStyles.body.copyWith(
+                        color: widget.data.isBuy ? const Color(0xFF3CFF00) : Colors.redAccent,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
-
-  void _startTextHover(int index) {
-    setState(() => _textHoverIndex = index);
-    _hoverController.forward(from: 0);
-  }
-
-  void _endTextHover(int index) {
-    if (_textHoverIndex == index) {
-      setState(() => _textHoverIndex = -1);
-      if (hoveredIndex == -1) {
-        _hoverController.reverse(from: _hoverController.value);
-      }
-    }
-  }
-}
-
-class _CardData {
-  final String image;
-  final double rotation;
-  const _CardData({required this.image, required this.rotation});
 }
 
 class _GlowBackground extends StatelessWidget {
-  const _GlowBackground();
+  final double? width;
+  const _GlowBackground({this.width});
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Center(
-          child: FractionallySizedBox(
-            widthFactor: 2.0,
-            heightFactor: 1.0,
-            child: Opacity(
-              opacity: 0.85,
-              child: Image.asset(
-                'assets/mockups/light.png',
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
-              ),
+    return IgnorePointer(
+      child: Center(
+        child: SizedBox(
+          width: width,
+          child: Opacity(
+            opacity: 0.85,
+            child: Image.asset(
+              'assets/mockups/light.png',
+              fit: BoxFit.contain,
+              alignment: Alignment.center,
             ),
           ),
         ),
@@ -373,12 +485,12 @@ class _PhoneScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<_SignalRowData> rows = [
-      _SignalRowData(icon: Icons.water_drop, pair: 'WTI', side: AppLocalizations.of(context)!.buyLimit),
-      _SignalRowData(icon: Icons.currency_bitcoin, pair: 'XAU/USD', side: AppLocalizations.of(context)!.sellLimit),
-      _SignalRowData(icon: Icons.currency_exchange, pair: 'DXY/USDT', side: AppLocalizations.of(context)!.buyLimit),
-      _SignalRowData(icon: Icons.account_balance, pair: 'XAU/USD', side: AppLocalizations.of(context)!.sellLimit),
-      _SignalRowData(icon: Icons.euro, pair: 'EUR/USD', side: AppLocalizations.of(context)!.buyLimit),
-      _SignalRowData(icon: Icons.currency_bitcoin, pair: 'BTC/USDT', side: AppLocalizations.of(context)!.sellLimit),
+      _SignalRowData(icon: Icons.water_drop, pair: 'WTI', side: 'Buy Limit'),
+      _SignalRowData(icon: Icons.currency_bitcoin, pair: 'XAU/USD', side: 'Sell Limit'),
+      _SignalRowData(icon: Icons.currency_exchange, pair: 'DXY/USDT', side: 'Buy Limit'),
+      _SignalRowData(icon: Icons.account_balance, pair: 'XAU/USD', side: 'Sell Limit'),
+      _SignalRowData(icon: Icons.euro, pair: 'EUR/USD', side: 'Buy Limit'),
+      _SignalRowData(icon: Icons.currency_bitcoin, pair: 'BTC/USDT', side: 'Sell Limit'),
     ];
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1134,6 +1246,29 @@ class MaximizeResultsSection extends StatelessWidget {
               style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ContentWrapper extends StatelessWidget {
+  final Widget child;
+  const _ContentWrapper({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1200),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+             final bool isNarrow = MediaQuery.of(context).size.width < 900;
+             return Padding(
+               padding: EdgeInsets.symmetric(horizontal: isNarrow ? 12 : 0),
+               child: child,
+             );
+          },
         ),
       ),
     );

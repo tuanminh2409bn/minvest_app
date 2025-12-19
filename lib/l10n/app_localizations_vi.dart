@@ -853,7 +853,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get date => 'Ngày';
 
   @override
-  String get timeGmt7 => 'Thời gian (GMT +7)';
+  String get timeGmt7 => 'Thời gian (GMT)';
 
   @override
   String get orders => 'Lệnh';
@@ -962,7 +962,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get faqAnswer2 =>
-      'Có. Chỉ cần tạo tài khoản Exness thông qua liên kết Minvest, bạn sẽ có quyền truy cập vào nhóm tín hiệu demo miễn phí của chúng tôi (Community VIP).';
+      'Khi mở tài khoản, hệ thống sẽ tặng bạn 10 token miễn phí, tương đương 10 lần xem tín hiệu chi tiết. Sau đó, mỗi ngày bạn tiếp tục nhận thêm 1 token để sử dụng. Nếu nâng cấp lên tài khoản VIP, bạn sẽ được mở khóa nhiều tính năng nâng cao và theo dõi không giới hạn số lệnh.';
 
   @override
   String get faqQuestion3 =>
@@ -974,11 +974,11 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get faqQuestion4 =>
-      'Tôi vẫn có thể tham gia nếu tôi không đăng ký tài khoản Exness không?';
+      'Khi nâng cấp lên tài khoản VIP, tôi sẽ nhận được bao nhiêu tín hiệu mỗi ngày?';
 
   @override
   String get faqAnswer4 =>
-      'Vui lòng liên hệ với chúng tôi qua WhatsApp hoặc Live Chat để được hỗ trợ.';
+      'Khi nâng cấp lên tài khoản VIP, bạn sẽ được nhận tín hiệu giao dịch không giới hạn mỗi ngày. Số lượng tín hiệu không cố định, mà phụ thuộc hoàn toàn vào phân tích thị trường. Bất cứ khi nào xuất hiện điểm vào lệnh chất lượng, xác suất cao, đội ngũ phân tích sẽ gửi tín hiệu ngay cho bạn.';
 
   @override
   String get priceLevels => 'Mức giá';
@@ -1260,4 +1260,7 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get termsAndConditionsContent =>
       'Bằng việc đăng ký tài khoản tham gia vào hệ thống mInvest AI, bạn xác nhận rằng bạn đã đọc, hiểu và đồng ý với tất cả nội dung của các Điều khoản và Điều kiện Mở Tài khoản này.\nCác bản cập nhật mới nhất (nếu có) sẽ được công bố tại đây và mInvest AI sẽ không gửi thông báo riêng cho từng khách hàng. Do đó, vui lòng truy cập trang này thường xuyên để cập nhật các chính sách mới nhất.\n\n1. Thỏa thuận chung\n\nmInvest AI là một nền tảng công nghệ và trí tuệ nhân tạo thuộc sở hữu của CÔNG TY TNHH ĐẦU TƯ CÔNG NGHỆ EZTRADE. Bằng việc mở tài khoản trên hệ thống này, bạn đồng ý tham gia và sử dụng các dịch vụ và sản phẩm do EZTRADE cung cấp.\nViệc đăng ký và kích hoạt tài khoản được coi là một hợp đồng điện tử giữa bạn và mInvest AI, có giá trị pháp lý tương đương với một hợp đồng dân sự theo pháp luật Việt Nam.\n\n2. Thông tin Tài khoản Cá nhân và Quyền riêng tư\n\n2.1. Mục đích và Phạm vi Thu thập Thông tin\n\nĐể truy cập và sử dụng một số dịch vụ của mInvest AI, bạn phải cung cấp thông tin cá nhân cơ bản, bao gồm:\nHọ và tên đầy đủ;\nĐịa chỉ email;\nSố điện thoại liên hệ;\nCác thông tin khác (nếu có) cần thiết cho việc xác minh, hỗ trợ hoặc cấp quyền truy cập.\nMọi thông tin được cung cấp phải chính xác, trung thực và hợp pháp. mInvest AI sẽ không chịu trách nhiệm đối với bất kỳ tổn thất hoặc tranh chấp nào phát sinh từ thông tin sai lệch, thiếu sót hoặc gian lận do người dùng cung cấp.\nNgoài ra, hệ thống có thể tự động thu thập một số dữ liệu kỹ thuật, chẳng hạn như:\nĐịa chỉ IP, loại trình duyệt và ngôn ngữ sử dụng;\nThời gian truy cập và các trang đã xem trong hệ thống.\nThông tin này giúp mInvest AI cải thiện hiệu suất, tăng cường bảo mật và tối ưu hóa trải nghiệm người dùng.\n\n2.2. Phạm vi Sử dụng Thông tin\n\nThông tin cá nhân của bạn được thu thập và sử dụng cho các mục đích hợp pháp, bao gồm:\nQuản lý tài khoản, xác minh người dùng và duy trì dịch vụ;\nGửi thông báo liên quan đến dịch vụ, tài khoản, khuyến mãi hoặc thay đổi chính sách;\nCung cấp hỗ trợ kỹ thuật, dịch vụ khách hàng và giải quyết tranh chấp (nếu có);\nPhân tích dữ liệu để cải thiện chất lượng sản phẩm và trải nghiệm người dùng.\nChúng tôi cam kết bảo vệ thông tin cá nhân của bạn và sẽ không chia sẻ nó với bên thứ ba trừ khi được pháp luật hoặc cơ quan có thẩm quyền yêu cầu.\n\n2.3. Thời gian Lưu trữ Dữ liệu\n\nThông tin của bạn sẽ được lưu trữ cho đến khi một trong các trường hợp sau xảy ra:\nBạn yêu cầu xóa tài khoản; hoặc\nHệ thống mInvest AI ngừng hoạt động theo quy định của pháp luật hiện hành.\nTrong mọi trường hợp, dữ liệu của bạn sẽ được lưu trữ an toàn và bảo vệ nghiêm ngặt trên máy chủ của EZTRADE.\n\n2.4. Đơn vị Chịu trách nhiệm Thu thập và Quản lý Thông tin Cá nhân\n\nCÔNG TY TNHH ĐẦU TƯ CÔNG NGHỆ EZTRADE\nĐịa chỉ: Số 8 Phố Đỗ Hành, Phường Nguyễn Du, Quận Hai Bà Trưng, Thành phố Hà Nội, Việt Nam\nMã số doanh nghiệp: 0110057263\n\n2.5. Phương thức và Công cụ Chỉnh sửa Thông tin\n\nBạn có thể truy cập phần “Cài đặt Tài khoản” trong hệ thống để chỉnh sửa hoặc cập nhật thông tin cá nhân của mình. Nếu bạn gặp khó khăn trong quá trình này, vui lòng liên hệ với chúng tôi qua các kênh hỗ trợ chính thức của mInvest AI được công bố trên website.\n\n2.6. Cung cấp và Xác minh Thông tin\n\nĐể đảm bảo an toàn tài khoản và bảo vệ quyền lợi của bạn, bạn phải:\nCung cấp chính xác họ tên, email và số điện thoại khi đăng ký;\nXác minh thông tin qua email xác nhận do hệ thống gửi;\nNhận thông báo kích hoạt, đặt lại mật khẩu hoặc các thông báo quan trọng khác từ mInvest AI.\nNếu thông tin cung cấp không chính xác hoặc không đầy đủ, bạn sẽ hoàn toàn chịu trách nhiệm về mọi rủi ro liên quan (ví dụ: không kích hoạt được tài khoản, mất quyền truy cập hoặc bỏ lỡ thông báo).\n\n2.7. Nghĩa vụ và Trách nhiệm Bảo mật của Người dùng\n\nBạn chịu trách nhiệm bảo vệ thông tin đăng nhập và mật khẩu của mình.\nNếu mật khẩu của bạn bị mất, bị tiết lộ hoặc bị truy cập trái phép, mInvest AI sẽ không chịu trách nhiệm về bất kỳ thiệt hại nào phát sinh.\nBạn đồng ý cho phép EZTRADE lưu trữ, quản lý và xử lý thông tin cá nhân của bạn theo quy định của pháp luật Việt Nam.\n\n2.8. Quyền Tiếp cận Thông tin của Bạn\n\nThông tin cá nhân của bạn chỉ có thể được tiếp cận bởi:\nĐội ngũ quản trị hệ thống mInvest AI (cho mục đích quản lý và kỹ thuật);\nChủ sở hữu tài khoản (thông qua phần quản lý thông tin cá nhân);\nCơ quan chức năng Việt Nam, khi có yêu cầu hợp lệ và hợp pháp theo quy định của pháp luật.\n\n2.9. Cơ chế Khiếu nại và Giải quyết\n\nĐối với mọi khiếu nại hoặc phản hồi liên quan đến việc đăng ký, sử dụng tài khoản hoặc bảo mật thông tin, bạn có thể gửi yêu cầu thông qua trang Liên hệ chính thức của mInvest AI.\nChúng tôi sẽ tiếp nhận, xử lý và phản hồi sớm nhất có thể để đảm bảo quyền và lợi ích hợp pháp của khách hàng theo quy định pháp luật hiện hành.\n\n3. Hiệu lực và Cập nhật\n\nCác Điều khoản và Điều kiện Mở Tài khoản này có hiệu lực từ ngày 14 tháng 11 năm 2025. mInvest AI bảo lưu quyền cập nhật, sửa đổi hoặc bổ sung nội dung bất kỳ lúc nào mà không cần báo trước. Mọi thay đổi sẽ được công bố công khai trên website mInvest.ai trước khi áp dụng.';
+
+  @override
+  String get performance => 'Hiệu suất';
 }

@@ -831,7 +831,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get date => '날짜';
 
   @override
-  String get timeGmt7 => '시간 (GMT +7)';
+  String get timeGmt7 => '시간 (GMT)';
 
   @override
   String get orders => '주문';
@@ -936,7 +936,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get faqAnswer2 =>
-      '是的。只需通过Minvest链接创建一个Exness账户，即可访问我们的免费模拟信号群（社区VIP）。';
+      '계좌 개설 시 시스템에서 10개의 무료 토큰(상세 신호 보기 10회 분량)을 선물로 드립니다. 그 후 매일 1개의 토큰을 추가로 받아 사용하실 수 있습니다. VIP 계정으로 업그레이드하면 많은 고급 기능을 잠금 해제하고 무제한 주문을 추적할 수 있습니다.';
 
   @override
   String get faqQuestion3 => '如果我已注册但未收到任何信号，我该怎么办？';
@@ -945,10 +945,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get faqAnswer3 => '处理通常是自动的。如果您仍未看到任何信号建议，请通过Whatsapp联系我们寻求即时帮助。';
 
   @override
-  String get faqQuestion4 => '如果我不注册Exness账户，还能加入吗？';
+  String get faqQuestion4 => 'VIP 계정으로 업그레이드하면 매일 몇 개의 신호를 받게 되나요?';
 
   @override
-  String get faqAnswer4 => '请通过WhatsApp或在线聊天联系我们寻求帮助。';
+  String get faqAnswer4 =>
+      'VIP 계정으로 업그레이드하면 매일 무제한 거래 신호를 받게 됩니다. 신호의 수는 고정되어 있지 않으며 전적으로 시장 분석에 따라 달라집니다. 고품질, 고확률 진입점이 나타날 때마다 분석 팀이 즉시 신호를 보내드립니다.';
 
   @override
   String get priceLevels => '价格水平';
@@ -1222,4 +1223,7 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get termsAndConditionsContent =>
       'By registering an account to participate in the mInvest AI system, you confirm that you have read, understood, and agreed to all the contents of these Account Opening Terms and Conditions.\nThe latest updates (if any) will be published here, and mInvest AI will not send separate notifications to each customer. Therefore, please visit this page regularly to stay informed about the most recent policies.\n\n1. General Agreement\n\nmInvest AI is a technology and artificial intelligence platform owned by EZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED. By opening an account on this system, you agree to participate in and use the services and products provided by EZTRADE.\nAccount registration and activation are considered an electronic contract between you and mInvest AI, which has the same legal validity as a civil contract under the laws of Vietnam.\n\n2. Personal Account Information and Privacy\n\n2.1. Purpose and Scope of Information Collection\n\nTo access and use certain mInvest AI services, you must provide basic personal information, including:\nFull name;\nEmail address;\nContact phone number;\nOther information (if any) necessary for verification, support, or access authorization.\nAll information provided must be accurate, truthful, and lawful. mInvest AI shall not be responsible for any losses or disputes arising from false, missing, or fraudulent information provided by the user.\nAdditionally, the system may automatically collect certain technical data, such as:\nIP address, browser type, and language used;\nAccess time and pages viewed within the system.\nThis information helps mInvest AI improve performance, enhance security, and optimize user experience.\n\n2.2. Scope of Information Use\n\nYour personal information is collected and used for legitimate purposes, including:\nManaging accounts, verifying users, and maintaining services;\nSending notifications related to services, accounts, promotions, or policy changes;\nProviding technical support, customer service, and dispute resolution (if any);\nData analysis to improve product quality and user experience.\nWe are committed to protecting your personal information and will not share it with third parties unless required by law or competent authorities.\n\n2.3. Data Retention Period\n\nYour information will be stored until one of the following occurs:\nYou request account deletion; or\nThe mInvest AI system ceases operation in accordance with applicable laws.\nIn all cases, your data will be securely stored and strictly protected on EZTRADE’s servers.\n\n2.4. Entity Responsible for Collecting and Managing Personal Information\n\nEZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED\nAddress: No. 8 Do Hanh Street, Hai Ba Trung Ward, Hanoi City, Vietnam\nBusiness Registration Number: 0110057263\n\n2.5. Methods and Tools for Editing Information\n\nYou can access the “Account Settings” section within the system to edit or update your personal information. If you encounter difficulties while doing so, please contact us through the official support channels of mInvest AI as published on the website.\n\n2.6. Information Provision and Verification\n\nTo ensure account security and protect your rights, you must:\nProvide accurate full name, email, and phone number during registration;\nVerify your information via the confirmation email sent by the system;\nReceive activation, password reset, or other important notifications from mInvest AI.\nIf the provided information is inaccurate or incomplete, you shall be solely responsible for any related risks (e.g., account activation failure, loss of access, or missed notifications).\n\n2.7. User Confidentiality Obligations and Responsibilities\n\nYou are responsible for safeguarding your login credentials and password.\nIf your password is lost, disclosed, or accessed without authorization, mInvest AI shall not be liable for any resulting damages.\nYou agree to allow EZTRADE to store, manage, and process your personal information in accordance with the laws of Vietnam.\n\n2.8. Access Rights to Your Information\n\nYour personal information may only be accessed by:\nThe mInvest AI system administration team (for management and technical purposes);\nThe account owner (via the personal information management section);\nVietnamese authorities, upon receipt of a valid and lawful request as prescribed by law.\n\n2.9. Complaint and Resolution Mechanism\n\nFor any complaints or feedback related to account registration, usage, or information security, you may submit a request through the official Contact page of mInvest AI.\nWe will receive, process, and respond as soon as possible to ensure the customer’s lawful rights and interests in accordance with applicable legal regulations.\n\n3. Effectiveness and Updates\n\nThese Account Opening Terms and Conditions take effect from November 14, 2025. mInvest AI reserves the right to update, modify, or supplement the contents at any time without prior notice. All changes will be publicly announced on the mInvest.ai website prior to implementation.';
+
+  @override
+  String get performance => '성과';
 }
