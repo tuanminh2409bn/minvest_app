@@ -50,38 +50,43 @@ class _NewsPageState extends State<NewsPage> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 12),
-                  const LandingNavBar(),
-                  const SizedBox(height: 32),
-                  _header(context),
-                  const SizedBox(height: 24),
-                  _categoryTabs(context),
-                  const SizedBox(height: 12),
-                  const Divider(color: Colors.white12, height: 1),
-                  const SizedBox(height: 24),
-                  StreamBuilder<List<NewsArticle>>(
-                    stream: _newsService.streamNews(category: _categoryFilter, limit: 20),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      final articles = snapshot.data ?? [];
-                      return _NewsLayout(
-                        articles: articles,
-                        selectedCategory: _selectedTab,
-                        getTabTitle: (tab) => _getTabTitle(context, tab),
-                      );
-                    },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 12),
+                const LandingNavBar(),
+                const SizedBox(height: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _header(context),
+                      const SizedBox(height: 24),
+                      _categoryTabs(context),
+                      const SizedBox(height: 12),
+                      const Divider(color: Colors.white12, height: 1),
+                      const SizedBox(height: 24),
+                      StreamBuilder<List<NewsArticle>>(
+                        stream: _newsService.streamNews(category: _categoryFilter, limit: 20),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          final articles = snapshot.data ?? [];
+                          return _NewsLayout(
+                            articles: articles,
+                            selectedCategory: _selectedTab,
+                            getTabTitle: (tab) => _getTabTitle(context, tab),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 64),
-                  const FooterSection(),
-                ],
-              ),
+                ),
+                const SizedBox(height: 64),
+                const FooterSection(),
+              ],
             ),
           ),
         ),

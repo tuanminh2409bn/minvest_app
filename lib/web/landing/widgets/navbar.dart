@@ -34,7 +34,7 @@ class LandingNavBar extends StatelessWidget {
           // Tăng ngưỡng breakpoint lên 1250 để xử lý sớm các ngôn ngữ dài như tiếng Pháp
           final bool isCompact = constraints.maxWidth < 1250; 
           
-          final double padH = stacked ? 12 : 24;
+          final double padH = 0; // Đã loại bỏ padding ngang nội bộ
           final double padV = stacked ? 12 : 6;
           
           // Tinh chỉnh khoảng cách giữa các item: Nhỏ hơn khi ở chế độ Compact

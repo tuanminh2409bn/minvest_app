@@ -1657,7 +1657,7 @@ abstract class AppLocalizations {
   /// No description provided for @timeGmt7.
   ///
   /// In en, this message translates to:
-  /// **'Time (GMT +7)'**
+  /// **'Time (GMT)'**
   String get timeGmt7;
 
   /// No description provided for @orders.
@@ -1849,7 +1849,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqAnswer2.
   ///
   /// In en, this message translates to:
-  /// **'Yes. Simply create an Exness account through the Minvest link, and you’ll get access to our free demo signal group (Community VIP).'**
+  /// **'When opening an account, the system will gift you 10 free tokens, equivalent to 10 detailed signal views. After that, you will receive 1 additional token every day to use. If you upgrade to a VIP account, you will unlock many advanced features and track an unlimited number of orders.'**
   String get faqAnswer2;
 
   /// No description provided for @faqQuestion3.
@@ -1867,13 +1867,13 @@ abstract class AppLocalizations {
   /// No description provided for @faqQuestion4.
   ///
   /// In en, this message translates to:
-  /// **'Can I still join if I don’t sign up for an Exness account?'**
+  /// **'How many signals will I receive per day when upgrading to a VIP account?'**
   String get faqQuestion4;
 
   /// No description provided for @faqAnswer4.
   ///
   /// In en, this message translates to:
-  /// **'Please contact us via WhatsApp or Live Chat for assistance.'**
+  /// **'When upgrading to a VIP account, you will receive unlimited trading signals every day. The number of signals is not fixed but depends entirely on market analysis. Whenever a high-quality, high-probability entry point appears, the analysis team will send the signal to you immediately.'**
   String get faqAnswer4;
 
   /// No description provided for @priceLevels.
@@ -2403,6 +2403,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'By registering an account to participate in the mInvest AI system, you confirm that you have read, understood, and agreed to all the contents of these Account Opening Terms and Conditions.\nThe latest updates (if any) will be published here, and mInvest AI will not send separate notifications to each customer. Therefore, please visit this page regularly to stay informed about the most recent policies.\n\n1. General Agreement\n\nmInvest AI is a technology and artificial intelligence platform owned by EZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED. By opening an account on this system, you agree to participate in and use the services and products provided by EZTRADE.\nAccount registration and activation are considered an electronic contract between you and mInvest AI, which has the same legal validity as a civil contract under the laws of Vietnam.\n\n2. Personal Account Information and Privacy\n\n2.1. Purpose and Scope of Information Collection\n\nTo access and use certain mInvest AI services, you must provide basic personal information, including:\nFull name;\nEmail address;\nContact phone number;\nOther information (if any) necessary for verification, support, or access authorization.\nAll information provided must be accurate, truthful, and lawful. mInvest AI shall not be responsible for any losses or disputes arising from false, missing, or fraudulent information provided by the user.\nAdditionally, the system may automatically collect certain technical data, such as:\nIP address, browser type, and language used;\nAccess time and pages viewed within the system.\nThis information helps mInvest AI improve performance, enhance security, and optimize user experience.\n\n2.2. Scope of Information Use\n\nYour personal information is collected and used for legitimate purposes, including:\nManaging accounts, verifying users, and maintaining services;\nSending notifications related to services, accounts, promotions, or policy changes;\nProviding technical support, customer service, and dispute resolution (if any);\nData analysis to improve product quality and user experience.\nWe are committed to protecting your personal information and will not share it with third parties unless required by law or competent authorities.\n\n2.3. Data Retention Period\n\nYour information will be stored until one of the following occurs:\nYou request account deletion; or\nThe mInvest AI system ceases operation in accordance with applicable laws.\nIn all cases, your data will be securely stored and strictly protected on EZTRADE’s servers.\n\n2.4. Entity Responsible for Collecting and Managing Personal Information\n\nEZTRADE TECHNOLOGY INVESTMENT COMPANY LIMITED\nAddress: No. 8 Do Hanh Street, Hai Ba Trung Ward, Hanoi City, Vietnam\nBusiness Registration Number: 0110057263\n\n2.5. Methods and Tools for Editing Information\n\nYou can access the “Account Settings” section within the system to edit or update your personal information. If you encounter difficulties while doing so, please contact us through the official support channels of mInvest AI as published on the website.\n\n2.6. Information Provision and Verification\n\nTo ensure account security and protect your rights, you must:\nProvide accurate full name, email, and phone number during registration;\nVerify your information via the confirmation email sent by the system;\nReceive activation, password reset, or other important notifications from mInvest AI.\nIf the provided information is inaccurate or incomplete, you shall be solely responsible for any related risks (e.g., account activation failure, loss of access, or missed notifications).\n\n2.7. User Confidentiality Obligations and Responsibilities\n\nYou are responsible for safeguarding your login credentials and password.\nIf your password is lost, disclosed, or accessed without authorization, mInvest AI shall not be liable for any resulting damages.\nYou agree to allow EZTRADE to store, manage, and process your personal information in accordance with the laws of Vietnam.\n\n2.8. Access Rights to Your Information\n\nYour personal information may only be accessed by:\nThe mInvest AI system administration team (for management and technical purposes);\nThe account owner (via the personal information management section);\nVietnamese authorities, upon receipt of a valid and lawful request as prescribed by law.\n\n2.9. Complaint and Resolution Mechanism\n\nFor any complaints or feedback related to account registration, usage, or information security, you may submit a request through the official Contact page of mInvest AI.\nWe will receive, process, and respond as soon as possible to ensure the customer’s lawful rights and interests in accordance with applicable legal regulations.\n\n3. Effectiveness and Updates\n\nThese Account Opening Terms and Conditions take effect from November 14, 2025. mInvest AI reserves the right to update, modify, or supplement the contents at any time without prior notice. All changes will be publicly announced on the mInvest.ai website prior to implementation.'**
   String get termsAndConditionsContent;
+
+  /// No description provided for @performance.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance'**
+  String get performance;
 }
 
 class _AppLocalizationsDelegate

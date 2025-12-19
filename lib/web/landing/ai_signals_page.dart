@@ -5,8 +5,6 @@ import 'package:minvest_forex_app/features/signals/screens/signal_detail_screen_
 import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
@@ -32,7 +30,22 @@ class AISignalsPage extends StatefulWidget {
 class _AISignalsPageState extends State<AISignalsPage> {
   AISignalsTab selectedTab = AISignalsTab.aiSignals;
   AssetFilter _assetFilter = AssetFilter.all;
+  String _selectedPair = 'All Currency pairs';
+  String _selectedTimezone = 'GMT+7'; // Default for Vietnam context
   DateTimeRange? _dateRange;
+
+  final List<String> _currencyPairs = [
+    'All Currency pairs',
+    'XAU/USD',
+    'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 
+    'AUD/USD', 'USD/CAD', 'NZD/USD',
+    'EUR/GBP', 'EUR/JPY', 'GBP/JPY', 'AUD/JPY',
+    'BTC/USD', 'ETH/USD', 'BNB/USD'
+  ];
+
+  final List<String> _timezones = [
+    for (int i = -12; i <= 14; i++) 'GMT${i >= 0 ? '+' : ''}$i',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -44,46 +57,66 @@ class _AISignalsPageState extends State<AISignalsPage> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 12),
-                  const LandingNavBar(),
-                  const SizedBox(height: 32),
-                  const _TitleSection(),
-                  const SizedBox(height: 24),
-                  _TabBar(
-                    selected: selectedTab,
-                    onSelect: (tab) {
-                      setState(() => selectedTab = tab);
-                    },
-                  ),
-                const SizedBox(height: 24),
-                if (selectedTab == AISignalsTab.aiSignals) ...[
-                _FiltersRow(
-                  assetFilter: _assetFilter,
-                  dateRange: _dateRange,
-                  onAssetChanged: (value) => setState(() => _assetFilter = value),
-                  onDateRangeChanged: (value) => setState(() => _dateRange = value),
-                ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 12),
+                const LandingNavBar(),
                 const SizedBox(height: 32),
-                _SignalGridLive(
-                  assetFilter: _assetFilter,
-                  dateRange: _dateRange,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const _TitleSection(),
+                      const SizedBox(height: 24),
+                      _TabBar(
+                        selected: selectedTab,
+                        onSelect: (tab) {
+                          setState(() => selectedTab = tab);
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      if (selectedTab == AISignalsTab.aiSignals || selectedTab == AISignalsTab.history) ...[
+                        _FiltersRow(
+                          assetFilter: _assetFilter,
+                          selectedPair: _selectedPair,
+                          selectedTimezone: _selectedTimezone,
+                          dateRange: _dateRange,
+                          availablePairs: _currencyPairs,
+                          availableTimezones: _timezones,
+                          onAssetChanged: (value) => setState(() => _assetFilter = value),
+                          onPairChanged: (value) => setState(() => _selectedPair = value),
+                          onTimezoneChanged: (value) => setState(() => _selectedTimezone = value),
+                          onDateRangeChanged: (value) => setState(() => _dateRange = value),
+                        ),
+                        const SizedBox(height: 32),
+                      ],
+                      if (selectedTab == AISignalsTab.aiSignals) ...[
+                        _SignalGridLive(
+                          assetFilter: _assetFilter,
+                          selectedPair: _selectedPair,
+                          selectedTimezone: _selectedTimezone,
+                          dateRange: _dateRange,
+                        ),
+                      ] else if (selectedTab == AISignalsTab.performance) ...const [
+                        _PerformanceSection(),
+                      ] else if (selectedTab == AISignalsTab.history) ...[
+                        _HistorySection(
+                          assetFilter: _assetFilter,
+                          selectedPair: _selectedPair,
+                          selectedTimezone: _selectedTimezone,
+                          dateRange: _dateRange,
+                        ),
+                      ] else ...const [
+                        PricingTab(),
+                      ],
+                    ],
+                  ),
                 ),
-              ] else if (selectedTab == AISignalsTab.performance) ...const [
-                _PerformanceSection(),
-              ] else if (selectedTab == AISignalsTab.history) ...const [
-                _HistorySection(),
-                  ] else ...const [
-                    PricingTab(),
-                  ],
-                  const SizedBox(height: 64),
-                  const FooterSection(),
-                ],
-              ),
+                const SizedBox(height: 64),
+                const FooterSection(),
+              ],
             ),
           ),
         ),
@@ -125,7 +158,7 @@ class _TabBar extends StatelessWidget {
           onTap: () => onSelect(AISignalsTab.aiSignals),
         ),
         _TabChip(
-          label: 'Performance', // Keep as English technical term or add to loc if needed
+          label: AppLocalizations.of(context)!.performance,
           isActive: selected == AISignalsTab.performance,
           onTap: () => onSelect(AISignalsTab.performance),
         ),
@@ -183,13 +216,26 @@ class _TabChip extends StatelessWidget {
 
 class _FiltersRow extends StatelessWidget {
   final AssetFilter assetFilter;
+  final String selectedPair;
+  final String selectedTimezone;
   final DateTimeRange? dateRange;
+  final List<String> availablePairs;
+  final List<String> availableTimezones;
   final ValueChanged<AssetFilter> onAssetChanged;
+  final ValueChanged<String> onPairChanged;
+  final ValueChanged<String> onTimezoneChanged;
   final ValueChanged<DateTimeRange?> onDateRangeChanged;
+
   const _FiltersRow({
     required this.assetFilter,
+    required this.selectedPair,
+    required this.selectedTimezone,
     required this.dateRange,
+    required this.availablePairs,
+    required this.availableTimezones,
     required this.onAssetChanged,
+    required this.onPairChanged,
+    required this.onTimezoneChanged,
     required this.onDateRangeChanged,
   });
 
@@ -204,25 +250,38 @@ class _FiltersRow extends StatelessWidget {
           value: assetFilter,
           onChanged: onAssetChanged,
         ),
-        _FilterDropdown(
+        _PairDropdown(
           label: AppLocalizations.of(context)!.currencyPairs,
-          value: AppLocalizations.of(context)!.allCurrencyPairs,
+          value: selectedPair,
+          items: availablePairs,
+          onChanged: onPairChanged,
         ),
         _DateRangePicker(
           dateRange: dateRange,
           onChanged: onDateRangeChanged,
         ),
-        const _TimezoneDropdown(),
+        _TimezoneDropdown(
+          value: selectedTimezone,
+          items: availableTimezones,
+          onChanged: onTimezoneChanged,
+        ),
       ],
     );
   }
 }
 
-class _FilterDropdown extends StatelessWidget {
+class _PairDropdown extends StatelessWidget {
   final String label;
   final String value;
-  final double? width;
-  const _FilterDropdown({required this.label, required this.value, this.width});
+  final List<String> items;
+  final ValueChanged<String> onChanged;
+
+  const _PairDropdown({
+    required this.label,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +294,7 @@ class _FilterDropdown extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Container(
-          width: width ?? 260,
+          width: 260,
           height: 44,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
@@ -243,16 +302,27 @@ class _FilterDropdown extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.white12),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  value,
-                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
-                ),
-              ),
-              const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
-            ],
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: items.contains(value) ? value : items.first,
+              dropdownColor: const Color(0xFF0D0D0D),
+              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
+              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+              isExpanded: true,
+              items: items.map((pair) {
+                // Localize "All Currency pairs" display
+                final display = pair == 'All Currency pairs' 
+                    ? AppLocalizations.of(context)!.allCurrencyPairs 
+                    : pair;
+                return DropdownMenuItem<String>(
+                  value: pair,
+                  child: Text(display, overflow: TextOverflow.ellipsis),
+                );
+              }).toList(),
+              onChanged: (v) {
+                if (v != null) onChanged(v);
+              },
+            ),
           ),
         ),
       ],
@@ -261,7 +331,15 @@ class _FilterDropdown extends StatelessWidget {
 }
 
 class _TimezoneDropdown extends StatelessWidget {
-  const _TimezoneDropdown();
+  final String value;
+  final List<String> items;
+  final ValueChanged<String> onChanged;
+
+  const _TimezoneDropdown({
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -269,12 +347,12 @@ class _TimezoneDropdown extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppLocalizations.of(context)!.dateRange,
-          style: AppTextStyles.caption.copyWith(color: Colors.transparent, fontSize: 13),
+          AppLocalizations.of(context)!.timeGmt7, // Reusing key or create 'Timezone'
+          style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
         ),
         const SizedBox(height: 8),
         Container(
-          width: 90,
+          width: 110,
           height: 44,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
@@ -282,15 +360,24 @@ class _TimezoneDropdown extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.white12),
           ),
-          child: Row(
-            children: [
-              Text(
-                'GMT',
-                style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
-              ),
-              const Spacer(),
-              const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
-            ],
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: items.contains(value) ? value : items.first,
+              dropdownColor: const Color(0xFF0D0D0D),
+              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
+              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+              isExpanded: true,
+              menuMaxHeight: 300,
+              items: items.map((tz) {
+                return DropdownMenuItem<String>(
+                  value: tz,
+                  child: Text(tz),
+                );
+              }).toList(),
+              onChanged: (v) {
+                if (v != null) onChanged(v);
+              },
+            ),
           ),
         ),
       ],
@@ -345,21 +432,88 @@ class _AssetDropdown extends StatelessWidget {
   }
 }
 
-class _DateRangePicker extends StatelessWidget {
+class _DateRangePicker extends StatefulWidget {
   final DateTimeRange? dateRange;
   final ValueChanged<DateTimeRange?> onChanged;
   const _DateRangePicker({required this.dateRange, required this.onChanged});
 
   @override
+  State<_DateRangePicker> createState() => _DateRangePickerState();
+}
+
+class _DateRangePickerState extends State<_DateRangePicker> {
+  final GlobalKey _key = GlobalKey();
+  OverlayEntry? _overlayEntry;
+  bool _isOpen = false;
+
+  void _toggleDropdown() {
+    if (_isOpen) {
+      _closeDropdown();
+    } else {
+      _openDropdown();
+    }
+  }
+
+  void _openDropdown() {
+    final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final offset = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+    final overlay = Overlay.of(context);
+    
+    // Calculate position: below the input field
+    final top = offset.dy + size.height + 8; // 8px spacing
+    final left = offset.dx;
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) {
+        return Stack(
+          children: [
+            GestureDetector(
+              onTap: _closeDropdown,
+              behavior: HitTestBehavior.translucent,
+              child: Container(color: Colors.transparent),
+            ),
+            Positioned(
+              top: top,
+              left: left,
+              width: 320,
+              child: _DateRangeDropdownContent(
+                initialRange: widget.dateRange,
+                onRangeSelected: (range) {
+                  widget.onChanged(range);
+                  _closeDropdown();
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    overlay.insert(_overlayEntry!);
+    setState(() => _isOpen = true);
+  }
+
+  void _closeDropdown() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    setState(() => _isOpen = false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     String label;
-    if (dateRange == null) {
+    if (widget.dateRange == null) {
       label = AppLocalizations.of(context)!.selectDateRange;
     } else {
       label =
-          '${DateFormat('dd/MM/yyyy').format(dateRange!.start)} - ${DateFormat('dd/MM/yyyy').format(dateRange!.end)}';
+          '${DateFormat('dd/MM/yyyy').format(widget.dateRange!.start)} - ${DateFormat('dd/MM/yyyy').format(widget.dateRange!.end)}';
     }
+    
     return Column(
+      key: _key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -368,27 +522,7 @@ class _DateRangePicker extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         InkWell(
-          onTap: () async {
-            final picked = await showDateRangePicker(
-              context: context,
-              firstDate: DateTime(2022),
-              lastDate: DateTime(2100),
-              initialDateRange: dateRange,
-              builder: (context, child) {
-                return Theme(
-                  data: Theme.of(context).copyWith(
-                    colorScheme: const ColorScheme.dark(
-                      primary: Color(0xFF00BFFF),
-                      surface: Color(0xFF0D0D0D),
-                      onSurface: Colors.white,
-                    ),
-                  ),
-                  child: child ?? const SizedBox.shrink(),
-                );
-              },
-            );
-            onChanged(picked);
-          },
+          onTap: _toggleDropdown,
           child: Container(
             width: 260,
             height: 44,
@@ -396,30 +530,136 @@ class _DateRangePicker extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFF0D0D0D),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.white12),
+              border: Border.all(color: _isOpen ? const Color(0xFF00BFFF) : Colors.white12),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
-                  ),
-                ),
-                const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
-              ],
-            ),
-          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  label,
+                                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+                                ),
+                              ),
+                                                if (widget.dateRange != null)
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(right: 8),
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        // Note: In some cases InkWell inside InkWell needs careful handling.
+                                                        // But here, widget.onChanged(null) will trigger a parent rebuild.
+                                                        widget.onChanged(null);
+                                                      },
+                                                      child: const Icon(Icons.close, color: Colors.white70, size: 16),
+                                                    ),
+                                                  ),                              Icon(
+                                Icons.calendar_today, 
+                                color: _isOpen ? const Color(0xFF00BFFF) : Colors.white70, 
+                                size: 16
+                              ),
+                            ],
+                          ),          ),
         ),
       ],
     );
   }
 }
+
+class _DateRangeDropdownContent extends StatefulWidget {
+  final DateTimeRange? initialRange;
+  final ValueChanged<DateTimeRange> onRangeSelected;
+
+  const _DateRangeDropdownContent({
+    required this.initialRange,
+    required this.onRangeSelected,
+  });
+
+  @override
+  State<_DateRangeDropdownContent> createState() => _DateRangeDropdownContentState();
+}
+
+class _DateRangeDropdownContentState extends State<_DateRangeDropdownContent> {
+  DateTime? _tempStart;
+  DateTime? _tempEnd;
+
+  @override
+  void initState() {
+    super.initState();
+    _tempStart = widget.initialRange?.start;
+    _tempEnd = widget.initialRange?.end;
+  }
+
+  void _handleDateChanged(DateTime date) {
+    setState(() {
+      if (_tempStart == null || (_tempStart != null && _tempEnd != null)) {
+        _tempStart = date;
+        _tempEnd = null;
+      } else if (_tempStart != null && date.isBefore(_tempStart!)) {
+        _tempStart = date;
+      } else {
+        _tempEnd = date;
+        // Delay callback slightly to allow UI update and prevent conflicts
+        Future.microtask(() {
+          widget.onRangeSelected(DateTimeRange(start: _tempStart!, end: _tempEnd!));
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 8,
+      color: const Color(0xFF0D0D0D),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Colors.white12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF00BFFF),
+              onPrimary: Colors.white,
+              surface: Color(0xFF1A1A1A),
+              onSurface: Colors.white,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _tempStart == null 
+                    ? 'Select Start Date' 
+                    : (_tempEnd == null ? 'Select End Date' : 'Selected Range'),
+                style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 300,
+                child: CalendarDatePicker(
+                  initialDate: _tempStart ?? DateTime.now(),
+                  firstDate: DateTime(2022),
+                  lastDate: DateTime(2100),
+                  onDateChanged: _handleDateChanged,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 class _SignalGridLive extends StatefulWidget {
   final AssetFilter assetFilter;
+  final String selectedPair;
+  final String selectedTimezone;
   final DateTimeRange? dateRange;
   const _SignalGridLive({
     required this.assetFilter,
+    required this.selectedPair,
+    required this.selectedTimezone,
     required this.dateRange,
   });
 
@@ -429,18 +669,25 @@ class _SignalGridLive extends StatefulWidget {
 
 class _SignalGridLiveState extends State<_SignalGridLive> {
   final SignalService _signalService = SignalService();
-  static const int _pageSize = 5;
+  static const int _pageSizeAll = 5;
+  static const int _pageSizeSpecific = 15;
+  
   int _goldPage = 0;
   int _cryptoPage = 0;
   int _forexPage = 0;
+  int _specificPage = 0;
 
   @override
   void didUpdateWidget(covariant _SignalGridLive oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.assetFilter != widget.assetFilter || oldWidget.dateRange != widget.dateRange) {
+    if (oldWidget.assetFilter != widget.assetFilter || 
+        oldWidget.dateRange != widget.dateRange ||
+        oldWidget.selectedPair != widget.selectedPair ||
+        oldWidget.selectedTimezone != widget.selectedTimezone) {
       _goldPage = 0;
       _cryptoPage = 0;
       _forexPage = 0;
+      _specificPage = 0;
     }
   }
 
@@ -448,87 +695,13 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       final bool stacked = constraints.maxWidth < 900;
-      final double columnWidth = stacked ? constraints.maxWidth : (constraints.maxWidth - 32) / 3;
+      final double columnWidthAll = stacked ? constraints.maxWidth : (constraints.maxWidth - 32) / 3;
+      final double itemWidthSpecific = stacked ? constraints.maxWidth : (constraints.maxWidth - 32) / 3;
+
       final user = FirebaseAuth.instance.currentUser;
+      
       if (user == null) {
-        final now = Timestamp.now();
-        final sampleSignals = [
-          Signal(
-            id: 'sample1',
-            symbol: 'XAU/USD',
-            type: 'buy',
-            status: 'running',
-            entryPrice: 0,
-            stopLoss: 0,
-            takeProfits: const [],
-            createdAt: now,
-            matchStatus: 'NOT MATCHED',
-            isMatched: false,
-          ),
-          Signal(
-            id: 'sample2',
-            symbol: 'XAU/USD',
-            type: 'sell',
-            status: 'running',
-            entryPrice: 0,
-            stopLoss: 0,
-            takeProfits: const [],
-            createdAt: now,
-            matchStatus: 'NOT MATCHED',
-            isMatched: false,
-          ),
-          Signal(
-            id: 'sample3',
-            symbol: 'XAU/USD',
-            type: 'buy',
-            status: 'running',
-            entryPrice: 0,
-            stopLoss: 0,
-            takeProfits: const [],
-            createdAt: now,
-            matchStatus: 'NOT MATCHED',
-            isMatched: false,
-          ),
-        ];
-        final goldPaged = _paginate(sampleSignals, _goldPage);
-        final hasPrevGold = _goldPage > 0;
-        final hasNextGold = sampleSignals.length > (_goldPage + 1) * _pageSize;
-        final sampleColumns = [
-          SizedBox(
-            width: columnWidth,
-            child: _SignalColumnLive(
-              title: 'GOLD',
-              icon: Icons.emoji_events_outlined,
-              signals: goldPaged,
-              page: _goldPage,
-              onPageChanged: (p) => setState(() => _goldPage = p),
-              hasPrev: hasPrevGold,
-              hasNext: hasNextGold,
-            ),
-          ),
-          const SizedBox(width: 16, height: 16),
-          SizedBox(
-            width: columnWidth,
-            child: const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined),
-          ),
-          const SizedBox(width: 16, height: 16),
-          SizedBox(
-            width: columnWidth,
-            child: const _EmptyColumn(title: 'FOREX', icon: Icons.verified),
-          ),
-        ];
-
-        if (stacked) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: sampleColumns,
-          );
-        }
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: sampleColumns,
-        );
+        return _buildSampleData(columnWidthAll, stacked);
       }
 
       return StreamBuilder<List<Signal>>(
@@ -545,103 +718,240 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
               ),
             );
           }
-          final filtered = _filteredSignals(snapshot.data ?? []);
-          final goldAll = filtered.where(_isGold).toList();
-          final cryptoAll = filtered.where(_isCrypto).toList();
-          final forexAll = filtered.where(_isForex).toList();
+          
+          final allSignals = _filteredSignals(snapshot.data ?? []);
 
-          final goldPage = _normalizePage(_goldPage, goldAll.length);
-          final cryptoPage = _normalizePage(_cryptoPage, cryptoAll.length);
-          final forexPage = _normalizePage(_forexPage, forexAll.length);
-
-          final goldPaged = _paginate(goldAll, goldPage);
-          final cryptoPaged = _paginate(cryptoAll, cryptoPage);
-          final forexPaged = _paginate(forexAll, forexPage);
-
-          final hasPrevGold = goldPage > 0;
-          final hasPrevCrypto = cryptoPage > 0;
-          final hasPrevForex = forexPage > 0;
-          final hasNextGold = goldAll.length > (goldPage + 1) * _pageSize;
-          final hasNextCrypto = cryptoAll.length > (cryptoPage + 1) * _pageSize;
-          final hasNextForex = forexAll.length > (forexPage + 1) * _pageSize;
-
-          final liveColumns = [
-            SizedBox(
-              width: columnWidth,
-              child: _SignalColumnLive(
-                title: 'GOLD',
-                icon: Icons.emoji_events_outlined,
-                signals: goldPaged,
-                page: goldPage,
-                onPageChanged: (p) => setState(() => _goldPage = p),
-                hasPrev: hasPrevGold,
-                hasNext: hasNextGold,
-              ),
-            ),
-            const SizedBox(width: 16, height: 16),
-            SizedBox(
-              width: columnWidth,
-              child: cryptoPaged.isEmpty
-                  ? const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined)
-                  : _SignalColumnLive(
-                      title: 'CRYPTO',
-                      icon: Icons.workspace_premium_outlined,
-                      signals: cryptoPaged,
-                      page: cryptoPage,
-                      onPageChanged: (p) => setState(() => _cryptoPage = p),
-                      hasPrev: hasPrevCrypto,
-                      hasNext: hasNextCrypto,
-                    ),
-            ),
-            const SizedBox(width: 16, height: 16),
-            SizedBox(
-              width: columnWidth,
-              child: forexPaged.isEmpty
-                  ? const _EmptyColumn(title: 'FOREX', icon: Icons.verified)
-                  : _SignalColumnLive(
-                      title: 'FOREX',
-                      icon: Icons.verified,
-                      signals: forexPaged,
-                      page: forexPage,
-                      onPageChanged: (p) => setState(() => _forexPage = p),
-                      hasPrev: hasPrevForex,
-                      hasNext: hasNextForex,
-                    ),
-            ),
-          ];
-
-          if (stacked) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: liveColumns,
-            );
+          if (widget.assetFilter != AssetFilter.all) {
+             return _buildSpecificAssetView(allSignals, itemWidthSpecific, stacked);
           }
 
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: liveColumns,
-          );
+          return _buildAllAssetsView(allSignals, columnWidthAll, stacked);
         },
       );
     });
   }
 
-  List<Signal> _paginate(List<Signal> list, int page) {
-    final start = page * _pageSize;
-    return list.skip(start).take(_pageSize).toList();
+  Widget _buildSpecificAssetView(List<Signal> signals, double itemWidth, bool stacked) {
+    if (signals.isEmpty) {
+      return Center(
+        child: Container(
+          width: double.infinity,
+          height: 200,
+          constraints: const BoxConstraints(maxWidth: 600),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F0F0F),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.search_off, size: 48, color: Colors.white24),
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context)!.noSignalsAvailable,
+                style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final totalItems = signals.length;
+    final totalPages = (totalItems / _pageSizeSpecific).ceil();
+    final currentPage = _specificPage.clamp(0, totalPages > 0 ? totalPages - 1 : 0);
+    final pagedSignals = signals.skip(currentPage * _pageSizeSpecific).take(_pageSizeSpecific).toList();
+
+    return Column(
+      children: [
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: pagedSignals.map((signal) {
+            return SizedBox(
+              width: itemWidth,
+              child: _SignalWebCard(signal: signal, timeZone: widget.selectedTimezone),
+            );
+          }).toList(),
+        ),
+        if (totalPages > 1) ...[
+          const SizedBox(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _NavButton(
+                enabled: currentPage > 0,
+                icon: Icons.arrow_back_ios_new,
+                onTap: () => setState(() => _specificPage = currentPage - 1),
+              ),
+              const SizedBox(width: 24),
+              Text(
+                '${AppLocalizations.of(context)!.page} ${currentPage + 1} / $totalPages',
+                style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 14),
+              ),
+              const SizedBox(width: 24),
+              _NavButton(
+                enabled: currentPage < totalPages - 1,
+                icon: Icons.arrow_forward_ios,
+                onTap: () => setState(() => _specificPage = currentPage + 1),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
   }
 
-  int _normalizePage(int page, int totalItems) {
-    if (totalItems <= 0) return 0;
-    final totalPages = (totalItems / _pageSize).ceil();
-    return page.clamp(0, totalPages - 1).toInt();
+  Widget _buildAllAssetsView(List<Signal> signals, double columnWidth, bool stacked) {
+    final goldAll = signals.where(_isGold).toList();
+    final cryptoAll = signals.where(_isCrypto).toList();
+    final forexAll = signals.where(_isForex).toList();
+
+    final goldPage = _normalizePage(_goldPage, goldAll.length, _pageSizeAll);
+    final cryptoPage = _normalizePage(_cryptoPage, cryptoAll.length, _pageSizeAll);
+    final forexPage = _normalizePage(_forexPage, forexAll.length, _pageSizeAll);
+
+    final goldPaged = _paginate(goldAll, goldPage, _pageSizeAll);
+    final cryptoPaged = _paginate(cryptoAll, cryptoPage, _pageSizeAll);
+    final forexPaged = _paginate(forexAll, forexPage, _pageSizeAll);
+
+    final hasPrevGold = goldPage > 0;
+    final hasPrevCrypto = cryptoPage > 0;
+    final hasPrevForex = forexPage > 0;
+    final hasNextGold = goldAll.length > (goldPage + 1) * _pageSizeAll;
+    final hasNextCrypto = cryptoAll.length > (cryptoPage + 1) * _pageSizeAll;
+    final hasNextForex = forexAll.length > (forexPage + 1) * _pageSizeAll;
+
+    final liveColumns = [
+      SizedBox(
+        width: columnWidth,
+        child: _SignalColumnLive(
+          title: 'GOLD',
+          icon: Icons.emoji_events_outlined,
+          signals: goldPaged,
+          page: goldPage,
+          onPageChanged: (p) => setState(() => _goldPage = p),
+          hasPrev: hasPrevGold,
+          hasNext: hasNextGold,
+          timezone: widget.selectedTimezone,
+        ),
+      ),
+      if (!stacked) const SizedBox(width: 16),
+      if (stacked) const SizedBox(height: 16),
+      SizedBox(
+        width: columnWidth,
+        child: cryptoPaged.isEmpty
+            ? const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined)
+            : _SignalColumnLive(
+                title: 'CRYPTO',
+                icon: Icons.workspace_premium_outlined,
+                signals: cryptoPaged,
+                page: cryptoPage,
+                onPageChanged: (p) => setState(() => _cryptoPage = p),
+                hasPrev: hasPrevCrypto,
+                hasNext: hasNextCrypto,
+                timezone: widget.selectedTimezone,
+              ),
+      ),
+      if (!stacked) const SizedBox(width: 16),
+      if (stacked) const SizedBox(height: 16),
+      SizedBox(
+        width: columnWidth,
+        child: forexPaged.isEmpty
+            ? const _EmptyColumn(title: 'FOREX', icon: Icons.verified)
+            : _SignalColumnLive(
+                title: 'FOREX',
+                icon: Icons.verified,
+                signals: forexPaged,
+                page: forexPage,
+                onPageChanged: (p) => setState(() => _forexPage = p),
+                hasPrev: hasPrevForex,
+                hasNext: hasNextForex,
+                timezone: widget.selectedTimezone,
+              ),
+      ),
+    ];
+
+    if (stacked) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: liveColumns,
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: liveColumns,
+    );
+  }
+
+  Widget _buildSampleData(double columnWidth, bool stacked) {
+    final now = Timestamp.now();
+    final sampleSignals = [
+      Signal(id: 's1', symbol: 'XAU/USD', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
+      Signal(id: 's2', symbol: 'XAU/USD', type: 'sell', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
+      Signal(id: 's3', symbol: 'XAU/USD', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
+    ];
+    final goldPaged = _paginate(sampleSignals, _goldPage, _pageSizeAll);
+    final hasPrevGold = _goldPage > 0;
+    final hasNextGold = sampleSignals.length > (_goldPage + 1) * _pageSizeAll;
+    
+    final sampleColumns = [
+      SizedBox(
+        width: columnWidth,
+        child: _SignalColumnLive(
+          title: 'GOLD',
+          icon: Icons.emoji_events_outlined,
+          signals: goldPaged,
+          page: _goldPage,
+          onPageChanged: (p) => setState(() => _goldPage = p),
+          hasPrev: hasPrevGold,
+          hasNext: hasNextGold,
+          timezone: widget.selectedTimezone,
+          isSample: true,
+        ),
+      ),
+      if (!stacked) const SizedBox(width: 16),
+      if (stacked) const SizedBox(height: 16),
+      SizedBox(
+        width: columnWidth,
+        child: const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined),
+      ),
+      if (!stacked) const SizedBox(width: 16),
+      if (stacked) const SizedBox(height: 16),
+      SizedBox(
+        width: columnWidth,
+        child: const _EmptyColumn(title: 'FOREX', icon: Icons.verified),
+      ),
+    ];
+
+    if (stacked) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: sampleColumns);
+    }
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: sampleColumns);
+  }
+
+  List<Signal> _paginate(List<Signal> list, int page, int pageSize) {
+    final start = page * pageSize;
+    return list.skip(start).take(pageSize).toList();
+  }
+
+  int _normalizePage(int page, int totalItems, int pageSize) {
+    if (totalItems <= 0 || pageSize <= 0) return 0;
+    final totalPages = (totalItems / pageSize).ceil();
+    if (totalPages <= 0) return 0;
+    final maxPage = totalPages - 1;
+    if (page > maxPage) return maxPage;
+    if (page < 0) return 0;
+    return page;
   }
 
   bool _isGold(Signal s) => s.symbol.toUpperCase().contains('XAU');
-  bool _isCrypto(Signal s) => s.symbol.toUpperCase().contains('BTC') || s.symbol.toUpperCase().contains('CRYPTO');
+  bool _isCrypto(Signal s) => s.symbol.toUpperCase().contains('BTC') || s.symbol.toUpperCase().contains('CRYPTO') || s.symbol.toUpperCase().contains('ETH');
   bool _isForex(Signal s) {
     final sym = s.symbol.toUpperCase();
-    return sym.contains('/') && !sym.contains('XAU') && !sym.contains('BTC');
+    return sym.contains('/') && !sym.contains('XAU') && !sym.contains('BTC') && !sym.contains('ETH');
   }
 
   List<Signal> _filteredSignals(List<Signal> signals) {
@@ -660,9 +970,13 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
         break;
     }
 
+    if (widget.selectedPair != 'All Currency pairs') {
+      filtered = filtered.where((s) => s.symbol == widget.selectedPair);
+    }
+
     if (widget.dateRange != null) {
       final start = widget.dateRange!.start;
-      final end = widget.dateRange!.end.add(const Duration(days: 1)); // inclusive
+      final end = widget.dateRange!.end.add(const Duration(days: 1));
       filtered = filtered.where((s) {
         if (s.createdAt is! Timestamp) return true;
         final dt = (s.createdAt as Timestamp).toDate();
@@ -680,7 +994,10 @@ class _SignalColumnLive extends StatelessWidget {
   final int page;
   final bool hasPrev;
   final bool hasNext;
+  final String timezone;
   final ValueChanged<int> onPageChanged;
+  final bool isSample;
+
   const _SignalColumnLive({
     required this.title,
     required this.icon,
@@ -688,7 +1005,9 @@ class _SignalColumnLive extends StatelessWidget {
     required this.page,
     required this.hasPrev,
     required this.hasNext,
+    required this.timezone,
     required this.onPageChanged,
+    this.isSample = false,
   });
 
   @override
@@ -735,7 +1054,9 @@ class _SignalColumnLive extends StatelessWidget {
         else
           ...signals.map((s) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: _SignalWebCard(signal: s),
+                child: isSample 
+                  ? _SampleSignalWebCard(signal: s, timeZone: timezone)
+                  : _SignalWebCard(signal: s, timeZone: timezone),
               )),
         if (signals.isNotEmpty) ...[
           const SizedBox(height: 4),
@@ -760,6 +1081,117 @@ class _SignalColumnLive extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _SampleSignalWebCard extends StatelessWidget {
+  final Signal signal;
+  final String timeZone;
+  const _SampleSignalWebCard({required this.signal, required this.timeZone});
+
+  @override
+  Widget build(BuildContext context) {
+    DateTime date = signal.createdAt.toDate();
+    if (timeZone.isNotEmpty) {
+       int offset = 0;
+        try {
+          final sign = timeZone.contains('+') ? 1 : -1;
+          final parts = timeZone.replaceAll('GMT', '').split(RegExp(r'[+-]'));
+          if (parts.isNotEmpty && parts.last.isNotEmpty) {
+            offset = int.parse(parts.last) * sign;
+          }
+        } catch (e) {
+          offset = 0; 
+        }
+        date = date.toUtc().add(Duration(hours: offset));
+    }
+
+    final isBuy = signal.type.toLowerCase() == 'buy';
+    final actionColor = isBuy ? const Color(0xFF3DCC5C) : const Color(0xFFE54747);
+    final typeText = isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell;
+    
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushNamed('/signin'),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 150),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F0F0F),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white12),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _FlagStack(symbol: signal.symbol),
+                const SizedBox(width: 8),
+                Text(
+                  signal.symbol,
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1D1D1D),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: Text(
+                    signal.status.toUpperCase(),
+                    style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text('${AppLocalizations.of(context)!.created}:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
+            const SizedBox(height: 4),
+            Text(
+              DateFormat('dd/MM/yyyy HH:mm').format(date),
+              style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isBuy ? Icons.north_east : Icons.south_east,
+                    size: 16,
+                    color: actionColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    typeText,
+                    style: AppTextStyles.body.copyWith(
+                      color: actionColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.detail,
+                  style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 13),
+                ),
+                const Spacer(),
+                const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 14),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -841,7 +1273,8 @@ class _EmptyColumn extends StatelessWidget {
 
 class _SignalWebCard extends StatelessWidget {
   final Signal signal;
-  const _SignalWebCard({required this.signal});
+  final String timeZone;
+  const _SignalWebCard({required this.signal, required this.timeZone});
 
   Future<bool> _consumeFreeToken(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -911,7 +1344,7 @@ class _SignalWebCard extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              Navigator.of(context).pushNamed('/pricing');
+              // Navigation to pricing tab if needed or scroll
             },
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E97FF)),
             child: Text(AppLocalizations.of(context)!.upgrade),
@@ -961,16 +1394,23 @@ class _SignalWebCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DateTime date = signal.createdAt.toDate();
+    if (timeZone.isNotEmpty) {
+       int offset = 0;
+        try {
+          final sign = timeZone.contains('+') ? 1 : -1;
+          final parts = timeZone.replaceAll('GMT', '').split(RegExp(r'[+-]'));
+          if (parts.isNotEmpty && parts.last.isNotEmpty) {
+            offset = int.parse(parts.last) * sign;
+          }
+        } catch (e) {
+          offset = 0; 
+        }
+        date = date.toUtc().add(Duration(hours: offset));
+    }
+
     final isBuy = signal.type.toLowerCase() == 'buy';
     final actionColor = isBuy ? const Color(0xFF3DCC5C) : const Color(0xFFE54747);
-    final createdAt = signal.createdAt;
-    String createdText = '';
-    if (createdAt is Timestamp) {
-      final dt = createdAt.toDate().toLocal().add(const Duration(hours: 0)); // assume local is GMT+7; adjust if needed
-      createdText = DateFormat('dd/MM/yyyy HH:mm').format(dt);
-    }
-    
-    // Localization for Buy/Sell
     final typeText = isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell;
     
     return GestureDetector(
@@ -1004,7 +1444,7 @@ class _SignalWebCard extends StatelessWidget {
                     border: Border.all(color: Colors.white12),
                   ),
                   child: Text(
-                    signal.status.toUpperCase(), // Consider localizing status too if fixed set
+                    signal.status.toUpperCase(),
                     style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -1014,7 +1454,7 @@ class _SignalWebCard extends StatelessWidget {
             Text('${AppLocalizations.of(context)!.created}:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
             const SizedBox(height: 4),
             Text(
-              createdText,
+              DateFormat('dd/MM/yyyy HH:mm').format(date),
               style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
             ),
             const SizedBox(height: 12),
@@ -1357,7 +1797,17 @@ class _ComingSoonSection extends StatelessWidget {
 }
 
 class _HistorySection extends StatefulWidget {
-  const _HistorySection();
+  final AssetFilter assetFilter;
+  final String selectedPair;
+  final String selectedTimezone;
+  final DateTimeRange? dateRange;
+
+  const _HistorySection({
+    required this.assetFilter,
+    required this.selectedPair,
+    required this.selectedTimezone,
+    required this.dateRange,
+  });
 
   @override
   State<_HistorySection> createState() => _HistorySectionState();
@@ -1366,6 +1816,17 @@ class _HistorySection extends StatefulWidget {
 class _HistorySectionState extends State<_HistorySection> {
   static const int _pageSize = 10;
   int _page = 0;
+
+  @override
+  void didUpdateWidget(covariant _HistorySection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.assetFilter != widget.assetFilter || 
+        oldWidget.selectedPair != widget.selectedPair ||
+        oldWidget.dateRange != widget.dateRange ||
+        oldWidget.selectedTimezone != widget.selectedTimezone) {
+      _page = 0;
+    }
+  }
 
   List<HistoryRow> _sampleRows() {
     return List.generate(8, (index) {
@@ -1382,6 +1843,45 @@ class _HistorySectionState extends State<_HistorySection> {
         tp2: '3995',
       );
     });
+  }
+
+  bool _isGold(Signal s) => s.symbol.toUpperCase().contains('XAU');
+  bool _isCrypto(Signal s) => s.symbol.toUpperCase().contains('BTC') || s.symbol.toUpperCase().contains('CRYPTO') || s.symbol.toUpperCase().contains('ETH');
+  bool _isForex(Signal s) {
+    final sym = s.symbol.toUpperCase();
+    return sym.contains('/') && !sym.contains('XAU') && !sym.contains('BTC') && !sym.contains('ETH');
+  }
+
+  List<Signal> _filteredSignals(List<Signal> signals) {
+    Iterable<Signal> filtered = signals;
+    switch (widget.assetFilter) {
+      case AssetFilter.gold:
+        filtered = filtered.where(_isGold);
+        break;
+      case AssetFilter.crypto:
+        filtered = filtered.where(_isCrypto);
+        break;
+      case AssetFilter.forex:
+        filtered = filtered.where(_isForex);
+        break;
+      case AssetFilter.all:
+        break;
+    }
+
+    if (widget.selectedPair != 'All Currency pairs') {
+      filtered = filtered.where((s) => s.symbol == widget.selectedPair);
+    }
+
+    if (widget.dateRange != null) {
+      final start = widget.dateRange!.start;
+      final end = widget.dateRange!.end.add(const Duration(days: 1));
+      filtered = filtered.where((s) {
+        if (s.createdAt is! Timestamp) return true;
+        final dt = (s.createdAt as Timestamp).toDate();
+        return dt.isAfter(start) && dt.isBefore(end);
+      });
+    }
+    return filtered.toList();
   }
 
   @override
@@ -1415,7 +1915,9 @@ class _HistorySectionState extends State<_HistorySection> {
               if (hasError) {
                 return Text('${AppLocalizations.of(context)!.errorLoadingHistory}: ${snapshot.error}', style: AppTextStyles.body.copyWith(color: Colors.white));
               }
-              rows.addAll(signals.map(_mapSignalToRow));
+              
+              final filtered = _filteredSignals(signals);
+              rows.addAll(filtered.map((s) => _mapSignalToRow(s, widget.selectedTimezone)));
             }
             if (rows.isEmpty) {
               return Padding(
@@ -1457,6 +1959,8 @@ class _HistorySectionState extends State<_HistorySection> {
   }
 }
 
+// ... _HistoryTable and _HistoryRow classes remain unchanged ...
+
 class _HistoryTable extends StatelessWidget {
   final List<HistoryRow> rows;
   const _HistoryTable({required this.rows});
@@ -1465,7 +1969,7 @@ class _HistoryTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final headers = [
       AppLocalizations.of(context)!.date,
-      AppLocalizations.of(context)!.timeGmt7,
+      AppLocalizations.of(context)!.timeGmt7, // Note: You might want to update this label dynamically if needed
       AppLocalizations.of(context)!.asset,
       AppLocalizations.of(context)!.orders,
       AppLocalizations.of(context)!.status,
@@ -1668,8 +2172,23 @@ class HistoryRow {
   });
 }
 
-HistoryRow _mapSignalToRow(Signal s) {
-  final created = s.createdAt is Timestamp ? (s.createdAt as Timestamp).toDate() : DateTime.now();
+HistoryRow _mapSignalToRow(Signal s, String timeZone) {
+  DateTime created = s.createdAt is Timestamp ? (s.createdAt as Timestamp).toDate() : DateTime.now();
+  
+  if (timeZone.isNotEmpty) {
+      int offset = 0;
+      try {
+        final sign = timeZone.contains('+') ? 1 : -1;
+        final parts = timeZone.replaceAll('GMT', '').split(RegExp(r'[+-]'));
+        if (parts.isNotEmpty && parts.last.isNotEmpty) {
+          offset = int.parse(parts.last) * sign;
+        }
+      } catch (e) {
+        offset = 0; 
+      }
+      created = created.toUtc().add(Duration(hours: offset));
+  }
+
   final dateStr = DateFormat('dd/MM/yyyy').format(created);
   final timeStr = DateFormat('HH:mm').format(created);
   final parts = s.symbol.split('/');
