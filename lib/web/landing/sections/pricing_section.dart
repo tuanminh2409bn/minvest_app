@@ -360,56 +360,58 @@ class _PricingCardContent extends StatelessWidget {
     return _AnimatedBorderCard(
       child: Container(
         width: double.infinity,
-        constraints: const BoxConstraints(minHeight: 400),
+        constraints: const BoxConstraints(minHeight: 450),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.workspace_premium, color: Colors.white, size: 22),
-                const SizedBox(width: 8),
-                Text(plan.title, style: AppTextStyles.h3.copyWith(color: Colors.white)),
-                const Spacer(),
-                _saveBadge(plan.badge),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(plan.price, style: AppTextStyles.h1.copyWith(fontSize: 34, color: const Color(0xFF00B2FF))),
-            if (plan.oldPrice != null && plan.oldPrice!.isNotEmpty)
-              Text(
-                plan.oldPrice!,
-                style: AppTextStyles.body.copyWith(
-                  color: Colors.white54,
-                  decoration: TextDecoration.lineThrough,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.workspace_premium, color: Colors.white, size: 22),
+                  const SizedBox(width: 8),
+                  Text(plan.title, style: AppTextStyles.h3.copyWith(color: Colors.white)),
+                  const Spacer(),
+                  _saveBadge(plan.badge),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(plan.price, style: AppTextStyles.h1.copyWith(fontSize: 34, color: const Color(0xFF00B2FF))),
+              if (plan.oldPrice != null && plan.oldPrice!.isNotEmpty)
+                Text(
+                  plan.oldPrice!,
+                  style: AppTextStyles.body.copyWith(
+                    color: Colors.white54,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.md),
+              Text(appLocalizations.whatsIncluded, style: AppTextStyles.body.copyWith(color: Colors.white70)),
+              const SizedBox(height: AppSpacing.sm),
+              ...features.map((f) => _feature(f)).toList(),
+              const SizedBox(height: AppSpacing.lg),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/signup');
+                  },
+                  child: Text(appLocalizations.chooseThisPlan),
                 ),
               ),
-            const SizedBox(height: AppSpacing.md),
-            Text(appLocalizations.whatsIncluded, style: AppTextStyles.body.copyWith(color: Colors.white70)),
-            const SizedBox(height: AppSpacing.sm),
-            ...features.map((f) => _feature(f)).toList(),
-            const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/signup');
-                },
-                child: Text(appLocalizations.chooseThisPlan),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

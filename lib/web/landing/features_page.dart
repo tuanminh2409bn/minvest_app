@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:minvest_forex_app/web/theme/colors.dart';
 import 'package:minvest_forex_app/web/theme/spacing.dart';
@@ -286,12 +287,20 @@ class _InteractiveSignalCardState extends State<_InteractiveSignalCard> with Sin
 
     return MouseRegion(
       onEnter: (_) {
-        setState(() => _isHovered = true);
-        _controller.forward();
+        Future.delayed(Duration.zero, () {
+          if (mounted) {
+            setState(() => _isHovered = true);
+            _controller.forward();
+          }
+        });
       },
       onExit: (_) {
-        setState(() => _isHovered = false);
-        _controller.reverse();
+        Future.delayed(Duration.zero, () {
+          if (mounted) {
+            setState(() => _isHovered = false);
+            _controller.reverse();
+          }
+        });
       },
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
