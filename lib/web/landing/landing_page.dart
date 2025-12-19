@@ -977,7 +977,7 @@ class _SignalCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Text(
         text,
-        style: AppTextStyles.h3.copyWith(fontSize: 20, color: Colors.white),
+        style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white),
       ),
     );
   }
@@ -1097,7 +1097,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(fontSize: 34, fontWeight: FontWeight.w800),
+      style: AppTextStyles.h1.copyWith(fontSize: 31, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1530,7 +1530,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(fontSize: 33, fontWeight: FontWeight.w800),
+      style: AppTextStyles.h1.copyWith(fontSize: 31, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1893,7 +1893,7 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppTextStyles.h3.copyWith(fontSize: 18, color: Colors.white)),
+                    Text(title, style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
                     const SizedBox(height: 4),
                     Text(subtitle, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
                   ],
@@ -2072,7 +2072,7 @@ class _CoreValueCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: AppTextStyles.h3.copyWith(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w700),
+            style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(

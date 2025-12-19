@@ -4,13 +4,13 @@ import 'colors.dart';
 
 class AppTextStyles {
   static TextStyle get h1 => GoogleFonts.beVietnamPro(
-        fontSize: 46,
+        fontSize: 36,
         fontWeight: FontWeight.w700, // Changed from w700 to w500
         color: AppColors.textPrimary,
       );
 
   static TextStyle get h2 => GoogleFonts.beVietnamPro(
-        fontSize: 32,
+        fontSize: 26,
         fontWeight: FontWeight.w600, // Changed from w700 to w500
         color: AppColors.textPrimary,
       );

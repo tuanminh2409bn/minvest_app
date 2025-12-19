@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:minvest_forex_app/web/theme/text_styles.dart';
 
 class SignalsBackground extends StatefulWidget {
@@ -192,7 +191,7 @@ class _InteractiveSignalCardState extends State<_InteractiveSignalCard> with Sin
 
     return MouseRegion(
       onEnter: (_) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(Duration.zero, () {
           if (mounted) {
             setState(() => _isHovered = true);
             _controller.forward();
@@ -200,7 +199,7 @@ class _InteractiveSignalCardState extends State<_InteractiveSignalCard> with Sin
         });
       },
       onExit: (_) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(Duration.zero, () {
           if (mounted) {
             setState(() => _isHovered = false);
             _controller.reverse();
