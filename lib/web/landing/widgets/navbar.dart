@@ -413,8 +413,12 @@ class _NavBarItemState extends State<_NavBarItem> {
         : Colors.white;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _isHovered = true);
+      }),
+      onExit: (_) => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _isHovered = false);
+      }),
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {

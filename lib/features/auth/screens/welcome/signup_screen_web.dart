@@ -4,18 +4,72 @@ import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
-import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/web/widgets/signals_background.dart';
 
-class SignupScreenWeb extends StatefulWidget {
+class SignupScreenWeb extends StatelessWidget {
   const SignupScreenWeb({super.key});
 
   @override
-  State<SignupScreenWeb> createState() => _SignupScreenWebState();
+  Widget build(BuildContext context) {
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        } else if (state.status == AuthStatus.unauthenticated && state.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.errorMessage!)),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Stack(
+                  children: [
+                    Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.only(top: 80, bottom: 40),
+                      child: SignalsBackground(
+                        child: const _SignupForm(),
+                      ),
+                    ),
+                    Positioned(
+                      top: 12,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1200),
+                          child: LandingNavBar(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 }
 
-class _SignupScreenWebState extends State<SignupScreenWeb> {
+// Refactored to separate the stateful part from the layout to avoid issues
+class _SignupForm extends StatefulWidget {
+  const _SignupForm();
+
+  @override
+  State<_SignupForm> createState() => _SignupFormState();
+}
+
+class _SignupFormState extends State<_SignupForm> {
   String _countryCode = 'VN(+84)';
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -34,84 +88,8 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state.status == AuthStatus.authenticated) {
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-        } else if (state.status == AuthStatus.unauthenticated && state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
-          );
-        }
-      },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            final double verticalGap = (constraints.maxHeight * 0.16).clamp(70.0, 130.0);
-            final bool isNarrow = constraints.maxWidth < 900;
-            final double effectiveGap = isNarrow ? 40 : verticalGap;
-            final double formPadding = isNarrow ? 24 : verticalGap;
-            final double stackHeight = (670 + (effectiveGap * 2)).clamp(720.0, 1050.0);
-            final bool showCards = constraints.maxWidth > 900;
-            final double topSpace = isNarrow ? 32 : 96;
-            final double bottomSpace = isNarrow ? 32 : effectiveGap;
-
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 12),
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1200),
-                        child: const LandingNavBar(),
-                      ),
-                    ),
-                    SizedBox(height: topSpace),
-                    if (isNarrow)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: _GlowWrapper(
-                          child: _buildWebLayout(context, formPadding),
-                        ),
-                      )
-                    else
-                      SizedBox(
-                        height: stackHeight,
-                        child: Stack(
-                          children: [
-                            Positioned.fill(child: Container(color: Colors.black)),
-                            _AuthBackdrop(showCards: showCards),
-                            Positioned.fill(child: _buildWebLayout(context, formPadding)),
-                          ],
-                        ),
-                      ),
-                    SizedBox(height: bottomSpace),
-                    const FooterSection(),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWebLayout(BuildContext context, double verticalPadding) {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushReplacementNamed('/');
-      });
-    }
-
-    final double vPad = verticalPadding.clamp(120.0, 200.0);
-
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: vPad),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
@@ -197,7 +175,6 @@ class _SignupScreenWebState extends State<SignupScreenWeb> {
         phoneNumber: phone.isEmpty ? null : phone,
         countryCode: _countryCode,
       );
-      // Auth state changes will navigate via AuthGate; show success
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.accountCreatedSuccess)),
@@ -225,29 +202,25 @@ class _SocialSignInButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 50,
+      height: 48,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           side: const BorderSide(color: Colors.white12),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          alignment: Alignment.center,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               icon,
-              const SizedBox(width: 24),
-              Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(width: 12),
+              Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
             ],
           ),
         ),
@@ -394,192 +367,6 @@ class _PrimaryButton extends StatelessWidget {
         child: loading
             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
             : Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-      ),
-    );
-  }
-}
-
-class _AuthBackdrop extends StatelessWidget {
-  final bool showCards;
-  const _AuthBackdrop({required this.showCards});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 640,
-        height: 450,
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            const _SigninGlow(),
-            if (showCards) const _SigninCards(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GlowWrapper extends StatelessWidget {
-  final Widget child;
-  const _GlowWrapper({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Positioned.fill(
-          child: Opacity(
-            opacity: 0.6,
-            child: Image.asset(
-              'assets/mockups/light.png',
-              fit: BoxFit.cover,
-              alignment: Alignment.center,
-            ),
-          ),
-        ),
-        child,
-      ],
-    );
-  }
-}
-
-class _SigninGlow extends StatelessWidget {
-  const _SigninGlow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Center(
-          child: FractionallySizedBox(
-            widthFactor: 1.5,
-            heightFactor: 1.5,
-            child: Opacity(
-              opacity: 0.8,
-              child: Image.asset(
-                'assets/mockups/light.png',
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SigninCards extends StatelessWidget {
-  const _SigninCards();
-
-  @override
-  Widget build(BuildContext context) {
-    const cards = [
-      _SigninCardData(image: 'assets/mockups/card1.png', rotation: -2),
-      _SigninCardData(image: 'assets/mockups/card2.png', rotation: 1),
-      _SigninCardData(image: 'assets/mockups/card3.png', rotation: -3),
-      _SigninCardData(image: 'assets/mockups/card4.png', rotation: -5),
-      _SigninCardData(image: 'assets/mockups/card5.png', rotation: -10),
-      _SigninCardData(image: 'assets/mockups/card6.png', rotation: -8),
-    ];
-    return Positioned.fill(
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            left: -180,
-            top: 120,
-            child: _SigninCardColumn(
-              cards: cards.sublist(0, 3),
-              offsets: const [-60, 0, 40],
-              hoverDirectionUp: true,
-            ),
-          ),
-          Positioned(
-            right: -180,
-            top: 70,
-            child: _SigninCardColumn(
-              cards: cards.sublist(3, 6),
-              offsets: const [-40, 10, 50],
-              hoverDirectionUp: false,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SigninCardColumn extends StatelessWidget {
-  final List<_SigninCardData> cards;
-  final List<double> offsets;
-  final bool hoverDirectionUp;
-  const _SigninCardColumn({required this.cards, required this.offsets, required this.hoverDirectionUp});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(cards.length, (index) {
-        final card = cards[index];
-        final offsetY = offsets[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _HoverCard(
-            image: card.image,
-            rotation: card.rotation,
-            baseOffsetY: offsetY,
-            hoverDirectionUp: hoverDirectionUp,
-          ),
-        );
-      }),
-    );
-  }
-}
-
-class _SigninCardData {
-  final String image;
-  final double rotation;
-  const _SigninCardData({required this.image, required this.rotation});
-}
-
-class _HoverCard extends StatefulWidget {
-  final String image;
-  final double rotation;
-  final double baseOffsetY;
-  final bool hoverDirectionUp;
-  const _HoverCard({
-    required this.image,
-    required this.rotation,
-    required this.baseOffsetY,
-    required this.hoverDirectionUp,
-  });
-
-  @override
-  State<_HoverCard> createState() => _HoverCardState();
-}
-
-class _HoverCardState extends State<_HoverCard> {
-  bool _isHover = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final double hoverOffset = _isHover ? (widget.hoverDirectionUp ? -10 : 10) : 0;
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHover = true),
-      onExit: (_) => setState(() => _isHover = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-        transform: Matrix4.identity()..translate(0.0, widget.baseOffsetY + hoverOffset),
-        child: Transform.rotate(
-          angle: widget.rotation * 3.1416 / 180,
-          child: Image.asset(widget.image, width: 280, fit: BoxFit.contain),
-        ),
       ),
     );
   }
