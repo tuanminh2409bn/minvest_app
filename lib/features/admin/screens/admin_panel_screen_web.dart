@@ -1,12 +1,9 @@
-// lib/features/admin/screens/admin_panel_screen_web.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/features/admin/services/admin_service.dart';
-import 'package:minvest_forex_app/features/news/models/news_model.dart';
-import 'package:minvest_forex_app/features/news/services/news_service.dart';
+import 'package:minvest_forex_app/features/admin/screens/admin_news_screen.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -16,8 +13,58 @@ class AdminPanelScreen extends StatefulWidget {
 }
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _screens = [
+    const UserManagementView(),
+    const AdminNewsScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          NavigationRail(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (int index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            labelType: NavigationRailLabelType.all,
+            destinations: const [
+              NavigationRailDestination(
+                icon: Icon(Icons.people),
+                selectedIcon: Icon(Icons.people_alt),
+                label: Text('Users'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.newspaper),
+                selectedIcon: Icon(Icons.article),
+                label: Text('News'),
+              ),
+            ],
+          ),
+          const VerticalDivider(thickness: 1, width: 1),
+          Expanded(
+            child: _screens[_selectedIndex],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class UserManagementView extends StatefulWidget {
+  const UserManagementView({super.key});
+
+  @override
+  State<UserManagementView> createState() => _UserManagementViewState();
+}
+
+class _UserManagementViewState extends State<UserManagementView> {
   final AdminService _adminService = AdminService();
-  final NewsService _newsService = NewsService();
   final Set<String> _selectedUserIds = {};
 
   void _handleUpdateUsers() {
@@ -54,29 +101,11 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     return '\$${format.format(amount)}'.trim();
   }
 
-  void _openCreateNews() {
-    showDialog(
-      context: context,
-      builder: (_) => _CreateNewsDialog(
-        onSubmit: (article) async {
-          final id = await _newsService.createNews(article);
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(id != null ? 'Đã đăng bài News' : 'Đăng bài thất bại'),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bảng quản lý Admin (${_selectedUserIds.length} đã chọn)'),
+        title: Text('Quản lý Users (${_selectedUserIds.length} chọn)'),
         actions: [
           if (_selectedUserIds.isNotEmpty)
             IconButton(
@@ -84,11 +113,6 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               onPressed: () => setState(() => _selectedUserIds.clear()),
               tooltip: 'Bỏ chọn tất cả',
             ),
-          IconButton(
-            icon: const Icon(Icons.post_add),
-            tooltip: 'Tạo bài News',
-            onPressed: _openCreateNews,
-          ),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -103,14 +127,10 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           final userDocs = snapshot.data!.docs;
 
           return SingleChildScrollView(
-            key: const PageStorageKey('admin_user_list_web_vertical'),
             scrollDirection: Axis.vertical,
             child: SingleChildScrollView(
-              key: const PageStorageKey('admin_user_list_web_horizontal'), // Thêm Key cho cuộn ngang
               scrollDirection: Axis.horizontal,
               child: DataTable(
-                dataRowMinHeight: kMinInteractiveDimension,
-                dataRowMaxHeight: double.infinity,
                 showCheckboxColumn: true,
                 columns: const [
                   DataColumn(label: Text('Tên & Email')),
@@ -170,7 +190,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                           alignment: Alignment.topLeft,
                           child: Container(
                             constraints: const BoxConstraints(maxWidth: 250),
-                            padding: const EdgeInsets.symmetric(vertical: 8.0), // Thêm padding cho đẹp
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Text(reason, softWrap: true),
                           ),
                         ),
@@ -191,11 +211,11 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       ),
       floatingActionButton: _selectedUserIds.isNotEmpty
           ? FloatingActionButton.extended(
-        onPressed: _handleUpdateUsers,
-        label: const Text('Cập nhật vai trò'),
-        icon: const Icon(Icons.edit),
-        backgroundColor: Colors.blue.shade700,
-      )
+              onPressed: _handleUpdateUsers,
+              label: const Text('Cập nhật vai trò'),
+              icon: const Icon(Icons.edit),
+              backgroundColor: Colors.blue.shade700,
+            )
           : null,
     );
   }
@@ -256,9 +276,9 @@ class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
               ),
               items: ['free', 'demo', 'vip', 'elite']
                   .map((tier) => DropdownMenuItem(
-                value: tier,
-                child: Text(tier.toUpperCase()),
-              ))
+                        value: tier,
+                        child: Text(tier.toUpperCase()),
+                      ))
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -300,149 +320,5 @@ class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
         ),
       ],
     );
-  }
-}
-
-class _CreateNewsDialog extends StatefulWidget {
-  final Future<void> Function(NewsArticle article) onSubmit;
-  const _CreateNewsDialog({required this.onSubmit});
-
-  @override
-  State<_CreateNewsDialog> createState() => _CreateNewsDialogState();
-}
-
-class _CreateNewsDialogState extends State<_CreateNewsDialog> {
-  final _titleCtrl = TextEditingController();
-  final _subtitleCtrl = TextEditingController();
-  final _contentCtrl = TextEditingController();
-  final _thumbnailCtrl = TextEditingController();
-  final _tagsCtrl = TextEditingController();
-  final _authorCtrl = TextEditingController(text: 'Admin');
-  String _category = 'News';
-  bool _isFeatured = false;
-  String _status = 'published';
-  bool _submitting = false;
-
-  @override
-  void dispose() {
-    _titleCtrl.dispose();
-    _subtitleCtrl.dispose();
-    _contentCtrl.dispose();
-    _thumbnailCtrl.dispose();
-    _tagsCtrl.dispose();
-    _authorCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Tạo bài News'),
-      content: SizedBox(
-        width: 520,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _input(_titleCtrl, 'Tiêu đề', maxLines: 2),
-              const SizedBox(height: 10),
-              _input(_subtitleCtrl, 'Mô tả ngắn', maxLines: 2),
-              const SizedBox(height: 10),
-              _input(_thumbnailCtrl, 'Thumbnail URL'),
-              const SizedBox(height: 10),
-              _input(_authorCtrl, 'Tác giả'),
-              const SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                value: _category,
-                decoration: const InputDecoration(
-                  labelText: 'Danh mục',
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'News', child: Text('News')),
-                  DropdownMenuItem(value: 'Investor', child: Text('Investor')),
-                  DropdownMenuItem(value: 'Knowledge', child: Text('Knowledge')),
-                  DropdownMenuItem(value: 'Technical Analysis', child: Text('Technical Analysis')),
-                ],
-                onChanged: (v) => setState(() => _category = v ?? 'News'),
-              ),
-              const SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                value: _status,
-                decoration: const InputDecoration(
-                  labelText: 'Trạng thái',
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'published', child: Text('Published')),
-                  DropdownMenuItem(value: 'draft', child: Text('Draft')),
-                ],
-                onChanged: (v) => setState(() => _status = v ?? 'published'),
-              ),
-              const SizedBox(height: 10),
-              CheckboxListTile(
-                value: _isFeatured,
-                onChanged: (v) => setState(() => _isFeatured = v ?? false),
-                title: const Text('Đánh dấu Featured'),
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
-              _input(_tagsCtrl, 'Tags (phân tách bởi dấu phẩy)'),
-              const SizedBox(height: 10),
-              _input(_contentCtrl, 'Nội dung', maxLines: 6),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _submitting ? null : () => Navigator.pop(context),
-          child: const Text('Hủy'),
-        ),
-        ElevatedButton(
-          onPressed: _submitting ? null : _submit,
-          child: _submitting
-              ? const SizedBox(
-                  height: 18,
-                  width: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                )
-              : const Text('Đăng bài'),
-        ),
-      ],
-    );
-  }
-
-  Widget _input(TextEditingController ctrl, String label, {int maxLines = 1}) {
-    return TextField(
-      controller: ctrl,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-    );
-  }
-
-  Future<void> _submit() async {
-    if (_titleCtrl.text.trim().isEmpty || _contentCtrl.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nhập tiêu đề và nội dung')));
-      return;
-    }
-    setState(() => _submitting = true);
-    final article = NewsArticle(
-      id: '',
-      title: _titleCtrl.text.trim(),
-      subtitle: _subtitleCtrl.text.trim(),
-      content: _contentCtrl.text.trim(),
-      thumbnailUrl: _thumbnailCtrl.text.trim(),
-      category: _category,
-      author: _authorCtrl.text.trim().isEmpty ? 'Admin' : _authorCtrl.text.trim(),
-      tags: _tagsCtrl.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
-      isFeatured: _isFeatured,
-      status: _status,
-      publishedAt: Timestamp.now(),
-    );
-    await widget.onSubmit(article);
-    if (mounted) Navigator.pop(context);
   }
 }
