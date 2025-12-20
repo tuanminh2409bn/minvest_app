@@ -49,7 +49,7 @@ class _NewsPageState extends State<NewsPage> {
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
+            constraints: const BoxConstraints(maxWidth: 1230),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -172,76 +172,110 @@ class _NewsLayout extends StatelessWidget {
     if (featured.isNotEmpty) {
       mainArticle = featured.first;
     }
-    final sideArticles = articles.where((a) => a.id != mainArticle.id).toList();
+    // Take next 3 articles for the side column
+    final sideArticles = articles.where((a) => a.id != mainArticle.id).take(3).toList();
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final bool stacked = constraints.maxWidth < 960;
-        final double rightColumnWidth = stacked ? constraints.maxWidth : 520;
-        final double leftColumnWidth = stacked ? constraints.maxWidth : constraints.maxWidth - rightColumnWidth - 16;
-        if (stacked) {
+        // Breakpoint for the strict pixel layout (needs roughly 1150px space)
+        final bool isDesktop = constraints.maxWidth >= 1150;
+
+        if (!isDesktop) {
+          // Responsive / Mobile Layout fallback
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _FeaturedArticleCard(article: mainArticle),
-              const SizedBox(height: 16),
+              _FeaturedArticleCard(article: mainArticle, isDesktop: false),
+              const SizedBox(height: 24),
               ...sideArticles.map(
                 (a) => Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: _ArticleCard(article: a),
+                  child: _ArticleCard(article: a, isDesktop: false),
                 ),
               ),
             ],
           );
         }
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: leftColumnWidth,
-              child: _FeaturedArticleCard(article: mainArticle),
-            ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: rightColumnWidth,
-              child: Column(
-                children: sideArticles
-                    .map(
-                      (a) => Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: _ArticleCard(article: a),
-                      ),
-                    )
-                    .toList(),
+
+        // Strict Desktop Layout
+        return SizedBox(
+          height: 750,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Left Column - Main Article (Always first)
+              SizedBox(
+                width: 403.49,
+                height: 750,
+                child: _FeaturedArticleCard(article: mainArticle, isDesktop: true),
               ),
-            ),
-          ],
+              // Right Column - Subsequent Articles (Top to bottom)
+              if (sideArticles.isNotEmpty)
+                SizedBox(
+                  width: 783.67,
+                  height: 750,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (int i = 0; i < sideArticles.length; i++) ...[
+                        _ArticleCard(article: sideArticles[i], isDesktop: true),
+                        if (i < sideArticles.length - 1) const SizedBox(height: 15),
+                      ],
+                    ],
+                  ),
+                ),
+            ],
+          ),
         );
       },
     );
   }
 }
 
-class _FeaturedArticleCard extends StatelessWidget {
+class _FeaturedArticleCard extends StatefulWidget {
   final NewsArticle article;
-  const _FeaturedArticleCard({required this.article});
+  final bool isDesktop;
+  const _FeaturedArticleCard({required this.article, required this.isDesktop});
+
+  @override
+  State<_FeaturedArticleCard> createState() => _FeaturedArticleCardState();
+}
+
+class _FeaturedArticleCardState extends State<_FeaturedArticleCard> {
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    final DateTime? published = article.publishedAt is Timestamp ? (article.publishedAt as Timestamp).toDate() : null;
-    final String dateText = published != null ? DateFormat('MMM d, yyyy').format(published) : '';
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool isNarrow = constraints.maxWidth < 640;
-        final double imageHeight = isNarrow ? 200 : 280;
-        final double titleSize = isNarrow ? 15 : 16;
-        final double subtitleSize = isNarrow ? 13 : 14;
-        final double bodySize = isNarrow ? 12.5 : 13;
+    final DateTime? published = widget.article.publishedAt is Timestamp
+        ? (widget.article.publishedAt as Timestamp).toDate()
+        : null;
+    final String dateText =
+        published != null ? DateFormat('MMM d, yyyy').format(published) : '';
 
-        return InkWell(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => NewsDetailScreen(article: article)),
+    final double imgWidth = widget.isDesktop ? 381.46 : double.infinity;
+    final double imgHeight = widget.isDesktop ? 426.89 : 280;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => NewsDetailScreen(article: widget.article)),
+        ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(12), // Padding for border spacing
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _isHovered ? const Color(0xFF289EFF) : Colors.transparent,
+              width: 1.5,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,13 +283,13 @@ class _FeaturedArticleCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  height: imageHeight,
-                  width: double.infinity,
+                  width: imgWidth,
+                  height: imgHeight,
                   decoration: BoxDecoration(
                     color: const Color(0xFF1A1A1A),
-                    image: article.thumbnailUrl.isNotEmpty
+                    image: widget.article.thumbnailUrl.isNotEmpty
                         ? DecorationImage(
-                            image: NetworkImage(article.thumbnailUrl),
+                            image: NetworkImage(widget.article.thumbnailUrl),
                             fit: BoxFit.cover,
                             onError: (_, __) {},
                           )
@@ -263,149 +297,276 @@ class _FeaturedArticleCard extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              // Date & Category
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3FA9F5).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      widget.article.category.toUpperCase(),
+                      style: AppTextStyles.caption.copyWith(
+                        color: const Color(0xFF3FA9F5),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                  if (dateText.isNotEmpty) ...[
+                    const SizedBox(width: 12),
+                    const Icon(Icons.access_time, color: Colors.white54, size: 14),
+                    const SizedBox(width: 6),
+                    Text(
+                      dateText,
+                      style: AppTextStyles.caption.copyWith(color: Colors.white54),
+                    ),
+                  ],
+                ],
+              ),
               const SizedBox(height: 12),
+              // Title
               Text(
-                article.title,
-                style: AppTextStyles.body.copyWith(
+                widget.article.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.h3.copyWith(
                   color: Colors.white,
-                  fontSize: titleSize,
+                  fontSize: 24,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                article.subtitle.isNotEmpty ? article.subtitle : article.title,
-                style: AppTextStyles.body.copyWith(
-                  color: Colors.white,
-                  fontSize: subtitleSize,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(height: 12),
+              // Content / Subtitle
+              Expanded(
+                child: Text(
+                  widget.article.subtitle.isNotEmpty
+                      ? widget.article.subtitle
+                      : widget.article.content,
+                  maxLines: widget.isDesktop ? 6 : 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.body.copyWith(
+                    color: Colors.white70,
+                    height: 1.5,
+                  ),
                 ),
               ),
-              const SizedBox(height: 10),
-              Text(
-                article.subtitle.isNotEmpty ? article.subtitle : article.content,
-                style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: bodySize, height: 1.35),
-              ),
-              const SizedBox(height: 10),
-              if (dateText.isNotEmpty)
-                Text(
-                  dateText,
-                  style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
-                ),
-              const SizedBox(height: 10),
-              Text(
-                AppLocalizations.of(context)!.seeDetails,
-                style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 12),
+              const SizedBox(height: 12),
+              // Read More
+              Row(
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.seeDetails,
+                    style: AppTextStyles.body.copyWith(
+                      color: const Color(0xFF3FA9F5),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward, color: Color(0xFF3FA9F5), size: 16),
+                ],
               ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
 
-class _ArticleCard extends StatelessWidget {
+class _ArticleCard extends StatefulWidget {
   final NewsArticle article;
-  const _ArticleCard({required this.article});
+  final bool isDesktop;
+  const _ArticleCard({required this.article, required this.isDesktop});
+
+  @override
+  State<_ArticleCard> createState() => _ArticleCardState();
+}
+
+class _ArticleCardState extends State<_ArticleCard> {
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    final DateTime? published = article.publishedAt is Timestamp ? (article.publishedAt as Timestamp).toDate() : null;
-    final String dateText = published != null ? DateFormat('MMM d, yyyy').format(published) : '';
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool isNarrow = constraints.maxWidth < 640;
-        final double imageSize = isNarrow ? constraints.maxWidth : 120;
-        final double titleSize = isNarrow ? 13.5 : 14;
-        final double bodySize = isNarrow ? 11.5 : 12;
+    final DateTime? published = widget.article.publishedAt is Timestamp
+        ? (widget.article.publishedAt as Timestamp).toDate()
+        : null;
+    final String dateText =
+        published != null ? DateFormat('MMM d, yyyy').format(published) : '';
 
-        final image = Container(
-          width: isNarrow ? double.infinity : imageSize,
-          height: isNarrow ? 180 : imageSize,
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A1A),
-            borderRadius: BorderRadius.circular(6),
-            image: article.thumbnailUrl.isNotEmpty
-                ? DecorationImage(
-                    image: NetworkImage(article.thumbnailUrl),
-                    fit: BoxFit.cover,
-                    onError: (_, __) {},
-                  )
-                : null,
-          ),
-        );
+    final double imgWidth = widget.isDesktop ? 226.85 : 120;
+    final double imgHeight = widget.isDesktop ? 205 : 120;
+    final double cardHeight = widget.isDesktop ? 240 : double.infinity;
 
-        final content = Column(
+    Widget content() => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Category & Date
             Row(
               children: [
-                const Icon(Icons.article, color: Colors.white70, size: 14),
-                const SizedBox(width: 6),
-                Text(
-                  article.category,
-                  style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3FA9F5).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    widget.article.category.toUpperCase(),
+                    style: AppTextStyles.caption.copyWith(
+                      color: const Color(0xFF3FA9F5),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10,
+                    ),
+                  ),
                 ),
                 if (dateText.isNotEmpty) ...[
                   const SizedBox(width: 12),
-                  const Icon(Icons.calendar_month, color: Colors.white70, size: 12),
-                  const SizedBox(width: 4),
+                  const Icon(Icons.access_time, color: Colors.white54, size: 14),
+                  const SizedBox(width: 6),
                   Text(
                     dateText,
-                    style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
+                    style: AppTextStyles.caption.copyWith(color: Colors.white54),
                   ),
                 ],
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 12),
+            // Title
             Text(
-              article.title,
-              style: AppTextStyles.body.copyWith(
+              widget.article.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.h3.copyWith(
                 color: Colors.white,
-                fontSize: titleSize,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
+                height: 1.3,
               ),
             ),
             const SizedBox(height: 8),
+            // Excerpt
             Text(
-              article.subtitle.isNotEmpty ? article.subtitle : article.content,
-              maxLines: 3,
+              widget.article.subtitle.isNotEmpty
+                  ? widget.article.subtitle
+                  : widget.article.content,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: bodySize, height: 1.35),
+              style: AppTextStyles.body.copyWith(
+                color: Colors.white70,
+                fontSize: 13,
+                height: 1.5,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            // Read More
             Text(
               AppLocalizations.of(context)!.seeDetails,
-              style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: bodySize),
+              style: AppTextStyles.caption.copyWith(
+                color: const Color(0xFF3FA9F5),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         );
 
-        return InkWell(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => NewsDetailScreen(article: article)),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => NewsDetailScreen(article: widget.article)),
+        ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: widget.isDesktop ? 783.67 : null, // Restore width here
+          height: cardHeight,
+          margin: const EdgeInsets.only(bottom: 0),
+          padding: const EdgeInsets.all(12), // Padding for border
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _isHovered ? const Color(0xFF289EFF) : Colors.transparent,
+              width: 1.5,
+            ),
           ),
-          child: isNarrow
-              ? Column(
+          child: widget.isDesktop
+              ? Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(borderRadius: BorderRadius.circular(6), child: image),
-                    const SizedBox(height: 10),
-                    content,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        width: imgWidth,
+                        height: imgHeight,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A1A1A),
+                          image: widget.article.thumbnailUrl.isNotEmpty
+                              ? DecorationImage(
+                                  image: NetworkImage(widget.article.thumbnailUrl),
+                                  fit: BoxFit.cover,
+                                  onError: (_, __) {},
+                                )
+                              : null,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(child: content()),
                   ],
                 )
-              : Row(
+              : Row( // Mobile Layout
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(borderRadius: BorderRadius.circular(6), child: image),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A1A1A),
+                          image: widget.article.thumbnailUrl.isNotEmpty
+                              ? DecorationImage(
+                                  image: NetworkImage(widget.article.thumbnailUrl),
+                                  fit: BoxFit.cover,
+                                  onError: (_, __) {},
+                                )
+                              : null,
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 12),
-                    Expanded(child: content),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.article.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.body.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            dateText,
+                            style: AppTextStyles.caption.copyWith(color: Colors.white54),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
