@@ -789,10 +789,16 @@ class AppLocalizationsVi extends AppLocalizations {
       'Đăng ký Minvest AI hiện đã mở — số lượng có hạn, có thể đóng sớm khi chúng tôi xem xét và chấp thuận thành viên mới.';
 
   @override
-  String get currencyPairs => 'Cặp tiền tệ';
+  String get currencyPairs => 'Sản phẩm';
 
   @override
   String get allCurrencyPairs => 'Tất cả cặp tiền';
+
+  @override
+  String get allCommodities => 'Tất cả sản phẩm';
+
+  @override
+  String get allCryptoPairs => 'Tất cả Crypto';
 
   @override
   String get dateRange => 'Khoảng thời gian';
@@ -1263,4 +1269,17 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get performance => 'Hiệu suất';
+
+  @override
+  String get minvestSupport => 'Minvest Support';
+
+  @override
+  String get leaveMessagePart1 =>
+      'Hãy để lại tin nhắn, đội ngũ của chúng tôi sẽ phản hồi sớm nhất. Bạn cũng có thể liên hệ ';
+
+  @override
+  String get chatWhatsApp => 'WhatsApp';
+
+  @override
+  String get leaveMessagePart2 => ' +84 969 156 969 để được hỗ trợ nhanh.';
 }

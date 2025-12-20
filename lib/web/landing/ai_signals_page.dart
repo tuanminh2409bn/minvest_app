@@ -30,18 +30,55 @@ class AISignalsPage extends StatefulWidget {
 class _AISignalsPageState extends State<AISignalsPage> {
   AISignalsTab selectedTab = AISignalsTab.aiSignals;
   AssetFilter _assetFilter = AssetFilter.all;
-  String _selectedPair = 'All Currency pairs';
+  String _selectedCommodity = 'All Commodities';
   String _selectedTimezone = 'GMT+7'; // Default for Vietnam context
   DateTimeRange? _dateRange;
 
-  final List<String> _currencyPairs = [
-    'All Currency pairs',
+  final List<String> _allCommodities = [
     'XAU/USD',
     'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 
     'AUD/USD', 'USD/CAD', 'NZD/USD',
     'EUR/GBP', 'EUR/JPY', 'GBP/JPY', 'AUD/JPY',
     'BTC/USD', 'ETH/USD', 'BNB/USD'
   ];
+
+  List<String> get _currentCommodities {
+    switch (_assetFilter) {
+      case AssetFilter.gold:
+        return ['XAU/USD'];
+      case AssetFilter.forex:
+        return [
+          'All Currency Pairs',
+          'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 
+          'AUD/USD', 'USD/CAD', 'NZD/USD',
+          'EUR/GBP', 'EUR/JPY', 'GBP/JPY', 'AUD/JPY'
+        ];
+      case AssetFilter.crypto:
+        return [
+          'All Crypto Pairs',
+          'BTC/USD', 'ETH/USD', 'BNB/USD'
+        ];
+      case AssetFilter.all:
+      default:
+        return ['All Commodities', ..._allCommodities];
+    }
+  }
+
+  void _onAssetFilterChanged(AssetFilter value) {
+    setState(() {
+      _assetFilter = value;
+      // Reset selected commodity based on new filter
+      if (value == AssetFilter.gold) {
+        _selectedCommodity = 'XAU/USD';
+      } else if (value == AssetFilter.forex) {
+        _selectedCommodity = 'All Currency Pairs';
+      } else if (value == AssetFilter.crypto) {
+        _selectedCommodity = 'All Crypto Pairs';
+      } else {
+        _selectedCommodity = 'All Commodities';
+      }
+    });
+  }
 
   final List<String> _timezones = [
     for (int i = -12; i <= 14; i++) 'GMT${i >= 0 ? '+' : ''}$i',
@@ -80,13 +117,13 @@ class _AISignalsPageState extends State<AISignalsPage> {
                       if (selectedTab == AISignalsTab.aiSignals || selectedTab == AISignalsTab.history) ...[
                         _FiltersRow(
                           assetFilter: _assetFilter,
-                          selectedPair: _selectedPair,
+                          selectedPair: _selectedCommodity,
                           selectedTimezone: _selectedTimezone,
                           dateRange: _dateRange,
-                          availablePairs: _currencyPairs,
+                          availablePairs: _currentCommodities,
                           availableTimezones: _timezones,
-                          onAssetChanged: (value) => setState(() => _assetFilter = value),
-                          onPairChanged: (value) => setState(() => _selectedPair = value),
+                          onAssetChanged: _onAssetFilterChanged,
+                          onPairChanged: (value) => setState(() => _selectedCommodity = value),
                           onTimezoneChanged: (value) => setState(() => _selectedTimezone = value),
                           onDateRangeChanged: (value) => setState(() => _dateRange = value),
                         ),
@@ -95,7 +132,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
                       if (selectedTab == AISignalsTab.aiSignals) ...[
                         _SignalGridLive(
                           assetFilter: _assetFilter,
-                          selectedPair: _selectedPair,
+                          selectedPair: _selectedCommodity,
                           selectedTimezone: _selectedTimezone,
                           dateRange: _dateRange,
                         ),
@@ -104,7 +141,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
                       ] else if (selectedTab == AISignalsTab.history) ...[
                         _HistorySection(
                           assetFilter: _assetFilter,
-                          selectedPair: _selectedPair,
+                          selectedPair: _selectedCommodity,
                           selectedTimezone: _selectedTimezone,
                           dateRange: _dateRange,
                         ),
@@ -310,10 +347,16 @@ class _PairDropdown extends StatelessWidget {
               style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
               isExpanded: true,
               items: items.map((pair) {
-                // Localize "All Currency pairs" display
-                final display = pair == 'All Currency pairs' 
-                    ? AppLocalizations.of(context)!.allCurrencyPairs 
-                    : pair;
+                // Localize "All ..." display
+                String display = pair;
+                if (pair == 'All Commodities') {
+                  display = AppLocalizations.of(context)!.allCommodities;
+                } else if (pair == 'All Currency Pairs') {
+                  display = AppLocalizations.of(context)!.allCurrencyPairs;
+                } else if (pair == 'All Crypto Pairs') {
+                  display = AppLocalizations.of(context)!.allCryptoPairs;
+                }
+
                 return DropdownMenuItem<String>(
                   value: pair,
                   child: Text(display, overflow: TextOverflow.ellipsis),
