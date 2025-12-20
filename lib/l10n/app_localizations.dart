@@ -1531,14 +1531,26 @@ abstract class AppLocalizations {
   /// No description provided for @currencyPairs.
   ///
   /// In en, this message translates to:
-  /// **'Currency pairs'**
+  /// **'Commodity'**
   String get currencyPairs;
 
   /// No description provided for @allCurrencyPairs.
   ///
   /// In en, this message translates to:
-  /// **'All Currency pairs'**
+  /// **'All Currency Pairs'**
   String get allCurrencyPairs;
+
+  /// No description provided for @allCommodities.
+  ///
+  /// In en, this message translates to:
+  /// **'All Commodities'**
+  String get allCommodities;
+
+  /// No description provided for @allCryptoPairs.
+  ///
+  /// In en, this message translates to:
+  /// **'All Crypto Pairs'**
+  String get allCryptoPairs;
 
   /// No description provided for @dateRange.
   ///
@@ -2409,6 +2421,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Performance'**
   String get performance;
+
+  /// No description provided for @minvestSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Minvest Support'**
+  String get minvestSupport;
+
+  /// No description provided for @leaveMessagePart1.
+  ///
+  /// In en, this message translates to:
+  /// **'Please leave a message, our team will respond as soon as possible. You can also contact '**
+  String get leaveMessagePart1;
+
+  /// No description provided for @chatWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp'**
+  String get chatWhatsApp;
+
+  /// No description provided for @leaveMessagePart2.
+  ///
+  /// In en, this message translates to:
+  /// **' +84 969 156 969 for fast support.'**
+  String get leaveMessagePart2;
 }
 
 class _AppLocalizationsDelegate

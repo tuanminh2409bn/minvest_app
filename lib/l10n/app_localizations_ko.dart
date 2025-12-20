@@ -767,10 +767,16 @@ class AppLocalizationsKo extends AppLocalizations {
       'Minvest AI 등록이 시작되었습니다 — 신규 회원을 검토하고 승인함에 따라 자리가 조기 마감될 수 있습니다.';
 
   @override
-  String get currencyPairs => '통화 쌍';
+  String get currencyPairs => '상품';
 
   @override
   String get allCurrencyPairs => '모든 통화 쌍';
+
+  @override
+  String get allCommodities => '모든 상품';
+
+  @override
+  String get allCryptoPairs => '모든 암호화폐';
 
   @override
   String get dateRange => '날짜 범위';
@@ -1226,4 +1232,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get performance => '성과';
+
+  @override
+  String get minvestSupport => 'Minvest 지원';
+
+  @override
+  String get leaveMessagePart1 =>
+      '메시지를 남겨주시면 팀이 가능한 한 빨리 답변해 드리겠습니다. 또한 연락하실 수도 있습니다 ';
+
+  @override
+  String get chatWhatsApp => 'WhatsApp';
+
+  @override
+  String get leaveMessagePart2 => ' +84 969 156 969 빠른 지원을 위해.';
 }

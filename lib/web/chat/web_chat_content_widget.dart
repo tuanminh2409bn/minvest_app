@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minvest_forex_app/features/chat/models/chat_message_model.dart';
 import 'package:minvest_forex_app/features/chat/models/chat_room_model.dart';
 import 'package:minvest_forex_app/features/chat/services/chat_service.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WebChatContentWidget extends StatefulWidget {
   const WebChatContentWidget({super.key});
@@ -354,10 +356,30 @@ class _WebWelcomeHeader extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          Text(
-            l10n.chatWelcomeBody1,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          RichText(
             textAlign: TextAlign.center,
+            text: TextSpan(
+              style: const TextStyle(fontSize: 12, color: Colors.grey, fontFamily: 'BeVietnamPro'),
+              children: [
+                TextSpan(text: l10n.leaveMessagePart1),
+                TextSpan(
+                  text: l10n.chatWhatsApp,
+                  style: const TextStyle(
+                    color: Color(0xFF3C4BFE),
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () async {
+                      final uri = Uri.parse('https://wa.me/84969156969');
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri);
+                      }
+                    },
+                ),
+                TextSpan(text: l10n.leaveMessagePart2),
+              ],
+            ),
           ),
         ],
       ),

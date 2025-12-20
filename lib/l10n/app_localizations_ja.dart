@@ -765,10 +765,16 @@ class AppLocalizationsJa extends AppLocalizations {
       'Minvest AI の登録が開始されました — 新規メンバーの審査と承認が完了次第、募集が締め切られる場合があり ます。';
 
   @override
-  String get currencyPairs => '通貨ペア';
+  String get currencyPairs => '商品';
 
   @override
   String get allCurrencyPairs => '全ての通貨ペア';
+
+  @override
+  String get allCommodities => 'すべての商品';
+
+  @override
+  String get allCryptoPairs => 'すべての仮想通貨';
 
   @override
   String get dateRange => '日付範囲';
@@ -1226,4 +1232,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get performance => '実績';
+
+  @override
+  String get minvestSupport => 'Minvest サポート';
+
+  @override
+  String get leaveMessagePart1 =>
+      'メッセージを残してください。チームができるだけ早く返信します。また、連絡することもできます ';
+
+  @override
+  String get chatWhatsApp => 'WhatsApp';
+
+  @override
+  String get leaveMessagePart2 => ' +84 969 156 969 で迅速なサポートを受けられます。';
 }

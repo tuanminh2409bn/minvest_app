@@ -759,10 +759,16 @@ class AppLocalizationsZh extends AppLocalizations {
       'Minvest AI 注册现已开放 — 名额可能很快就会满，因为我们会审核并批准新成员。';
 
   @override
-  String get currencyPairs => '货币对';
+  String get currencyPairs => '商品';
 
   @override
   String get allCurrencyPairs => '所有货币对';
+
+  @override
+  String get allCommodities => '所有商品';
+
+  @override
+  String get allCryptoPairs => '所有加密货币';
 
   @override
   String get dateRange => '日期范围';
@@ -1216,4 +1222,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get performance => '业绩';
+
+  @override
+  String get minvestSupport => 'Minvest 支持';
+
+  @override
+  String get leaveMessagePart1 => '请留言，我们的团队将尽快回复。您也可以联系 ';
+
+  @override
+  String get chatWhatsApp => 'WhatsApp';
+
+  @override
+  String get leaveMessagePart2 => ' +84 969 156 969 以获得快速支持。';
 }

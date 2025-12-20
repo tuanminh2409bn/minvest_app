@@ -785,10 +785,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Minvest AI registration is now open — spots may close soon as we review and approve new members';
 
   @override
-  String get currencyPairs => 'Currency pairs';
+  String get currencyPairs => 'Commodity';
 
   @override
-  String get allCurrencyPairs => 'All Currency pairs';
+  String get allCurrencyPairs => 'All Currency Pairs';
+
+  @override
+  String get allCommodities => 'All Commodities';
+
+  @override
+  String get allCryptoPairs => 'All Crypto Pairs';
 
   @override
   String get dateRange => 'Date Range';
@@ -1257,4 +1263,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get performance => 'Performance';
+
+  @override
+  String get minvestSupport => 'Minvest Support';
+
+  @override
+  String get leaveMessagePart1 =>
+      'Please leave a message, our team will respond as soon as possible. You can also contact ';
+
+  @override
+  String get chatWhatsApp => 'WhatsApp';
+
+  @override
+  String get leaveMessagePart2 => ' +84 969 156 969 for fast support.';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_content_widget.dart';
 
 class WebChatBubble extends StatefulWidget {
@@ -48,12 +49,6 @@ class _WebChatBubbleState extends State<WebChatBubble> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    // Sử dụng Stack để popup nằm đè lên trên và căn chỉnh vị trí
-    // Tuy nhiên, widget này dự kiến sẽ được đặt trong một Stack lớn của trang
-    // hoặc dùng làm FloatingActionButton.
-    // Để đảm bảo vị trí, chúng ta dùng Align hoặc Positioned nếu cha là Stack.
-    // Ở đây tôi giả định widget này được đặt ở góc màn hình thông qua Stack cha.
-    
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -68,9 +63,9 @@ class _WebChatBubbleState extends State<WebChatBubble> with SingleTickerProvider
               child: Container(
                 width: 320,
                 height: 450,
-                margin: const EdgeInsets.only(bottom: 16, right: 4), // Cách nút một chút
+                margin: const EdgeInsets.only(bottom: 16, right: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0D1117), // Nền tối khớp với theme
+                  color: const Color(0xFF0D1117),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -99,9 +94,9 @@ class _WebChatBubbleState extends State<WebChatBubble> with SingleTickerProvider
                               backgroundColor: Colors.green, // Online indicator
                             ),
                             const SizedBox(width: 8),
-                            const Text(
-                              'Minvest Support',
-                              style: TextStyle(
+                            Text(
+                              AppLocalizations.of(context)!.minvestSupport,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                                 color: Colors.white,

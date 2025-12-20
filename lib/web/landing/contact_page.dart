@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
@@ -132,8 +133,9 @@ class _ContactPageState extends State<ContactPage> {
             width: 420,
             child: _InfoCard(
               title: 'Whatsapp', // Keep as English technical term or add to loc if needed
-              subtitle: '0969 15 6969',
+              subtitle: '+84 969.15.6969',
               icon: Icons.chat_bubble_outline,
+              onTap: () => launchUrl(Uri.parse('https://wa.me/84969156969')),
             ),
           ),
           const SizedBox(width: 16, height: 16),
@@ -141,8 +143,9 @@ class _ContactPageState extends State<ContactPage> {
             width: 420,
             child: _InfoCard(
               title: AppLocalizations.of(context)!.phone,
-              subtitle: '0969 15 6969', // This is a number, not for localization
+              subtitle: '+84 969.15.6969', // This is a number, not for localization
               icon: Icons.phone_in_talk_outlined,
+              onTap: () => launchUrl(Uri.parse('tel:+84969156969')),
             ),
           ),
         ];
@@ -415,53 +418,90 @@ class _ContactPageState extends State<ContactPage> {
   }
 }
 
-class _InfoCard extends StatelessWidget {
+class _InfoCard extends StatefulWidget {
   final String title;
   final String subtitle;
   final IconData icon;
-  const _InfoCard({required this.title, required this.subtitle, required this.icon});
+  final VoidCallback? onTap;
+
+  const _InfoCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    this.onTap,
+  });
+
+  @override
+  State<_InfoCard> createState() => _InfoCardState();
+}
+
+class _InfoCardState extends State<_InfoCard> {
+  bool _isHovering = false;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(1.5),
-      decoration: BoxDecoration(
-        gradient: AppGradients.cta,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Container(
-        height: 110,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(9),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF111325), Color(0xFF070812)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: _isHovering ? Matrix4.identity().scaled(1.02) : Matrix4.identity(),
+          padding: const EdgeInsets.all(1.5),
+          decoration: BoxDecoration(
+            gradient: AppGradients.cta,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: _isHovering
+                ? [
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.3),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    )
+                  ]
+                : [],
           ),
-        ),
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white, size: 18),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
-                  ),
-                ],
+          child: Container(
+            height: 110,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(9),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF111325), Color(0xFF070812)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
-          ],
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Icon(widget.icon, color: Colors.white, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: AppTextStyles.body.copyWith(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.subtitle,
+                        style: AppTextStyles.caption
+                            .copyWith(color: Colors.white, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
