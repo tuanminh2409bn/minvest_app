@@ -35,4 +35,32 @@ class NewsService {
       return null;
     }
   }
+
+  Future<void> updateNews(NewsArticle article) async {
+    try {
+      await _firestore.collection('news').doc(article.id).update(article.toJson());
+    } catch (e) {
+      print("Lỗi updateNews: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> deleteNews(String id) async {
+    try {
+      await _firestore.collection('news').doc(id).delete();
+    } catch (e) {
+      print("Lỗi deleteNews: $e");
+      rethrow;
+    }
+  }
+
+  // Admin Stream: Get all news including drafts, ordered by date
+  Stream<List<NewsArticle>> streamAllNews() {
+    return _firestore
+        .collection('news')
+        .orderBy('publishedAt', descending: true)
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((doc) => NewsArticle.fromFirestore(doc)).toList());
+  }
 }

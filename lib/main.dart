@@ -37,6 +37,7 @@ import 'web/landing/legal/terms_conditions_page.dart';
 import 'features/auth/screens/welcome/signup_screen_web.dart';
 import 'features/auth/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
@@ -289,7 +290,10 @@ class _MyAppState extends State<MyApp> {
             title: 'Minvest Forex App',
             theme: _buildAppTheme(),
             locale: languageProvider.locale,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+                        localizationsDelegates: [
+              ...AppLocalizations.localizationsDelegates,
+              FlutterQuillLocalizations.delegate,
+            ],
             supportedLocales: AppLocalizations.supportedLocales,
             routes: {
               '/': (context) => const LandingPage(),
@@ -315,7 +319,10 @@ class _MyAppState extends State<MyApp> {
           title: 'Minvest Forex App',
           theme: _buildAppTheme(),
           locale: languageProvider.locale,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+                      localizationsDelegates: [
+              ...AppLocalizations.localizationsDelegates,
+              FlutterQuillLocalizations.delegate,
+            ],
           supportedLocales: AppLocalizations.supportedLocales,
           home: const AuthGate(),
         );
@@ -353,7 +360,15 @@ ThemeData _buildAppTheme() {
 
   return base.copyWith(
     textTheme: newTextTheme,
+    primaryColor: Colors.white,
+    colorScheme: const ColorScheme.dark(
+      primary: Colors.white,
+      onPrimary: Colors.black,
+      secondary: Colors.white,
+      onSecondary: Colors.black,
+    ),
     scaffoldBackgroundColor: const Color(0xFF121212),
+    indicatorColor: Colors.white,
     appBarTheme: const AppBarTheme(
       elevation: 0,
       centerTitle: true,
