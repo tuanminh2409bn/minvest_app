@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
-import 'package:minvest_forex_app/features/verification/screens/upgrade_screen.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -158,7 +157,7 @@ class SignalDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  if (userTier != 'elite') const _UpgradeSection(),
+                  if (userTier != 'elite') _UpgradeSection(signal: signal),
                 ],
               ),
             ),
@@ -190,7 +189,21 @@ class SignalDetailScreen extends StatelessWidget {
 }
 
 class _TokenCounter extends StatelessWidget {
-  const _TokenCounter();
+  final Signal? signal;
+  const _TokenCounter({this.signal});
+
+  bool _isSignalUnlocked(Signal signal, List<String> activeSubs) {
+    final symbol = signal.symbol.toUpperCase();
+    if (activeSubs.contains('gold') && symbol.contains('XAU')) return true;
+    
+    final isCrypto = symbol.contains('BTC') || symbol.contains('ETH') || symbol.contains('BNB') || symbol.contains('CRYPTO');
+    if (activeSubs.contains('crypto') && isCrypto) return true;
+
+    final isForex = symbol.contains('/') && !symbol.contains('XAU') && !isCrypto;
+    if (activeSubs.contains('forex') && isForex) return true;
+    
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +219,9 @@ class _TokenCounter extends StatelessWidget {
         }
         final data = snapshot.data!.data() ?? {};
         final tier = (data['subscriptionTier'] ?? 'free').toString().toLowerCase();
-        if (tier == 'elite') {
+        final activeSubs = List<String>.from(data['activeSubscriptions'] ?? []);
+
+        if (tier == 'elite' || (signal != null && _isSignalUnlocked(signal!, activeSubs))) {
           return Text(AppLocalizations.of(context)!.unlimitedSignals, style: const TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
         }
         final tokenBalance = (data['tokenBalance'] ?? 0) as int;
@@ -456,7 +471,8 @@ class _PriceBox extends StatelessWidget {
 }
 
 class _UpgradeSection extends StatelessWidget {
-  const _UpgradeSection();
+  final Signal signal;
+  const _UpgradeSection({required this.signal});
 
   @override
   Widget build(BuildContext context) {
@@ -481,7 +497,7 @@ class _UpgradeSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const _TokenCounter(),
+              _TokenCounter(signal: signal),
               const Spacer(),
               Text(AppLocalizations.of(context)!.goldPlan,
                   style: const TextStyle(
