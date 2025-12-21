@@ -209,12 +209,8 @@ class _TokenCounter extends StatelessWidget {
         if (tier == 'elite') {
           return Text(AppLocalizations.of(context)!.unlimitedSignals, style: const TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
         }
-        final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
-        final storedDate = (data['freeTokensDate'] ?? '') as String;
-        final used = (data['freeTokensUsed'] ?? 0) as int;
-        final effectiveUsed = storedDate == todayKey ? used : 0;
-        final left = (10 - effectiveUsed).clamp(0, 10);
-        return Text(AppLocalizations.of(context)!.freeSignalsLeft(left), style: const TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
+        final tokenBalance = (data['tokenBalance'] ?? 0) as int;
+        return Text(AppLocalizations.of(context)!.freeSignalsLeft(tokenBalance), style: const TextStyle(color: Color(0xFF289EFF), fontSize: 13, fontWeight: FontWeight.w700));
       },
     );
   }

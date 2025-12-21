@@ -632,12 +632,8 @@ class _TokenBadge extends StatelessWidget {
           return _badge(text: appLocalizations.tenLeft, color: Colors.greenAccent);
         }
         final data = snapshot.data!.data() ?? {};
-        final storedDate = (data['freeTokensDate'] ?? '') as String;
-        final used = (data['freeTokensUsed'] ?? 0) as int;
-        final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
-        final effectiveUsed = storedDate == todayKey ? used : 0;
-        final left = (10 - effectiveUsed).clamp(0, 10);
-        return _badge(text: '$left left', color: left > 0 ? Colors.greenAccent : Colors.redAccent);
+        final tokenBalance = (data['tokenBalance'] ?? 0) as int;
+        return _badge(text: '$tokenBalance left', color: tokenBalance > 0 ? Colors.greenAccent : Colors.redAccent);
       },
     );
   }
