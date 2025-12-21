@@ -234,6 +234,9 @@ class AuthService {
               'role': 'guest',
               'isSuspended': false,
               'languageCode': languageCode, // 2. Thêm languageCode cho Guest
+              'tokenBalance': 10,
+              'lastTokenGrantDate': Timestamp.now(),
+              'activeSubscriptions': [],
             });
           } else {
             String? email = googleEmail ?? appleEmail ?? facebookUserData?['email'] ?? user.email;
@@ -259,6 +262,9 @@ class AuthService {
             'isSuspended': false,
             'languageCode': languageCode, // 3. Thêm languageCode cho người dùng thường
             'phone': user.phoneNumber,
+            'tokenBalance': 10, // Tặng 10 token cho user mới
+            'lastTokenGrantDate': Timestamp.now(),
+            'activeSubscriptions': [],
           });
         }
       } else {

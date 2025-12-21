@@ -1013,7 +1013,9 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
         break;
     }
 
-    if (widget.selectedPair != 'All Currency pairs') {
+    if (widget.selectedPair != 'All Commodities' && 
+        widget.selectedPair != 'All Currency Pairs' &&
+        widget.selectedPair != 'All Crypto Pairs') {
       filtered = filtered.where((s) => s.symbol == widget.selectedPair);
     }
 
@@ -1328,42 +1330,30 @@ class _SignalWebCard extends StatelessWidget {
     if (tier == 'elite') return true;
 
     final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-    final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
     try {
       final result = await FirebaseFirestore.instance.runTransaction<bool>((tx) async {
         final snap = await tx.get(docRef);
-        if (!snap.exists) {
-          tx.set(docRef, {
-            'uid': user.uid,
-            'email': user.email ?? 'guest_${user.uid}@minvest.com',
-            'subscriptionTier': 'free',
-            'freeTokensDate': todayKey,
-            'freeTokensUsed': 1,
-          }, SetOptions(merge: true));
-          return true;
-        } else {
-          final data = snap.data() as Map<String, dynamic>? ?? {};
-          String storedDate = (data['freeTokensDate'] ?? '') as String;
-          int used = (data['freeTokensUsed'] ?? 0) as int;
-          if (storedDate != todayKey) {
-            storedDate = todayKey;
-            used = 0;
-          }
-          if (used >= 10) {
-            return false;
-          }
+        if (!snap.exists) return false;
+
+        final data = snap.data() as Map<String, dynamic>? ?? {};
+        final currentBalance = (data['tokenBalance'] ?? 0) as int;
+
+        if (currentBalance > 0) {
           tx.update(docRef, {
-            'freeTokensDate': storedDate,
-            'freeTokensUsed': used + 1,
+            'tokenBalance': FieldValue.increment(-1),
           });
           return true;
+        } else {
+          return false;
         }
       });
       return result;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Không thể trừ token: $e')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không thể trừ token: $e')),
+        );
+      }
       return false;
     }
   }
@@ -1911,7 +1901,9 @@ class _HistorySectionState extends State<_HistorySection> {
         break;
     }
 
-    if (widget.selectedPair != 'All Currency pairs') {
+    if (widget.selectedPair != 'All Commodities' && 
+        widget.selectedPair != 'All Currency Pairs' &&
+        widget.selectedPair != 'All Crypto Pairs') {
       filtered = filtered.where((s) => s.symbol == widget.selectedPair);
     }
 
