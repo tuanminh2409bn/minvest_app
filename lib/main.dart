@@ -34,6 +34,7 @@ import 'web/landing/contact_page.dart';
 import 'web/landing/legal/terms_of_registration_page.dart';
 import 'web/landing/legal/operating_principles_page.dart';
 import 'web/landing/legal/terms_conditions_page.dart';
+import 'web/landing/payment_callback_screen.dart'; // Import PaymentCallbackScreen
 import 'features/auth/screens/welcome/signup_screen_web.dart';
 import 'features/auth/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -308,6 +309,9 @@ class _MyAppState extends State<MyApp> {
               '/terms-of-registration': (context) => const TermsOfRegistrationPage(),
               '/operating-principles': (context) => const OperatingPrinciplesPage(),
               '/terms-conditions': (context) => const TermsConditionsPage(),
+              // Payment callback routes
+              '/payment/success': (context) => const PaymentCallbackScreen(isSuccess: true),
+              '/payment/cancel': (context) => const PaymentCallbackScreen(isSuccess: false),
             },
             initialRoute: '/',
           );
