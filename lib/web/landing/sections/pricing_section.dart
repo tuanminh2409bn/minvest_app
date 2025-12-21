@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:minvest_forex_app/core/services/paypal_service_web.dart';
 import '../../theme/colors.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/spacing.dart';
@@ -29,8 +31,10 @@ class _PricingSectionState extends State<PricingSection> {
     final price = _isAnnual ? '\$460' : '\$78';
     final oldPrice = _isAnnual ? '\$920' : null;
     final badge = appLocalizations.save50Percent;
+    final suffix = _isAnnual ? '_12_months' : '_1_month';
     return [
       _PlanData(
+        id: 'gold$suffix',
         title: 'GOLD',
         price: price,
         oldPrice: oldPrice,
@@ -42,6 +46,7 @@ class _PricingSectionState extends State<PricingSection> {
         ),
       ),
       _PlanData(
+        id: 'forex$suffix',
         title: 'FOREX',
         price: price,
         oldPrice: oldPrice,
@@ -53,6 +58,7 @@ class _PricingSectionState extends State<PricingSection> {
         ),
       ),
       _PlanData(
+        id: 'crypto$suffix',
         title: 'CRYPTO',
         price: price,
         oldPrice: oldPrice,
@@ -204,6 +210,7 @@ class _PricingSectionState extends State<PricingSection> {
 }
 
 class _PlanData {
+  final String id;
   final String title;
   final String price;
   final String? oldPrice;
@@ -211,6 +218,7 @@ class _PlanData {
   final LinearGradient gradient;
 
   const _PlanData({
+    required this.id,
     required this.title,
     required this.price,
     required this.oldPrice,
@@ -349,10 +357,91 @@ class _AnimatedBorderCardState extends State<_AnimatedBorderCard> with SingleTic
   }
 }
 
-class _PricingCardContent extends StatelessWidget {
+class _PricingCardContent extends StatefulWidget {
   final _PlanData plan;
   final List<String> features;
   const _PricingCardContent({required this.plan, required this.features});
+
+  @override
+  State<_PricingCardContent> createState() => _PricingCardContentState();
+}
+
+class _PricingCardContentState extends State<_PricingCardContent> {
+  bool _isLoading = false;
+
+  Future<void> _handlePurchase() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      Navigator.of(context).pushNamed('/signin');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final paypalService = PaypalServiceWeb();
+      final orderID = await paypalService.createOrder(widget.plan.id);
+
+      if (orderID != null && mounted) {
+        // Show dialog to wait for user confirmation
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: const Color(0xFF1E1E1E),
+            title: const Text("Completing Payment", style: TextStyle(color: Colors.white)),
+            content: const Text(
+              "A PayPal window has been opened. Please complete the payment there.\n\nAfter you have paid, click 'I Have Paid' below.",
+              style: TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0070BA)), // PayPal Blue
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _verifyPayment(orderID);
+                },
+                child: const Text("I Have Paid", style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _verifyPayment(String orderID) async {
+    setState(() => _isLoading = true);
+    try {
+      final success = await PaypalServiceWeb().captureOrder(orderID);
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Payment Successful! Your account has been upgraded.')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Payment Verification Failed or Incomplete.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error verifying: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -375,16 +464,16 @@ class _PricingCardContent extends StatelessWidget {
                 children: [
                   const Icon(Icons.workspace_premium, color: Colors.white, size: 22),
                   const SizedBox(width: 8),
-                  Text(plan.title, style: AppTextStyles.h3.copyWith(color: Colors.white)),
+                  Text(widget.plan.title, style: AppTextStyles.h3.copyWith(color: Colors.white)),
                   const Spacer(),
-                  _saveBadge(plan.badge),
+                  _saveBadge(widget.plan.badge),
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
-              Text(plan.price, style: AppTextStyles.h1.copyWith(fontSize: 34, color: const Color(0xFF00B2FF))),
-              if (plan.oldPrice != null && plan.oldPrice!.isNotEmpty)
+              Text(widget.plan.price, style: AppTextStyles.h1.copyWith(fontSize: 34, color: const Color(0xFF00B2FF))),
+              if (widget.plan.oldPrice != null && widget.plan.oldPrice!.isNotEmpty)
                 Text(
-                  plan.oldPrice!,
+                  widget.plan.oldPrice!,
                   style: AppTextStyles.body.copyWith(
                     color: Colors.white54,
                     decoration: TextDecoration.lineThrough,
@@ -393,7 +482,7 @@ class _PricingCardContent extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               Text(appLocalizations.whatsIncluded, style: AppTextStyles.body.copyWith(color: Colors.white70)),
               const SizedBox(height: AppSpacing.sm),
-              ...features.map((f) => _feature(f)).toList(),
+              ...widget.features.map((f) => _feature(f)).toList(),
               const SizedBox(height: AppSpacing.lg),
               SizedBox(
                 width: double.infinity,
@@ -404,10 +493,10 @@ class _PricingCardContent extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/signup');
-                  },
-                  child: Text(appLocalizations.chooseThisPlan),
+                  onPressed: _isLoading ? null : _handlePurchase,
+                  child: _isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                      : Text(appLocalizations.chooseThisPlan),
                 ),
               ),
             ],

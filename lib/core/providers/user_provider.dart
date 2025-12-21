@@ -22,6 +22,10 @@ class UserProvider with ChangeNotifier {
   // --- THAY ĐỔI 1: Thay thế các trường cũ bằng trường mới chung hơn ---
   bool _requiresSessionReset = false;
   String? _sessionResetReason;
+  
+  // --- THAY ĐỔI: Token & Subscriptions ---
+  int _tokenBalance = 0;
+  List<String> _activeSubscriptions = [];
 
   String? get uid => _uid;
   String? get userTier => _userTier;
@@ -34,6 +38,8 @@ class UserProvider with ChangeNotifier {
   // --- THAY ĐỔI 2: Cung cấp getter cho các thuộc tính mới ---
   bool get requiresSessionReset => _requiresSessionReset;
   String? get sessionResetReason => _sessionResetReason;
+  int get tokenBalance => _tokenBalance;
+  List<String> get activeSubscriptions => _activeSubscriptions;
 
   StreamSubscription<DocumentSnapshot>? _userSubscription;
   StreamSubscription<User?>? _authStateSubscription;
@@ -79,6 +85,9 @@ class UserProvider with ChangeNotifier {
         // --- THAY ĐỔI 3: Đọc dữ liệu từ các trường mới trên Firestore ---
         _requiresSessionReset = data['requiresSessionReset'] ?? false;
         _sessionResetReason = data['sessionResetReason'];
+        
+        _tokenBalance = (data['tokenBalance'] ?? 0) as int;
+        _activeSubscriptions = List<String>.from(data['activeSubscriptions'] ?? []);
 
         _status =
         isFromCache ? UserDataStatus.fromCache : UserDataStatus.fromServer;
@@ -129,6 +138,8 @@ class UserProvider with ChangeNotifier {
     // --- THAY ĐỔI 5: Reset các trường mới ---
     _requiresSessionReset = false;
     _sessionResetReason = null;
+    _tokenBalance = 0;
+    _activeSubscriptions = [];
   }
 
   void clearVerificationStatus() {

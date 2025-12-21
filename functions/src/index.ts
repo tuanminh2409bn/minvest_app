@@ -13,6 +13,7 @@ import { Response } from "express";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getLocalizedPayload } from "./localization";
 import * as jose from "node-jose";
+import * as paypal from '@paypal/checkout-server-sdk';
 
 // =================================================================
 // === KHỞI TẠO CÁC DỊCH VỤ CƠ BẢN ===
@@ -24,6 +25,12 @@ const translateClient = new translate.Translate();
 const PRODUCT_PRICES: { [key: string]: number } = {
   'elite_1_month': 78,
   'elite_12_months': 460,
+  'gold_1_month': 78,
+  'gold_12_months': 460,
+  'forex_1_month': 78,
+  'forex_12_months': 460,
+  'crypto_1_month': 78,
+  'crypto_12_months': 460,
   'minvest.01': 78,
   'minvest.12': 460,
 };
@@ -1048,3 +1055,196 @@ export const submitContactMessage = onCall({ region: "asia-southeast1" }, async 
         throw new HttpsError("internal", "Không thể lưu thông tin liên hệ, vui lòng thử lại sau.");
     }
 });
+
+// =================================================================
+// === PAYPAL INTEGRATION ===
+// =================================================================
+
+function getPaypalClient() {
+    const clientId = process.env.PAYPAL_CLIENT_ID || 'sb';
+    const clientSecret = process.env.PAYPAL_CLIENT_SECRET || '';
+    // Tự động chuyển sang Live nếu biến môi trường PAYPAL_MODE = 'live'
+    const environment = process.env.PAYPAL_MODE === 'live' 
+        ? new paypal.core.LiveEnvironment(clientId, clientSecret)
+        : new paypal.core.SandboxEnvironment(clientId, clientSecret);
+    
+    return new paypal.core.PayPalHttpClient(environment);
+}
+
+export const createPaypalOrder = onCall({ region: "asia-southeast1", secrets: ["PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET"] }, async (request) => {
+    const { packageId } = request.data;
+    const userId = request.auth?.uid;
+
+    if (!userId) throw new HttpsError("unauthenticated", "User must be logged in.");
+    if (!packageId || !PRODUCT_PRICES[packageId]) throw new HttpsError("invalid-argument", "Invalid package ID.");
+
+    const price = PRODUCT_PRICES[packageId];
+    const client = getPaypalClient();
+    const requestPaypal = new paypal.orders.OrdersCreateRequest();
+    
+    requestPaypal.prefer("return=representation");
+    requestPaypal.requestBody({
+        intent: "CAPTURE",
+        purchase_units: [{
+            amount: {
+                currency_code: "USD",
+                value: price.toString()
+            },
+            custom_id: `${userId}|${packageId}`,
+            description: `Payment for ${packageId.replace(/_/g, ' ').toUpperCase()}`
+        }],
+        application_context: {
+            brand_name: "Minvest AI",
+            landing_page: "BILLING",
+            user_action: "PAY_NOW",
+            return_url: "https://minvest-app.web.app/payment/success", 
+            cancel_url: "https://minvest-app.web.app/payment/cancel"
+        }
+    });
+
+    try {
+        const response = await client.execute(requestPaypal);
+        const orderID = response.result.id;
+        const approveLink = response.result.links.find((link: any) => link.rel === "approve")?.href;
+
+        return { orderID, approveLink };
+    } catch (error: any) {
+        functions.logger.error("Error creating PayPal order:", error);
+        throw new HttpsError("internal", "Unable to create PayPal order.", error.message);
+    }
+});
+
+export const capturePaypalOrder = onCall({ region: "asia-southeast1", secrets: ["PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET"] }, async (request) => {
+    const { orderID } = request.data;
+    const userId = request.auth?.uid;
+
+    if (!userId) throw new HttpsError("unauthenticated", "User must be logged in.");
+    if (!orderID) throw new HttpsError("invalid-argument", "Missing orderID.");
+
+    const client = getPaypalClient();
+    const requestPaypal = new paypal.orders.OrdersCaptureRequest(orderID);
+    requestPaypal.requestBody({});
+
+    try {
+        const response = await client.execute(requestPaypal);
+        const captureData = response.result;
+
+        if (captureData.status === "COMPLETED") {
+            const purchaseUnit = captureData.purchase_units[0];
+            const customId = purchaseUnit.custom_id;
+            if (!customId) throw new Error("Missing custom_id in transaction.");
+
+            const [uidFromOrder, packageId] = customId.split("|");
+            
+            const amountPaid = parseFloat(purchaseUnit.payments.captures[0].amount.value);
+            
+            const now = new Date();
+            let expiryDate = new Date();
+            if (packageId.includes("1_month")) {
+                expiryDate.setMonth(expiryDate.getMonth() + 1);
+            } else if (packageId.includes("12_months")) {
+                expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+            }
+
+            const packageType = packageId.split("_")[0]; // gold, forex, crypto, elite
+
+            const userRef = firestore.collection("users").doc(userId);
+            const userTransactionRef = userRef.collection("transactions").doc(orderID);
+
+            await firestore.runTransaction(async (transaction) => {
+                const userDoc = await transaction.get(userRef);
+                const userData = userDoc.data() || {};
+                
+                let updatePayload: any = {
+                    totalPaidAmount: admin.firestore.FieldValue.increment(amountPaid),
+                };
+
+                if (packageType === 'elite') {
+                    updatePayload.subscriptionTier = 'elite';
+                    updatePayload.subscriptionExpiryDate = admin.firestore.Timestamp.fromDate(expiryDate);
+                } else {
+                    const currentSubs = new Set<string>(userData.activeSubscriptions || []);
+                    currentSubs.add(packageType);
+                    
+                    updatePayload.activeSubscriptions = Array.from(currentSubs);
+                    updatePayload[`subscriptionsExpiry.${packageType}`] = admin.firestore.Timestamp.fromDate(expiryDate);
+                }
+
+                transaction.set(userRef, updatePayload, { merge: true });
+
+                transaction.set(userTransactionRef, {
+                    amount: amountPaid,
+                    productId: packageId,
+                    paymentMethod: "paypal",
+                    transactionDate: admin.firestore.FieldValue.serverTimestamp(),
+                    paypalOrderId: orderID,
+                    status: "COMPLETED"
+                });
+            });
+
+            return { status: "success", message: "Purchase successful!" };
+        } else {
+            throw new HttpsError("aborted", "PayPal capture failed or status not COMPLETED.");
+        }
+
+    } catch (error: any) {
+        functions.logger.error("Error capturing PayPal order:", error);
+        throw new HttpsError("internal", "Unable to capture PayPal order.", error.message);
+    }
+});
+
+// =================================================================
+// === FUNCTION CỘNG TOKEN HÀNG NGÀY CHO FREE USER ===
+// =================================================================
+export const grantDailyFreeTokens = onSchedule(
+    {
+        schedule: "1 0 * * *", // Chạy lúc 00:01 mỗi ngày
+        timeZone: "Asia/Ho_Chi_Minh",
+        region: "asia-southeast1",
+        memory: "512MiB",
+        timeoutSeconds: 540 // Tăng timeout lên 9 phút cho xử lý batch lớn
+    },
+    async (event) => {
+        functions.logger.log("⏰ Bắt đầu cộng token hàng ngày cho tài khoản Free...");
+        
+        const batchSize = 500;
+        const usersRef = firestore.collection("users");
+        
+        // Chỉ lấy những user là 'free' (hoặc có thể bỏ điều kiện này nếu muốn cộng cho tất cả)
+        const snapshot = await usersRef.where("subscriptionTier", "==", "free").get();
+        
+        if (snapshot.empty) {
+            functions.logger.log("Không có user Free nào để cộng token.");
+            return;
+        }
+
+        let batch = firestore.batch();
+        let operationCounter = 0;
+        let batchCount = 0;
+
+        for (const doc of snapshot.docs) {
+            // Cộng 1 token vào tokenBalance
+            batch.update(doc.ref, {
+                tokenBalance: admin.firestore.FieldValue.increment(1)
+            });
+            
+            operationCounter++;
+
+            // Nếu đạt giới hạn batch (500), commit và tạo batch mới
+            if (operationCounter >= batchSize) {
+                await batch.commit();
+                functions.logger.log(`Đã commit batch thứ ${++batchCount} (${operationCounter} users)`);
+                batch = firestore.batch();
+                operationCounter = 0;
+            }
+        }
+
+        // Commit những user còn lại trong batch cuối cùng
+        if (operationCounter > 0) {
+            await batch.commit();
+            functions.logger.log(`Đã commit batch cuối cùng (${operationCounter} users)`);
+        }
+
+        functions.logger.log(`✅ Hoàn tất cộng token cho tổng cộng ${snapshot.size} user.`);
+    }
+);
