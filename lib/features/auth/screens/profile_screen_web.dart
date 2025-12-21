@@ -6,9 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
 import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
-import 'package:minvest_forex_app/web/theme/colors.dart';
 import 'package:minvest_forex_app/web/theme/text_styles.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
@@ -30,7 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = FirebaseAuth.instance.currentUser;
     final name = user?.displayName?.trim().isNotEmpty == true
         ? user!.displayName!
-        : appLocalizations.yourName; // Localize 'User'
+        : appLocalizations.yourName;
     final email = user?.email ?? '';
 
     return Scaffold(
@@ -55,7 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           email: email,
                           tabIndex: _tabIndex,
                           onTabChanged: (i) => setState(() => _tabIndex = i),
-                          appLocalizations: appLocalizations, // Pass appLocalizations
+                          appLocalizations: appLocalizations,
                         ),
                         const SizedBox(width: 24),
                         Expanded(
@@ -89,25 +87,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
+// --- Helpers ---
+String _formatDate(dynamic date) {
+  if (date == null) return '---';
+  if (date is Timestamp) return DateFormat('dd/MM/yyyy').format(date.toDate());
+  return '---';
+}
+
+dynamic _getMapValueCaseInsensitive(Map<String, dynamic> map, String key) {
+  if (map.isEmpty) return null;
+  final lowerKey = key.toLowerCase();
+  for (final k in map.keys) {
+    if (k.toLowerCase() == lowerKey) return map[k];
+  }
+  return null;
+}
+
+dynamic _getPackageDate(Map<String, dynamic> userData, String fieldPrefix, String packageKey) {
+  final nested = userData[fieldPrefix];
+  if (nested is Map<String, dynamic>) {
+    final val = _getMapValueCaseInsensitive(nested, packageKey);
+    if (val != null) return val;
+  }
+  // Fallback for flat keys like "subscriptionsExpiry.gold"
+  final targetKey = '$fieldPrefix.$packageKey'.toLowerCase();
+  for (final k in userData.keys) {
+    if (k.toLowerCase() == targetKey) return userData[k];
+  }
+  return null;
+}
+
+// --- Components ---
+
 class _ProfileSidebar extends StatelessWidget {
   final String name;
   final String email;
   final int tabIndex;
   final ValueChanged<int> onTabChanged;
-  final AppLocalizations appLocalizations; // Added AppLocalizations
+  final AppLocalizations appLocalizations;
+
   const _ProfileSidebar({
     required this.name,
     required this.email,
     required this.tabIndex,
     required this.onTabChanged,
-    required this.appLocalizations, // Added to constructor
+    required this.appLocalizations,
   });
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final userRole = userProvider.role ?? 'user';
-    debugPrint('Current User Role: "$userRole"'); // Debug print
 
     return Container(
       width: 260,
@@ -138,7 +168,6 @@ class _ProfileSidebar extends StatelessWidget {
                     Text(name, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
                     if (email.isNotEmpty)
                       Text(email, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
-
                   ],
                 ),
               ),
@@ -211,7 +240,7 @@ class _AdminPanelButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E2C),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+          border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
         ),
         alignment: Alignment.centerLeft,
         child: Row(
@@ -238,6 +267,7 @@ class _LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return InkWell(
       onTap: () {
         context.read<AuthBloc>().add(SignOutRequested(providersToReset: [
@@ -253,7 +283,7 @@ class _LogoutButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF1E0A0A),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+          border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
         ),
         alignment: Alignment.centerLeft,
         child: Row(
@@ -261,7 +291,7 @@ class _LogoutButton extends StatelessWidget {
             const Icon(Icons.logout, color: Colors.redAccent, size: 20),
             const SizedBox(width: 12),
             Text(
-              AppLocalizations.of(context)!.logout,
+              l10n.logout,
               style: AppTextStyles.body.copyWith(
                 color: Colors.redAccent,
                 fontWeight: FontWeight.w600,
@@ -275,63 +305,152 @@ class _LogoutButton extends StatelessWidget {
   }
 }
 
-
 class _OverviewContent extends StatelessWidget {
   const _OverviewContent();
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _CardContainer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(appLocalizations.signalsPlan, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
-              const SizedBox(height: 12),
-              Row(
+    if (user == null) return const SizedBox.shrink();
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final userData = snapshot.data?.data() as Map<String, dynamic>? ?? {};
+        final tier = (userData['subscriptionTier'] as String?)?.toLowerCase() ?? 'free';
+        final tokenBalance = userData['tokenBalance'] ?? 0;
+        final activeSubs = List<String>.from(userData['activeSubscriptions'] ?? []);
+
+        final isElite = tier == 'elite';
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Token & Tier Card
+            _CardContainer(
+              child: Row(
                 children: [
-                  Expanded(child: _PlanTile(title: appLocalizations.goldSignals)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _PlanTile(title: appLocalizations.forexSignals)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _PlanTile(title: appLocalizations.cryptoSignals)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Current Plan', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                        const SizedBox(height: 4),
+                        Text(
+                          isElite ? 'ELITE' : 'STANDARD',
+                          style: AppTextStyles.h2.copyWith(color: isElite ? Colors.purpleAccent : Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(width: 1, height: 40, color: Colors.white12),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Available Tokens', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                          const SizedBox(height: 4),
+                          Text(
+                            isElite ? 'UNLIMITED' : '$tokenBalance',
+                            style: AppTextStyles.h2.copyWith(
+                              color: isElite ? Colors.greenAccent : (tokenBalance > 0 ? Colors.greenAccent : Colors.redAccent),
+                              fontWeight: FontWeight.bold
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ],
+            ),
+            const SizedBox(height: 16),
+            
+            // Subscriptions List
+            Text('Subscriptions', style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18)),
+            const SizedBox(height: 12),
+            
+            _buildSubscriptionCard(context, 'Gold', 'gold', userData, activeSubs, isElite),
+            const SizedBox(height: 12),
+            _buildSubscriptionCard(context, 'Forex', 'forex', userData, activeSubs, isElite),
+            const SizedBox(height: 12),
+            _buildSubscriptionCard(context, 'Crypto', 'crypto', userData, activeSubs, isElite),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSubscriptionCard(BuildContext context, String title, String key, Map<String, dynamic> userData, List<String> activeSubs, bool isElite) {
+    final isActive = activeSubs.any((s) => s.toLowerCase() == key.toLowerCase());
+    final startDate = _getPackageDate(userData, 'subscriptionsStart', key);
+    final expiryDate = _getPackageDate(userData, 'subscriptionsExpiry', key);
+    
+    String statusText = 'Inactive';
+    Color statusColor = Colors.grey;
+    String detailText = 'Uses 1 Token per view';
+
+    if (isElite) {
+      statusText = 'Active (Elite)';
+      statusColor = Colors.purpleAccent;
+      detailText = 'Unlimited Access';
+    } else if (isActive) {
+      statusText = 'Active';
+      statusColor = Colors.greenAccent;
+      detailText = '${_formatDate(startDate)} - ${_formatDate(expiryDate)}';
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111111),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: isActive || isElite ? statusColor.withValues(alpha: 0.3) : Colors.white12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              key == 'gold' ? Icons.monetization_on : (key == 'crypto' ? Icons.currency_bitcoin : Icons.currency_exchange),
+              color: statusColor,
+              size: 24,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _CardContainer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(appLocalizations.aiMinvest, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F0F0F),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white12),
-                ),
-                child: Row(
-                  children: [
-                    Text(appLocalizations.yourTokens, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
-                    const SizedBox(width: 12),
-                    _TokenBadge(uid: user?.uid),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.help_outline, size: 16, color: Colors.white54),
-                  ],
-                ),
-              ),
-            ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(height: 4),
+                Text(detailText, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+              ],
+            ),
           ),
-        ),
-      ],
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+            ),
+            child: Text(
+              statusText.toUpperCase(),
+              style: AppTextStyles.caption.copyWith(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -442,132 +561,80 @@ class _PaymentContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context)!;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const SizedBox.shrink();
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text('Transaction History', style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18)),
+        const SizedBox(height: 16),
         _CardContainer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(appLocalizations.paymentHistory, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
-              const SizedBox(height: 6),
-              Text(
-                appLocalizations.chooseSignalNotificationTypes,
-                style: AppTextStyles.caption.copyWith(color: Colors.white70),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Text(appLocalizations.searchLabel, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF111111),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.white24),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        appLocalizations.writeConcernsHere,
-                        style: AppTextStyles.caption.copyWith(color: Colors.white38),
-                      ),
-                    ),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .collection('transactions')
+                .orderBy('transactionDate', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Text('No transactions found.', style: AppTextStyles.body.copyWith(color: Colors.white54)),
                   ),
-                  const SizedBox(width: 16),
-                  Text(appLocalizations.filterBy, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
-                  const SizedBox(width: 8),
-                  Container(
-                    height: 44,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF111111),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white24),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(appLocalizations.allTime, style: AppTextStyles.caption.copyWith(color: Colors.white)),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_drop_down, color: Colors.white70),
+                );
+              }
+
+              final docs = snapshot.data!.docs;
+
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  headingRowColor: WidgetStateProperty.all(Colors.white10),
+                  columns: const [
+                    DataColumn(label: Text('Date', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Product', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Amount', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Method', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Status', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                  ],
+                  rows: docs.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final date = (data['transactionDate'] as Timestamp?)?.toDate();
+                    final amount = data['amount'];
+                    final product = (data['productId'] as String?)?.toUpperCase() ?? 'N/A';
+                    final method = (data['paymentMethod'] as String?) ?? 'N/A';
+                    
+                    return DataRow(
+                      cells: [
+                        DataCell(Text(date != null ? DateFormat('dd/MM/yyyy').format(date) : '---', style: const TextStyle(color: Colors.white70))),
+                        DataCell(Text(product, style: const TextStyle(color: Colors.white))),
+                        DataCell(Text('\$${amount ?? 0}', style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold))),
+                        DataCell(Text(method, style: const TextStyle(color: Colors.white70))),
+                        DataCell(
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text('Success', style: TextStyle(color: Colors.green, fontSize: 11)),
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          height: 260,
-          decoration: BoxDecoration(
-            color: const Color(0xFF101010),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white24),
+                    );
+                  }).toList(),
+                ),
+              );
+            },
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PlanTile extends StatelessWidget {
-  final String title;
-  const _PlanTile({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context)!;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F0F0F),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(title, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
-              const Spacer(),
-              _DeactivateButton(),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(appLocalizations.startDate, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
-          Text('...', style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13)),
-          const SizedBox(height: 4),
-          Text(appLocalizations.endDate, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
-          Text('...', style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13)),
-        ],
-      ),
-    );
-  }
-}
-
-class _DeactivateButton extends StatelessWidget {
-  const _DeactivateButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context)!;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Text(
-        appLocalizations.deactivate,
-        style: AppTextStyles.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
-      ),
     );
   }
 }
@@ -586,67 +653,6 @@ class _CardContainer extends StatelessWidget {
         border: Border.all(color: Colors.white24),
       ),
       child: child,
-    );
-  }
-}
-
-class _PlaceholderCard extends StatelessWidget {
-  final String title;
-  final String content;
-  const _PlaceholderCard({required this.title, required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    return _CardContainer(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 12),
-          Text(content, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
-        ],
-      ),
-    );
-  }
-}
-
-class _TokenBadge extends StatelessWidget {
-  final String? uid;
-  const _TokenBadge({this.uid});
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context)!;
-    final userTier = Provider.of<UserProvider?>(context, listen: false)?.userTier?.toLowerCase() ?? 'free';
-    final isElite = userTier == 'elite';
-    if (isElite) {
-      return _badge(text: appLocalizations.unlimited, color: Colors.greenAccent);
-    }
-    if (uid == null) {
-      return _badge(text: appLocalizations.tenLeft, color: Colors.greenAccent);
-    }
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return _badge(text: appLocalizations.tenLeft, color: Colors.greenAccent);
-        }
-        final data = snapshot.data!.data() ?? {};
-        final tokenBalance = (data['tokenBalance'] ?? 0) as int;
-        return _badge(text: '$tokenBalance left', color: tokenBalance > 0 ? Colors.greenAccent : Colors.redAccent);
-      },
-    );
-  }
-
-  Widget _badge({required String text, required Color color}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Text(text, style: AppTextStyles.body.copyWith(color: color, fontWeight: FontWeight.w700)),
     );
   }
 }

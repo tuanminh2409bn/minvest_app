@@ -1153,6 +1153,7 @@ export const capturePaypalOrder = onCall({ region: "asia-southeast1" }, async (r
             }
 
             const packageType = packageId.split("_")[0]; // gold, forex, crypto, elite
+            const startDate = new Date(); // Record start date
 
             const userRef = firestore.collection("users").doc(userId);
             const userTransactionRef = userRef.collection("transactions").doc(orderID);
@@ -1167,12 +1168,14 @@ export const capturePaypalOrder = onCall({ region: "asia-southeast1" }, async (r
 
                 if (packageType === 'elite') {
                     updatePayload.subscriptionTier = 'elite';
+                    updatePayload.subscriptionStartDate = admin.firestore.Timestamp.fromDate(startDate);
                     updatePayload.subscriptionExpiryDate = admin.firestore.Timestamp.fromDate(expiryDate);
                 } else {
                     const currentSubs = new Set<string>(userData.activeSubscriptions || []);
                     currentSubs.add(packageType);
                     
                     updatePayload.activeSubscriptions = Array.from(currentSubs);
+                    updatePayload[`subscriptionsStart.${packageType}`] = admin.firestore.Timestamp.fromDate(startDate);
                     updatePayload[`subscriptionsExpiry.${packageType}`] = admin.firestore.Timestamp.fromDate(expiryDate);
                 }
 
@@ -1252,5 +1255,73 @@ export const grantDailyFreeTokens = onSchedule(
         }
 
         functions.logger.log(`✅ Hoàn tất cộng token cho tổng cộng ${snapshot.size} user.`);
+    }
+);
+
+// =================================================================
+// === FUNCTION KIỂM TRA VÀ HỦY GÓI HẾT HẠN ===
+// =================================================================
+export const checkExpiredSubscriptions = onSchedule(
+    {
+        schedule: "0 * * * *", // Chạy mỗi giờ
+        timeZone: "Asia/Ho_Chi_Minh",
+        region: "asia-southeast1",
+        memory: "512MiB",
+    },
+    async (event) => {
+        functions.logger.log("⏰ Bắt đầu kiểm tra các gói đăng ký hết hạn...");
+        const now = admin.firestore.Timestamp.now();
+        const batch = firestore.batch();
+        let operationCount = 0;
+
+        // 1. Kiểm tra gói ELITE hết hạn
+        const eliteQuery = await firestore.collection("users")
+            .where("subscriptionTier", "==", "elite")
+            .where("subscriptionExpiryDate", "<=", now)
+            .get();
+
+        eliteQuery.forEach((doc) => {
+            functions.logger.log(`User ${doc.id} hết hạn gói ELITE. Hạ cấp về FREE.`);
+            batch.update(doc.ref, {
+                subscriptionTier: "free",
+                subscriptionExpiryDate: admin.firestore.FieldValue.delete(),
+                // Reset activeSubscriptions nếu cần, hoặc giữ nguyên nếu họ có mua gói lẻ
+                // Ở đây giả sử Elite bao trùm tất cả, khi hết Elite thì về Free và check các gói lẻ sau
+            });
+            operationCount++;
+        });
+
+        // 2. Kiểm tra các gói lẻ (Gold, Forex, Crypto) hết hạn
+        // Cần index cho subscriptionsExpiry.gold, .forex, .crypto nếu dữ liệu lớn
+        const packages = ['gold', 'forex', 'crypto'];
+        
+        for (const pkg of packages) {
+            // Tìm những user có gói này đang active NHƯNG ngày hết hạn đã qua
+            const expiredQuery = await firestore.collection("users")
+                .where("activeSubscriptions", "array-contains", pkg)
+                // Lưu ý: Query này yêu cầu activeSubscriptions chứa pkg
+                // Và ta sẽ lọc client-side hoặc composite query nếu index cho phép.
+                // Để đơn giản và chính xác mà không cần quá nhiều index phức tạp ngay lập tức:
+                // Ta query field expiry cụ thể < now.
+                .where(`subscriptionsExpiry.${pkg}`, "<=", now)
+                .get();
+
+            expiredQuery.forEach((doc) => {
+                functions.logger.log(`User ${doc.id} hết hạn gói ${pkg.toUpperCase()}. Gỡ bỏ khỏi activeSubscriptions.`);
+                batch.update(doc.ref, {
+                    activeSubscriptions: admin.firestore.FieldValue.arrayRemove(pkg),
+                    [`subscriptionsExpiry.${pkg}`]: admin.firestore.FieldValue.delete(), // Xóa ngày hết hạn để sạch data
+                    [`subscriptionsStart.${pkg}`]: admin.firestore.FieldValue.delete(), // Xóa ngày bắt đầu
+                });
+                operationCount++;
+            });
+        }
+
+        if (operationCount > 0) {
+            await batch.commit();
+            functions.logger.log(`✅ Đã xử lý ${operationCount} trường hợp hết hạn.`);
+        } else {
+            functions.logger.log("Không tìm thấy gói nào hết hạn trong đợt quét này.");
+        }
     }
 );

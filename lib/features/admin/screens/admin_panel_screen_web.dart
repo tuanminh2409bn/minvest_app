@@ -67,45 +67,166 @@ class _UserManagementViewState extends State<UserManagementView> {
   final AdminService _adminService = AdminService();
   final Set<String> _selectedUserIds = {};
 
-  void _handleUpdateUsers() {
-    if (_selectedUserIds.isEmpty) return;
-
-    showDialog(
-      context: context,
-      builder: (context) => _UpdateUserTierDialog(
-        onConfirm: (tier, reason) {
-          _executeUpdateAction(tier: tier, reason: reason);
-        },
-      ),
-    );
+  // Helper to format dates
+  String _formatDate(dynamic date) {
+    if (date == null) return '---';
+    if (date is Timestamp) return DateFormat('dd/MM/yy').format(date.toDate());
+    return '---';
   }
 
-  Future<void> _executeUpdateAction({
-    required String tier,
-    required String reason,
-  }) async {
-    final message = await _adminService.updateUserSubscriptionTier(
-      userIds: _selectedUserIds.toList(),
-      tier: tier,
-      reason: reason,
+  // Helper to get map value ignoring case (e.g. finds 'Gold' when asking for 'gold')
+  dynamic _getMapValueCaseInsensitive(Map<String, dynamic> map, String key) {
+    if (map.isEmpty) return null;
+    final lowerKey = key.toLowerCase();
+    for (final k in map.keys) {
+      if (k.toLowerCase() == lowerKey) return map[k];
+    }
+    return null;
+  }
+
+  // Robust helper to get package date (handles both nested Map and dot-notation keys)
+  dynamic _getPackageDate(Map<String, dynamic> userData, String fieldPrefix, String packageKey) {
+    // 1. Try nested map (Standard)
+    final nested = userData[fieldPrefix];
+    if (nested is Map<String, dynamic>) {
+      final val = _getMapValueCaseInsensitive(nested, packageKey);
+      if (val != null) return val;
+    }
+
+    // 2. Try flat dot-notation key (Legacy/Bug fallback)
+    // Looks for keys like "subscriptionsExpiry.gold"
+    final targetKey = '$fieldPrefix.$packageKey'.toLowerCase();
+    for (final k in userData.keys) {
+      if (k.toLowerCase() == targetKey) {
+        return userData[k];
+      }
+    }
+    
+    return null;
+  }
+
+  // --- UPDATE LOGIC ---
+
+  // 1. Update Token Balance
+  Future<void> _updateTokenBalance(String userId, int currentBalance) async {
+    final controller = TextEditingController(text: currentBalance.toString());
+    final newBalance = await showDialog<int>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cập nhật Token'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          decoration: const InputDecoration(labelText: 'Số lượng Token'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Hủy')),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, int.tryParse(controller.text)),
+            child: const Text('Lưu'),
+          ),
+        ],
+      ),
     );
-    setState(() => _selectedUserIds.clear());
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+
+    if (newBalance != null && newBalance != currentBalance) {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'tokenBalance': newBalance,
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã cập nhật token!')));
     }
   }
 
-  String _formatPayment(dynamic amount) {
-    if (amount == null || amount is! num || amount == 0) return 'N/A';
-    final format = NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0);
-    return '\$${format.format(amount)}'.trim();
+  // 2. Update Subscription Package (Gold, Forex, Crypto)
+  Future<void> _updatePackageDates(String userId, String packageKey, Timestamp? currentStart, Timestamp? currentExpiry) async {
+    // Pick Start Date
+    final DateTime? startDate = await showDatePicker(
+      context: context,
+      initialDate: currentStart?.toDate() ?? DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+      helpText: 'Chọn ngày BẮT ĐẦU gói ${packageKey.toUpperCase()}',
+      cancelText: 'Hủy Gói',
+    );
+
+    if (!mounted) return;
+
+    if (startDate != null) {
+      // Pick Expiry Date
+      final DateTime? expiryDate = await showDatePicker(
+        context: context,
+        initialDate: currentExpiry?.toDate() ?? startDate.add(const Duration(days: 30)),
+        firstDate: startDate,
+        lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+        helpText: 'Chọn ngày HẾT HẠN gói ${packageKey.toUpperCase()}',
+      );
+
+      if (!mounted) return;
+
+      if (expiryDate != null) {
+        await FirebaseFirestore.instance.collection('users').doc(userId).update({
+          'subscriptionsStart.$packageKey': Timestamp.fromDate(startDate),
+          'subscriptionsExpiry.$packageKey': Timestamp.fromDate(expiryDate),
+          'activeSubscriptions': FieldValue.arrayUnion([packageKey]),
+        });
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Đã cập nhật ngày cho gói ${packageKey.toUpperCase()}!')));
+      }
+    } else {
+      // Logic xóa gói nếu bấm Cancel ở bước chọn ngày bắt đầu
+      if (currentStart != null || currentExpiry != null) {
+        final confirmDelete = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Xóa gói ${packageKey.toUpperCase()}?'),
+            content: const Text('Người dùng sẽ mất quyền truy cập vào gói này.'),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
+              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Xóa', style: TextStyle(color: Colors.red))),
+            ],
+          ),
+        );
+
+        if (confirmDelete == true) {
+          await FirebaseFirestore.instance.collection('users').doc(userId).update({
+            'subscriptionsStart.$packageKey': FieldValue.delete(),
+            'subscriptionsExpiry.$packageKey': FieldValue.delete(),
+            'activeSubscriptions': FieldValue.arrayRemove([packageKey]),
+          });
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Đã xóa gói ${packageKey.toUpperCase()}!')));
+        }
+      }
+    }
+  }
+
+  // 3. Update Role (Tier)
+  void _handleSingleUserTierUpdate(String userId, String currentTier) {
+    showDialog(
+      context: context,
+      builder: (context) => _UpdateUserTierDialog(
+        initialTier: currentTier,
+        onConfirm: (tier, reason) async {
+          final message = await _adminService.updateUserSubscriptionTier(
+            userIds: [userId],
+            tier: tier,
+            reason: reason,
+          );
+          if (!mounted) return;
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quản lý Users (${_selectedUserIds.length} chọn)'),
+        title: Text('Quản lý User & Gói Dịch Vụ (${_selectedUserIds.length} chọn)'),
         actions: [
           if (_selectedUserIds.isNotEmpty)
             IconButton(
@@ -115,135 +236,214 @@ class _UserManagementViewState extends State<UserManagementView> {
             ),
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('users').orderBy('displayName').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('Không có người dùng nào.'));
-          }
-          final userDocs = snapshot.data!.docs;
+      body: SizedBox.expand( // Đảm bảo chiếm full chiều rộng
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance.collection('users').orderBy('createdAt', descending: true).snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('Không có người dùng nào.'));
+            }
+            final userDocs = snapshot.data!.docs;
 
-          return SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                showCheckboxColumn: true,
-                columns: const [
-                  DataColumn(label: Text('Tên & Email')),
-                  DataColumn(label: Text('Group')),
-                  DataColumn(label: Text('Trạng thái')),
-                  DataColumn(label: Text('Lý do Cập nhật')),
-                  DataColumn(label: Text('Payment')),
-                  DataColumn(label: Text('Mobile UID')),
-                  DataColumn(label: Text('Exness Client UID')),
-                  DataColumn(label: Text('Exness Account')),
-                  DataColumn(label: Text('Ngày tạo')),
-                  DataColumn(label: Text('Ngày hết hạn')),
-                ],
-                rows: userDocs.map((doc) {
-                  final userData = doc.data() as Map<String, dynamic>;
-                  final userId = doc.id;
-                  final isSelected = _selectedUserIds.contains(userId);
-                  final Timestamp? createdAt = userData['createdAt'];
-                  final Timestamp? expiryDate = userData['subscriptionExpiryDate'];
-                  final reason = userData['sessionResetReason'] ?? userData['updateReason'] ?? userData['downgradeReason'] ?? '';
-
-                  return DataRow(
-                    selected: isSelected,
-                    onSelectChanged: (selected) {
-                      setState(() {
-                        if (selected == true) {
-                          _selectedUserIds.add(userId);
-                        } else {
-                          _selectedUserIds.remove(userId);
-                        }
-                      });
-                    },
-                    cells: [
-                      DataCell(
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(userData['displayName'] ?? 'N/A', style: const TextStyle(fontWeight: FontWeight.bold)),
-                            Text(userData['email'] ?? 'N/A', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                      DataCell(Text(userData['subscriptionTier']?.toUpperCase() ?? 'FREE')),
-                      DataCell(
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text('Active'),
-                        ),
-                      ),
-                      DataCell(
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Container(
-                            constraints: const BoxConstraints(maxWidth: 250),
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(reason, softWrap: true),
-                          ),
-                        ),
-                      ),
-                      DataCell(Text(_formatPayment(userData['totalPaidAmount']))),
-                      DataCell(_buildCopyableCell(userData['activeSession']?['deviceId'])),
-                      DataCell(_buildCopyableCell(userData['exnessClientUid'])),
-                      DataCell(Text(userData['exnessClientAccount']?.toString() ?? 'N/A')),
-                      DataCell(Text(createdAt != null ? DateFormat('dd/MM/yy').format(createdAt.toDate()) : 'N/A')),
-                      DataCell(Text(expiryDate != null ? DateFormat('dd/MM/yy').format(expiryDate.toDate()) : 'N/A')),
+            return SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 72), // Trừ đi Rail width
+                  child: DataTable(
+                    showCheckboxColumn: true,
+                    columnSpacing: 20,
+                    dataRowMinHeight: 70,
+                    dataRowMaxHeight: 90,
+                    headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
+                    columns: [
+                      const DataColumn(label: Text('User Info', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
+                      const DataColumn(label: Text('Role (Tier)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
+                      const DataColumn(label: Text('Tokens', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
+                      DataColumn(label: Text('Gold (Start/Exp)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade900))),
+                      DataColumn(label: Text('Forex (Start/Exp)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue.shade900))),
+                      DataColumn(label: Text('Crypto (Start/Exp)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900))),
+                      const DataColumn(label: Text('Registered', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
                     ],
-                  );
-                }).toList(),
+                    rows: userDocs.map((doc) {
+                      final userData = doc.data() as Map<String, dynamic>;
+                      final userId = doc.id;
+                      final isSelected = _selectedUserIds.contains(userId);
+
+                      // Extract Data
+                      final tier = (userData['subscriptionTier'] as String?)?.toLowerCase() ?? 'free';
+                      final tokens = userData['tokenBalance'] ?? 0;
+                      final activeSubs = List<String>.from(userData['activeSubscriptions'] ?? []);
+
+                      return DataRow(
+                        selected: isSelected,
+                        onSelectChanged: (selected) {
+                          setState(() {
+                            if (selected == true) {
+                              _selectedUserIds.add(userId);
+                            } else {
+                              _selectedUserIds.remove(userId);
+                            }
+                          });
+                        },
+                        cells: [
+                          // 1. User Info (No ID)
+                          DataCell(
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(userData['displayName'] ?? 'No Name', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  Text(userData['email'] ?? 'No Email', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          
+                          // 2. Role (Free / Elite only)
+                          DataCell(
+                            InkWell(
+                              onTap: () => _handleSingleUserTierUpdate(userId, tier),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: _getTierColor(tier).withValues(alpha: 0.2),
+                                  border: Border.all(color: _getTierColor(tier)),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(tier.toUpperCase(), style: TextStyle(color: _getTierColor(tier), fontWeight: FontWeight.bold)),
+                                    const SizedBox(width: 4),
+                                    Icon(Icons.edit, size: 14, color: _getTierColor(tier)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // 3. Tokens
+                          DataCell(
+                            InkWell(
+                              onTap: () => _updateTokenBalance(userId, tokens is int ? tokens : 0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('$tokens', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.edit, size: 14, color: Colors.grey),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // 4-6. Packages (Start & Expiry)
+                          DataCell(_buildPackageCell(userId, 'gold', 
+                            _getPackageDate(userData, 'subscriptionsStart', 'gold'), 
+                            _getPackageDate(userData, 'subscriptionsExpiry', 'gold'), 
+                            activeSubs)),
+                          DataCell(_buildPackageCell(userId, 'forex', 
+                            _getPackageDate(userData, 'subscriptionsStart', 'forex'), 
+                            _getPackageDate(userData, 'subscriptionsExpiry', 'forex'), 
+                            activeSubs)),
+                          DataCell(_buildPackageCell(userId, 'crypto', 
+                            _getPackageDate(userData, 'subscriptionsStart', 'crypto'), 
+                            _getPackageDate(userData, 'subscriptionsExpiry', 'crypto'), 
+                            activeSubs)),
+
+                          // 7. Created At
+                          DataCell(Text(_formatDate(userData['createdAt']))),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
-      floatingActionButton: _selectedUserIds.isNotEmpty
-          ? FloatingActionButton.extended(
-              onPressed: _handleUpdateUsers,
-              label: const Text('Cập nhật vai trò'),
-              icon: const Icon(Icons.edit),
-              backgroundColor: Colors.blue.shade700,
-            )
-          : null,
     );
   }
 
-  Widget _buildCopyableCell(String? text) {
-    if (text == null || text.isEmpty) {
-      return const Text('N/A');
+  Widget _buildPackageCell(String userId, String packageKey, dynamic start, dynamic expiry, List<String> activeSubs) {
+    // Case-insensitive check
+    final bool isActive = activeSubs.any((s) => s.toLowerCase() == packageKey.toLowerCase());
+    
+    // Formatting
+    String startStr = _formatDate(start);
+    final String expiryStr = _formatDate(expiry);
+
+    // If active but missing start date (legacy data), show placeholder
+    if (isActive && start == null) {
+      startStr = '???';
     }
-    return Row(
-      children: [
-        Expanded(child: Text(text, overflow: TextOverflow.ellipsis)),
-        const SizedBox(width: 8),
-        InkWell(
-          onTap: () {
-            Clipboard.setData(ClipboardData(text: text));
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã sao chép!'), duration: Duration(seconds: 1)));
-          },
-          child: const Icon(Icons.copy, size: 14, color: Colors.blueAccent),
+
+    return InkWell(
+      onTap: () => _updatePackageDates(userId, packageKey, start as Timestamp?, expiry as Timestamp?),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: isActive
+            ? BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+              )
+            : null,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('S: ', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                Text(startStr, style: TextStyle(
+                  fontSize: 11,
+                  color: isActive ? Colors.black : Colors.grey,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                )),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('E: ', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                Text(expiryStr, style: TextStyle(
+                  fontSize: 11,
+                  color: isActive ? Colors.red.shade700 : Colors.grey,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                )),
+              ],
+            ),
+          ],
         ),
-      ],
+      ),
     );
+  }
+
+  Color _getTierColor(String tier) {
+    switch (tier) {
+      case 'elite': return Colors.purple;
+      case 'vip': return Colors.amber.shade800;
+      case 'demo': return Colors.blue;
+      default: return Colors.grey;
+    }
   }
 }
 
 class _UpdateUserTierDialog extends StatefulWidget {
+  final String? initialTier;
   final Function(String tier, String reason) onConfirm;
 
-  const _UpdateUserTierDialog({required this.onConfirm});
+  const _UpdateUserTierDialog({this.initialTier, required this.onConfirm});
 
   @override
   State<_UpdateUserTierDialog> createState() => __UpdateUserTierDialogState();
@@ -251,7 +451,17 @@ class _UpdateUserTierDialog extends StatefulWidget {
 
 class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
   final _reasonController = TextEditingController();
-  String _selectedTier = 'free';
+  late String _selectedTier;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTier = widget.initialTier ?? 'free';
+    // Đảm bảo chỉ chọn free hoặc elite. Nếu đang là demo/vip thì cũng cho phép đổi sang 1 trong 2 cái này
+    if (!['free', 'elite'].contains(_selectedTier)) {
+      _selectedTier = 'free';
+    }
+  }
 
   @override
   void dispose() {
@@ -274,7 +484,7 @@ class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
                 labelText: 'Chọn vai trò mới',
                 border: OutlineInputBorder(),
               ),
-              items: ['free', 'demo', 'vip', 'elite']
+              items: ['free', 'elite']
                   .map((tier) => DropdownMenuItem(
                         value: tier,
                         child: Text(tier.toUpperCase()),

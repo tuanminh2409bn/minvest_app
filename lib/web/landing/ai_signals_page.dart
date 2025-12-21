@@ -1387,6 +1387,19 @@ class _SignalWebCard extends StatelessWidget {
     );
   }
 
+  bool _isSignalUnlocked(Signal signal, List<String> activeSubs) {
+    final symbol = signal.symbol.toUpperCase();
+    if (activeSubs.contains('gold') && symbol.contains('XAU')) return true;
+    
+    final isCrypto = symbol.contains('BTC') || symbol.contains('ETH') || symbol.contains('BNB') || symbol.contains('CRYPTO');
+    if (activeSubs.contains('crypto') && isCrypto) return true;
+
+    final isForex = symbol.contains('/') && !symbol.contains('XAU') && !isCrypto;
+    if (activeSubs.contains('forex') && isForex) return true;
+    
+    return false;
+  }
+
   Future<void> _openDetail(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -1395,8 +1408,9 @@ class _SignalWebCard extends StatelessWidget {
     }
     final userProvider = Provider.of<UserProvider?>(context, listen: false);
     final tier = userProvider?.userTier?.toLowerCase() ?? 'free';
+    final activeSubs = userProvider?.activeSubscriptions ?? [];
 
-    if (tier == 'elite') {
+    if (tier == 'elite' || _isSignalUnlocked(signal, activeSubs)) {
       Navigator.push(
         context,
         MaterialPageRoute(
