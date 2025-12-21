@@ -1061,17 +1061,16 @@ export const submitContactMessage = onCall({ region: "asia-southeast1" }, async 
 // =================================================================
 
 function getPaypalClient() {
-    const clientId = process.env.PAYPAL_CLIENT_ID || 'sb';
-    const clientSecret = process.env.PAYPAL_CLIENT_SECRET || '';
-    // Tự động chuyển sang Live nếu biến môi trường PAYPAL_MODE = 'live'
-    const environment = process.env.PAYPAL_MODE === 'live' 
-        ? new paypal.core.LiveEnvironment(clientId, clientSecret)
-        : new paypal.core.SandboxEnvironment(clientId, clientSecret);
+    const clientId = 'AT3KFAJQmZKr69b5SilgwqOFWCwNdogl6yx3B1rp9u7oMIfpnqsiawhWnMx8KxaW9CEDK6mQ-v528nxT';
+    const clientSecret = 'EANmGgMZyoNUGCSqqO15B1Nty4cO6gcEmbExpHSvuwtk0dkUqa6v5IYLYNFmn063LbB6iDoDkk0k7Q9_';
+    
+    // Luôn dùng SandboxEnvironment cho key test này
+    const environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
     
     return new paypal.core.PayPalHttpClient(environment);
 }
 
-export const createPaypalOrder = onCall({ region: "asia-southeast1", secrets: ["PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET"] }, async (request) => {
+export const createPaypalOrder = onCall({ region: "asia-southeast1" }, async (request) => {
     const { packageId } = request.data;
     const userId = request.auth?.uid;
 
@@ -1114,7 +1113,7 @@ export const createPaypalOrder = onCall({ region: "asia-southeast1", secrets: ["
     }
 });
 
-export const capturePaypalOrder = onCall({ region: "asia-southeast1", secrets: ["PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET"] }, async (request) => {
+export const capturePaypalOrder = onCall({ region: "asia-southeast1" }, async (request) => {
     const { orderID } = request.data;
     const userId = request.auth?.uid;
 
@@ -1122,23 +1121,30 @@ export const capturePaypalOrder = onCall({ region: "asia-southeast1", secrets: [
     if (!orderID) throw new HttpsError("invalid-argument", "Missing orderID.");
 
     const client = getPaypalClient();
-    const requestPaypal = new paypal.orders.OrdersCaptureRequest(orderID);
-    requestPaypal.requestBody({});
 
     try {
-        const response = await client.execute(requestPaypal);
-        const captureData = response.result;
+        // 1. Get Order details FIRST to retrieve custom_id (reliable way)
+        const requestGet = new paypal.orders.OrdersGetRequest(orderID);
+        const orderResponse = await client.execute(requestGet);
+        const orderData = orderResponse.result;
+        
+        const customId = orderData.purchase_units[0].custom_id;
+        if (!customId) throw new Error("Missing custom_id in order details.");
+
+        // 2. Capture Order
+        const requestCapture = new paypal.orders.OrdersCaptureRequest(orderID);
+        requestCapture.requestBody({} as any);
+        const captureResponse = await client.execute(requestCapture);
+        const captureData = captureResponse.result;
 
         if (captureData.status === "COMPLETED") {
             const purchaseUnit = captureData.purchase_units[0];
-            const customId = purchaseUnit.custom_id;
-            if (!customId) throw new Error("Missing custom_id in transaction.");
+            // const customId = purchaseUnit.custom_id; // Don't rely on this in capture response
 
-            const [uidFromOrder, packageId] = customId.split("|");
+            const [, packageId] = customId.split("|");
             
             const amountPaid = parseFloat(purchaseUnit.payments.captures[0].amount.value);
             
-            const now = new Date();
             let expiryDate = new Date();
             if (packageId.includes("1_month")) {
                 expiryDate.setMonth(expiryDate.getMonth() + 1);
