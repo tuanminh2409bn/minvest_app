@@ -2345,13 +2345,13 @@ abstract class AppLocalizations {
   /// No description provided for @emailNotificationPreferences.
   ///
   /// In en, this message translates to:
-  /// **'Email Notification Preferences'**
+  /// **'Browser Notification Preferences'**
   String get emailNotificationPreferences;
 
   /// No description provided for @chooseSignalNotificationTypes.
   ///
   /// In en, this message translates to:
-  /// **'Choose which types of signal notifications you want to receive via email'**
+  /// **'Choose which types of signal notifications you want to receive via browser push'**
   String get chooseSignalNotificationTypes;
 
   /// No description provided for @allSignalNotifications.
@@ -2479,6 +2479,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **' +84 969 156 969 for fast support.'**
   String get leaveMessagePart2;
+
+  /// No description provided for @currentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Plan'**
+  String get currentPlan;
+
+  /// No description provided for @standard.
+  ///
+  /// In en, this message translates to:
+  /// **'STANDARD'**
+  String get standard;
+
+  /// No description provided for @availableTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Tokens'**
+  String get availableTokens;
+
+  /// No description provided for @subscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get subscriptions;
+
+  /// No description provided for @usesTokenPerView.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses 1 Token per view'**
+  String get usesTokenPerView;
+
+  /// No description provided for @unlimitedAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited Access'**
+  String get unlimitedAccess;
+
+  /// No description provided for @activeElite.
+  ///
+  /// In en, this message translates to:
+  /// **'Active (Elite)'**
+  String get activeElite;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @transactionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction History'**
+  String get transactionHistory;
+
+  /// No description provided for @noTransactionsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions found.'**
+  String get noTransactionsFound;
+
+  /// No description provided for @colDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get colDate;
+
+  /// No description provided for @colProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Product'**
+  String get colProduct;
+
+  /// No description provided for @colAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get colAmount;
+
+  /// No description provided for @colMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get colMethod;
+
+  /// No description provided for @colStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get colStatus;
+
+  /// No description provided for @statusSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get statusSuccess;
+
+  /// No description provided for @featureForVipOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is only for VIP customers, please upgrade to receive notifications.'**
+  String get featureForVipOnly;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePassword;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated successfully'**
+  String get passwordUpdateSuccess;
+
+  /// No description provided for @passwordUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update password: {error}'**
+  String passwordUpdateFailed(String error);
+
+  /// No description provided for @reauthFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect current password'**
+  String get reauthFailed;
 }
 
 class _AppLocalizationsDelegate

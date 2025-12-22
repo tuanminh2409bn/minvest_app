@@ -312,6 +312,7 @@ class _OverviewContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
@@ -337,10 +338,10 @@ class _OverviewContent extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Current Plan', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                        Text(l10n.currentPlan, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
                         const SizedBox(height: 4),
                         Text(
-                          isElite ? 'ELITE' : 'STANDARD',
+                          isElite ? l10n.tierElite.toUpperCase() : l10n.standard,
                           style: AppTextStyles.h2.copyWith(color: isElite ? Colors.purpleAccent : Colors.white, fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -353,10 +354,10 @@ class _OverviewContent extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Available Tokens', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                          Text(l10n.availableTokens, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
                           const SizedBox(height: 4),
                           Text(
-                            isElite ? 'UNLIMITED' : '$tokenBalance',
+                            isElite ? l10n.unlimited.toUpperCase() : '$tokenBalance',
                             style: AppTextStyles.h2.copyWith(
                               color: isElite ? Colors.greenAccent : (tokenBalance > 0 ? Colors.greenAccent : Colors.redAccent),
                               fontWeight: FontWeight.bold
@@ -372,14 +373,14 @@ class _OverviewContent extends StatelessWidget {
             const SizedBox(height: 16),
             
             // Subscriptions List
-            Text('Subscriptions', style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18)),
+            Text(l10n.subscriptions, style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18)),
             const SizedBox(height: 12),
             
-            _buildSubscriptionCard(context, 'Gold', 'gold', userData, activeSubs, isElite),
+            _buildSubscriptionCard(context, l10n.goldSignals, 'gold', userData, activeSubs, isElite),
             const SizedBox(height: 12),
-            _buildSubscriptionCard(context, 'Forex', 'forex', userData, activeSubs, isElite),
+            _buildSubscriptionCard(context, l10n.forexSignals, 'forex', userData, activeSubs, isElite),
             const SizedBox(height: 12),
-            _buildSubscriptionCard(context, 'Crypto', 'crypto', userData, activeSubs, isElite),
+            _buildSubscriptionCard(context, l10n.cryptoSignals, 'crypto', userData, activeSubs, isElite),
           ],
         );
       },
@@ -387,20 +388,21 @@ class _OverviewContent extends StatelessWidget {
   }
 
   Widget _buildSubscriptionCard(BuildContext context, String title, String key, Map<String, dynamic> userData, List<String> activeSubs, bool isElite) {
+    final l10n = AppLocalizations.of(context)!;
     final isActive = activeSubs.any((s) => s.toLowerCase() == key.toLowerCase());
     final startDate = _getPackageDate(userData, 'subscriptionsStart', key);
     final expiryDate = _getPackageDate(userData, 'subscriptionsExpiry', key);
     
-    String statusText = 'Inactive';
+    String statusText = l10n.inactive;
     Color statusColor = Colors.grey;
-    String detailText = 'Uses 1 Token per view';
+    String detailText = l10n.usesTokenPerView;
 
     if (isElite) {
-      statusText = 'Active (Elite)';
+      statusText = l10n.activeElite;
       statusColor = Colors.purpleAccent;
-      detailText = 'Unlimited Access';
+      detailText = l10n.unlimitedAccess;
     } else if (isActive) {
-      statusText = 'Active';
+      statusText = l10n.active;
       statusColor = Colors.greenAccent;
       detailText = '${_formatDate(startDate)} - ${_formatDate(expiryDate)}';
     }
@@ -467,10 +469,100 @@ class _SettingContentState extends State<_SettingContent> {
   bool crypto = true;
   bool forex = true;
   bool gold = true;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          final data = doc.data() as Map<String, dynamic>;
+          final settings = data['notificationSettings'] as Map<String, dynamic>? ?? {};
+          if (mounted) {
+            setState(() {
+              all = settings['all'] ?? true;
+              crypto = settings['crypto'] ?? true;
+              forex = settings['forex'] ?? true;
+              gold = settings['gold'] ?? true;
+              _isLoading = false;
+            });
+          }
+        } else {
+           if (mounted) setState(() => _isLoading = false);
+        }
+      } catch (e) {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    } else {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _updateSetting(String key, bool value) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Optimistic UI update
+    setState(() {
+      if (key == 'all') all = value;
+      else if (key == 'crypto') crypto = value;
+      else if (key == 'forex') forex = value;
+      else if (key == 'gold') gold = value;
+    });
+
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'notificationSettings': {
+          'all': all,
+          'crypto': crypto,
+          'forex': forex,
+          'gold': gold,
+        }
+      }, SetOptions(merge: true));
+    } catch (e) {
+      // Revert if failed
+      _loadSettings();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update settings')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = AppLocalizations.of(context)!;
+    final userProvider = Provider.of<UserProvider>(context);
+    final tier = userProvider.userTier?.toLowerCase() ?? 'free';
+    final activeSubs = userProvider.activeSubscriptions;
+
+    final isElite = tier == 'elite';
+    // Elite users can toggle everything.
+    // Single package users can only toggle their specific package.
+    final canToggleGold = isElite || activeSubs.contains('gold');
+    final canToggleForex = isElite || activeSubs.contains('forex');
+    final canToggleCrypto = isElite || activeSubs.contains('crypto');
+    // "All" switch is reserved for Elite users who have access to everything
+    final canToggleAll = isElite;
+    
+    // Check if user is effectively free (no access to any notification toggles)
+    final isFree = !canToggleGold && !canToggleForex && !canToggleCrypto;
+
+    if (_isLoading) {
+      return const Center(child: Padding(
+        padding: EdgeInsets.all(40.0),
+        child: CircularProgressIndicator(color: Color(0xFF04B3E9)),
+      ));
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -488,34 +580,67 @@ class _SettingContentState extends State<_SettingContent> {
               _SettingTile(
                 label: appLocalizations.allSignalNotifications,
                 value: all,
-                onChanged: (v) => setState(() => all = v),
+                enabled: canToggleAll,
+                onChanged: (v) => _updateSetting('all', v),
               ),
               const SizedBox(height: 10),
               _SettingTile(
                 label: appLocalizations.cryptoSignals,
                 value: crypto,
-                onChanged: (v) => setState(() => crypto = v),
+                enabled: canToggleCrypto,
+                onChanged: (v) => _updateSetting('crypto', v),
               ),
               const SizedBox(height: 10),
               _SettingTile(
                 label: appLocalizations.forexSignals,
                 value: forex,
-                onChanged: (v) => setState(() => forex = v),
+                enabled: canToggleForex,
+                onChanged: (v) => _updateSetting('forex', v),
               ),
               const SizedBox(height: 10),
               _SettingTile(
                 label: appLocalizations.goldSignals,
                 value: gold,
-                onChanged: (v) => setState(() => gold = v),
+                enabled: canToggleGold,
+                onChanged: (v) => _updateSetting('gold', v),
               ),
             ],
           ),
         ),
+        if (isFree) ...[
+          const SizedBox(height: 12),
+          Text(
+            appLocalizations.featureForVipOnly,
+            style: AppTextStyles.caption.copyWith(color: Colors.redAccent, fontStyle: FontStyle.italic),
+          ),
+        ],
         const SizedBox(height: 16),
         _CardContainer(
-          child: Text(
-            appLocalizations.updatePasswordSecure,
-            style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  appLocalizations.updatePasswordSecure,
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                ),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const _ChangePasswordDialog(),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF04B3E9),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                child: Text(appLocalizations.changePassword),
+              ),
+            ],
           ),
         ),
       ],
@@ -527,30 +652,40 @@ class _SettingTile extends StatelessWidget {
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
-  const _SettingTile({required this.label, required this.value, required this.onChanged});
+  final bool enabled;
+
+  const _SettingTile({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    this.enabled = true,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: Row(
-        children: [
-          Text(label, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
-          const Spacer(),
-          Switch(
-            value: value,
-            activeColor: Colors.white,
-            activeTrackColor: const Color(0xFF04B3E9),
-            inactiveThumbColor: Colors.white,
-            inactiveTrackColor: Colors.grey.shade700,
-            onChanged: onChanged,
-          ),
-        ],
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.5,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Row(
+          children: [
+            Text(label, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+            const Spacer(),
+            Switch(
+              value: value,
+              activeColor: Colors.white,
+              activeTrackColor: const Color(0xFF04B3E9),
+              inactiveThumbColor: Colors.white,
+              inactiveTrackColor: Colors.grey.shade700,
+              onChanged: enabled ? onChanged : null,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -563,11 +698,12 @@ class _PaymentContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Transaction History', style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18)),
+        Text(l10n.transactionHistory, style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18)),
         const SizedBox(height: 16),
         _CardContainer(
           child: StreamBuilder<QuerySnapshot>(
@@ -585,7 +721,7 @@ class _PaymentContent extends StatelessWidget {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
-                    child: Text('No transactions found.', style: AppTextStyles.body.copyWith(color: Colors.white54)),
+                    child: Text(l10n.noTransactionsFound, style: AppTextStyles.body.copyWith(color: Colors.white54)),
                   ),
                 );
               }
@@ -596,12 +732,12 @@ class _PaymentContent extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
                   headingRowColor: WidgetStateProperty.all(Colors.white10),
-                  columns: const [
-                    DataColumn(label: Text('Date', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Product', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Amount', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Method', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Status', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                  columns: [
+                    DataColumn(label: Text(l10n.colDate, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text(l10n.colProduct, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text(l10n.colAmount, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text(l10n.colMethod, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text(l10n.colStatus, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
                   ],
                   rows: docs.map((doc) {
                     final data = doc.data() as Map<String, dynamic>;
@@ -623,7 +759,7 @@ class _PaymentContent extends StatelessWidget {
                               color: Colors.green.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text('Success', style: TextStyle(color: Colors.green, fontSize: 11)),
+                            child: Text(l10n.statusSuccess, style: const TextStyle(color: Colors.green, fontSize: 11)),
                           ),
                         ),
                       ],
@@ -653,6 +789,165 @@ class _CardContainer extends StatelessWidget {
         border: Border.all(color: Colors.white24),
       ),
       child: child,
+    );
+  }
+}
+
+class _ChangePasswordDialog extends StatefulWidget {
+  const _ChangePasswordDialog();
+
+  @override
+  State<_ChangePasswordDialog> createState() => _ChangePasswordDialogState();
+}
+
+class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
+  final _currentPassController = TextEditingController();
+  final _newPassController = TextEditingController();
+  final _confirmPassController = TextEditingController();
+  bool _isLoading = false;
+  bool _obscureCurrent = true;
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
+
+  @override
+  void dispose() {
+    _currentPassController.dispose();
+    _newPassController.dispose();
+    _confirmPassController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _changePassword() async {
+    final l10n = AppLocalizations.of(context)!;
+    if (_newPassController.text != _confirmPassController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.passwordsDoNotMatch)),
+      );
+      return;
+    }
+    if (_newPassController.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password must be at least 6 characters")),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && user.email != null) {
+      try {
+        final credential = EmailAuthProvider.credential(
+          email: user.email!,
+          password: _currentPassController.text,
+        );
+        await user.reauthenticateWithCredential(credential);
+        await user.updatePassword(_newPassController.text);
+        
+        if (mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.passwordUpdateSuccess), backgroundColor: Colors.green),
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        if (mounted) {
+          String errorMsg = l10n.passwordUpdateFailed(e.message ?? 'Unknown error');
+          if (e.code == 'wrong-password') {
+            errorMsg = l10n.reauthFailed;
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.passwordUpdateFailed(e.toString())), backgroundColor: Colors.red),
+          );
+        }
+      }
+    }
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Dialog(
+      backgroundColor: const Color(0xFF1E1E1E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Container(
+        width: 400,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.changePassword,
+              style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 20),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            _buildTextField(
+              controller: _currentPassController,
+              label: l10n.currentPassword,
+              obscure: _obscureCurrent,
+              onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: _newPassController,
+              label: l10n.newPassword,
+              obscure: _obscureNew,
+              onToggle: () => setState(() => _obscureNew = !_obscureNew),
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: _confirmPassController,
+              label: l10n.confirmNewPassword,
+              obscure: _obscureConfirm,
+              onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _changePassword,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF04B3E9),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: _isLoading
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : Text(l10n.changePassword, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required bool obscure,
+    required VoidCallback onToggle,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        filled: true,
+        fillColor: Colors.black54,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+        suffixIcon: IconButton(
+          icon: Icon(obscure ? Icons.visibility_off : Icons.visibility, color: Colors.white54),
+          onPressed: onToggle,
+        ),
+      ),
     );
   }
 }

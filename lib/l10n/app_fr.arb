@@ -427,5 +427,39 @@
     "minvestSupport": "Support Minvest",
     "leaveMessagePart1": "Veuillez laisser un message, notre équipe vous répondra dès que possible. Vous pouvez également contacter ",
     "chatWhatsApp": "WhatsApp",
-    "leaveMessagePart2": " +84 969 156 969 pour une assistance rapide."
+    "leaveMessagePart2": " +84 969 156 969 pour une assistance rapide.",
+    "currentPlan": "Current Plan",
+    "standard": "STANDARD",
+    "availableTokens": "Available Tokens",
+    "subscriptions": "Subscriptions",
+    "usesTokenPerView": "Uses 1 Token per view",
+    "unlimitedAccess": "Unlimited Access",
+    "activeElite": "Active (Elite)",
+    "active": "Active",
+    "inactive": "Inactive",
+    "transactionHistory": "Transaction History",
+    "noTransactionsFound": "No transactions found.",
+    "colDate": "Date",
+    "colProduct": "Product",
+    "colAmount": "Amount",
+    "colMethod": "Method",
+    "colStatus": "Status",
+    "statusSuccess": "Success",
+    "featureForVipOnly": "This feature is only for VIP customers, please upgrade to receive notifications.",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordUpdateSuccess": "Password updated successfully",
+    "passwordUpdateFailed": "Failed to update password: {error}",
+    "@passwordUpdateFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "reauthFailed": "Incorrect current password"
+
 }

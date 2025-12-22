@@ -61,7 +61,16 @@ class NotificationService {
 
   Future<void> _requestPermissions() async {
     debugPrint("🔐 [FCM_SERVICE] Đang xin quyền nhận thông báo...");
-    await _firebaseMessaging.requestPermission();
+    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+    debugPrint('🔐 [FCM_SERVICE] Trạng thái quyền thông báo: ${settings.authorizationStatus}');
   }
 
   Future<void> _createAndroidChannel() async {

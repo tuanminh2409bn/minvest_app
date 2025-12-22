@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
+import 'package:minvest_forex_app/core/providers/user_provider.dart'; // Added Import
+import 'package:minvest_forex_app/core/utils/signal_access_helper.dart'; // Added Import
 import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -76,7 +78,15 @@ class SignalDetailScreen extends StatelessWidget {
     final String createdLabel =
         '(GMT +7) ${DateFormat('dd/MM/yyyy, HH:mm:ss').format(created)}';
 
-    final String entryText = _formatPrice(signal.entryPrice);
+    // Access Control Logic
+    final userProvider = Provider.of<UserProvider>(context);
+    final canViewEntry = SignalAccessHelper.canViewEntry(
+      signal, 
+      userProvider.userTier, 
+      userProvider.activeSubscriptions
+    );
+
+    final String entryText = canViewEntry ? _formatPrice(signal.entryPrice) : '****';
     final String slText = _formatPrice(signal.stopLoss);
     final String tp1 = signal.takeProfits.isNotEmpty
         ? _formatPrice(signal.takeProfits[0])

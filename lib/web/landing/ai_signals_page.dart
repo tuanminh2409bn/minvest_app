@@ -16,6 +16,7 @@ import 'widgets/navbar.dart';
 import 'sections/footer_section.dart';
 import 'sections/pricing_tab.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
+import 'package:minvest_forex_app/core/utils/signal_access_helper.dart';
 
 enum AISignalsTab { aiSignals, performance, history, pricing }
 enum AssetFilter { all, gold, crypto, forex }
@@ -39,7 +40,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
     'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 
     'AUD/USD', 'USD/CAD', 'NZD/USD',
     'EUR/GBP', 'EUR/JPY', 'GBP/JPY', 'AUD/JPY',
-    'BTC/USD', 'ETH/USD', 'BNB/USD'
+    'BTC', 'ETH', 'BNB', 'PEPE'
   ];
 
   List<String> get _currentCommodities {
@@ -56,7 +57,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
       case AssetFilter.crypto:
         return [
           'All Crypto Pairs',
-          'BTC/USD', 'ETH/USD', 'BNB/USD'
+          'BTC', 'ETH', 'BNB', 'PEPE'
         ];
       case AssetFilter.all:
       default:
@@ -575,32 +576,34 @@ class _DateRangePickerState extends State<_DateRangePicker> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: _isOpen ? const Color(0xFF00BFFF) : Colors.white12),
             ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  label,
-                                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
-                                ),
-                              ),
-                                                if (widget.dateRange != null)
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(right: 8),
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        // Note: In some cases InkWell inside InkWell needs careful handling.
-                                                        // But here, widget.onChanged(null) will trigger a parent rebuild.
-                                                        widget.onChanged(null);
-                                                      },
-                                                      child: const Icon(Icons.close, color: Colors.white70, size: 16),
-                                                    ),
-                                                  ),                              Icon(
-                                Icons.calendar_today, 
-                                color: _isOpen ? const Color(0xFF00BFFF) : Colors.white70, 
-                                size: 16
-                              ),
-                            ],
-                          ),          ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+                if (widget.dateRange != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: InkWell(
+                      onTap: () {
+                        // Note: In some cases InkWell inside InkWell needs careful handling.
+                        // But here, widget.onChanged(null) will trigger a parent rebuild.
+                        widget.onChanged(null);
+                        },
+                      child: const Icon(Icons.close, color: Colors.white70, size: 16),
+                    ),
+                  ),
+                Icon(
+                    Icons.calendar_today,
+                    color: _isOpen ? const Color(0xFF00BFFF) : Colors.white70,
+                    size: 16
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -1304,10 +1307,10 @@ class _EmptyColumn extends StatelessWidget {
                   style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),
-                                  Text(
-                                    AppLocalizations.of(context)!.signalsWillAppearHere, // Add translation if needed
-                                    style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 12),
-                                  ),              ],
+                Text(
+                  AppLocalizations.of(context)!.signalsWillAppearHere, // Add translation if needed
+                  style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 12),
+                ),],
             ),
           ),
         ),
@@ -1460,6 +1463,11 @@ class _SignalWebCard extends StatelessWidget {
     final actionColor = isBuy ? const Color(0xFF3DCC5C) : const Color(0xFFE54747);
     final typeText = isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell;
     
+    // Check permission to view Entry
+    final userProvider = Provider.of<UserProvider?>(context);
+    final canViewEntry = userProvider != null && 
+        SignalAccessHelper.canViewEntry(signal, userProvider.userTier, userProvider.activeSubscriptions);
+
     return GestureDetector(
       onTap: () => _openDetail(context),
       child: Container(
@@ -1527,7 +1535,24 @@ class _SignalWebCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            if (canViewEntry) ...[
+               Row(
+                children: [
+                  Text(
+                    'Entry:',
+                    style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    signal.entryPrice.toString(),
+                    style: AppTextStyles.body.copyWith(color: const Color(0xFF289EFF), fontSize: 14, fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+            const SizedBox(height: 4),
             Row(
               children: [
                 Text(

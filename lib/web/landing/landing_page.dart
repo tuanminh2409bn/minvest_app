@@ -1,13 +1,12 @@
 import 'dart:math' as math;
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:web/web.dart' as web;
 import 'dart:js_interop';
-import 'dart:convert'; // Thêm dòng này
+import 'dart:convert';
 import '../theme/colors.dart';
 import '../theme/breakpoints.dart';
 import '../theme/text_styles.dart';
