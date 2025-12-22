@@ -20,6 +20,23 @@ class LanguageProvider with ChangeNotifier {
     Locale('fr'),
     Locale('ja'),
     Locale('ko'),
+    Locale('hi'),
+    Locale('ar'),
+    Locale('pt'),
+    Locale('km'),
+    Locale('cs'),
+    Locale('da'),
+    Locale('de'),
+    Locale('hu'),
+    Locale('id'),
+    Locale('it'),
+    Locale('ms'),
+    Locale('mn'),
+    Locale('ru'),
+    Locale('fi'),
+    Locale('ro'),
+    Locale('es'),
+    Locale('th'),
   ];
 
   void setLocale(Locale newLocale) async {
