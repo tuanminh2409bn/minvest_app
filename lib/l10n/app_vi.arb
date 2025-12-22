@@ -405,8 +405,8 @@
     "signalsPlan": "Gói tín hiệu",
     "aiMinvest": "AI Minvest",
     "yourTokens": "Token của bạn",
-    "emailNotificationPreferences": "Tùy chọn thông báo qua email",
-    "chooseSignalNotificationTypes": "Chọn loại thông báo tín hiệu bạn muốn nhận qua email",
+    "emailNotificationPreferences": "Tùy chọn thông báo trình duyệt",
+    "chooseSignalNotificationTypes": "Chọn loại thông báo tín hiệu bạn muốn nhận qua thông báo đẩy trình duyệt",
     "allSignalNotifications": "Tất cả thông báo tín hiệu",
     "cryptoSignals": "Tín hiệu Crypto",
     "forexSignals": "Tín hiệu Forex",
@@ -427,5 +427,38 @@
     "minvestSupport": "Minvest Support",
     "leaveMessagePart1": "Hãy để lại tin nhắn, đội ngũ của chúng tôi sẽ phản hồi sớm nhất. Bạn cũng có thể liên hệ ",
     "chatWhatsApp": "WhatsApp",
-    "leaveMessagePart2": " +84 969 156 969 để được hỗ trợ nhanh."
+    "leaveMessagePart2": " +84 969 156 969 để được hỗ trợ nhanh.",
+    "currentPlan": "Gói hiện tại",
+    "standard": "TIÊU CHUẨN",
+    "availableTokens": "Token khả dụng",
+    "subscriptions": "Gói đăng ký",
+    "usesTokenPerView": "Sử dụng 1 Token mỗi lần xem",
+    "unlimitedAccess": "Truy cập không giới hạn",
+    "activeElite": "Đang hoạt động (Elite)",
+    "active": "Đang hoạt động",
+    "inactive": "Không hoạt động",
+    "transactionHistory": "Lịch sử giao dịch",
+    "noTransactionsFound": "Không tìm thấy giao dịch nào.",
+    "colDate": "Ngày",
+    "colProduct": "Sản phẩm",
+    "colAmount": "Số tiền",
+    "colMethod": "Phương thức",
+    "colStatus": "Trạng thái",
+    "statusSuccess": "Thành công",
+    "featureForVipOnly": "Tính năng này chỉ dành cho khách hàng VIP, vui lòng nâng cấp để nhận thông báo.",
+    "changePassword": "Đổi mật khẩu",
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "confirmNewPassword": "Xác nhận mật khẩu mới",
+    "passwordsDoNotMatch": "Mật khẩu không khớp",
+    "passwordUpdateSuccess": "Cập nhật mật khẩu thành công",
+    "passwordUpdateFailed": "Cập nhật thất bại: {error}",
+    "@passwordUpdateFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "reauthFailed": "Mật khẩu hiện tại không đúng"
 }

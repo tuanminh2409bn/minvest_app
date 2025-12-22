@@ -11,6 +11,7 @@ import axios from "axios";
 import { GoogleAuth } from "google-auth-library";
 import { Response } from "express";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { defineSecret } from "firebase-functions/params";
 import { getLocalizedPayload } from "./localization";
 import * as jose from "node-jose";
 import * as paypal from '@paypal/checkout-server-sdk';
@@ -1060,9 +1061,12 @@ export const submitContactMessage = onCall({ region: "asia-southeast1" }, async 
 // === PAYPAL INTEGRATION ===
 // =================================================================
 
+const paypalClientId = defineSecret("PAYPAL_CLIENT_ID");
+const paypalClientSecret = defineSecret("PAYPAL_CLIENT_SECRET");
+
 function getPaypalClient() {
-    const clientId = 'AT3KFAJQmZKr69b5SilgwqOFWCwNdogl6yx3B1rp9u7oMIfpnqsiawhWnMx8KxaW9CEDK6mQ-v528nxT';
-    const clientSecret = 'EANmGgMZyoNUGCSqqO15B1Nty4cO6gcEmbExpHSvuwtk0dkUqa6v5IYLYNFmn063LbB6iDoDkk0k7Q9_';
+    const clientId = paypalClientId.value();
+    const clientSecret = paypalClientSecret.value();
     
     // Luôn dùng SandboxEnvironment cho key test này
     const environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
@@ -1070,7 +1074,10 @@ function getPaypalClient() {
     return new paypal.core.PayPalHttpClient(environment);
 }
 
-export const createPaypalOrder = onCall({ region: "asia-southeast1" }, async (request) => {
+export const createPaypalOrder = onCall({ 
+    region: "asia-southeast1",
+    secrets: [paypalClientId, paypalClientSecret]
+}, async (request) => {
     const { packageId } = request.data;
     const userId = request.auth?.uid;
 
@@ -1113,7 +1120,10 @@ export const createPaypalOrder = onCall({ region: "asia-southeast1" }, async (re
     }
 });
 
-export const capturePaypalOrder = onCall({ region: "asia-southeast1" }, async (request) => {
+export const capturePaypalOrder = onCall({ 
+    region: "asia-southeast1",
+    secrets: [paypalClientId, paypalClientSecret]
+}, async (request) => {
     const { orderID } = request.data;
     const userId = request.auth?.uid;
 
@@ -1177,6 +1187,23 @@ export const capturePaypalOrder = onCall({ region: "asia-southeast1" }, async (r
                     updatePayload.activeSubscriptions = Array.from(currentSubs);
                     updatePayload[`subscriptionsStart.${packageType}`] = admin.firestore.Timestamp.fromDate(startDate);
                     updatePayload[`subscriptionsExpiry.${packageType}`] = admin.firestore.Timestamp.fromDate(expiryDate);
+
+                    // Check for Elite Upgrade (Gold + Crypto + Forex)
+                    if (currentSubs.has('gold') && currentSubs.has('crypto') && currentSubs.has('forex')) {
+                        updatePayload.subscriptionTier = 'elite';
+                        
+                        const existingExpiryMap = userData.subscriptionsExpiry || {};
+                        
+                        const getTime = (pType: string) => {
+                            if (pType === packageType) return expiryDate.getTime();
+                            const ts = existingExpiryMap[pType];
+                            return ts ? ts.toDate().getTime() : 0;
+                        };
+
+                        const maxTime = Math.max(getTime('gold'), getTime('crypto'), getTime('forex'));
+                        updatePayload.subscriptionExpiryDate = admin.firestore.Timestamp.fromMillis(maxTime);
+                        functions.logger.log(`[Auto-Upgrade] User ${userId} collected all 3 packages. Upgraded to ELITE until ${new Date(maxTime).toISOString()}`);
+                    }
                 }
 
                 transaction.set(userRef, updatePayload, { merge: true });

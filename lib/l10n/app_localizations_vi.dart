@@ -1209,11 +1209,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get yourTokens => 'Token của bạn';
 
   @override
-  String get emailNotificationPreferences => 'Tùy chọn thông báo qua email';
+  String get emailNotificationPreferences => 'Tùy chọn thông báo trình duyệt';
 
   @override
   String get chooseSignalNotificationTypes =>
-      'Chọn loại thông báo tín hiệu bạn muốn nhận qua email';
+      'Chọn loại thông báo tín hiệu bạn muốn nhận qua thông báo đẩy trình duyệt';
 
   @override
   String get allSignalNotifications => 'Tất cả thông báo tín hiệu';
@@ -1282,4 +1282,85 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get leaveMessagePart2 => ' +84 969 156 969 để được hỗ trợ nhanh.';
+
+  @override
+  String get currentPlan => 'Gói hiện tại';
+
+  @override
+  String get standard => 'TIÊU CHUẨN';
+
+  @override
+  String get availableTokens => 'Token khả dụng';
+
+  @override
+  String get subscriptions => 'Gói đăng ký';
+
+  @override
+  String get usesTokenPerView => 'Sử dụng 1 Token mỗi lần xem';
+
+  @override
+  String get unlimitedAccess => 'Truy cập không giới hạn';
+
+  @override
+  String get activeElite => 'Đang hoạt động (Elite)';
+
+  @override
+  String get active => 'Đang hoạt động';
+
+  @override
+  String get inactive => 'Không hoạt động';
+
+  @override
+  String get transactionHistory => 'Lịch sử giao dịch';
+
+  @override
+  String get noTransactionsFound => 'Không tìm thấy giao dịch nào.';
+
+  @override
+  String get colDate => 'Ngày';
+
+  @override
+  String get colProduct => 'Sản phẩm';
+
+  @override
+  String get colAmount => 'Số tiền';
+
+  @override
+  String get colMethod => 'Phương thức';
+
+  @override
+  String get colStatus => 'Trạng thái';
+
+  @override
+  String get statusSuccess => 'Thành công';
+
+  @override
+  String get featureForVipOnly =>
+      'Tính năng này chỉ dành cho khách hàng VIP, vui lòng nâng cấp để nhận thông báo.';
+
+  @override
+  String get changePassword => 'Đổi mật khẩu';
+
+  @override
+  String get currentPassword => 'Mật khẩu hiện tại';
+
+  @override
+  String get newPassword => 'Mật khẩu mới';
+
+  @override
+  String get confirmNewPassword => 'Xác nhận mật khẩu mới';
+
+  @override
+  String get passwordsDoNotMatch => 'Mật khẩu không khớp';
+
+  @override
+  String get passwordUpdateSuccess => 'Cập nhật mật khẩu thành công';
+
+  @override
+  String passwordUpdateFailed(String error) {
+    return 'Cập nhật thất bại: $error';
+  }
+
+  @override
+  String get reauthFailed => 'Mật khẩu hiện tại không đúng';
 }

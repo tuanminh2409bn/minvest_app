@@ -405,8 +405,8 @@
     "signalsPlan": "Signals Plan",
     "aiMinvest": "AI Minvest",
     "yourTokens": "Your Tokens",
-    "emailNotificationPreferences": "Email Notification Preferences",
-    "chooseSignalNotificationTypes": "Choose which types of signal notifications you want to receive via email",
+    "emailNotificationPreferences": "Browser Notification Preferences",
+    "chooseSignalNotificationTypes": "Choose which types of signal notifications you want to receive via browser push",
     "allSignalNotifications": "All Signal Notifications",
     "cryptoSignals": "Crypto Signals",
     "forexSignals": "Forex Signals",
@@ -427,5 +427,38 @@
     "minvestSupport": "Minvest Support",
     "leaveMessagePart1": "Please leave a message, our team will respond as soon as possible. You can also contact ",
     "chatWhatsApp": "WhatsApp",
-    "leaveMessagePart2": " +84 969 156 969 for fast support."
+    "leaveMessagePart2": " +84 969 156 969 for fast support.",
+    "currentPlan": "Current Plan",
+    "standard": "STANDARD",
+    "availableTokens": "Available Tokens",
+    "subscriptions": "Subscriptions",
+    "usesTokenPerView": "Uses 1 Token per view",
+    "unlimitedAccess": "Unlimited Access",
+    "activeElite": "Active (Elite)",
+    "active": "Active",
+    "inactive": "Inactive",
+    "transactionHistory": "Transaction History",
+    "noTransactionsFound": "No transactions found.",
+    "colDate": "Date",
+    "colProduct": "Product",
+    "colAmount": "Amount",
+    "colMethod": "Method",
+    "colStatus": "Status",
+    "statusSuccess": "Success",
+    "featureForVipOnly": "This feature is only for VIP customers, please upgrade to receive notifications.",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordUpdateSuccess": "Password updated successfully",
+    "passwordUpdateFailed": "Failed to update password: {error}",
+    "@passwordUpdateFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "reauthFailed": "Incorrect current password"
 }

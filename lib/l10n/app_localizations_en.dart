@@ -1203,11 +1203,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yourTokens => 'Your Tokens';
 
   @override
-  String get emailNotificationPreferences => 'Email Notification Preferences';
+  String get emailNotificationPreferences => 'Browser Notification Preferences';
 
   @override
   String get chooseSignalNotificationTypes =>
-      'Choose which types of signal notifications you want to receive via email';
+      'Choose which types of signal notifications you want to receive via browser push';
 
   @override
   String get allSignalNotifications => 'All Signal Notifications';
@@ -1276,4 +1276,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leaveMessagePart2 => ' +84 969 156 969 for fast support.';
+
+  @override
+  String get currentPlan => 'Current Plan';
+
+  @override
+  String get standard => 'STANDARD';
+
+  @override
+  String get availableTokens => 'Available Tokens';
+
+  @override
+  String get subscriptions => 'Subscriptions';
+
+  @override
+  String get usesTokenPerView => 'Uses 1 Token per view';
+
+  @override
+  String get unlimitedAccess => 'Unlimited Access';
+
+  @override
+  String get activeElite => 'Active (Elite)';
+
+  @override
+  String get active => 'Active';
+
+  @override
+  String get inactive => 'Inactive';
+
+  @override
+  String get transactionHistory => 'Transaction History';
+
+  @override
+  String get noTransactionsFound => 'No transactions found.';
+
+  @override
+  String get colDate => 'Date';
+
+  @override
+  String get colProduct => 'Product';
+
+  @override
+  String get colAmount => 'Amount';
+
+  @override
+  String get colMethod => 'Method';
+
+  @override
+  String get colStatus => 'Status';
+
+  @override
+  String get statusSuccess => 'Success';
+
+  @override
+  String get featureForVipOnly =>
+      'This feature is only for VIP customers, please upgrade to receive notifications.';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get passwordUpdateSuccess => 'Password updated successfully';
+
+  @override
+  String passwordUpdateFailed(String error) {
+    return 'Failed to update password: $error';
+  }
+
+  @override
+  String get reauthFailed => 'Incorrect current password';
 }
