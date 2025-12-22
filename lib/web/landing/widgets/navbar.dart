@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
-import '../../theme/colors.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/gradients.dart';
 import '../../theme/spacing.dart';
@@ -247,16 +246,33 @@ class _LanguageSelector extends StatelessWidget {
       case 'fr': return 'assets/images/fr_flag.png';
       case 'zh': return 'assets/images/cn_flag.png';
       case 'ko': return 'assets/images/kr_flag.png';
+      case 'hi': return 'assets/images/ando.png';
+      case 'ar': return 'assets/images/arapxeut.png';
+      case 'pt': return 'assets/images/bodaonha.png';
+      case 'km': return 'assets/images/campuchia.png';
+      case 'cs': return 'assets/images/conghoasec.png';
+      case 'da': return 'assets/images/danmach.png';
+      case 'de': return 'assets/images/duc.png';
+      case 'hu': return 'assets/images/hungary.png';
+      case 'id': return 'assets/images/indonesia.png';
+      case 'it': return 'assets/images/italy.png';
+      case 'ms': return 'assets/images/malaysia.png';
+      case 'mn': return 'assets/images/mongco.png';
+      case 'ru': return 'assets/images/nga.png';
+      case 'fi': return 'assets/images/phanlan.png';
+      case 'ro': return 'assets/images/romania.png';
+      case 'es': return 'assets/images/taybannha.png';
+      case 'th': return 'assets/images/thailan.png';
       default: return '';
     }
   }
 
-  Widget _buildFlag(String code) {
+  Widget _buildFlag(String code, {double width = 24, double height = 16}) {
     final asset = _getFlagAsset(code);
     if (asset.isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(4),
-        child: Image.asset(asset, width: 24, height: 16, fit: BoxFit.cover),
+        child: Image.asset(asset, width: width, height: height, fit: BoxFit.cover),
       );
     }
     return Text(
@@ -265,42 +281,59 @@ class _LanguageSelector extends StatelessWidget {
     );
   }
 
+  String _getLanguageName(String code) {
+    switch (code) {
+      case 'en': return 'English';
+      case 'vi': return 'Tiếng Việt';
+      case 'zh': return '中文';
+      case 'fr': return 'Français';
+      case 'ja': return '日本語';
+      case 'ko': return '한국어';
+      case 'hi': return 'हिन्दी';
+      case 'ar': return 'العربية';
+      case 'pt': return 'Português';
+      case 'km': return 'ភាសាខ្មែរ';
+      case 'cs': return 'Čeština';
+      case 'da': return 'Dansk';
+      case 'de': return 'Deutsch';
+      case 'hu': return 'Magyar';
+      case 'id': return 'Bahasa';
+      case 'it': return 'Italiano';
+      case 'ms': return 'Bahasa Melayu';
+      case 'mn': return 'Монгол';
+      case 'ru': return 'Русский';
+      case 'fi': return 'Suomi';
+      case 'ro': return 'Română';
+      case 'es': return 'Español';
+      case 'th': return 'ไทย';
+      default: return code.toUpperCase();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final GlobalKey buttonKey = GlobalKey();
+
     return Consumer<LanguageProvider>(
       builder: (context, provider, child) {
-        return PopupMenuButton<Locale>(
-          onSelected: (Locale newLocale) {
-            provider.setLocale(newLocale);
-          },
-          offset: const Offset(0, 40),
-          color: const Color(0xFF1E1E1E),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          itemBuilder: (BuildContext context) {
-            return LanguageProvider.supportedLocales.map((Locale locale) {
-              return PopupMenuItem<Locale>(
-                value: locale,
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32, 
-                      height: 20, 
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white12),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: _buildFlag(locale.languageCode),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      _getLanguageName(locale.languageCode),
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    ),
-                  ],
-                ),
-              );
-            }).toList();
+        return GestureDetector(
+          key: buttonKey,
+          onTap: () {
+            final RenderBox renderBox = buttonKey.currentContext!.findRenderObject() as RenderBox;
+            final offset = renderBox.localToGlobal(Offset.zero);
+            final size = renderBox.size;
+
+            showDialog(
+              context: context,
+              barrierColor: Colors.transparent,
+              builder: (context) => _LanguagePopup(
+                provider: provider,
+                getFlagAsset: _getFlagAsset,
+                getLanguageName: _getLanguageName,
+                buttonPosition: offset,
+                buttonSize: size,
+              ),
+            );
           },
           child: Container(
             height: 32,
@@ -318,7 +351,7 @@ class _LanguageSelector extends StatelessWidget {
                   width: 32, 
                   height: 20, 
                   alignment: Alignment.center,
-                  child: _buildFlag(provider.locale?.languageCode ?? 'en'),
+                  child: _buildFlag(provider.locale?.languageCode ?? 'en', width: 24, height: 16),
                 ),
                 const SizedBox(width: 6),
                 const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 12),
@@ -329,17 +362,146 @@ class _LanguageSelector extends StatelessWidget {
       },
     );
   }
+}
 
-  String _getLanguageName(String code) {
-    switch (code) {
-      case 'en': return 'English';
-      case 'vi': return 'Tiếng Việt';
-      case 'zh': return '中文';
-      case 'fr': return 'Français';
-      case 'ja': return '日本語';
-      case 'ko': return '한국어';
-      default: return code.toUpperCase();
-    }
+class _LanguagePopup extends StatelessWidget {
+  final LanguageProvider provider;
+  final String Function(String) getFlagAsset;
+  final String Function(String) getLanguageName;
+  final Offset buttonPosition;
+  final Size buttonSize;
+
+  const _LanguagePopup({
+    required this.provider,
+    required this.getFlagAsset,
+    required this.getLanguageName,
+    required this.buttonPosition,
+    required this.buttonSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 600;
+    
+    // Popup dimensions
+    final double popupWidth = isMobile ? size.width * 0.9 : 450;
+    final double popupMaxHeight = 400;
+
+    // Calculate Position (Right aligned with button)
+    // Avoid overflow on right side
+    double right = size.width - (buttonPosition.dx + buttonSize.width);
+    if (right < 16) right = 16; // Margin from screen edge
+
+    double top = buttonPosition.dy + buttonSize.height + 8;
+
+    return Stack(
+      children: [
+        // Barrier to close on tap outside
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            behavior: HitTestBehavior.translucent,
+            child: Container(color: Colors.transparent),
+          ),
+        ),
+        Positioned(
+          top: top,
+          right: right,
+          child: Material(
+            color: Colors.transparent,
+            elevation: 8,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: popupWidth,
+              constraints: BoxConstraints(maxHeight: popupMaxHeight),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: GridView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isMobile ? 2 : 3,
+                  childAspectRatio: 3.2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemCount: LanguageProvider.supportedLocales.length,
+                itemBuilder: (context, index) {
+                  final locale = LanguageProvider.supportedLocales[index];
+                  final isSelected = provider.locale?.languageCode == locale.languageCode;
+                  
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        provider.setLocale(locale);
+                        Navigator.pop(context);
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isSelected ? const Color(0xFF04B3E9) : Colors.white.withOpacity(0.1),
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          color: isSelected ? const Color(0xFF04B3E9).withOpacity(0.15) : Colors.white.withOpacity(0.05),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 28,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.white24, width: 0.5),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(2),
+                                child: Image.asset(
+                                  getFlagAsset(locale.languageCode),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                getLanguageName(locale.languageCode),
+                                style: TextStyle(
+                                  color: isSelected ? const Color(0xFF04B3E9) : Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
