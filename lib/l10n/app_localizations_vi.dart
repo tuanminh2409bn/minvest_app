@@ -1363,4 +1363,11 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Mật khẩu hiện tại không đúng';
+
+  @override
+  String get signInRequired => 'Yêu cầu đăng nhập';
+
+  @override
+  String get signInToExploreSignal =>
+      'Đăng nhập để khám phá tín hiệu giao dịch này!';
 }

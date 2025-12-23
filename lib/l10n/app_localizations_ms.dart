@@ -1364,4 +1364,11 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'Log Masuk Diperlukan';
+
+  @override
+  String get signInToExploreSignal =>
+      'Log masuk untuk meneroka isyarat dagangan ini!';
 }

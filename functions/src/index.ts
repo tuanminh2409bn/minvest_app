@@ -1068,8 +1068,8 @@ function getPaypalClient() {
     const clientId = paypalClientId.value();
     const clientSecret = paypalClientSecret.value();
     
-    // Luôn dùng SandboxEnvironment cho key test này
-    const environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
+    // Sử dụng LiveEnvironment cho tài khoản Doanh nghiệp thực
+    const environment = new paypal.core.LiveEnvironment(clientId, clientSecret);
     
     return new paypal.core.PayPalHttpClient(environment);
 }
@@ -1094,7 +1094,7 @@ export const createPaypalOrder = onCall({
         purchase_units: [{
             amount: {
                 currency_code: "USD",
-                value: price.toString()
+                value: price.toFixed(2)
             },
             custom_id: `${userId}|${packageId}`,
             description: `Payment for ${packageId.replace(/_/g, ' ').toUpperCase()}`
@@ -1116,7 +1116,9 @@ export const createPaypalOrder = onCall({
         return { orderID, approveLink };
     } catch (error: any) {
         functions.logger.error("Error creating PayPal order:", error);
-        throw new HttpsError("internal", "Unable to create PayPal order.", error.message);
+        // Trả về chi tiết lỗi từ PayPal (nếu có) để dễ debug
+        const errorDetails = error.message || "Unknown error";
+        throw new HttpsError("internal", `Unable to create PayPal order: ${errorDetails}`, error.result || error);
     }
 });
 

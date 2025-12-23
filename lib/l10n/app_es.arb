@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "Inicio de sesión requerido",
+    "signInToExploreSignal": "¡Inicia sesión para explorar esta señal de trading!"
 }

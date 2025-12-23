@@ -1380,4 +1380,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'Connexion requise';
+
+  @override
+  String get signInToExploreSignal =>
+      'Connectez-vous pour explorer ce signal de trading !';
 }

@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "需要登录",
+    "signInToExploreSignal": "登录以查看此交易信号！"
 }

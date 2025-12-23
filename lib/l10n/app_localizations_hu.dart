@@ -1368,4 +1368,11 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'Bejelentkezés szükséges';
+
+  @override
+  String get signInToExploreSignal =>
+      'Jelentkezzen be a kereskedési szignál megtekintéséhez!';
 }

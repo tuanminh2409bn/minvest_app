@@ -1326,4 +1326,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => '로그인 필요';
+
+  @override
+  String get signInToExploreSignal => '이 거래 신호를 확인하려면 로그인하세요!';
 }

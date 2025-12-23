@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "ログインが必要です",
+    "signInToExploreSignal": "この取引シグナルを確認するにはログインしてください！"
 }

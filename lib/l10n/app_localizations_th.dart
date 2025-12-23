@@ -1354,4 +1354,11 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'ต้องเข้าสู่ระบบ';
+
+  @override
+  String get signInToExploreSignal =>
+      'เข้าสู่ระบบเพื่อสำรวจสัญญาณการซื้อขายนี้!';
 }

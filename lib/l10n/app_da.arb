@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "Log ind påkrævet",
+    "signInToExploreSignal": "Log ind for at udforske dette handelssignal!"
 }

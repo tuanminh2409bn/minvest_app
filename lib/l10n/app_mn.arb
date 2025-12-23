@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "Нэвтрэх шаардлагатай",
+    "signInToExploreSignal": "Энэхүү арилжааны дохиог үзэхийн туلد нэвтэрнэ үү!"
 }

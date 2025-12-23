@@ -1362,4 +1362,11 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'Kirjautuminen vaaditaan';
+
+  @override
+  String get signInToExploreSignal =>
+      'Kirjaudu sisään tutkiaksesi tätä kaupankäyntisignaalia!';
 }

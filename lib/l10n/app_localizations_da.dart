@@ -1359,4 +1359,11 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'Log ind påkrævet';
+
+  @override
+  String get signInToExploreSignal =>
+      'Log ind for at udforske dette handelssignal!';
 }

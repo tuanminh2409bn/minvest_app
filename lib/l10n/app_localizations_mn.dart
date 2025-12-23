@@ -1369,4 +1369,11 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'Нэвтрэх шаардлагатай';
+
+  @override
+  String get signInToExploreSignal =>
+      'Энэхүү арилжааны дохиог үзэхийн туلد нэвтэрнэ үү!';
 }

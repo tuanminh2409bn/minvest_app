@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "लॉग इन आवश्यक",
+    "signInToExploreSignal": "इस ट्रेडिंग सिग्नल को देखने के लिए लॉग इन करें!"
 }

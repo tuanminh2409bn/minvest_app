@@ -2635,6 +2635,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Incorrect current password'**
   String get reauthFailed;
+
+  /// No description provided for @signInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in Required'**
+  String get signInRequired;
+
+  /// No description provided for @signInToExploreSignal.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to explore this trading signal!'**
+  String get signInToExploreSignal;
 }
 
 class _AppLocalizationsDelegate

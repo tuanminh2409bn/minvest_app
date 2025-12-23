@@ -1367,4 +1367,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'Требуется вход';
+
+  @override
+  String get signInToExploreSignal =>
+      'Войдите, чтобы изучить этот торговый сигнал!';
 }

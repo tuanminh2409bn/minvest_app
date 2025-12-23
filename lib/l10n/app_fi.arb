@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "Kirjautuminen vaaditaan",
+    "signInToExploreSignal": "Kirjaudu sisään tutkiaksesi tätä kaupankäyntisignaalia!"
 }
