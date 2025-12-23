@@ -1362,4 +1362,11 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'Vyžadováno přihlášení';
+
+  @override
+  String get signInToExploreSignal =>
+      'Přihlaste se a prozkoumejte tento obchodní signál!';
 }

@@ -1363,4 +1363,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'Diperlukan Masuk';
+
+  @override
+  String get signInToExploreSignal =>
+      'Masuk untuk menjelajahi sinyal trading ini!';
 }

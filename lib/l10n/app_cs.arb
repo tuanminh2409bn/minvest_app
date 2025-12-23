@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "Vyžadováno přihlášení",
+    "signInToExploreSignal": "Přihlaste se a prozkoumejte tento obchodní signál!"
 }

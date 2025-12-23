@@ -1326,4 +1326,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'ログインが必要です';
+
+  @override
+  String get signInToExploreSignal => 'この取引シグナルを確認するにはログインしてください！';
 }

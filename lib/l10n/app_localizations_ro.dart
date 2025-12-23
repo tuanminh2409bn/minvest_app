@@ -1377,4 +1377,11 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'Autentificare necesară';
+
+  @override
+  String get signInToExploreSignal =>
+      'Conectați-vă pentru a explora acest semnal de tranzacționare!';
 }

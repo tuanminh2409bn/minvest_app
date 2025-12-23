@@ -1358,4 +1358,11 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'តម្រូវឱ្យចូល';
+
+  @override
+  String get signInToExploreSignal =>
+      'សូមចូលក្នុងប្រព័ន្ធដើម្បីរុករកសញ្ញាជួញដូរនេះ!';
 }

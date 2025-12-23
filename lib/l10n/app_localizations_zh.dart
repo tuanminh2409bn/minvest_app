@@ -1315,4 +1315,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => '需要登录';
+
+  @override
+  String get signInToExploreSignal => '登录以查看此交易信号！';
 }

@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "Bejelentkezés szükséges",
+    "signInToExploreSignal": "Jelentkezzen be a kereskedési szignál megtekintéséhez!"
 }

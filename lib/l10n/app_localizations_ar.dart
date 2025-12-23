@@ -1353,4 +1353,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reauthFailed => 'Incorrect current password';
+
+  @override
+  String get signInRequired => 'تسجيل الدخول مطلوب';
+
+  @override
+  String get signInToExploreSignal =>
+      'قم بتسجيل الدخول لاستكشاف إشارة التداول هذه!';
 }

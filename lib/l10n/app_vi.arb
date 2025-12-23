@@ -460,5 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Mật khẩu hiện tại không đúng"
+    "reauthFailed": "Mật khẩu hiện tại không đúng",
+    "signInRequired": "Yêu cầu đăng nhập",
+    "signInToExploreSignal": "Đăng nhập để khám phá tín hiệu giao dịch này!"
 }

@@ -1160,7 +1160,36 @@ class _SampleSignalWebCard extends StatelessWidget {
     final typeText = isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell;
     
     return GestureDetector(
-      onTap: () => Navigator.of(context).pushNamed('/signin'),
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF1E1E1E),
+            title: Text(AppLocalizations.of(context)!.signInRequired, style: const TextStyle(color: Colors.white)),
+            content: Text(
+              AppLocalizations.of(context)!.signInToExploreSignal,
+              style: const TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.white54)),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.of(context).pushNamed('/signin');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E97FF),
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(AppLocalizations.of(context)!.signIn),
+              ),
+            ],
+          ),
+        );
+      },
       child: Container(
         constraints: const BoxConstraints(minHeight: 150),
         decoration: BoxDecoration(
@@ -1406,7 +1435,34 @@ class _SignalWebCard extends StatelessWidget {
   Future<void> _openDetail(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      Navigator.of(context).pushNamed('/signin');
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color(0xFF1E1E1E),
+          title: Text(AppLocalizations.of(context)!.signInRequired, style: const TextStyle(color: Colors.white)),
+          content: Text(
+            AppLocalizations.of(context)!.signInToExploreSignal,
+            style: const TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.white54)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamed('/signin');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2E97FF),
+                foregroundColor: Colors.white,
+              ),
+              child: Text(AppLocalizations.of(context)!.signIn),
+            ),
+          ],
+        ),
+      );
       return;
     }
     final userProvider = Provider.of<UserProvider?>(context, listen: false);

@@ -351,7 +351,14 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                         height: 38,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(8),
-                          onTap: () => context.read<AuthBloc>().add(SignInAnonymouslyRequested()),
+                          onTap: () {
+                            final authState = context.read<AuthBloc>().state;
+                            if (authState.status == AuthStatus.authenticated) {
+                              Navigator.of(context).pushNamed('/ai-signals');
+                            } else {
+                              Navigator.of(context).pushNamed('/signin');
+                            }
+                          },
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),

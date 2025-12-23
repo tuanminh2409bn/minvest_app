@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "Diperlukan Masuk",
+    "signInToExploreSignal": "Masuk untuk menjelajahi sinyal trading ini!"
 }

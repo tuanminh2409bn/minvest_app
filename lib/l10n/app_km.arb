@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "តម្រូវឱ្យចូល",
+    "signInToExploreSignal": "សូមចូលក្នុងប្រព័ន្ធដើម្បីរុករកសញ្ញាជួញដូរនេះ!"
 }

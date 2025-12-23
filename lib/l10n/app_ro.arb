@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "Autentificare necesară",
+    "signInToExploreSignal": "Conectați-vă pentru a explora acest semnal de tranzacționare!"
 }

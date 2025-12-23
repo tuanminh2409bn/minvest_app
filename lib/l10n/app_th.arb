@@ -460,6 +460,7 @@
             }
         }
     },
-    "reauthFailed": "Incorrect current password"
-
+    "reauthFailed": "Incorrect current password",
+    "signInRequired": "ต้องเข้าสู่ระบบ",
+    "signInToExploreSignal": "เข้าสู่ระบบเพื่อสำรวจสัญญาณการซื้อขายนี้!"
 }
