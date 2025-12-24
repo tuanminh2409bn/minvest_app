@@ -1,12 +1,21 @@
-// lib/services/notification_service.dart
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:minvest_forex_app/firebase_options.dart';
+import 'package:minvest_forex_app/services/web_notification/web_notification.dart'; // Import helper
 import 'dart:convert';
+
+final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'minvest_channel_id',
+  'Minvest Forex Signals',
+  description: 'Kênh nhận thông báo tín hiệu từ Minvest.',
+  importance: Importance.max,
+  playSound: true,
+);
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -19,18 +28,7 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  // Đưa vào trong class để tránh khởi tạo sớm gây lỗi trên Web
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  
-  static const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'minvest_channel_id',
-    'Minvest Forex Signals',
-    description: 'Kênh nhận thông báo tín hiệu từ Minvest.',
-    importance: Importance.max,
-    playSound: true,
-  );
-
-  FirebaseMessaging get _firebaseMessaging => FirebaseMessaging.instance;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   bool _isInitialized = false;
 
   Future<void> initialize({
@@ -61,16 +59,7 @@ class NotificationService {
 
   Future<void> _requestPermissions() async {
     debugPrint("🔐 [FCM_SERVICE] Đang xin quyền nhận thông báo...");
-    NotificationSettings settings = await _firebaseMessaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-    debugPrint('🔐 [FCM_SERVICE] Trạng thái quyền thông báo: ${settings.authorizationStatus}');
+    await _firebaseMessaging.requestPermission();
   }
 
   Future<void> _createAndroidChannel() async {
@@ -114,12 +103,22 @@ class NotificationService {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint("🟢 [FCM_SERVICE] Foreground message received: ${message.data}");
       final RemoteNotification? notification = message.notification;
-      if (notification != null && !kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-        // TRUYỀN TOÀN BỘ message.data VÀO ĐÂY
+      
+      // LOGIC MỚI: Xử lý cho Web
+      if (kIsWeb) {
+        if (notification != null) {
+          debugPrint("🔔 [FCM_SERVICE] Hiển thị thông báo Web: ${notification.title}");
+          showWebNotification(
+            notification.title ?? 'Minvest', 
+            notification.body ?? ''
+          );
+        }
+      } else if (notification != null && defaultTargetPlatform == TargetPlatform.android) {
+         // Logic cũ cho Android
         _showLocalNotification(
           title: notification.title ?? '',
           body: notification.body ?? '',
-          payload: message.data, // Sửa ở đây
+          payload: message.data,
         );
       }
     });
@@ -140,7 +139,7 @@ class NotificationService {
   void _showLocalNotification({
     required String title,
     required String body,
-    required Map<String, dynamic> payload, // Sửa ở đây từ String -> Map
+    required Map<String, dynamic> payload,
   }) {
     _flutterLocalNotificationsPlugin.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
@@ -161,8 +160,7 @@ class NotificationService {
           presentSound: true,
         ),
       ),
-      // MÃ HÓA MAP THÀNH CHUỖI JSON ĐỂ TRUYỀN ĐI
-      payload: jsonEncode(payload), // Sửa ở đây
+      payload: jsonEncode(payload),
     );
     debugPrint("📱 [FCM_SERVICE] Hiển thị thông báo cục bộ thành công.");
   }

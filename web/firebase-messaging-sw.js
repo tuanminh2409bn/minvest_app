@@ -16,19 +16,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 // Chỉ cần lấy instance của messaging.
+// Không cần xử lý onBackgroundMessage nữa vì trình duyệt sẽ tự làm.
 const messaging = firebase.messaging();
-
-messaging.onBackgroundMessage(function(payload) {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/icons/Icon-192.png',
-    data: payload.data
-  };
-
-  return self.registration.showNotification(notificationTitle, notificationOptions);
-});
 
 console.log("Firebase Messaging Service Worker has been set up correctly.");

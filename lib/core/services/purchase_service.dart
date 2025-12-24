@@ -22,6 +22,10 @@ class PurchaseService extends ChangeNotifier {
   bool get isPurchasePending => _isPurchasePending;
 
   Future<void> initialize() async {
+    if (kIsWeb) {
+      debugPrint("Store không khả dụng trên Web.");
+      return;
+    }
     _isStoreAvailable = await _inAppPurchase.isAvailable();
     debugPrint("Store khả dụng: $_isStoreAvailable");
     if (_isStoreAvailable) {
