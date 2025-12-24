@@ -40,6 +40,8 @@ import 'features/auth/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
+import 'package:minvest_forex_app/services/web_notification/web_notification.dart';
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
 
@@ -287,6 +289,7 @@ class _MyAppState extends State<MyApp> {
       builder: (context, languageProvider, child) {
         if (kIsWeb) {
           return MaterialApp(
+            navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
             title: 'Minvest Forex App',
             theme: _buildAppTheme(),

@@ -1,12 +1,10 @@
-// lib/features/notifications/services/notification_service.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/features/notifications/models/notification_model.dart';
 
 class NotificationService {
-  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
-  FirebaseAuth get _auth => FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Lấy danh sách tất cả thông báo của người dùng hiện tại
   Stream<List<NotificationModel>> getNotifications() {
