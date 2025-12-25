@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:minvest_forex_app/firebase_options.dart';
-import 'package:minvest_forex_app/services/web_notification/web_notification.dart'; // Import helper
 import 'dart:convert';
 
 final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -17,7 +16,7 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
   playSound: true,
 );
 
-@pragma('vm:entry-point')
+ @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   debugPrint("🔥 [FCM_SERVICE] Background message handled by OS.");
@@ -103,22 +102,12 @@ class NotificationService {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint("🟢 [FCM_SERVICE] Foreground message received: ${message.data}");
       final RemoteNotification? notification = message.notification;
-      
-      // LOGIC MỚI: Xử lý cho Web
-      if (kIsWeb) {
-        if (notification != null) {
-          debugPrint("🔔 [FCM_SERVICE] Hiển thị thông báo Web: ${notification.title}");
-          showWebNotification(
-            notification.title ?? 'Minvest', 
-            notification.body ?? ''
-          );
-        }
-      } else if (notification != null && defaultTargetPlatform == TargetPlatform.android) {
-         // Logic cũ cho Android
+      if (notification != null && !kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+        // TRUYỀN TOÀN BỘ message.data VÀO ĐÂY
         _showLocalNotification(
           title: notification.title ?? '',
           body: notification.body ?? '',
-          payload: message.data,
+          payload: message.data, // Sửa ở đây
         );
       }
     });
@@ -139,7 +128,7 @@ class NotificationService {
   void _showLocalNotification({
     required String title,
     required String body,
-    required Map<String, dynamic> payload,
+    required Map<String, dynamic> payload, // Sửa ở đây từ String -> Map
   }) {
     _flutterLocalNotificationsPlugin.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
@@ -160,7 +149,8 @@ class NotificationService {
           presentSound: true,
         ),
       ),
-      payload: jsonEncode(payload),
+      // MÃ HÓA MAP THÀNH CHUỖI JSON ĐỂ TRUYỀN ĐI
+      payload: jsonEncode(payload), // Sửa ở đây
     );
     debugPrint("📱 [FCM_SERVICE] Hiển thị thông báo cục bộ thành công.");
   }

@@ -34,21 +34,22 @@ import 'web/landing/contact_page.dart';
 import 'web/landing/legal/terms_of_registration_page.dart';
 import 'web/landing/legal/operating_principles_page.dart';
 import 'web/landing/legal/terms_conditions_page.dart';
-import 'web/landing/payment_callback_screen.dart'; // Import PaymentCallbackScreen
+import 'web/landing/payment_callback_screen.dart';
 import 'features/auth/screens/welcome/signup_screen_web.dart';
 import 'features/auth/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
-import 'package:minvest_forex_app/services/web_notification/web_notification.dart';
-
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // KHÔNG gọi await Firebase.initializeApp() ở đây để tránh chặn UI
-  
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     systemNavigationBarColor: Colors.transparent,
@@ -91,41 +92,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   StreamSubscription<String>? _forceLogoutSubscription;
   bool _isLogoutDialogShowing = false;
-  bool _isFirebaseInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeApp();
-  }
-  
-  Future<void> _initializeApp() async {
-    try {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-      
-      if (mounted) {
-        // Sau khi Firebase sẵn sàng, khởi tạo các dịch vụ phụ thuộc
-        await context.read<AuthService>().initialize();
-        FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-        
-        // Khởi tạo PurchaseService
-        context.read<PurchaseService>().initialize();
-        
-        // Khởi tạo NotificationService
-        await NotificationService().initialize(
-          onNotificationTapped: (data) {
-            _handleNotificationNavigation(data);
-          },
-        );
+    _initializeCoreServices();
 
-        final fcmToken = await NotificationService().getFcmToken();
-        if (fcmToken != null) {
-          debugPrint("FCM Token: $fcmToken");
-        }
-        
-        // Setup listener cho force logout
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
         final authService = context.read<AuthService>();
         _forceLogoutSubscription = authService.forceLogoutStream.listen((reason) {
           if (mounted && !_isLogoutDialogShowing) {
@@ -133,20 +107,35 @@ class _MyAppState extends State<MyApp> {
             _showLogoutDialog(reason);
           }
         });
-
-        setState(() {
-          _isFirebaseInitialized = true;
-        });
       }
-    } catch (e) {
-      debugPrint("Lỗi khởi tạo ứng dụng: $e");
-    }
+    });
   }
 
   @override
   void dispose() {
     _forceLogoutSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> _initializeCoreServices() async {
+    // Initialize AuthService
+    await context.read<AuthService>().initialize();
+
+    // Khởi tạo PurchaseService
+    context.read<PurchaseService>().initialize();
+    debugPrint("✅ Đã gọi initialize() cho PurchaseService từ MyApp.");
+
+    // Khởi tạo NotificationService
+    await NotificationService().initialize(
+      onNotificationTapped: (data) {
+        _handleNotificationNavigation(data);
+      },
+    );
+
+    final fcmToken = await NotificationService().getFcmToken();
+    if (fcmToken != null) {
+      debugPrint("FCM Token: $fcmToken");
+    }
   }
 
   Future<void> _handleNotificationNavigation(Map<String, dynamic> data) async {
@@ -246,7 +235,6 @@ class _MyAppState extends State<MyApp> {
               child: Text(l10n.ok),
               onPressed: () async {
                 Navigator.of(dialogContext).pop();
-                // Dùng context của MyApp để truy cập Provider
                 if (mounted) {
                    await Provider.of<AuthService>(context, listen: false).signOut();
                 }
@@ -266,25 +254,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isFirebaseInitialized) {
-      return const Directionality(
-        textDirection: TextDirection.ltr,
-        child: ColoredBox(
-          color: Color(0xFF000000),
-          child: Center(
-            child: SizedBox(
-              width: 50,
-              height: 50,
-              child: CircularProgressIndicator(
-                color: Color(0xFF3C4BFE),
-                strokeWidth: 4,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
     return Consumer<LanguageProvider>(
       builder: (context, languageProvider, child) {
         if (kIsWeb) {
