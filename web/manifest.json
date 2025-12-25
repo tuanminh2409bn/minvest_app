@@ -1,11 +1,11 @@
 {
-    "name": "minvest_forex_app",
-    "short_name": "minvest_forex_app",
+    "name": "Signal GPT",
+    "short_name": "Signal GPT",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#000000",
     "theme_color": "#000000",
-    "description": "Minvest Forex App AI",
+    "description": "Signal GPT",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

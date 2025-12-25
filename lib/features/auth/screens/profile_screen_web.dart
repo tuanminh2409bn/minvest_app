@@ -45,21 +45,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     const LandingNavBar(),
                     const SizedBox(height: 20),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _ProfileSidebar(
-                          name: name,
-                          email: email,
-                          tabIndex: _tabIndex,
-                          onTabChanged: (i) => setState(() => _tabIndex = i),
-                          appLocalizations: appLocalizations,
-                        ),
-                        const SizedBox(width: 24),
-                        Expanded(
-                          child: _buildTabContent(name),
-                        ),
-                      ],
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isMobile = constraints.maxWidth < 800;
+                        if (isMobile) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _ProfileSidebar(
+                                name: name,
+                                email: email,
+                                tabIndex: _tabIndex,
+                                onTabChanged: (i) => setState(() => _tabIndex = i),
+                                appLocalizations: appLocalizations,
+                                isMobile: true,
+                              ),
+                              const SizedBox(height: 24),
+                              _buildTabContent(name),
+                            ],
+                          );
+                        }
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _ProfileSidebar(
+                              name: name,
+                              email: email,
+                              tabIndex: _tabIndex,
+                              onTabChanged: (i) => setState(() => _tabIndex = i),
+                              appLocalizations: appLocalizations,
+                              isMobile: false,
+                            ),
+                            const SizedBox(width: 24),
+                            Expanded(
+                              child: _buildTabContent(name),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     const SizedBox(height: 40),
                     const FooterSection(),
@@ -125,6 +148,7 @@ class _ProfileSidebar extends StatelessWidget {
   final int tabIndex;
   final ValueChanged<int> onTabChanged;
   final AppLocalizations appLocalizations;
+  final bool isMobile;
 
   const _ProfileSidebar({
     required this.name,
@@ -132,6 +156,7 @@ class _ProfileSidebar extends StatelessWidget {
     required this.tabIndex,
     required this.onTabChanged,
     required this.appLocalizations,
+    this.isMobile = false,
   });
 
   @override
@@ -140,7 +165,7 @@ class _ProfileSidebar extends StatelessWidget {
     final userRole = userProvider.role ?? 'user';
 
     return Container(
-      width: 260,
+      width: isMobile ? double.infinity : 260,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.black,
@@ -176,24 +201,49 @@ class _ProfileSidebar extends StatelessWidget {
           const SizedBox(height: 16),
           Text(appLocalizations.nationality, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
           const SizedBox(height: 24),
-          _tabButton(appLocalizations.overview, 0),
-          _tabButton(appLocalizations.setting, 1),
-          _tabButton(appLocalizations.paymentHistory, 2),
-          const SizedBox(height: 24),
-          if (userRole.toLowerCase().trim() == 'admin') ...[
-            const _AdminPanelButton(),
-            const SizedBox(height: 10),
+          if (isMobile) ...[
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _tabButton(appLocalizations.overview, 0, horizontal: true),
+                  const SizedBox(width: 8),
+                  _tabButton(appLocalizations.setting, 1, horizontal: true),
+                  const SizedBox(width: 8),
+                  _tabButton(appLocalizations.paymentHistory, 2, horizontal: true),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                if (userRole.toLowerCase().trim() == 'admin') ...[
+                  const Expanded(child: _AdminPanelButton(horizontal: true)),
+                  const SizedBox(width: 8),
+                ],
+                const Expanded(child: _LogoutButton(horizontal: true)),
+              ],
+            ),
+          ] else ...[
+            _tabButton(appLocalizations.overview, 0),
+            _tabButton(appLocalizations.setting, 1),
+            _tabButton(appLocalizations.paymentHistory, 2),
+            const SizedBox(height: 24),
+            if (userRole.toLowerCase().trim() == 'admin') ...[
+              const _AdminPanelButton(),
+              const SizedBox(height: 10),
+            ],
+            const _LogoutButton(),
           ],
-          const _LogoutButton(),
         ],
       ),
     );
   }
 
-  Widget _tabButton(String text, int index) {
+  Widget _tabButton(String text, int index, {bool horizontal = false}) {
     final bool active = tabIndex == index;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: horizontal ? EdgeInsets.zero : const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: () => onTabChanged(index),
         borderRadius: BorderRadius.circular(8),
@@ -205,7 +255,7 @@ class _ProfileSidebar extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: active ? Colors.white : Colors.white24),
           ),
-          alignment: Alignment.centerLeft,
+          alignment: horizontal ? Alignment.center : Alignment.centerLeft,
           child: Text(
             text,
             style: AppTextStyles.body.copyWith(
@@ -221,7 +271,8 @@ class _ProfileSidebar extends StatelessWidget {
 }
 
 class _AdminPanelButton extends StatelessWidget {
-  const _AdminPanelButton();
+  final bool horizontal;
+  const _AdminPanelButton({this.horizontal = false});
 
   @override
   Widget build(BuildContext context) {
@@ -242,17 +293,21 @@ class _AdminPanelButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
         ),
-        alignment: Alignment.centerLeft,
+        alignment: horizontal ? Alignment.center : Alignment.centerLeft,
         child: Row(
+          mainAxisSize: horizontal ? MainAxisSize.min : MainAxisSize.max,
           children: [
             const Icon(Icons.admin_panel_settings, color: Colors.blueAccent, size: 20),
             const SizedBox(width: 12),
-            Text(
-              l10n.adminPanel,
-              style: AppTextStyles.body.copyWith(
-                color: Colors.blueAccent,
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
+            Flexible(
+              child: Text(
+                l10n.adminPanel,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.blueAccent,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -263,7 +318,8 @@ class _AdminPanelButton extends StatelessWidget {
 }
 
 class _LogoutButton extends StatelessWidget {
-  const _LogoutButton();
+  final bool horizontal;
+  const _LogoutButton({this.horizontal = false});
 
   @override
   Widget build(BuildContext context) {
@@ -285,17 +341,21 @@ class _LogoutButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
         ),
-        alignment: Alignment.centerLeft,
+        alignment: horizontal ? Alignment.center : Alignment.centerLeft,
         child: Row(
+          mainAxisSize: horizontal ? MainAxisSize.min : MainAxisSize.max,
           children: [
             const Icon(Icons.logout, color: Colors.redAccent, size: 20),
             const SizedBox(width: 12),
-            Text(
-              l10n.logout,
-              style: AppTextStyles.body.copyWith(
-                color: Colors.redAccent,
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
+            Flexible(
+              child: Text(
+                l10n.logout,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -674,8 +734,16 @@ class _SettingTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(label, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
-            const Spacer(),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
             Switch(
               value: value,
               activeColor: Colors.white,
