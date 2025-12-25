@@ -2,7 +2,6 @@
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js');
 
-// Dữ liệu cấu hình của bạn (đã chính xác)
 const firebaseConfig = {
   apiKey: "AIzaSyC4z9Q-lasHcw_gbsYvNod5N8pGkqs3BfE",
   authDomain: "minvestforexapp-33dff.firebaseapp.com",
@@ -15,8 +14,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-// Chỉ cần lấy instance của messaging.
-// Không cần xử lý onBackgroundMessage nữa vì trình duyệt sẽ tự làm.
 const messaging = firebase.messaging();
 
 console.log("Firebase Messaging Service Worker has been set up correctly.");

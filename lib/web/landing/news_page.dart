@@ -341,19 +341,31 @@ class _FeaturedArticleCardState extends State<_FeaturedArticleCard> {
               ),
               const SizedBox(height: 12),
               // Content / Subtitle
-              Expanded(
-                child: Text(
-                  widget.article.subtitle.isNotEmpty
-                      ? widget.article.subtitle
-                      : widget.article.content,
-                  maxLines: widget.isDesktop ? 6 : 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.body.copyWith(
-                    color: Colors.white70,
-                    height: 1.5,
-                  ),
-                ),
-              ),
+              widget.isDesktop
+                  ? Expanded(
+                      child: Text(
+                        widget.article.subtitle.isNotEmpty
+                            ? widget.article.subtitle
+                            : widget.article.content,
+                        maxLines: 6,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.body.copyWith(
+                          color: Colors.white70,
+                          height: 1.5,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      widget.article.subtitle.isNotEmpty
+                          ? widget.article.subtitle
+                          : widget.article.content,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.body.copyWith(
+                        color: Colors.white70,
+                        height: 1.5,
+                      ),
+                    ),
               const SizedBox(height: 12),
               // Read More
               Row(
@@ -399,7 +411,7 @@ class _ArticleCardState extends State<_ArticleCard> {
 
     final double imgWidth = widget.isDesktop ? 226.85 : 120;
     final double imgHeight = widget.isDesktop ? 205 : 120;
-    final double cardHeight = widget.isDesktop ? 240 : double.infinity;
+    final double? cardHeight = widget.isDesktop ? 240 : null;
 
     Widget content() => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
