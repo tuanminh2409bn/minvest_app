@@ -30,32 +30,20 @@ class LandingNavBar extends StatelessWidget {
         final user = snapshot.data;
         return LayoutBuilder(builder: (context, constraints) {
           final bool stacked = constraints.maxWidth < 720;
-          // Tăng ngưỡng breakpoint lên 1250 để xử lý sớm các ngôn ngữ dài như tiếng Pháp
-          final bool isCompact = constraints.maxWidth < 1250; 
-          
-          final double padH = 0; // Đã loại bỏ padding ngang nội bộ
+          final bool isCompact = constraints.maxWidth < 1250;
+          final double padH = 0;
           final double padV = stacked ? 12 : 6;
-          
-          // Tinh chỉnh khoảng cách giữa các item: Nhỏ hơn khi ở chế độ Compact
-          final navSpacing = stacked
-              ? 10.0
-              : isCompact
-                  ? 14.0 
-                  : 24.0;
-                  
-          // Giảm nhẹ font size khi không gian hẹp
+          final navSpacing = 25.0;
           final fontSize = stacked
               ? 14.0
               : isCompact
                   ? 14.5
                   : 16.0;
-
-          // Khoảng cách giữa Logo và Menu: Giảm đáng kể khi ở chế độ Compact (từ 82 -> 32)
           final double logoGap = isCompact ? 32.0 : 64.0;
-
           final navLinks = SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 ...navItems.map(
                   (item) => Padding(
@@ -106,8 +94,12 @@ class LandingNavBar extends StatelessWidget {
                         onTap: () => Navigator.of(context).pushNamed('/'),
                         child: Image.asset('assets/mockups/logo.png', height: 42, fit: BoxFit.contain),
                       ),
-                      SizedBox(width: logoGap), // Sử dụng khoảng cách linh hoạt
-                      Expanded(child: navLinks),
+                      SizedBox(width: logoGap),
+                      Expanded(
+                        child: Center(
+                          child: navLinks,
+                        ),
+                      ),
                       actions,
                     ],
                   ),
@@ -586,12 +578,19 @@ class _NavBarItemState extends State<_NavBarItem> {
         onTap: () {
           Navigator.of(context).pushNamed(widget.route);
         },
-        child: Text(
-          widget.title,
-          style: AppTextStyles.h3.copyWith(
-            fontSize: widget.fontSize,
-            fontWeight: FontWeight.w700,
-            color: color,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 100),
+          child: Text(
+            widget.title,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.visible,
+            style: AppTextStyles.h3.copyWith(
+              fontSize: widget.fontSize,
+              fontWeight: FontWeight.w700,
+              color: color,
+              height: 1.2, // Adjust line height for better spacing when wrapped
+            ),
           ),
         ),
       ),
