@@ -2307,6 +2307,9 @@ class FaqSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     final List<Map<String, String>> faqItems = [
       {
         'question': AppLocalizations.of(context)!.faqQuestion1,
@@ -2326,12 +2329,15 @@ class FaqSection extends StatelessWidget {
       },
     ];
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 24, vertical: 32),
       child: Column(
         children: [
           Text(
             AppLocalizations.of(context)!.frequentlyAskedQuestions,
-            style: AppTextStyles.h1.copyWith(fontSize: 32, fontWeight: FontWeight.w700),
+            style: AppTextStyles.h1.copyWith(
+              fontSize: isMobile ? 32 : 32, // Keep as is or adjust if needed
+              fontWeight: FontWeight.w700,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -2339,7 +2345,10 @@ class FaqSection extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 800),
             child: Text(
               AppLocalizations.of(context)!.faqSubtitle,
-              style: AppTextStyles.body.copyWith(color: Colors.white),
+              style: AppTextStyles.body.copyWith(
+                color: Colors.white, 
+                fontSize: isMobile ? 18 : 16,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -2389,14 +2398,17 @@ class CtaSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.xl),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.02),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(isMobile ? 0 : 16),
           border: Border.all(color: AppColors.cardBorder),
         ),
         child: Column(
@@ -2404,15 +2416,21 @@ class CtaSection extends StatelessWidget {
           Text(
             AppLocalizations.of(context)!.maximizeResultsTitle,
             textAlign: TextAlign.center,
-            style: AppTextStyles.h1.copyWith(fontSize: 32, fontWeight: FontWeight.w700),
+            style: AppTextStyles.h1.copyWith(
+              fontSize: isMobile ? 32 : 32, 
+              fontWeight: FontWeight.w700,
+            ),
           ),
             const SizedBox(height: AppSpacing.sm),
           Container(
-            constraints: const BoxConstraints(maxWidth: 800), // Thêm constraint cho mô tả
+            constraints: const BoxConstraints(maxWidth: 800),
             child: Text(
               AppLocalizations.of(context)!.minvestAiRegistrationDesc,
               textAlign: TextAlign.center,
-              style: AppTextStyles.body.copyWith(color: Colors.white),
+              style: AppTextStyles.body.copyWith(
+                color: Colors.white,
+                fontSize: isMobile ? 18 : 16,
+              ),
             ),
           ),
             const SizedBox(height: AppSpacing.lg),
@@ -2421,10 +2439,11 @@ class CtaSection extends StatelessWidget {
                 label: AppLocalizations.of(context)!.startNow,
                 height: 38,
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                borderRadius: 6,
+                borderRadius: isMobile ? 1 : 6,
                 textStyle: AppTextStyles.body.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
+                  fontSize: isMobile ? 18 : 14,
                 ),
                 onPressed: () => Navigator.of(context).pushNamed('/signup'),
               ),
