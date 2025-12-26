@@ -30,6 +30,8 @@ class SignalDetailScreen extends StatelessWidget {
     'NZD': 'assets/images/nzd_flag.png',
     'USD': 'assets/images/us_flag.png',
     'XAU': 'assets/images/crown_icon.png',
+    'BTC': 'assets/images/btc.png',
+    'USDT': 'assets/images/usdt.png',
   };
 
   List<String> _getFlagPathsFromSymbol(String symbol) {
@@ -136,6 +138,11 @@ class SignalDetailScreen extends StatelessWidget {
                             label: 'ENTRY',
                             value: entryText,
                             color: const Color(0xFF289EFF)),
+                        if (signal.leverage != null)
+                          PriceCell(
+                              label: 'LEVERAGE',
+                              value: signal.leverage!,
+                              color: Colors.amber),
                         PriceCell(
                             label: 'SL',
                             value: slText,
@@ -257,10 +264,83 @@ class _Header extends StatelessWidget {
     required this.createdLabel,
   });
 
+  static const Map<String, String> _currencyFlags = {
+    'BTC': 'assets/images/btc.png',
+    'USDT': 'assets/images/usdt.png',
+  };
+
+  Widget _buildCryptoIcon(String symbol) {
+    final code = symbol.toUpperCase();
+    if (_currencyFlags.containsKey(code)) {
+      return CircleAvatar(
+        radius: 16,
+        backgroundColor: Colors.transparent,
+        backgroundImage: AssetImage(_currencyFlags[code]!),
+      );
+    }
+
+    IconData iconData = Icons.currency_bitcoin;
+    Color color = Colors.orange;
+
+    if (code.contains('BTC')) {
+      iconData = Icons.currency_bitcoin;
+      color = const Color(0xFFF7931A);
+    } else if (code.contains('ETH')) {
+      iconData = Icons.currency_exchange;
+      color = const Color(0xFF627EEA);
+    } else if (code.contains('USDT')) {
+      iconData = Icons.attach_money;
+      color = const Color(0xFF26A17B);
+    } else if (code.contains('BNB')) {
+      iconData = Icons.token;
+      color = const Color(0xFFF3BA2F);
+    } else {
+      iconData = Icons.token;
+      color = Colors.grey;
+    }
+
+    return CircleAvatar(
+      radius: 16,
+      backgroundColor: color.withOpacity(0.2),
+      child: Icon(iconData, color: color, size: 20),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isBuy = type.toLowerCase() == 'buy';
     final typeColor = isBuy ? const Color(0xFF18D46F) : const Color(0xFFE54747);
+    
+    Widget iconWidget;
+    if (flagPaths.isNotEmpty) {
+      iconWidget = SizedBox(
+        width: 52,
+        height: 32,
+        child: Stack(
+          children: List.generate(flagPaths.length, (index) {
+            return Positioned(
+              left: index * 16.0,
+              child: CircleAvatar(
+                radius: 16,
+                backgroundColor: Colors.grey.shade800,
+                backgroundImage: AssetImage(flagPaths[index]),
+              ),
+            );
+          }),
+        ),
+      );
+    } else {
+        // Try to parse symbol for base/quote if possible
+        final parts = symbol.split('/');
+        if (parts.length == 2) {
+             // For crypto pairs like BTC/USD, we might want to show two icons or just base
+             // For simplicity, let's show the base crypto icon
+             iconWidget = _buildCryptoIcon(parts[0]);
+        } else {
+             iconWidget = _buildCryptoIcon(symbol);
+        }
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -273,24 +353,8 @@ class _Header extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (flagPaths.isNotEmpty)
-                SizedBox(
-                  width: 52,
-                  height: 32,
-                  child: Stack(
-                    children: List.generate(flagPaths.length, (index) {
-                      return Positioned(
-                        left: index * 16.0,
-                        child: CircleAvatar(
-                          radius: 16,
-                          backgroundColor: Colors.grey.shade800,
-                          backgroundImage: AssetImage(flagPaths[index]),
-                        ),
-                      );
-                    }),
-                  ),
-                ),
-              if (flagPaths.isNotEmpty) const SizedBox(width: 10),
+              iconWidget,
+              const SizedBox(width: 10),
               Text(
                 symbol.toUpperCase(),
                 style: const TextStyle(

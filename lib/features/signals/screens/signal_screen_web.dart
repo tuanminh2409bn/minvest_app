@@ -22,7 +22,17 @@ class SignalScreen extends StatefulWidget {
 
 class _SignalScreenState extends State<SignalScreen> {
   bool _isLive = true;
+  String? _selectedSymbol; // Null means "All"
   final SignalService _signalService = SignalService();
+
+  final List<String> _popularSymbols = [
+    'XAU/USD',
+    'BTC/USD',
+    'ETH/USD',
+    'EUR/USD',
+    'GBP/USD',
+    'USD/JPY',
+  ];
 
   bool _isWithinGoldenHours() {
     final nowInVietnam = DateTime.now().toUtc().add(const Duration(hours: 7));
@@ -59,10 +69,8 @@ class _SignalScreenState extends State<SignalScreen> {
                     const SizedBox(width: 40),
                     _buildFilters(l10n),
                     const Spacer(),
-                    // ▼▼▼ BẮT ĐẦU SỬA ĐỔI ▼▼▼
-                    const _LanguageSwitcher(), // Luôn hiển thị lá cờ
+                    const _LanguageSwitcher(),
                     const SizedBox(width: 16),
-                    // Chỉ hiển thị chuông thông báo cho user đã đăng nhập
                     if (userTier != 'free')
                       Consumer<NotificationProvider>(
                         builder: (context, notificationProvider, child) {
@@ -97,7 +105,6 @@ class _SignalScreenState extends State<SignalScreen> {
                           );
                         },
                       ),
-                    // ▲▲▲ KẾT THÚC SỬA ĐỔI ▲▲▲
                   ],
                 ),
               ),
@@ -111,7 +118,6 @@ class _SignalScreenState extends State<SignalScreen> {
     );
   }
 
-  // ... (Các hàm còn lại giữ nguyên không thay đổi)
   Widget _buildContent(String userTier, AppLocalizations l10n) {
     if (userTier == 'free') {
       return _buildFreeUserView(l10n);
@@ -152,7 +158,11 @@ class _SignalScreenState extends State<SignalScreen> {
 
   Widget _buildSignalList(String userTier, AppLocalizations l10n) {
     return StreamBuilder<List<Signal>>(
-      stream: _signalService.getSignals(isLive: _isLive, userTier: userTier),
+      stream: _signalService.getSignals(
+        isLive: _isLive, 
+        userTier: userTier,
+        symbol: _selectedSymbol // Pass symbol here
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -209,9 +219,26 @@ class _SignalScreenState extends State<SignalScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _GradientFilterButton(text: l10n.symbol, onPressed: () {}),
+        // Symbol Filter
+        PopupMenuButton<String>(
+          onSelected: (value) {
+            setState(() {
+              _selectedSymbol = value == 'All' ? null : value;
+            });
+          },
+          itemBuilder: (context) {
+            return [
+              const PopupMenuItem(value: 'All', child: Text('All Symbols')),
+              ..._popularSymbols.map((s) => PopupMenuItem(value: s, child: Text(s))),
+            ];
+          },
+          child: _FilterButtonContent(
+            text: _selectedSymbol ?? l10n.symbol,
+            isActive: _selectedSymbol != null,
+          ),
+        ),
         const SizedBox(width: 20),
-        _GradientFilterButton(text: l10n.aiSignal, onPressed: () {}),
+        _FilterButtonContent(text: l10n.aiSignal, isActive: false, onPressed: () {}),
       ],
     );
   }
@@ -335,10 +362,12 @@ class _LanguageSwitcher extends StatelessWidget {
   }
 }
 
-class _GradientFilterButton extends StatelessWidget {
+class _FilterButtonContent extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
-  const _GradientFilterButton({required this.text, required this.onPressed});
+  final bool isActive;
+  final VoidCallback? onPressed;
+
+  const _FilterButtonContent({required this.text, this.isActive = false, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -349,7 +378,7 @@ class _GradientFilterButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: const LinearGradient(colors: [Color(0xFF0D1117), Color(0xFF161B22), Color.fromARGB(255, 20, 29, 110)]),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.blueGrey.withOpacity(0.5)),
+          border: Border.all(color: isActive ? Colors.blueAccent : Colors.blueGrey.withOpacity(0.5)),
         ),
         child: ElevatedButton(
           onPressed: onPressed,
@@ -357,9 +386,9 @@ class _GradientFilterButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(text, style: const TextStyle(fontSize: 11)),
+              Text(text, style: TextStyle(fontSize: 11, color: isActive ? Colors.blueAccent : Colors.white)),
               const SizedBox(width: 4),
-              const Icon(Icons.arrow_drop_down, size: 18),
+              Icon(Icons.arrow_drop_down, size: 18, color: isActive ? Colors.blueAccent : Colors.white),
             ],
           ),
         ),
