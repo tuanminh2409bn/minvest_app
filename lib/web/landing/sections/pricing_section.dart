@@ -6,6 +6,7 @@ import '../../theme/colors.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/spacing.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 class PricingSection extends StatefulWidget {
   final String? heading;
@@ -74,6 +75,9 @@ class _PricingSectionState extends State<PricingSection> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     final appLocalizations = AppLocalizations.of(context)!;
     final plans = _buildPlans(context);
     final heading = widget.heading ?? appLocalizations.bestPricesForPremiumAccess;
@@ -87,69 +91,74 @@ class _PricingSectionState extends State<PricingSection> {
       appLocalizations.providingBestSignals,
     ];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            heading,
-            style: AppTextStyles.h1.copyWith(fontSize: widget.headingFontSize, fontWeight: FontWeight.w700),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            subheading,
-            style: AppTextStyles.body.copyWith(color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _toggle(context),
-          const SizedBox(height: AppSpacing.lg),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth > 800) {
-                return IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              heading,
+              style: AppTextStyles.h1.copyWith(fontSize: widget.headingFontSize, fontWeight: FontWeight.w700),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              subheading,
+              style: AppTextStyles.body.copyWith(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _toggle(context),
+            const SizedBox(height: AppSpacing.lg),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth > 800) {
+                  return IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (int i = 0; i < plans.length; i++) ...[
+                          if (i > 0) const SizedBox(width: 16),
+                          Expanded(
+                            child: _AnimatedPricingCard(
+                              plan: plans[i],
+                              features: features,
+                              slideDirection: i == 0
+                                  ? _SlideDirection.fromLeft
+                                  : i == 1
+                                      ? _SlideDirection.fromBottom
+                                      : _SlideDirection.fromRight,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                } else {
+                  return Column(
                     children: [
                       for (int i = 0; i < plans.length; i++) ...[
-                        if (i > 0) const SizedBox(width: 16),
-                        Expanded(
+                        if (i > 0) const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
                           child: _AnimatedPricingCard(
                             plan: plans[i],
                             features: features,
-                            slideDirection: i == 0
-                                ? _SlideDirection.fromLeft
-                                : i == 1
-                                    ? _SlideDirection.fromBottom
-                                    : _SlideDirection.fromRight,
+                            slideDirection: _SlideDirection.fromBottom,
                           ),
                         ),
                       ],
                     ],
-                  ),
-                );
-              } else {
-                return Column(
-                  children: [
-                    for (int i = 0; i < plans.length; i++) ...[
-                      if (i > 0) const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: _AnimatedPricingCard(
-                          plan: plans[i],
-                          features: features,
-                          slideDirection: _SlideDirection.fromBottom,
-                        ),
-                      ),
-                    ],
-                  ],
-                );
-              }
-            },
-          ),
-        ],
+                  );
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -445,62 +454,97 @@ class _PricingCardContentState extends State<_PricingCardContent> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
     final appLocalizations = AppLocalizations.of(context)!;
+    final double cardHeight = isMobile ? 500 : 450;
+
     return _AnimatedBorderCard(
       child: Container(
         width: double.infinity,
-        constraints: const BoxConstraints(minHeight: 450),
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        height: isMobile ? cardHeight : null,
+        constraints: BoxConstraints(minHeight: cardHeight),
+        padding: EdgeInsets.all(isMobile ? 24 : AppSpacing.lg),
         decoration: BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.workspace_premium, color: Colors.white, size: 22),
-                  const SizedBox(width: 8),
-                  Text(widget.plan.title, style: AppTextStyles.h3.copyWith(color: Colors.white)),
-                  const Spacer(),
-                  _saveBadge(widget.plan.badge),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(widget.plan.price, style: AppTextStyles.h1.copyWith(fontSize: 34, color: const Color(0xFF00B2FF))),
-              if (widget.plan.oldPrice != null && widget.plan.oldPrice!.isNotEmpty)
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.workspace_premium, color: Colors.white, size: isMobile ? 28 : 22),
+                    const SizedBox(width: 8),
+                    Text(
+                      widget.plan.title, 
+                      style: AppTextStyles.h3.copyWith(
+                        color: Colors.white, 
+                        fontSize: isMobile ? 36 : 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const Spacer(),
+                    _saveBadge(widget.plan.badge),
+                  ],
+                ),
+                SizedBox(height: isMobile ? 24 : AppSpacing.md),
                 Text(
-                  widget.plan.oldPrice!,
+                  widget.plan.price, 
+                  style: AppTextStyles.h1.copyWith(
+                    fontSize: isMobile ? 72 : 34, 
+                    color: const Color(0xFF00B2FF),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                if (widget.plan.oldPrice != null && widget.plan.oldPrice!.isNotEmpty)
+                  Text(
+                    widget.plan.oldPrice!,
+                    style: AppTextStyles.body.copyWith(
+                      color: Colors.white54,
+                      decoration: TextDecoration.lineThrough,
+                      fontSize: isMobile ? 22 : 14,
+                    ),
+                  ),
+                SizedBox(height: isMobile ? 28 : AppSpacing.md),
+                Text(
+                  appLocalizations.whatsIncluded, 
                   style: AppTextStyles.body.copyWith(
-                    color: Colors.white54,
-                    decoration: TextDecoration.lineThrough,
+                    color: Colors.white70,
+                    fontSize: isMobile ? 22 : 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              const SizedBox(height: AppSpacing.md),
-              Text(appLocalizations.whatsIncluded, style: AppTextStyles.body.copyWith(color: Colors.white70)),
-              const SizedBox(height: AppSpacing.sm),
-              ...widget.features.map((f) => _feature(f)).toList(),
-              const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  onPressed: _isLoading ? null : _handlePurchase,
-                  child: _isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                      : Text(appLocalizations.chooseThisPlan),
+                const SizedBox(height: 12),
+                ...widget.features.map((f) => _feature(f, isMobile)).toList(),
+              ],
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: EdgeInsets.symmetric(vertical: isMobile ? 18 : 12),
                 ),
+                onPressed: _isLoading ? null : _handlePurchase,
+                child: _isLoading
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                    : Text(
+                        appLocalizations.chooseThisPlan,
+                        style: TextStyle(
+                          fontSize: isMobile ? 22 : 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -520,17 +564,20 @@ class _PricingCardContentState extends State<_PricingCardContent> {
     );
   }
 
-  Widget _feature(String text) {
+  Widget _feature(String text, bool isMobile) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          const Icon(Icons.check_box, color: Colors.white70, size: 18),
+          Icon(Icons.check_box, color: Colors.white70, size: isMobile ? 20 : 18),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: AppTextStyles.body.copyWith(color: Colors.white),
+              style: AppTextStyles.body.copyWith(
+                color: Colors.white,
+                fontSize: isMobile ? 20 : 14,
+              ),
             ),
           ),
         ],

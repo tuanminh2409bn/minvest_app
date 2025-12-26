@@ -10,33 +10,42 @@ import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
 import 'package:minvest_forex_app/web/theme/gradients.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 class FeaturesPage extends StatelessWidget {
   const FeaturesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      floatingActionButton: const WebChatBubble(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 12),
-            const _ContentWrapper(child: LandingNavBar()),
-            const SizedBox(height: 24),
-            const WinMoreSection(),
-            const SizedBox(height: 96),
-            const _ContentWrapper(child: SmartToolsSection()),
-            const SizedBox(height: 96),
-            const _ContentWrapper(child: YourOnDemandSection()),
-            const SizedBox(height: 96),
-            const _ContentWrapper(child: MaximizeResultsSection()),
-            const SizedBox(height: 48),
-            const _ContentWrapper(child: FooterSection()),
-          ],
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        floatingActionButton: const WebChatBubble(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 12),
+              const _ContentWrapper(child: LandingNavBar()),
+              const SizedBox(height: 24),
+              const WinMoreSection(),
+              const SizedBox(height: 96),
+              const _ContentWrapper(child: SmartToolsSection()),
+              const SizedBox(height: 96),
+              const _ContentWrapper(child: YourOnDemandSection()),
+              const SizedBox(height: 96),
+              const _ContentWrapper(child: MaximizeResultsSection()),
+              const SizedBox(height: 48),
+              const _ContentWrapper(child: FooterSection()),
+            ],
+          ),
         ),
       ),
     );

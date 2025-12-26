@@ -7,6 +7,7 @@ import 'package:minvest_forex_app/features/news/models/news_model.dart';
 import 'package:minvest_forex_app/features/news/services/news_service.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import 'widgets/navbar.dart';
@@ -164,120 +165,128 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     final DateTime? published = widget.article.publishedAt is Timestamp ? (widget.article.publishedAt as Timestamp).toDate() : null;
     final String publishedText = published != null ? DateFormat('MMM d, yyyy • HH:mm').format(published) : '';
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      floatingActionButton: const WebChatBubble(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const LandingNavBar(),
-                    const SizedBox(height: 20),
-                    InkWell(
-                      onTap: () => Navigator.pop(context),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        floatingActionButton: const WebChatBubble(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const LandingNavBar(),
+                      const SizedBox(height: 20),
+                      InkWell(
+                        onTap: () => Navigator.pop(context),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.arrow_back_ios_new, color: Colors.white70, size: 14),
+                            const SizedBox(width: 6),
+                            Text(AppLocalizations.of(context)!.returnToHomePage, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
                         children: [
-                          const Icon(Icons.arrow_back_ios_new, color: Colors.white70, size: 14),
+                          const Icon(Icons.calendar_month, size: 14, color: Colors.white54),
                           const SizedBox(width: 6),
-                          Text(AppLocalizations.of(context)!.returnToHomePage, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                          Text(publishedText, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        const Icon(Icons.calendar_month, size: 14, color: Colors.white54),
-                        const SizedBox(width: 6),
-                        Text(publishedText, style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      widget.article.title,
-                      style: AppTextStyles.h3.copyWith(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        height: 1.2,
+                      const SizedBox(height: 10),
+                      Text(
+                        widget.article.title,
+                        style: AppTextStyles.h3.copyWith(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          height: 1.2,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 18),
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final bool narrow = constraints.maxWidth < 960;
-                        if (narrow) {
-                          return Column(
+                      const SizedBox(height: 18),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final bool narrow = constraints.maxWidth < 960;
+                          if (narrow) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _heroImage(widget.article.thumbnailUrl),
+                                const SizedBox(height: 14),
+                                if (widget.article.subtitle.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Text(
+                                      widget.article.subtitle,
+                                      style: AppTextStyles.caption.copyWith(color: Colors.white70, height: 1.4, fontStyle: FontStyle.italic),
+                                    ),
+                                  ),
+                                _buildContent(),
+                                const SizedBox(height: 18),
+                                _MostPopularList(
+                                  currentId: widget.article.id,
+                                  newsService: _newsService,
+                                ),
+                              ],
+                            );
+                          }
+                          return Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _heroImage(widget.article.thumbnailUrl),
-                              const SizedBox(height: 14),
-                              if (widget.article.subtitle.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: Text(
-                                    widget.article.subtitle,
-                                    style: AppTextStyles.caption.copyWith(color: Colors.white70, height: 1.4, fontStyle: FontStyle.italic),
-                                  ),
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _heroImage(widget.article.thumbnailUrl),
+                                    const SizedBox(height: 14),
+                                    if (widget.article.subtitle.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 12),
+                                        child: Text(
+                                          widget.article.subtitle,
+                                          style: AppTextStyles.caption.copyWith(color: Colors.white70, height: 1.4, fontStyle: FontStyle.italic),
+                                        ),
+                                      ),
+                                    _buildContent(),
+                                  ],
                                 ),
-                              _buildContent(),
-                              const SizedBox(height: 18),
-                              _MostPopularList(
-                                currentId: widget.article.id,
-                                newsService: _newsService,
+                              ),
+                              const SizedBox(width: 18),
+                              SizedBox(
+                                width: 260,
+                                child: _MostPopularList(
+                                  currentId: widget.article.id,
+                                  newsService: _newsService,
+                                ),
                               ),
                             ],
                           );
-                        }
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _heroImage(widget.article.thumbnailUrl),
-                                  const SizedBox(height: 14),
-                                  if (widget.article.subtitle.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 12),
-                                      child: Text(
-                                        widget.article.subtitle,
-                                        style: AppTextStyles.caption.copyWith(color: Colors.white70, height: 1.4, fontStyle: FontStyle.italic),
-                                      ),
-                                    ),
-                                  _buildContent(),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 18),
-                            SizedBox(
-                              width: 260,
-                              child: _MostPopularList(
-                                currentId: widget.article.id,
-                                newsService: _newsService,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 28),
-                    _RelatedArticles(
-                      currentId: widget.article.id,
-                      newsService: _newsService,
-                    ),
-                    const SizedBox(height: 40),
-                    const FooterSection(),
-                  ],
+                        },
+                      ),
+                      const SizedBox(height: 28),
+                      _RelatedArticles(
+                        currentId: widget.article.id,
+                        newsService: _newsService,
+                      ),
+                      const SizedBox(height: 40),
+                      const FooterSection(),
+                    ],
+                  ),
                 ),
               ),
             ),

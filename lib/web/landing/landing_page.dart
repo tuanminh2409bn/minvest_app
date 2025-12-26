@@ -39,83 +39,86 @@ class LandingPage extends StatelessWidget {
             final isTablet = constraints.maxWidth < Breakpoints.desktop && constraints.maxWidth >= Breakpoints.tablet;
             final isMobile = constraints.maxWidth < Breakpoints.tablet;
             final horizontalPadding = isMobile ? 16.0 : isTablet ? 24.0 : 32.0;
+            final double sectionSpacing = isMobile ? 60.0 : 100.0;
 
-            return Container(
-              color: AppColors.background,
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1200),
-                      child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(height: 12),
-                        LandingNavBar(),
-                        HeroSection(),
-                        SizedBox(height: 100),
-                        HeroSubtitleSection(),
-                        SizedBox(height: 100),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            final bool isNarrow = constraints.maxWidth < 900;
-                            if (isNarrow) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+              ),
+              child: Container(
+                color: AppColors.background,
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1200),
+                        child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 12),
+                          LandingNavBar(),
+                          const HeroSection(),
+                          SizedBox(height: sectionSpacing),
+                                                                          const HeroSubtitleSection(),
+                                                                          SizedBox(height: sectionSpacing),
+                                                                          LayoutBuilder(                            builder: (context, constraints) {
+                              final bool isNarrow = constraints.maxWidth < 900;
+                                                                                                                                              if (isNarrow) {
+                                                                                                                                                return Column(
+                                                                                                                                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                                                                                                                  children: const [
+                                                                                                                                                    LiveSignalsSection(),
+                                                                                                                                                    SizedBox(height: 24),
+                                                                                                                                                    HeroSignalsSection(),
+                                                                                                                                                  ],
+                                                                                                                                                );
+                                                                                                                                              }                              return Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: const [
-                                  LiveSignalsSection(),
-                                  SizedBox(height: 24),
-                                  HeroSignalsSection(),
+                                  Expanded(child: HeroSignalsSection()),
+                                  SizedBox(width: 16),
+                                  Expanded(child: LiveSignalsSection()),
                                 ],
                               );
-                            }
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Expanded(child: HeroSignalsSection()),
-                                SizedBox(width: 16),
-                                Expanded(child: LiveSignalsSection()),
-                              ],
-                            );
-                          },
-                        ),
-                        SizedBox(height: isMobile ? 32 : 80),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            final bool isNarrow = constraints.maxWidth < 900;
-                            if (isNarrow) {
+                            },
+                          ),
+                          SizedBox(height: sectionSpacing),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final bool isNarrow = constraints.maxWidth < 900;
+                              if (isNarrow) {
+                                return Column(
+                                  children: [
+                                                                      const OrderEngineSection(),
+                                                                      SizedBox(height: sectionSpacing),
+                                                                      const _TransparentCardAnimated(),
+                                                                      const SizedBox(height: 8),
+                                                                      const _SignalsPerformanceCard(),
+                                                                    ],                                );
+                              }
                               return Column(
                                 children: const [
                                   OrderEngineSection(),
-                                  SizedBox(height: 24),
-                                  _TransparentCardAnimated(),
-                                  SizedBox(height: 24),
-                                  _SignalsPerformanceCard(),
+                                  SizedBox(height: 72),
+                                  _SignalsPerformanceRow(),
                                 ],
                               );
-                            }
-                            return Column(
-                              children: const [
-                                OrderEngineSection(),
-                                SizedBox(height: 72),
-                                _SignalsPerformanceRow(),
-                              ],
-                            );
-                          },
-                        ),
-                        SizedBox(height: 96),
-                        CoreValueSection(),
-                        SizedBox(height: 96),
-                        PricingSection(),
-                        const SizedBox(height: 96),
-                        FaqSection(),
-                        const SizedBox(height: 96),
-                        CtaSection(),
-                        const SizedBox(height: 96),
-                        FooterSection(),
-                      ],
+                            },
+                          ),
+                          SizedBox(height: sectionSpacing),
+                          const CoreValueSection(),
+                          SizedBox(height: sectionSpacing),
+                          const PricingSection(),
+                          SizedBox(height: sectionSpacing),
+                          const FaqSection(),
+                          SizedBox(height: sectionSpacing),
+                          const CtaSection(),
+                          SizedBox(height: sectionSpacing),
+                          const FooterSection(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -292,6 +295,9 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
   }
 
   Widget _buildContent() {
+    final viewportWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = viewportWidth < Breakpoints.tablet;
+
     return Positioned.fill(
       child: Center(
         child: ConstrainedBox(
@@ -334,54 +340,52 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                     children: [
                       GradientButton(
                         label: AppLocalizations.of(context)!.getSignalsNow,
-                        width: 188,
-                        height: 38,
-                        borderRadius: 6,
-                        padding: EdgeInsets.zero,
+                        padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 32, vertical: isMobile ? 12 : 14),
+                        borderRadius: isMobile ? 1 : 6,
                         textStyle: AppTextStyles.body.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontSize: isMobile ? 20 : 16,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                           height: 1.1,
                         ),
                         onPressed: () => Navigator.of(context).pushNamed('/signup'),
                       ),
-                      SizedBox(
-                        width: 138,
-                        height: 38,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(8),
-                          onTap: () {
-                            final authState = context.read<AuthBloc>().state;
-                            if (authState.status == AuthStatus.authenticated) {
-                              Navigator.of(context).pushNamed('/ai-signals');
-                            } else {
-                              Navigator.of(context).pushNamed('/signin');
-                            }
-                          },
+                      InkWell(
+                        borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
+                        onTap: () {
+                          final authState = context.read<AuthBloc>().state;
+                          if (authState.status == AuthStatus.authenticated) {
+                            Navigator.of(context).pushNamed('/ai-signals');
+                          } else {
+                            Navigator.of(context).pushNamed('/signin');
+                          }
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(1),
                           child: Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                              borderRadius: BorderRadius.circular(isMobile ? 1 : 7),
+                              color: Colors.black,
                             ),
-                            padding: const EdgeInsets.all(1),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(7),
-                                color: Colors.black,
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                AppLocalizations.of(context)!.freeTrial,
-                                style: AppTextStyles.body.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 14,
-                                ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isMobile ? 24 : 32, 
+                              vertical: isMobile ? 11 : 13, // Reduced by 1 to match GradientButton (which has no border)
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context)!.freeTrial,
+                              style: AppTextStyles.body.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: isMobile ? 20 : 16,
+                                height: 1.1, // Sync with GradientButton
                               ),
                             ),
                           ),
@@ -414,20 +418,31 @@ class HeroSubtitleSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 0),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32, vertical: 0),
       child: Column(
         children: [
           Text(
             AppLocalizations.of(context)!.globalAiInnovationTitle,
             textAlign: TextAlign.center,
-            style: AppTextStyles.h2.copyWith(fontSize: 28, color: Colors.white),
+            style: AppTextStyles.h2.copyWith(
+              fontSize: isMobile ? 32 : 28, 
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.md),
           Text(
             AppLocalizations.of(context)!.globalAiInnovationDesc,
             textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(color: Colors.white),
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontSize: isMobile ? 18 : 16,
+              height: 1.5,
+            ),
           ),
         ],
       ),
@@ -471,6 +486,9 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection> with SingleTick
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth.clamp(320.0, 560.0);
@@ -490,11 +508,11 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection> with SingleTick
                 child: _AnimatedGlowCard(
                   width: maxWidth,
                   child: Container(
-                    constraints: const BoxConstraints(minHeight: 520),
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                    constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
+                    padding: EdgeInsets.all(isMobile ? 16 : AppSpacing.md),
                     child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: isMobile ? MainAxisAlignment.start : MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Column(
@@ -505,6 +523,7 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection> with SingleTick
                             _buildTabs(context),
                           ],
                         ),
+                        if (isMobile) const SizedBox(height: 24),
                         const _StaggeredSignalCards(),
                       ],
                     ),
@@ -1048,8 +1067,11 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.xxl),
+      padding: EdgeInsets.only(top: isMobile ? 0 : AppSpacing.xxl),
       child: VisibilityDetector(
         key: const Key('live_signals_visibility'),
         onVisibilityChanged: (info) {
@@ -1063,13 +1085,16 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
           child: FadeTransition(
             opacity: _fadeIn,
             child: Container(
-              constraints: const BoxConstraints(minHeight: 480),
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
+              constraints: BoxConstraints(minHeight: isMobile ? 0 : 480),
+              padding: isMobile 
+                  ? const EdgeInsets.only(bottom: 24) 
+                  : const EdgeInsets.all(AppSpacing.lg),
+              decoration: isMobile ? null : BoxDecoration(
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _chip(context, AppLocalizations.of(context)!.aiSignal),
@@ -1078,16 +1103,19 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     AppLocalizations.of(context)!.liveTradingSignalsDesc,
-                    style: AppTextStyles.body.copyWith(color: Colors.white),
+                    style: AppTextStyles.body.copyWith(
+                      color: Colors.white,
+                      fontSize: isMobile ? 18 : 14,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Wrap(
-                    spacing: AppSpacing.md,
-                    runSpacing: AppSpacing.sm,
+                    spacing: AppSpacing.xs,
+                    runSpacing: 6,
                     children: [
-                      _outlinedChip(AppLocalizations.of(context)!.aiSignal),
-                      _outlinedChip(AppLocalizations.of(context)!.trendFollowing),
-                      _outlinedChip(AppLocalizations.of(context)!.realtime),
+                      _outlinedChip(AppLocalizations.of(context)!.aiSignal, isMobile),
+                      _outlinedChip(AppLocalizations.of(context)!.trendFollowing, isMobile),
+                      _outlinedChip(AppLocalizations.of(context)!.realtime, isMobile),
                     ],
                   ),
                 ],
@@ -1152,24 +1180,27 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
     );
   }
 
-  Widget _outlinedChip(String text) {
+  Widget _outlinedChip(String text, bool isMobile) {
     return Container(
-      height: 35,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
         border: Border.all(color: Colors.white, width: 1),
         color: Colors.black,
       ),
-      child: Center(
-        widthFactor: 1.0,
-        child: Text(
-          text,
-          style: AppTextStyles.body.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            text,
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -1215,8 +1246,13 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool isNarrow = constraints.maxWidth < 900;
+        final isMobile = constraints.maxWidth < Breakpoints.tablet;
+
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: isNarrow ? 16 : 32, vertical: 32),
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 0 : (isNarrow ? 16 : 32), 
+            vertical: 32,
+          ),
           child: VisibilityDetector(
             key: const Key('order_engine_visibility'),
             onVisibilityChanged: (info) {
@@ -1229,7 +1265,7 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
                 ? Column(
                     children: [
                       ConstrainedBox(
-                        constraints: const BoxConstraints(minHeight: 320),
+                        constraints: BoxConstraints(minHeight: isMobile ? 0 : 320),
                         child: SlideTransition(
                           position: _leftSlide,
                           child: FadeTransition(
@@ -1238,9 +1274,9 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
                       ConstrainedBox(
-                        constraints: const BoxConstraints(minHeight: 320),
+                        constraints: BoxConstraints(minHeight: isMobile ? 0 : 320),
                         child: SlideTransition(
                           position: _rightSlide,
                           child: FadeTransition(
@@ -1339,11 +1375,16 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 520),
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
+      constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
+      padding: isMobile 
+          ? const EdgeInsets.only(bottom: 24) 
+          : const EdgeInsets.all(AppSpacing.lg),
+      decoration: isMobile ? null : BoxDecoration(
         color: Colors.black,
         borderRadius: BorderRadius.circular(14),
       ),
@@ -1356,16 +1397,19 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppLocalizations.of(context)!.orderExplanationEngineDesc,
-            style: AppTextStyles.body.copyWith(color: Colors.white),
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontSize: isMobile ? 18 : 14,
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.sm,
+            spacing: 8,
+            runSpacing: 6,
             children: [
-              _pill(AppLocalizations.of(context)!.transparent),
-              _pill(AppLocalizations.of(context)!.educational),
-              _pill(AppLocalizations.of(context)!.logical),
+              _pill(AppLocalizations.of(context)!.transparent, isMobile),
+              _pill(AppLocalizations.of(context)!.educational, isMobile),
+              _pill(AppLocalizations.of(context)!.logical, isMobile),
             ],
           ),
         ],
@@ -1425,24 +1469,27 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
     );
   }
 
-  Widget _pill(String text) {
+  Widget _pill(String text, bool isMobile) {
     return Container(
-      height: 35,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
         border: Border.all(color: Colors.white, width: 1),
         color: Colors.black,
       ),
-      child: Center(
-        widthFactor: 1.0,
-        child: Text(
-          text,
-          style: AppTextStyles.body.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            text,
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -1499,6 +1546,9 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     return VisibilityDetector(
       key: const Key('transparent_card_visibility'),
       onVisibilityChanged: (info) {
@@ -1517,9 +1567,11 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
           opacity: _fadeIn,
           child: Container(
             width: double.infinity,
-            constraints: const BoxConstraints(minHeight: 520),
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
+            constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
+            padding: isMobile 
+                ? const EdgeInsets.only(bottom: 24) 
+                : const EdgeInsets.all(AppSpacing.lg),
+            decoration: isMobile ? null : BoxDecoration(
               color: Colors.black,
               borderRadius: BorderRadius.circular(14),
             ),
@@ -1536,18 +1588,21 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
                     const SizedBox(height: AppSpacing.sm),
                     Text(
                       AppLocalizations.of(context)!.transparentRealPerformanceDesc,
-                      style: AppTextStyles.body.copyWith(color: Colors.white),
+                      style: AppTextStyles.body.copyWith(
+                        color: Colors.white,
+                        fontSize: isMobile ? 18 : 14,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 32),
                 Wrap(
-                  spacing: AppSpacing.md,
-                  runSpacing: AppSpacing.sm,
+                  spacing: 8,
+                  runSpacing: 6,
                   children: [
-                    _TransparentCard()._pill(AppLocalizations.of(context)!.results),
-                    _TransparentCard()._pill(AppLocalizations.of(context)!.performanceTracking),
-                    _TransparentCard()._pill(AppLocalizations.of(context)!.accurate),
+                    _TransparentCard()._pill(AppLocalizations.of(context)!.results, isMobile),
+                    _TransparentCard()._pill(AppLocalizations.of(context)!.performanceTracking, isMobile),
+                    _TransparentCard()._pill(AppLocalizations.of(context)!.accurate, isMobile),
                   ],
                 ),
               ],
@@ -2037,24 +2092,27 @@ class _SignalsPerformanceRow extends StatelessWidget {
     );
   }
 
-  Widget _pill(String text) {
+  Widget _pill(String text, bool isMobile) {
     return Container(
-      height: 35,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
         border: Border.all(color: Colors.white, width: 1),
         color: Colors.black,
       ),
-      child: Center(
-        widthFactor: 1.0,
-        child: Text(
-          text,
-          style: AppTextStyles.body.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            text,
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -2065,6 +2123,9 @@ class CoreValueSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     final items = [
       (
         title: AppLocalizations.of(context)!.realtimeMarketAnalysis,
@@ -2085,18 +2146,25 @@ class CoreValueSection extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
       child: Column(
         children: [
         Text(
           AppLocalizations.of(context)!.minvestAiCoreValueTitle,
           textAlign: TextAlign.center,
-          style: AppTextStyles.h1.copyWith(color: Colors.white, fontSize: 36),
+          style: AppTextStyles.h1.copyWith(
+            color: Colors.white, 
+            fontSize: isMobile ? 32 : 36,
+            fontWeight: FontWeight.w800,
+          ),
         ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppLocalizations.of(context)!.minvestAiCoreValueDesc,
-            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white, 
+              fontSize: isMobile ? 18 : 16,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -2130,10 +2198,13 @@ class _CoreValueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     return Container(
-      width: 550.0,
-      constraints: const BoxConstraints(minHeight: 200),
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      width: isMobile ? double.infinity : 550.0,
+      constraints: BoxConstraints(minHeight: isMobile ? 0 : 200),
+      padding: EdgeInsets.all(isMobile ? 20 : AppSpacing.lg),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: AppColors.background,
@@ -2143,12 +2214,21 @@ class _CoreValueCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w700),
+            textAlign: TextAlign.start,
+            style: AppTextStyles.h3.copyWith(
+              fontSize: isMobile ? 20 : 22, 
+              color: Colors.white, 
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             description,
-            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16),
+            textAlign: TextAlign.start,
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white, 
+              fontSize: isMobile ? 18 : 16,
+            ),
           ),
         ],
       ),

@@ -10,6 +10,7 @@ import 'sections/footer_section.dart';
 import 'news_detail_screen.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -42,51 +43,59 @@ class _NewsPageState extends State<NewsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      floatingActionButton: const WebChatBubble(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: SingleChildScrollView(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1230),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 12),
-                const LandingNavBar(),
-                const SizedBox(height: 32),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _header(context),
-                      const SizedBox(height: 24),
-                      _categoryTabs(context),
-                      const SizedBox(height: 12),
-                      const Divider(color: Colors.white12, height: 1),
-                      const SizedBox(height: 24),
-                      StreamBuilder<List<NewsArticle>>(
-                        stream: _newsService.streamNews(category: _categoryFilter, limit: 20),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
-                          }
-                          final articles = snapshot.data ?? [];
-                          return _NewsLayout(
-                            articles: articles,
-                            selectedCategory: _selectedTab,
-                            getTabTitle: (tab) => _getTabTitle(context, tab),
-                          );
-                        },
-                      ),
-                    ],
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        floatingActionButton: const WebChatBubble(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        body: SingleChildScrollView(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1230),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 12),
+                  const LandingNavBar(),
+                  const SizedBox(height: 32),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _header(context),
+                        const SizedBox(height: 24),
+                        _categoryTabs(context),
+                        const SizedBox(height: 12),
+                        const Divider(color: Colors.white12, height: 1),
+                        const SizedBox(height: 24),
+                        StreamBuilder<List<NewsArticle>>(
+                          stream: _newsService.streamNews(category: _categoryFilter, limit: 20),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+                            final articles = snapshot.data ?? [];
+                            return _NewsLayout(
+                              articles: articles,
+                              selectedCategory: _selectedTab,
+                              getTabTitle: (tab) => _getTabTitle(context, tab),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 64),
-                const FooterSection(),
-              ],
+                  const SizedBox(height: 64),
+                  const FooterSection(),
+                ],
+              ),
             ),
           ),
         ),
