@@ -39,8 +39,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
     'XAU/USD',
     'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 
     'AUD/USD', 'USD/CAD', 'NZD/USD',
-    'EUR/GBP', 'EUR/JPY', 'GBP/JPY', 'AUD/JPY',
-    'BTC', 'ETH', 'BNB', 'PEPE'
+    'BTC/USD', 'ETH/USD', 'BNB/USD', 'ETH/USDT', 'BTC/USDT'
   ];
 
   List<String> get _currentCommodities {
@@ -57,7 +56,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
       case AssetFilter.crypto:
         return [
           'All Crypto Pairs',
-          'BTC', 'ETH', 'BNB', 'PEPE'
+          'BTC', 'ETH', 'BNB', 'ETH/USDT', 'BTC/USDT'
         ];
       case AssetFilter.all:
       default:
@@ -994,10 +993,13 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
   }
 
   bool _isGold(Signal s) => s.symbol.toUpperCase().contains('XAU');
-  bool _isCrypto(Signal s) => s.symbol.toUpperCase().contains('BTC') || s.symbol.toUpperCase().contains('CRYPTO') || s.symbol.toUpperCase().contains('ETH');
+  bool _isCrypto(Signal s) {
+    final sym = s.symbol.toUpperCase();
+    return sym.contains('BTC') || sym.contains('ETH') || sym.contains('BNB') || sym.contains('USDT') || sym.contains('CRYPTO');
+  }
   bool _isForex(Signal s) {
     final sym = s.symbol.toUpperCase();
-    return sym.contains('/') && !sym.contains('XAU') && !sym.contains('BTC') && !sym.contains('ETH');
+    return sym.contains('/') && !sym.contains('XAU') && !_isCrypto(s);
   }
 
   List<Signal> _filteredSignals(List<Signal> signals) {
@@ -1639,41 +1641,121 @@ class _FlagStack extends StatelessWidget {
     'NZD': 'assets/images/nzd_flag.png',
     'USD': 'assets/images/us_flag.png',
     'XAU': 'assets/images/crown_icon.png',
+    'BTC': 'assets/images/btc.png',
+    'USDT': 'assets/images/usdt.png',
   };
 
-  List<String> _flags() {
-    final parts = symbol.toUpperCase().split('/');
-    if (parts.length == 2) {
-      final p1 = _currencyFlags[parts[0]];
-      final p2 = _currencyFlags[parts[1]];
-      return [
-        if (p1 != null) p1,
-        if (p2 != null) p2,
-      ];
+  Widget _buildCryptoIcon(String code) {
+    if (code == 'BTC' || code == 'USDT') {
+      return CircleAvatar(
+        radius: 14,
+        backgroundColor: Colors.transparent,
+        backgroundImage: AssetImage(_currencyFlags[code]!),
+      );
     }
-    return [];
+
+    IconData iconData = Icons.currency_bitcoin;
+    Color color = Colors.orange;
+
+    if (code.contains('BTC')) {
+      iconData = Icons.currency_bitcoin;
+      color = const Color(0xFFF7931A);
+    } else if (code.contains('ETH')) {
+      iconData = Icons.currency_exchange; // Placeholder for ETH
+      color = const Color(0xFF627EEA);
+    } else if (code.contains('USDT')) {
+      iconData = Icons.attach_money;
+      color = const Color(0xFF26A17B);
+    } else if (code.contains('BNB')) {
+      iconData = Icons.token;
+      color = const Color(0xFFF3BA2F);
+    } else {
+      iconData = Icons.token; // Generic
+      color = Colors.grey;
+    }
+
+    return CircleAvatar(
+      radius: 14,
+      backgroundColor: color.withOpacity(0.2),
+      child: Icon(iconData, color: color, size: 18),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final flags = _flags();
-    if (flags.isEmpty) {
-      return const Icon(Icons.flag_circle_outlined, color: Colors.white, size: 18);
+    final parts = symbol.toUpperCase().split('/');
+    if (parts.length != 2) {
+       // Single symbol or non-standard
+       if (symbol.toUpperCase().contains('BTC')) return _buildCryptoIcon('BTC');
+       return const Icon(Icons.flag_circle_outlined, color: Colors.white, size: 18);
     }
+
+    final base = parts[0];
+    final quote = parts[1];
+    
+    // Check if it's a crypto pair (e.g., BTC/USD) where base is crypto
+    final isBaseCrypto = ['BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX'].contains(base);
+    final isQuoteCrypto = ['USDT', 'USDC', 'BTC', 'ETH'].contains(quote);
+
+    if (isBaseCrypto || isQuoteCrypto) {
+         return SizedBox(
+          width: 42,
+          height: 28,
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                child: isBaseCrypto 
+                  ? _buildCryptoIcon(base) 
+                  : (_currencyFlags[base] != null 
+                      ? CircleAvatar(radius: 14, backgroundColor: Colors.grey.shade800, backgroundImage: AssetImage(_currencyFlags[base]!))
+                      : _buildCryptoIcon(base)),
+              ),
+              Positioned(
+                left: 14,
+                child: isQuoteCrypto
+                  ? _buildCryptoIcon(quote)
+                  : (_currencyFlags[quote] != null
+                      ? CircleAvatar(radius: 14, backgroundColor: Colors.grey.shade800, backgroundImage: AssetImage(_currencyFlags[quote]!))
+                      : _buildCryptoIcon(quote)),
+              ),
+            ],
+          ),
+        );
+    }
+
+    // Standard Forex/Gold
+    final p1 = _currencyFlags[base];
+    final p2 = _currencyFlags[quote];
+
+    if (p1 == null && p2 == null) {
+       return const Icon(Icons.show_chart, color: Colors.white, size: 18);
+    }
+
     return SizedBox(
       width: 42,
       height: 28,
       child: Stack(
-        children: List.generate(flags.length, (index) {
-          return Positioned(
-            left: index * 14.0,
-            child: CircleAvatar(
-              radius: 14,
-              backgroundColor: Colors.grey.shade800,
-              backgroundImage: AssetImage(flags[index]),
+        children: [
+          if (p1 != null)
+            Positioned(
+              left: 0,
+              child: CircleAvatar(
+                radius: 14,
+                backgroundColor: Colors.grey.shade800,
+                backgroundImage: AssetImage(p1),
+              ),
             ),
-          );
-        }),
+          if (p2 != null)
+            Positioned(
+              left: 14,
+              child: CircleAvatar(
+                radius: 14,
+                backgroundColor: Colors.grey.shade800,
+                backgroundImage: AssetImage(p2),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1974,10 +2056,13 @@ class _HistorySectionState extends State<_HistorySection> {
   }
 
   bool _isGold(Signal s) => s.symbol.toUpperCase().contains('XAU');
-  bool _isCrypto(Signal s) => s.symbol.toUpperCase().contains('BTC') || s.symbol.toUpperCase().contains('CRYPTO') || s.symbol.toUpperCase().contains('ETH');
+  bool _isCrypto(Signal s) {
+    final sym = s.symbol.toUpperCase();
+    return sym.contains('BTC') || sym.contains('ETH') || sym.contains('BNB') || sym.contains('USDT') || sym.contains('CRYPTO');
+  }
   bool _isForex(Signal s) {
     final sym = s.symbol.toUpperCase();
-    return sym.contains('/') && !sym.contains('XAU') && !sym.contains('BTC') && !sym.contains('ETH');
+    return sym.contains('/') && !sym.contains('XAU') && !_isCrypto(s);
   }
 
   List<Signal> _filteredSignals(List<Signal> signals) {
@@ -2327,11 +2412,18 @@ HistoryRow _mapSignalToRow(Signal s, String timeZone) {
   final status = (s.result ?? s.status).toString();
   final pips = s.pips != null ? (s.pips! >= 0 ? '+${s.pips}' : s.pips.toString()) : '-';
 
-  String _fmt(num? v) => v == null ? '-' : v.toStringAsFixed(2);
+  String _fmt(num? v) {
+    if (v == null) return '-';
+    if (v >= 1000) return v.toStringAsFixed(2);
+    if (v >= 100) return v.toStringAsFixed(3);
+    if (v >= 10) return v.toStringAsFixed(4);
+    return v.toStringAsFixed(5);
+  }
+
   String _tp(int idx) {
     if (s.takeProfits.length > idx) {
       final v = s.takeProfits[idx];
-      if (v is num) return v.toStringAsFixed(2);
+      if (v is num) return _fmt(v);
       if (v is String) return v;
     }
     return '-';

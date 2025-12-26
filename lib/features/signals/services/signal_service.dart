@@ -11,6 +11,7 @@ class SignalService {
   Stream<List<Signal>> getSignals({
     required bool isLive,
     required String userTier,
+    String? symbol,
     bool allowUnauthenticated = false,
   }) {
     if (_auth.currentUser == null && !allowUnauthenticated) {
@@ -21,6 +22,11 @@ class SignalService {
 
     if (isLive) {
       query = query.where('status', isEqualTo: 'running');
+    }
+    
+    // Add symbol filter
+    if (symbol != null && symbol != 'All') {
+      query = query.where('symbol', isEqualTo: symbol);
     }
 
     query = query.orderBy('createdAt', descending: true);

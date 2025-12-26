@@ -176,6 +176,7 @@ export const processVerificationImage = onObjectFinalized(
 // === FUNCTION WEBHOOK CHO TELEGRAM BOT ===
 // =================================================================
 const TELEGRAM_CHAT_ID = "-1002785712406";
+const TELEGRAM_BITCOIN_CHAT_ID = "-1003419694521";
 
 export const telegramWebhook = functions.https.onRequest(
   { region: "asia-southeast1", timeoutSeconds: 30, memory: "512MiB" },
@@ -187,7 +188,7 @@ export const telegramWebhook = functions.https.onRequest(
     }
     const update = req.body;
     const message = update.message || update.channel_post;
-    if (!message || message.chat.id.toString() !== TELEGRAM_CHAT_ID) {
+    if (!message || (message.chat.id.toString() !== TELEGRAM_CHAT_ID && message.chat.id.toString() !== TELEGRAM_BITCOIN_CHAT_ID)) {
       functions.logger.log(`Bỏ qua tin nhắn từ chat ID không xác định: ${message?.chat.id}`);
       res.status(200).send("OK");
       return;
@@ -291,33 +292,80 @@ function parseSignalMessage(text: string): any | null {
     const lines = signalPart.split("\n");
     const titleLine = lines.find((line) => line.includes("Tín hiệu:"));
     if (!titleLine) return null;
-    if (titleLine.includes("BUY")) signal.type = "buy";
-    else if (titleLine.includes("SELL")) signal.type = "sell";
+    
+    // 1. Parse Type
+    if (titleLine.toUpperCase().includes("BUY")) signal.type = "buy";
+    else if (titleLine.toUpperCase().includes("SELL")) signal.type = "sell";
     else return null;
+
+    // 2. Parse Symbol (Improved for Crypto)
+    // Try standard regex first (for XAU/USD)
     const symbolRegex = /\b([A-Z]{3}\/[A-Z]{3}|XAU\/USD)\b/i;
     const symbolMatch = titleLine.match(symbolRegex);
+    
     if (symbolMatch) {
         signal.symbol = symbolMatch[0].toUpperCase();
     } else {
-        signal.symbol = "XAU/USD";
+        // Fallback: Get the last word if it looks like a symbol (e.g. ETHUSDT)
+        // Only accept if it's NOT a keyword
+        const words = titleLine.trim().split(/\s+/);
+        if (words.length > 0) {
+            const lastWord = words[words.length - 1].toUpperCase();
+            const keywords = ["BUY", "SELL", "LIMIT", "STOP", "NOW", "TÍN", "HIỆU", ":"];
+            if (!keywords.includes(lastWord) && lastWord.length >= 3) {
+                 signal.symbol = lastWord;
+            }
+        }
+        
+        // Final fallback default
+        if (!signal.symbol) {
+             signal.symbol = "XAU/USD";
+        }
     }
+
+    // 3. Format Symbol (UI Friendly)
+    if (signal.symbol && !signal.symbol.includes('/')) {
+        if (signal.symbol.endsWith('USDT')) {
+            signal.symbol = signal.symbol.replace('USDT', '/USDT');
+        } else if (signal.symbol.endsWith('USD') && signal.symbol !== 'XAUUSD') {
+             signal.symbol = signal.symbol.replace('USD', '/USD');
+        } else if (signal.symbol === 'XAUUSD') {
+             signal.symbol = 'XAU/USD';
+        }
+    }
+
+    // 4. Parse Entry, SL, TP (Robust for Emojis and Pipes)
     for (const line of lines) {
-        const entryRegex = /Entry:\s*([\d.]+)/;
+        // Entry: Match number after "Entry:" (ignoring emojis/spaces)
+        const entryRegex = /Entry:.*?([\d.]+)/;
         const entryMatch = line.match(entryRegex);
         if (entryMatch) signal.entryPrice = parseFloat(entryMatch[1]);
-        const slRegex = /SL:\s*([\d.]+)/;
+        
+        // SL: Match number after "SL:" anywhere in line
+        const slRegex = /SL:.*?([\d.]+)/;
         const slMatch = line.match(slRegex);
         if (slMatch) signal.stopLoss = parseFloat(slMatch[1]);
-        const tpRegex = /TP\d*:\s*([\d.]+)/g;
+        
+        // TP: Global match for all TPs in the line
+        const tpRegex = /TP\d*:.*?([\d.]+)/g;
         let tpMatch;
         while ((tpMatch = tpRegex.exec(line)) !== null) {
             signal.takeProfits.push(parseFloat(tpMatch[1]));
         }
+
+        // Leverage: Match "Đòn bẩy: x..."
+        const leverageRegex = /(?:Đòn bẩy|Leverage):\s*(x\d+)/i;
+        const leverageMatch = line.match(leverageRegex);
+        if (leverageMatch) {
+            signal.leverage = leverageMatch[1];
+        }
     }
+
     const reasonIndex = text.indexOf("=== GIẢI THÍCH ===");
     if (reasonIndex !== -1) {
         signal.reason = text.substring(reasonIndex).replace(/=== GIẢI THÍCH ===/i, "").trim();
     }
+    
     if (signal.type && signal.symbol && signal.entryPrice && signal.stopLoss && signal.takeProfits.length > 0) {
         return signal;
     }
