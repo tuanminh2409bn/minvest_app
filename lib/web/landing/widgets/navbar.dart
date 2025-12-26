@@ -47,54 +47,74 @@ class LandingNavBar extends StatelessWidget {
                     ? 14.5
                     : 16.0;
             final double logoGap = isCompact ? 32.0 : 64.0;
-            final navLinks = SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ...navItems.map(
-                    (item) => Padding(
-                      padding: EdgeInsets.symmetric(horizontal: navSpacing / 2),
-                      child: _NavBarItem(
-                        title: item['title']!,
-                        route: item['route']!,
-                        fontSize: fontSize,
-                      ),
+
+            final navLinks = Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ...navItems.map(
+                  (item) => Padding(
+                    padding: EdgeInsets.symmetric(horizontal: navSpacing / 2),
+                    child: _NavBarItem(
+                      title: item['title']!,
+                      route: item['route']!,
+                      fontSize: fontSize,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
+            );
+
+            final verticalNavLinks = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...navItems.map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: _NavBarItem(
+                      title: item['title']!,
+                      route: item['route']!,
+                      fontSize: 20, // Increased for mobile
+                    ),
+                  ),
+                ),
+              ],
             );
 
             final actions = Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 if (user == null) ...[
-                  _ctaButton(context, l10n.getSignalsNow),
+                  Expanded(
+                    flex: 3,
+                    child: _ctaButton(context, l10n.getSignalsNow, isMobile: isMobile),
+                  ),
                   const SizedBox(width: AppSpacing.sm),
-                  _outlineButton(
-                    context,
-                    l10n.signIn,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                  Expanded(
+                    flex: 2,
+                    child: _outlineButton(
+                      context,
+                      l10n.signIn,
+                      isMobile: isMobile,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                      ),
                     ),
                   ),
                 ] else ...[
-                  _userNameChip(
-                    context,
-                    user,
-                    onTap: () => Navigator.of(context).pushNamed('/profile'),
+                  Expanded(
+                    child: _userNameChip(
+                      context,
+                      user,
+                      onTap: () => Navigator.of(context).pushNamed('/profile'),
+                    ),
                   ),
                 ],
-                const SizedBox(width: AppSpacing.sm),
-                const _LanguageSelector(),
               ],
             );
 
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
               child: stacked
-                  ? _MobileNavBar(navLinks: navLinks, actions: actions)
+                  ? _MobileNavBar(navLinks: verticalNavLinks, actions: actions)
                   : Row(
                       children: [
                         InkWell(
@@ -104,10 +124,38 @@ class LandingNavBar extends StatelessWidget {
                         SizedBox(width: logoGap),
                         Expanded(
                           child: Center(
-                            child: navLinks,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: navLinks,
+                            ),
                           ),
                         ),
-                        actions,
+                        // Actions on desktop should not be full width
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (user == null) ...[
+                              _ctaButton(context, l10n.getSignalsNow, isMobile: false),
+                              const SizedBox(width: AppSpacing.sm),
+                              _outlineButton(
+                                context,
+                                l10n.signIn,
+                                isMobile: false,
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                                ),
+                              ),
+                            ] else ...[
+                              _userNameChip(
+                                context,
+                                user,
+                                onTap: () => Navigator.of(context).pushNamed('/profile'),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        const _LanguageSelector(),
                       ],
                     ),
             );
@@ -117,14 +165,14 @@ class LandingNavBar extends StatelessWidget {
     );
   }
 
-  Widget _ctaButton(BuildContext context, String text) {
+  Widget _ctaButton(BuildContext context, String text, {required bool isMobile}) {
     return Builder(
       builder: (context) => GestureDetector(
         onTap: () => Navigator.of(context).pushNamed('/signup'),
         child: Container(
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
             gradient: const LinearGradient(
               colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
               begin: Alignment.topLeft,
@@ -135,17 +183,19 @@ class LandingNavBar extends StatelessWidget {
             ],
           ),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: isMobile ? 12 : 6),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: BorderRadius.circular(isMobile ? 1 : 5),
               color: Colors.transparent,
             ),
-            child: Text(
-              text,
-              style: AppTextStyles.h3.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+            child: Center(
+              child: Text(
+                text,
+                style: AppTextStyles.h3.copyWith(
+                  fontSize: isMobile ? 20 : 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -154,28 +204,30 @@ class LandingNavBar extends StatelessWidget {
     );
   }
 
-  Widget _outlineButton(BuildContext context, String text, {VoidCallback? onTap}) {
+  Widget _outlineButton(BuildContext context, String text, {required bool isMobile, VoidCallback? onTap}) {
     return Builder(
       builder: (context) => GestureDetector(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
             gradient: AppGradients.cta,
           ),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: isMobile ? 12 : 6),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: BorderRadius.circular(isMobile ? 1 : 5),
               color: Colors.black,
             ),
-            child: Text(
-              text,
-              style: AppTextStyles.h3.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+            child: Center(
+              child: Text(
+                text,
+                style: AppTextStyles.h3.copyWith(
+                  fontSize: isMobile ? 20 : 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -520,7 +572,7 @@ class _MobileNavBarState extends State<_MobileNavBar> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
@@ -529,6 +581,8 @@ class _MobileNavBarState extends State<_MobileNavBar> {
               child: Image.asset('assets/mockups/logo.png', height: 38, fit: BoxFit.contain),
             ),
             const Spacer(),
+            const _LanguageSelector(),
+            const SizedBox(width: 8),
             IconButton(
               icon: Icon(_menuOpen ? Icons.close : Icons.menu, color: Colors.white),
               onPressed: () => setState(() => _menuOpen = !_menuOpen),
@@ -536,10 +590,17 @@ class _MobileNavBarState extends State<_MobileNavBar> {
           ],
         ),
         if (_menuOpen) ...[
-          const SizedBox(height: 12),
-          Align(alignment: Alignment.centerLeft, child: widget.navLinks),
-          const SizedBox(height: 12),
-          Align(alignment: Alignment.center, child: widget.actions),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: widget.navLinks,
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: widget.actions,
+          ),
+          const SizedBox(height: 24),
         ],
       ],
     );
