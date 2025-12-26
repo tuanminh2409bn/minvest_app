@@ -17,6 +17,7 @@ import 'sections/footer_section.dart';
 import 'sections/pricing_tab.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/core/utils/signal_access_helper.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 enum AISignalsTab { aiSignals, performance, history, pricing }
 enum AssetFilter { all, gold, crypto, forex }
@@ -86,74 +87,82 @@ class _AISignalsPageState extends State<AISignalsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      floatingActionButton: const WebChatBubble(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: SingleChildScrollView(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 12),
-                const LandingNavBar(),
-                const SizedBox(height: 32),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const _TitleSection(),
-                      const SizedBox(height: 24),
-                      _TabBar(
-                        selected: selectedTab,
-                        onSelect: (tab) {
-                          setState(() => selectedTab = tab);
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      if (selectedTab == AISignalsTab.aiSignals || selectedTab == AISignalsTab.history) ...[
-                        _FiltersRow(
-                          assetFilter: _assetFilter,
-                          selectedPair: _selectedCommodity,
-                          selectedTimezone: _selectedTimezone,
-                          dateRange: _dateRange,
-                          availablePairs: _currentCommodities,
-                          availableTimezones: _timezones,
-                          onAssetChanged: _onAssetFilterChanged,
-                          onPairChanged: (value) => setState(() => _selectedCommodity = value),
-                          onTimezoneChanged: (value) => setState(() => _selectedTimezone = value),
-                          onDateRangeChanged: (value) => setState(() => _dateRange = value),
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        floatingActionButton: const WebChatBubble(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        body: SingleChildScrollView(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 12),
+                  const LandingNavBar(),
+                  const SizedBox(height: 32),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const _TitleSection(),
+                        const SizedBox(height: 24),
+                        _TabBar(
+                          selected: selectedTab,
+                          onSelect: (tab) {
+                            setState(() => selectedTab = tab);
+                          },
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
+                        if (selectedTab == AISignalsTab.aiSignals || selectedTab == AISignalsTab.history) ...[
+                          _FiltersRow(
+                            assetFilter: _assetFilter,
+                            selectedPair: _selectedCommodity,
+                            selectedTimezone: _selectedTimezone,
+                            dateRange: _dateRange,
+                            availablePairs: _currentCommodities,
+                            availableTimezones: _timezones,
+                            onAssetChanged: _onAssetFilterChanged,
+                            onPairChanged: (value) => setState(() => _selectedCommodity = value),
+                            onTimezoneChanged: (value) => setState(() => _selectedTimezone = value),
+                            onDateRangeChanged: (value) => setState(() => _dateRange = value),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                        if (selectedTab == AISignalsTab.aiSignals) ...[
+                          _SignalGridLive(
+                            assetFilter: _assetFilter,
+                            selectedPair: _selectedCommodity,
+                            selectedTimezone: _selectedTimezone,
+                            dateRange: _dateRange,
+                          ),
+                        ] else if (selectedTab == AISignalsTab.performance) ...const [
+                          _PerformanceSection(),
+                        ] else if (selectedTab == AISignalsTab.history) ...[
+                          _HistorySection(
+                            assetFilter: _assetFilter,
+                            selectedPair: _selectedCommodity,
+                            selectedTimezone: _selectedTimezone,
+                            dateRange: _dateRange,
+                          ),
+                        ] else ...const [
+                          PricingTab(),
+                        ],
                       ],
-                      if (selectedTab == AISignalsTab.aiSignals) ...[
-                        _SignalGridLive(
-                          assetFilter: _assetFilter,
-                          selectedPair: _selectedCommodity,
-                          selectedTimezone: _selectedTimezone,
-                          dateRange: _dateRange,
-                        ),
-                      ] else if (selectedTab == AISignalsTab.performance) ...const [
-                        _PerformanceSection(),
-                      ] else if (selectedTab == AISignalsTab.history) ...[
-                        _HistorySection(
-                          assetFilter: _assetFilter,
-                          selectedPair: _selectedCommodity,
-                          selectedTimezone: _selectedTimezone,
-                          dateRange: _dateRange,
-                        ),
-                      ] else ...const [
-                        PricingTab(),
-                      ],
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 64),
-                const FooterSection(),
-              ],
+                  const SizedBox(height: 64),
+                  const FooterSection(),
+                ],
+              ),
             ),
           ),
         ),

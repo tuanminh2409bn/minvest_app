@@ -10,6 +10,7 @@ import 'package:minvest_forex_app/core/utils/signal_access_helper.dart'; // Adde
 import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 class SignalDetailScreen extends StatelessWidget {
   final Signal signal;
@@ -70,6 +71,9 @@ class SignalDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     final l10n = AppLocalizations.of(context)!;
     final List<String> flagPaths = _getFlagPathsFromSymbol(signal.symbol);
     final String statusText = signal.getTranslatedResult(l10n);
@@ -100,82 +104,87 @@ class SignalDetailScreen extends StatelessWidget {
         ? _formatPrice(signal.takeProfits[2])
         : '—';
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        scrolledUnderElevation: 0,
-        elevation: 0,
-        toolbarHeight: 0,
-        automaticallyImplyLeading: false,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(color: Colors.black),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1100),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _Header(
-                    flagPaths: flagPaths,
-                    symbol: signal.symbol,
-                    statusText: statusText,
-                    statusColor: statusColor,
-                    type: signal.type,
-                    createdLabel: createdLabel,
-                  ),
-                  const SizedBox(height: 16),
-                  _SectionCard(
-                    title: l10n.priceLevels,
-                    child: _PriceGrid(
-                      topItems: [
-                        PriceCell(
-                            label: 'ENTRY',
-                            value: entryText,
-                            color: const Color(0xFF289EFF)),
-                        if (signal.leverage != null)
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          scrolledUnderElevation: 0,
+          elevation: 0,
+          toolbarHeight: 0,
+          automaticallyImplyLeading: false,
+        ),
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(color: Colors.black),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1100),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _Header(
+                      flagPaths: flagPaths,
+                      symbol: signal.symbol,
+                      statusText: statusText,
+                      statusColor: statusColor,
+                      type: signal.type,
+                      createdLabel: createdLabel,
+                    ),
+                    const SizedBox(height: 16),
+                    _SectionCard(
+                      title: l10n.priceLevels,
+                      child: _PriceGrid(
+                        topItems: [
                           PriceCell(
-                              label: 'LEVERAGE',
-                              value: signal.leverage!,
-                              color: Colors.amber),
-                        PriceCell(
-                            label: 'SL',
-                            value: slText,
-                            color: const Color(0xFFE54747)),
-                      ],
-                      bottomItems: [
-                        PriceCell(
-                            label: 'TP1',
-                            value: tp1,
-                            color: const Color(0xFF3BFF00)),
-                        PriceCell(
-                            label: 'TP2',
-                            value: tp2,
-                            color: const Color(0xFF3BFF00)),
-                        PriceCell(
-                            label: 'TP3',
-                            value: tp3,
-                            color: const Color(0xFF3BFF00)),
-                      ],
+                              label: 'ENTRY',
+                              value: entryText,
+                              color: const Color(0xFF289EFF)),
+                          if (signal.leverage != null)
+                            PriceCell(
+                                label: 'LEVERAGE',
+                                value: signal.leverage!,
+                                color: Colors.amber),
+                          PriceCell(
+                              label: 'SL',
+                              value: slText,
+                              color: const Color(0xFFE54747)),
+                        ],
+                        bottomItems: [
+                          PriceCell(
+                              label: 'TP1',
+                              value: tp1,
+                              color: const Color(0xFF3BFF00)),
+                          PriceCell(
+                              label: 'TP2',
+                              value: tp2,
+                              color: const Color(0xFF3BFF00)),
+                          PriceCell(
+                              label: 'TP3',
+                              value: tp3,
+                              color: const Color(0xFF3BFF00)),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  _SectionCard(
-                    title: l10n.capitalManagement,
-                    child: Text(
-                      reasonText,
-                      style: const TextStyle(
-                          color: Colors.white70, height: 1.6, fontSize: 14),
+                    const SizedBox(height: 16),
+                    _SectionCard(
+                      title: l10n.capitalManagement,
+                      child: Text(
+                        reasonText,
+                        style: const TextStyle(
+                            color: Colors.white70, height: 1.6, fontSize: 14),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  if (userTier != 'elite') _UpgradeSection(signal: signal),
-                ],
+                    const SizedBox(height: 20),
+                    if (userTier != 'elite') _UpgradeSection(signal: signal),
+                  ],
+                ),
               ),
             ),
           ),

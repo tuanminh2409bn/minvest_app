@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/gradients.dart';
 import '../../theme/spacing.dart';
@@ -14,6 +15,8 @@ class LandingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
     final l10n = AppLocalizations.of(context)!;
 
     final List<Map<String, String>> navItems = [
@@ -24,88 +27,93 @@ class LandingNavBar extends StatelessWidget {
       {'title': l10n.contactUs, 'route': '/contact-us'},
     ];
 
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        final user = snapshot.data;
-        return LayoutBuilder(builder: (context, constraints) {
-          final bool stacked = constraints.maxWidth < 720;
-          final bool isCompact = constraints.maxWidth < 1250;
-          final double padH = 0;
-          final double padV = stacked ? 12 : 6;
-          final navSpacing = 25.0;
-          final fontSize = stacked
-              ? 14.0
-              : isCompact
-                  ? 14.5
-                  : 16.0;
-          final double logoGap = isCompact ? 32.0 : 64.0;
-          final navLinks = SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...navItems.map(
-                  (item) => Padding(
-                    padding: EdgeInsets.symmetric(horizontal: navSpacing / 2),
-                    child: _NavBarItem(
-                      title: item['title']!,
-                      route: item['route']!,
-                      fontSize: fontSize,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+      ),
+      child: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          final user = snapshot.data;
+          return LayoutBuilder(builder: (context, constraints) {
+            final bool stacked = constraints.maxWidth < 720;
+            final bool isCompact = constraints.maxWidth < 1250;
+            final double padH = 0;
+            final double padV = stacked ? 12 : 6;
+            final navSpacing = 25.0;
+            final fontSize = stacked
+                ? 14.0
+                : isCompact
+                    ? 14.5
+                    : 16.0;
+            final double logoGap = isCompact ? 32.0 : 64.0;
+            final navLinks = SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...navItems.map(
+                    (item) => Padding(
+                      padding: EdgeInsets.symmetric(horizontal: navSpacing / 2),
+                      child: _NavBarItem(
+                        title: item['title']!,
+                        route: item['route']!,
+                        fontSize: fontSize,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
+                ],
+              ),
+            );
 
-          final actions = Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (user == null) ...[
-                _ctaButton(context, l10n.getSignalsNow),
+            final actions = Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (user == null) ...[
+                  _ctaButton(context, l10n.getSignalsNow),
+                  const SizedBox(width: AppSpacing.sm),
+                  _outlineButton(
+                    context,
+                    l10n.signIn,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                    ),
+                  ),
+                ] else ...[
+                  _userNameChip(
+                    context,
+                    user,
+                    onTap: () => Navigator.of(context).pushNamed('/profile'),
+                  ),
+                ],
                 const SizedBox(width: AppSpacing.sm),
-                _outlineButton(
-                  context,
-                  l10n.signIn,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-                  ),
-                ),
-              ] else ...[
-                _userNameChip(
-                  context,
-                  user,
-                  onTap: () => Navigator.of(context).pushNamed('/profile'),
-                ),
+                const _LanguageSelector(),
               ],
-              const SizedBox(width: AppSpacing.sm),
-              const _LanguageSelector(),
-            ],
-          );
+            );
 
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
-            child: stacked
-                ? _MobileNavBar(navLinks: navLinks, actions: actions)
-                : Row(
-                    children: [
-                      InkWell(
-                        onTap: () => Navigator.of(context).pushNamed('/'),
-                        child: Image.asset('assets/mockups/logo.png', height: 42, fit: BoxFit.contain),
-                      ),
-                      SizedBox(width: logoGap),
-                      Expanded(
-                        child: Center(
-                          child: navLinks,
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
+              child: stacked
+                  ? _MobileNavBar(navLinks: navLinks, actions: actions)
+                  : Row(
+                      children: [
+                        InkWell(
+                          onTap: () => Navigator.of(context).pushNamed('/'),
+                          child: Image.asset('assets/mockups/logo.png', height: 42, fit: BoxFit.contain),
                         ),
-                      ),
-                      actions,
-                    ],
-                  ),
-          );
-        });
-      },
+                        SizedBox(width: logoGap),
+                        Expanded(
+                          child: Center(
+                            child: navLinks,
+                          ),
+                        ),
+                        actions,
+                      ],
+                    ),
+            );
+          });
+        },
+      ),
     );
   }
 

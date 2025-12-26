@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 import '../../theme/spacing.dart';
 import '../../theme/text_styles.dart';
+
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -9,130 +11,138 @@ class FooterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      // Breakpoint cho mobile/tablet tăng lên 1100 để đảm bảo không gian cho các cột
-      final bool isMobile = constraints.maxWidth < 1100;
-      final double padH = 0; // Đã loại bỏ padding ngang nội bộ để thẳng hàng với body
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
 
-      final logoCol = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () => Navigator.of(context).pushNamed('/'),
-            child: Image.asset('assets/mockups/logo.png', height: 60, fit: BoxFit.contain),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            AppLocalizations.of(context)!.companyName,
-            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            AppLocalizations.of(context)!.addressDetails,
-            style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 14),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            AppLocalizations.of(context)!.enterpriseCodeDetails,
-            style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 14),
-          ),
-        ],
-      );
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+      ),
+      child: LayoutBuilder(builder: (context, constraints) {
+        // Breakpoint cho mobile/tablet tăng lên 1100 để đảm bảo không gian cho các cột
+        final bool isMobileLayout = constraints.maxWidth < 1100;
+        final double padH = 0; // Đã loại bỏ padding ngang nội bộ để thẳng hàng với body
 
-      final pagesCol = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(AppLocalizations.of(context)!.pagesTitle, 
-              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: AppSpacing.md),
-          _FooterLink(text: AppLocalizations.of(context)!.feature, route: '/features'),
-          _FooterLink(text: AppLocalizations.of(context)!.aiSignal, route: '/ai-signals'),
-          _FooterLink(text: AppLocalizations.of(context)!.pricing, route: '/pricing'),
-          _FooterLink(text: AppLocalizations.of(context)!.navNews, route: '/news'),
-          _FooterLink(text: AppLocalizations.of(context)!.contactUs, route: '/contact-us'),
-        ],
-      );
+        final logoCol = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InkWell(
+              onTap: () => Navigator.of(context).pushNamed('/'),
+              child: Image.asset('assets/mockups/logo.png', height: 60, fit: BoxFit.contain),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              AppLocalizations.of(context)!.companyName,
+              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              AppLocalizations.of(context)!.addressDetails,
+              style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 14),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              AppLocalizations.of(context)!.enterpriseCodeDetails,
+              style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 14),
+            ),
+          ],
+        );
 
-      final legalCol = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(AppLocalizations.of(context)!.legalRegulatoryTitle, 
-              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700, overflow: TextOverflow.visible), softWrap: false),
-          const SizedBox(height: AppSpacing.md),
-          _FooterLink(text: AppLocalizations.of(context)!.termsOfRegistration, route: '/terms-of-registration'),
-          _FooterLink(text: AppLocalizations.of(context)!.operatingPrinciples, route: '/operating-principles'),
-          _FooterLink(text: AppLocalizations.of(context)!.termsConditions, route: '/terms-conditions'),
-        ],
-      );
+        final pagesCol = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(AppLocalizations.of(context)!.pagesTitle, 
+                style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: AppSpacing.md),
+            _FooterLink(text: AppLocalizations.of(context)!.feature, route: '/features'),
+            _FooterLink(text: AppLocalizations.of(context)!.aiSignal, route: '/ai-signals'),
+            _FooterLink(text: AppLocalizations.of(context)!.pricing, route: '/pricing'),
+            _FooterLink(text: AppLocalizations.of(context)!.navNews, route: '/news'),
+            _FooterLink(text: AppLocalizations.of(context)!.contactUs, route: '/contact-us'),
+          ],
+        );
 
-      final contactCol = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(AppLocalizations.of(context)!.contactTitle, 
-              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: AppSpacing.md),
-          _ContactItem(icon: Icons.phone, text: '+84 969.15.6969'),
-          const SizedBox(height: 8),
-          _ContactItem(icon: Icons.email, text: 'contact@minvest.vn'),
-          const SizedBox(height: AppSpacing.lg),
-          Wrap(
-            spacing: 16,
-            runSpacing: 12,
-            children: const [
-              _SocialIcon(iconPath: 'assets/images/facebook_logo.png', url: 'https://www.facebook.com/minvest.vn'),
-              _SocialIcon(iconPath: 'assets/images/tiktok_logo.png', url: 'https://www.tiktok.com/@minvest.minh'),
-              _SocialIcon(iconPath: 'assets/images/youtube_logo.png', url: 'https://www.youtube.com/@minvestvn'),
-              _SocialIcon(iconPath: 'assets/images/telegram_logo.png', url: 'https://t.me/minvest_free', size: 32),
-              _SocialIcon(iconPath: 'assets/images/web_logo.png', url: 'https://minvest.vn/'),
-            ],
-          ),
-        ],
-      );
+        final legalCol = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(AppLocalizations.of(context)!.legalRegulatoryTitle, 
+                style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700, overflow: TextOverflow.visible), softWrap: false),
+            const SizedBox(height: AppSpacing.md),
+            _FooterLink(text: AppLocalizations.of(context)!.termsOfRegistration, route: '/terms-of-registration'),
+            _FooterLink(text: AppLocalizations.of(context)!.operatingPrinciples, route: '/operating-principles'),
+            _FooterLink(text: AppLocalizations.of(context)!.termsConditions, route: '/terms-conditions'),
+          ],
+        );
 
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: padH, vertical: 64),
-        color: Colors.black, // Đảm bảo nền đen nếu cần
-        child: isMobile
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  logoCol,
-                  const SizedBox(height: 40),
-                  pagesCol,
-                  const SizedBox(height: 40),
-                  legalCol,
-                  const SizedBox(height: 40),
-                  contactCol,
-                ],
-              )
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Cột 1: Logo & Info (Giảm flex xuống 3)
-                  Expanded(
-                    flex: 5,
-                    child: logoCol,
-                  ),
-                  const SizedBox(width: 40),
-                  // Cột 2: Pages (Giữ nguyên flex 2)
-                  Expanded(
-                    flex: 2,
-                    child: pagesCol,
-                  ),
-                  // Cột 3: Legal (Tăng flex lên 4 để chứa chữ dài)
-                  Expanded(
-                    flex: 3,
-                    child: legalCol,
-                  ),
-                  // Cột 4: Contact (Flex 3)
-                  Expanded(
-                    flex: 3,
-                    child: contactCol,
-                  ),
-                ],
-              ),
-      );
-    });
+        final contactCol = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(AppLocalizations.of(context)!.contactTitle, 
+                style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: AppSpacing.md),
+            _ContactItem(icon: Icons.phone, text: '+84 969.15.6969'),
+            const SizedBox(height: 8),
+            _ContactItem(icon: Icons.email, text: 'contact@minvest.vn'),
+            const SizedBox(height: AppSpacing.lg),
+            Wrap(
+              spacing: 16,
+              runSpacing: 12,
+              children: const [
+                _SocialIcon(iconPath: 'assets/images/facebook_logo.png', url: 'https://www.facebook.com/minvest.vn'),
+                _SocialIcon(iconPath: 'assets/images/tiktok_logo.png', url: 'https://www.tiktok.com/@minvest.minh'),
+                _SocialIcon(iconPath: 'assets/images/youtube_logo.png', url: 'https://www.youtube.com/@minvestvn'),
+                _SocialIcon(iconPath: 'assets/images/telegram_logo.png', url: 'https://t.me/minvest_free', size: 32),
+                _SocialIcon(iconPath: 'assets/images/web_logo.png', url: 'https://minvest.vn/'),
+              ],
+            ),
+          ],
+        );
+
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: padH, vertical: 64),
+          color: Colors.black, // Đảm bảo nền đen nếu cần
+          child: isMobileLayout
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    logoCol,
+                    const SizedBox(height: 40),
+                    pagesCol,
+                    const SizedBox(height: 40),
+                    legalCol,
+                    const SizedBox(height: 40),
+                    contactCol,
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Cột 1: Logo & Info (Giảm flex xuống 3)
+                    Expanded(
+                      flex: 5,
+                      child: logoCol,
+                    ),
+                    const SizedBox(width: 40),
+                    // Cột 2: Pages (Giữ nguyên flex 2)
+                    Expanded(
+                      flex: 2,
+                      child: pagesCol,
+                    ),
+                    // Cột 3: Legal (Tăng flex lên 4 để chứa chữ dài)
+                    Expanded(
+                      flex: 3,
+                      child: legalCol,
+                    ),
+                    // Cột 4: Contact (Flex 3)
+                    Expanded(
+                      flex: 3,
+                      child: contactCol,
+                    ),
+                  ],
+                ),
+        );
+      }),
+    );
   }
 }
 

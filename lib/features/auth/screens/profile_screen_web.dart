@@ -11,6 +11,7 @@ import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/features/admin/screens/admin_panel_screen_web.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,6 +25,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     final appLocalizations = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     final name = user?.displayName?.trim().isNotEmpty == true
@@ -31,26 +35,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : appLocalizations.yourName;
     final email = user?.email ?? '';
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const LandingNavBar(),
-                    const SizedBox(height: 20),
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isMobile = constraints.maxWidth < 800;
-                        if (isMobile) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const LandingNavBar(),
+                      const SizedBox(height: 20),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isMobileLayout = constraints.maxWidth < 800;
+                          if (isMobileLayout) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _ProfileSidebar(
+                                  name: name,
+                                  email: email,
+                                  tabIndex: _tabIndex,
+                                  onTabChanged: (i) => setState(() => _tabIndex = i),
+                                  appLocalizations: appLocalizations,
+                                  isMobile: true,
+                                ),
+                                const SizedBox(height: 24),
+                                _buildTabContent(name),
+                              ],
+                            );
+                          }
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _ProfileSidebar(
                                 name: name,
@@ -58,35 +82,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 tabIndex: _tabIndex,
                                 onTabChanged: (i) => setState(() => _tabIndex = i),
                                 appLocalizations: appLocalizations,
-                                isMobile: true,
+                                isMobile: false,
                               ),
-                              const SizedBox(height: 24),
-                              _buildTabContent(name),
+                              const SizedBox(width: 24),
+                              Expanded(
+                                child: _buildTabContent(name),
+                              ),
                             ],
                           );
-                        }
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _ProfileSidebar(
-                              name: name,
-                              email: email,
-                              tabIndex: _tabIndex,
-                              onTabChanged: (i) => setState(() => _tabIndex = i),
-                              appLocalizations: appLocalizations,
-                              isMobile: false,
-                            ),
-                            const SizedBox(width: 24),
-                            Expanded(
-                              child: _buildTabContent(name),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 40),
-                    const FooterSection(),
-                  ],
+                        },
+                      ),
+                      const SizedBox(height: 40),
+                      const FooterSection(),
+                    ],
+                  ),
                 ),
               ),
             ),

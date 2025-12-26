@@ -6,60 +6,69 @@ import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/web/widgets/signals_background.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     if (FirebaseAuth.instance.currentUser != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushNamedAndRemoveUntil('/', (r) => r.isFirst);
       });
     }
 
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state.status == AuthStatus.authenticated) {
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-        } else if (state.status == AuthStatus.unauthenticated && state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
-          );
-        }
-      },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Stack(
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.only(top: 80, bottom: 40),
-                      child: SignalsBackground(
-                        child: const _LoginForm(),
-                      ),
-                    ),
-                    Positioned(
-                      top: 12,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1200),
-                          child: const LandingNavBar(),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+      ),
+      child: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state.status == AuthStatus.authenticated) {
+            Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+          } else if (state.status == AuthStatus.unauthenticated && state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.errorMessage!)),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Stack(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.only(top: 80, bottom: 40),
+                        child: SignalsBackground(
+                          child: const _LoginForm(),
                         ),
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        top: 12,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1200),
+                            child: const LandingNavBar(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

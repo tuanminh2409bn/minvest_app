@@ -8,6 +8,7 @@ import '../theme/gradients.dart';
 import 'widgets/navbar.dart';
 import 'sections/footer_section.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
+import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
@@ -71,30 +72,38 @@ class _ContactPageState extends State<ContactPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      floatingActionButton: const WebChatBubble(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: SingleChildScrollView(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 12),
-                  const LandingNavBar(),
-                  const SizedBox(height: 32),
-                  _header(context),
-                  const SizedBox(height: 24),
-                  _contactCards(context),
-                  const SizedBox(height: 24),
-                  _contactForm(context),
-                  const SizedBox(height: 64),
-                  const FooterSection(),
-                ],
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        floatingActionButton: const WebChatBubble(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        body: SingleChildScrollView(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 12),
+                    const LandingNavBar(),
+                    const SizedBox(height: 32),
+                    _header(context),
+                    const SizedBox(height: 24),
+                    _contactCards(context),
+                    const SizedBox(height: 24),
+                    _contactForm(context),
+                    const SizedBox(height: 64),
+                    const FooterSection(),
+                  ],
+                ),
               ),
             ),
           ),
