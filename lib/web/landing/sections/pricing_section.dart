@@ -106,12 +106,14 @@ class _PricingSectionState extends State<PricingSection> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text(
-              subheading,
-              style: AppTextStyles.body.copyWith(color: Colors.white),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        subheading,
+                        style: AppTextStyles.body.copyWith(
+                          color: Colors.white, 
+                          fontSize: isMobile ? 18 : 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),            const SizedBox(height: AppSpacing.lg),
             _toggle(context),
             const SizedBox(height: AppSpacing.lg),
             LayoutBuilder(
