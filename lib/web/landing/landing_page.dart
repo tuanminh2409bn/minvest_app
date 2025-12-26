@@ -489,16 +489,22 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection> with SingleTick
                 opacity: _fadeIn,
                 child: _AnimatedGlowCard(
                   width: maxWidth,
-                  child: Padding(
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 520),
                     padding: const EdgeInsets.all(AppSpacing.md),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSearchBar(context),
-                        const SizedBox(height: AppSpacing.md),
-                        _buildTabs(context),
-                        const SizedBox(height: AppSpacing.md),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSearchBar(context),
+                            const SizedBox(height: AppSpacing.md),
+                            _buildTabs(context),
+                          ],
+                        ),
                         const _StaggeredSignalCards(),
                       ],
                     ),
@@ -672,7 +678,7 @@ class _AnimatedGlowCardState extends State<_AnimatedGlowCard> with SingleTickerP
         return Container(
           width: widget.width,
           padding: const EdgeInsets.all(2),
-          constraints: const BoxConstraints(minHeight: 480),
+          constraints: const BoxConstraints(minHeight: 520),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: colors,
@@ -761,7 +767,7 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards> with Singl
 
   @override
   Widget build(BuildContext context) {
-    const double viewportHeight = 300;
+    const double viewportHeight = 370;
     return ClipRect(
       child: AnimatedBuilder(
         animation: _controller,
@@ -1148,17 +1154,21 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
 
   Widget _outlinedChip(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      height: 35,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.white, width: 1),
         color: Colors.black,
       ),
-      child: Text(
-        text,
-        style: AppTextStyles.body.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
+      child: Center(
+        widthFactor: 1.0,
+        child: Text(
+          text,
+          style: AppTextStyles.body.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -1245,15 +1255,17 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 32),
+                        child: Center(
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 520),
-                            child: SlideTransition(
-                              position: _leftSlide,
-                              child: FadeTransition(
-                                opacity: _leftFade,
-                                child: const _OrderCard(),
+                            constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: SlideTransition(
+                                position: _leftSlide,
+                                child: FadeTransition(
+                                  opacity: _leftFade,
+                                  child: const _OrderCard(),
+                                ),
                               ),
                             ),
                           ),
@@ -1261,13 +1273,18 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(minHeight: 520),
-                          child: SlideTransition(
-                            position: _rightSlide,
-                            child: FadeTransition(
-                              opacity: _rightFade,
-                              child: const _KeyFindingsCard(),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: SlideTransition(
+                                position: _rightSlide,
+                                child: FadeTransition(
+                                  opacity: _rightFade,
+                                  child: const _KeyFindingsCard(),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -1323,6 +1340,8 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(minHeight: 520),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: Colors.black,
@@ -1408,17 +1427,21 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
 
   Widget _pill(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      height: 35,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.white, width: 1),
         color: Colors.black,
       ),
-      child: Text(
-        text,
-        style: AppTextStyles.body.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
+      child: Center(
+        widthFactor: 1.0,
+        child: Text(
+          text,
+          style: AppTextStyles.body.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -1493,6 +1516,8 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
         child: FadeTransition(
           opacity: _fadeIn,
           child: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(minHeight: 520),
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
               color: Colors.black,
@@ -1500,16 +1525,22 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                _TransparentCard()._chip(context),
-                const SizedBox(height: AppSpacing.lg),
-                _buildTypingTitle(),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  AppLocalizations.of(context)!.transparentRealPerformanceDesc,
-                  style: AppTextStyles.body.copyWith(color: Colors.white),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _TransparentCard()._chip(context),
+                    const SizedBox(height: AppSpacing.lg),
+                    _buildTypingTitle(),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      AppLocalizations.of(context)!.transparentRealPerformanceDesc,
+                      style: AppTextStyles.body.copyWith(color: Colors.white),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: 32),
                 Wrap(
                   spacing: AppSpacing.md,
                   runSpacing: AppSpacing.sm,
@@ -1578,6 +1609,8 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard> with SingleTickerPro
         ]..sort();
 
         return Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 520),
           padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -1604,6 +1637,7 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard> with SingleTickerPro
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Key Findings', style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
                 const SizedBox(height: AppSpacing.md),
@@ -1627,7 +1661,7 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard> with SingleTickerPro
 
   Widget _chartPlaceholder(double progress) {
     return AspectRatio(
-      aspectRatio: 16 / 9,
+      aspectRatio: 16 / 10,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.black,
@@ -1827,26 +1861,31 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
         child: FadeTransition(
           opacity: _fadeIn,
           child: _AnimatedBorderCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF0D101A), Color(0xFF0A0B13)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+            child: Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(minHeight: 520),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0D101A), Color(0xFF0A0B13)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                     ),
+                    child: Text(AppLocalizations.of(context)!.signalsPerformanceTitle, style: AppTextStyles.h3.copyWith(color: Colors.white)),
                   ),
-                  child: Text(AppLocalizations.of(context)!.signalsPerformanceTitle, style: AppTextStyles.h3.copyWith(color: Colors.white)),
-                ),
-                _staggerItem(0, Icons.balance, AppLocalizations.of(context)!.riskToRewardRatio, AppLocalizations.of(context)!.howRiskComparesToReward),
-                _staggerItem(1, Icons.attach_money, AppLocalizations.of(context)!.profitLossOverview, AppLocalizations.of(context)!.netGainVsLoss),
-                _staggerItem(2, Icons.emoji_events, AppLocalizations.of(context)!.winRate, AppLocalizations.of(context)!.percentageOfWinningTrades),
-                _staggerItem(3, Icons.track_changes, AppLocalizations.of(context)!.accuracyRate, AppLocalizations.of(context)!.howPreciseOurSignalsAre),
-              ],
+                  _staggerItem(0, Icons.balance, AppLocalizations.of(context)!.riskToRewardRatio, AppLocalizations.of(context)!.howRiskComparesToReward),
+                  _staggerItem(1, Icons.attach_money, AppLocalizations.of(context)!.profitLossOverview, AppLocalizations.of(context)!.netGainVsLoss),
+                  _staggerItem(2, Icons.emoji_events, AppLocalizations.of(context)!.winRate, AppLocalizations.of(context)!.percentageOfWinningTrades),
+                  _staggerItem(3, Icons.track_changes, AppLocalizations.of(context)!.accuracyRate, AppLocalizations.of(context)!.howPreciseOurSignalsAre),
+                ],
+              ),
             ),
           ),
         ),
@@ -1880,7 +1919,7 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             gradient: const LinearGradient(
@@ -1920,14 +1959,36 @@ class _SignalsPerformanceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
-        Expanded(flex: 5, child: _SignalsPerformanceCard()),
-        SizedBox(width: 25),
-        Expanded(flex: 5, child: _TransparentCardAnimated()),
+      children: [
+        Expanded(
+          flex: 5,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
+              child: const SizedBox(
+                width: double.infinity,
+                child: _SignalsPerformanceCard(),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 25),
+        Expanded(
+          flex: 5,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
+              child: const SizedBox(
+                width: double.infinity,
+                child: _TransparentCardAnimated(),
+              ),
+            ),
+          ),
+        ),
       ],
     );
-   }
- } class _TransparentCard extends StatelessWidget {
+  }
+} class _TransparentCard extends StatelessWidget {
    const _TransparentCard();
 
   @override
@@ -1978,17 +2039,21 @@ class _SignalsPerformanceRow extends StatelessWidget {
 
   Widget _pill(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      height: 35,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.white, width: 1),
         color: Colors.black,
       ),
-      child: Text(
-        text,
-        style: AppTextStyles.body.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
+      child: Center(
+        widthFactor: 1.0,
+        child: Text(
+          text,
+          style: AppTextStyles.body.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
