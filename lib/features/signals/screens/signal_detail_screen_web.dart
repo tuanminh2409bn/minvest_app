@@ -33,6 +33,9 @@ class SignalDetailScreen extends StatelessWidget {
     'XAU': 'assets/images/crown_icon.png',
     'BTC': 'assets/images/btc.png',
     'USDT': 'assets/images/usdt.png',
+    'BTC/USDT': 'assets/images/btc.png',
+    'ETH': 'assets/images/eth.png',
+    'ETH/USDT': 'assets/images/eth.png',
   };
 
   List<String> _getFlagPathsFromSymbol(String symbol) {

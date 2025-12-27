@@ -27,8 +27,8 @@ class _SignalScreenState extends State<SignalScreen> {
 
   final List<String> _popularSymbols = [
     'XAU/USD',
-    'BTC/USD',
-    'ETH/USD',
+    'BTC/USDT',
+    'ETH/USDT',
     'EUR/USD',
     'GBP/USD',
     'USD/JPY',

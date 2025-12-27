@@ -312,8 +312,8 @@ function parseSignalMessage(text: string): any | null {
         if (words.length > 0) {
             const lastWord = words[words.length - 1].toUpperCase();
             const keywords = ["BUY", "SELL", "LIMIT", "STOP", "NOW", "TÍN", "HIỆU", ":"];
-            if (!keywords.includes(lastWord) && lastWord.length >= 3) {
-                 signal.symbol = lastWord;
+            if (!keywords.includes(lastWord.toUpperCase()) && lastWord.length >= 3) {
+                 signal.symbol = lastWord.toUpperCase();
             }
         }
         

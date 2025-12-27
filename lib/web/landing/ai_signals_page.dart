@@ -40,7 +40,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
     'XAU/USD',
     'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 
     'AUD/USD', 'USD/CAD', 'NZD/USD',
-    'BTC/USD', 'ETH/USD', 'BNB/USD', 'ETH/USDT', 'BTC/USDT'
+    'ETH/USDT', 'BTC/USDT'
   ];
 
   List<String> get _currentCommodities {
@@ -57,7 +57,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
       case AssetFilter.crypto:
         return [
           'All Crypto Pairs',
-          'BTC', 'ETH', 'BNB', 'ETH/USDT', 'BTC/USDT'
+          'ETH/USDT', 'BTC/USDT'
         ];
       case AssetFilter.all:
       default:
@@ -194,6 +194,59 @@ class _TabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
+    if (isMobile) {
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _TabChip(
+                  label: AppLocalizations.of(context)!.aiSignal,
+                  isActive: selected == AISignalsTab.aiSignals,
+                  onTap: () => onSelect(AISignalsTab.aiSignals),
+                  isMobile: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _TabChip(
+                  label: AppLocalizations.of(context)!.performance,
+                  isActive: selected == AISignalsTab.performance,
+                  onTap: () => onSelect(AISignalsTab.performance),
+                  isMobile: true,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _TabChip(
+                  label: AppLocalizations.of(context)!.history,
+                  isActive: selected == AISignalsTab.history,
+                  onTap: () => onSelect(AISignalsTab.history),
+                  isMobile: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _TabChip(
+                  label: AppLocalizations.of(context)!.pricing,
+                  isActive: selected == AISignalsTab.pricing,
+                  onTap: () => onSelect(AISignalsTab.pricing),
+                  isMobile: true,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
     return Wrap(
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.sm,
@@ -227,7 +280,13 @@ class _TabChip extends StatelessWidget {
   final String label;
   final bool isActive;
   final VoidCallback onTap;
-  const _TabChip({required this.label, required this.isActive, required this.onTap});
+  final bool isMobile;
+  const _TabChip({
+    required this.label, 
+    required this.isActive, 
+    required this.onTap,
+    this.isMobile = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -236,15 +295,16 @@ class _TabChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(1.1),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
           gradient: isActive ? AppGradients.cta : null,
           border: isActive ? null : Border.all(color: Colors.white12),
         ),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          alignment: isMobile ? Alignment.center : null,
           decoration: BoxDecoration(
             color: isActive ? Colors.black : const Color(0xFF0C0C0C),
-            borderRadius: BorderRadius.circular(7),
+            borderRadius: BorderRadius.circular(isMobile ? 0 : 7),
           ),
           child: Text(
             label,
@@ -287,6 +347,60 @@ class _FiltersRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
+    if (isMobile) {
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _AssetDropdown(
+                  value: assetFilter,
+                  onChanged: onAssetChanged,
+                  isMobile: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _PairDropdown(
+                  label: AppLocalizations.of(context)!.currencyPairs,
+                  value: selectedPair,
+                  items: availablePairs,
+                  onChanged: onPairChanged,
+                  isMobile: true,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: _DateRangePicker(
+                  dateRange: dateRange,
+                  onChanged: onDateRangeChanged,
+                  isMobile: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: _TimezoneDropdown(
+                  value: selectedTimezone,
+                  items: availableTimezones,
+                  onChanged: onTimezoneChanged,
+                  isMobile: true,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
     return Wrap(
       spacing: 16,
       runSpacing: 12,
@@ -321,12 +435,14 @@ class _PairDropdown extends StatelessWidget {
   final String value;
   final List<String> items;
   final ValueChanged<String> onChanged;
+  final bool isMobile;
 
   const _PairDropdown({
     required this.label,
     required this.value,
     required this.items,
     required this.onChanged,
+    this.isMobile = false,
   });
 
   @override
@@ -334,18 +450,20 @@ class _PairDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
-        ),
-        const SizedBox(height: 8),
+        if (!isMobile) ...[
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+        ],
         Container(
-          width: 260,
+          width: isMobile ? double.infinity : 260,
           height: 44,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: const Color(0xFF0D0D0D),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
             border: Border.all(color: Colors.white12),
           ),
           child: DropdownButtonHideUnderline(
@@ -356,7 +474,6 @@ class _PairDropdown extends StatelessWidget {
               style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
               isExpanded: true,
               items: items.map((pair) {
-                // Localize "All ..." display
                 String display = pair;
                 if (pair == 'All Commodities') {
                   display = AppLocalizations.of(context)!.allCommodities;
@@ -386,11 +503,13 @@ class _TimezoneDropdown extends StatelessWidget {
   final String value;
   final List<String> items;
   final ValueChanged<String> onChanged;
+  final bool isMobile;
 
   const _TimezoneDropdown({
     required this.value,
     required this.items,
     required this.onChanged,
+    this.isMobile = false,
   });
 
   @override
@@ -398,18 +517,20 @@ class _TimezoneDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context)!.timeGmt7, // Reusing key or create 'Timezone'
-          style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
-        ),
-        const SizedBox(height: 8),
+        if (!isMobile) ...[
+          Text(
+            AppLocalizations.of(context)!.timeGmt7, // Reusing key or create 'Timezone'
+            style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+        ],
         Container(
-          width: 110,
+          width: isMobile ? double.infinity : 110,
           height: 44,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: const Color(0xFF0D0D0D),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
             border: Border.all(color: Colors.white12),
           ),
           child: DropdownButtonHideUnderline(
@@ -440,25 +561,33 @@ class _TimezoneDropdown extends StatelessWidget {
 class _AssetDropdown extends StatelessWidget {
   final AssetFilter value;
   final ValueChanged<AssetFilter> onChanged;
-  const _AssetDropdown({required this.value, required this.onChanged});
+  final bool isMobile;
+
+  const _AssetDropdown({
+    required this.value,
+    required this.onChanged,
+    this.isMobile = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context)!.asset,
-          style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
-        ),
-        const SizedBox(height: 8),
+        if (!isMobile) ...[
+          Text(
+            AppLocalizations.of(context)!.asset,
+            style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+        ],
         Container(
-          width: 200,
+          width: isMobile ? double.infinity : 200,
           height: 44,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: const Color(0xFF0D0D0D),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
             border: Border.all(color: Colors.white12),
           ),
           child: DropdownButtonHideUnderline(
@@ -487,7 +616,13 @@ class _AssetDropdown extends StatelessWidget {
 class _DateRangePicker extends StatefulWidget {
   final DateTimeRange? dateRange;
   final ValueChanged<DateTimeRange?> onChanged;
-  const _DateRangePicker({required this.dateRange, required this.onChanged});
+  final bool isMobile;
+
+  const _DateRangePicker({
+    required this.dateRange,
+    required this.onChanged,
+    this.isMobile = false,
+  });
 
   @override
   State<_DateRangePicker> createState() => _DateRangePickerState();
@@ -518,6 +653,16 @@ class _DateRangePickerState extends State<_DateRangePicker> {
     final top = offset.dy + size.height + 8; // 8px spacing
     final left = offset.dx;
 
+    // Adjust width for mobile if needed, or stick to default 320
+    final dropdownWidth = 320.0;
+    
+    // Adjust left position if it goes off screen (simple check)
+    double actualLeft = left;
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (actualLeft + dropdownWidth > screenWidth) {
+        actualLeft = screenWidth - dropdownWidth - 16; // 16px padding
+    }
+
     _overlayEntry = OverlayEntry(
       builder: (context) {
         return Stack(
@@ -529,8 +674,8 @@ class _DateRangePickerState extends State<_DateRangePicker> {
             ),
             Positioned(
               top: top,
-              left: left,
-              width: 320,
+              left: actualLeft,
+              width: dropdownWidth,
               child: _DateRangeDropdownContent(
                 initialRange: widget.dateRange,
                 onRangeSelected: (range) {
@@ -568,20 +713,22 @@ class _DateRangePickerState extends State<_DateRangePicker> {
       key: _key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context)!.dateRange,
-          style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
-        ),
-        const SizedBox(height: 8),
+        if (!widget.isMobile) ...[
+          Text(
+            AppLocalizations.of(context)!.dateRange,
+            style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+        ],
         InkWell(
           onTap: _toggleDropdown,
           child: Container(
-            width: 260,
+            width: widget.isMobile ? double.infinity : 260,
             height: 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: const Color(0xFF0D0D0D),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
               border: Border.all(color: _isOpen ? const Color(0xFF00BFFF) : Colors.white12),
             ),
             child: Row(
@@ -590,6 +737,7 @@ class _DateRangePickerState extends State<_DateRangePicker> {
                   child: Text(
                     label,
                     style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 if (widget.dateRange != null)
@@ -597,8 +745,6 @@ class _DateRangePickerState extends State<_DateRangePicker> {
                     padding: const EdgeInsets.only(right: 8),
                     child: InkWell(
                       onTap: () {
-                        // Note: In some cases InkWell inside InkWell needs careful handling.
-                        // But here, widget.onChanged(null) will trigger a parent rebuild.
                         widget.onChanged(null);
                         },
                       child: const Icon(Icons.close, color: Colors.white70, size: 16),
@@ -942,14 +1088,23 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
 
   Widget _buildSampleData(double columnWidth, bool stacked) {
     final now = Timestamp.now();
-    final sampleSignals = [
+    final sampleGoldSignals = [
       Signal(id: 's1', symbol: 'XAU/USD', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
       Signal(id: 's2', symbol: 'XAU/USD', type: 'sell', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
       Signal(id: 's3', symbol: 'XAU/USD', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
     ];
-    final goldPaged = _paginate(sampleSignals, _goldPage, _pageSizeAll);
+    final sampleCryptoSignals = [
+      Signal(id: 'c1', symbol: 'BTC/USDT', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
+      Signal(id: 'c2', symbol: 'ETH/USDT', type: 'sell', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
+    ];
+
+    final goldPaged = _paginate(sampleGoldSignals, _goldPage, _pageSizeAll);
+    final cryptoPaged = _paginate(sampleCryptoSignals, _cryptoPage, _pageSizeAll);
+
     final hasPrevGold = _goldPage > 0;
-    final hasNextGold = sampleSignals.length > (_goldPage + 1) * _pageSizeAll;
+    final hasNextGold = sampleGoldSignals.length > (_goldPage + 1) * _pageSizeAll;
+    final hasPrevCrypto = _cryptoPage > 0;
+    final hasNextCrypto = sampleCryptoSignals.length > (_cryptoPage + 1) * _pageSizeAll;
     
     final sampleColumns = [
       SizedBox(
@@ -970,7 +1125,17 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       if (stacked) const SizedBox(height: 16),
       SizedBox(
         width: columnWidth,
-        child: const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined),
+        child: _SignalColumnLive(
+          title: 'CRYPTO',
+          icon: Icons.workspace_premium_outlined,
+          signals: cryptoPaged,
+          page: _cryptoPage,
+          onPageChanged: (p) => setState(() => _cryptoPage = p),
+          hasPrev: hasPrevCrypto,
+          hasNext: hasNextCrypto,
+          timezone: widget.selectedTimezone,
+          isSample: true,
+        ),
       ),
       if (!stacked) const SizedBox(width: 16),
       if (stacked) const SizedBox(height: 16),
@@ -1652,10 +1817,11 @@ class _FlagStack extends StatelessWidget {
     'XAU': 'assets/images/crown_icon.png',
     'BTC': 'assets/images/btc.png',
     'USDT': 'assets/images/usdt.png',
+    'ETH': 'assets/images/eth.png',
   };
 
   Widget _buildCryptoIcon(String code) {
-    if (code == 'BTC' || code == 'USDT') {
+    if (_currencyFlags.containsKey(code)) {
       return CircleAvatar(
         radius: 14,
         backgroundColor: Colors.transparent,
