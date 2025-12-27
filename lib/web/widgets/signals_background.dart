@@ -17,11 +17,11 @@ class _SignalsBackgroundState extends State<SignalsBackground> with SingleTicker
   // Pool of signal data to cycle through
   final List<_SignalCardData> _signalPool = const [
     _SignalCardData(pair: 'XAU/USD', side: 'Sell Limit', isBuy: false, icon: Icons.monetization_on),
-    _SignalCardData(pair: 'BTC/USD', side: 'Buy Limit', isBuy: true, icon: Icons.currency_bitcoin),
+    _SignalCardData(pair: 'BTC/USDT', side: 'Buy Limit', isBuy: true, icon: Icons.currency_bitcoin),
     _SignalCardData(pair: 'EUR/USD', side: 'Buy Limit', isBuy: true, icon: Icons.euro),
     _SignalCardData(pair: 'GBP/JPY', side: 'Sell Limit', isBuy: false, icon: Icons.currency_pound),
     _SignalCardData(pair: 'US30', side: 'Buy Limit', isBuy: true, icon: Icons.show_chart),
-    _SignalCardData(pair: 'ETH/USD', side: 'Sell Limit', isBuy: false, icon: Icons.token),
+    _SignalCardData(pair: 'ETH/USDT', side: 'Sell Limit', isBuy: false, icon: Icons.token),
   ];
 
   // State to track which data index is currently showing for each card position
