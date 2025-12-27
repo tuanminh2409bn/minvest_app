@@ -31,6 +31,13 @@ class AuthService {
   // Hàm khởi tạo service, gọi sau khi Firebase.initializeApp() hoàn tất
   Future<void> initialize() async {
     // Không cần logic listen thủ công nữa vì đã dùng trực tiếp stream của Firebase
+    try {
+      // Initialize Google Sign In (Required for v7.0.0+)
+      // Using default scopes as per previous behavior
+      await GoogleSignIn.instance.initialize(); 
+    } catch (e) {
+      print('Error initializing Google Sign In: $e');
+    }
   }
 
   Future<String> sendPhoneOtp(String phoneNumber) async {
@@ -297,12 +304,13 @@ class AuthService {
 
   Future<User?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      // Use the singleton instance and authenticate() method (v7.0.0+)
+      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
       if (googleUser == null) return null;
       final String? googleEmail = googleUser.email;
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
+        accessToken: null, // accessToken is no longer directly available on GoogleSignInAuthentication
         idToken: googleAuth.idToken,
       );
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
@@ -378,7 +386,7 @@ class AuthService {
       if (!kIsWeb) {
         await FacebookAuth.instance.logOut();
       }
-      await GoogleSignIn().signOut();
+      await GoogleSignIn.instance.signOut();
     } catch (e) {
       print("Lỗi khi đăng xuất khỏi các nhà cung cấp: $e");
     } finally {
