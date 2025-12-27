@@ -21,7 +21,7 @@ dependencies:
   cloud_functions:
 
   # Authentication
-  google_sign_in: 6.3.0
+  google_sign_in:
   flutter_facebook_auth:
   sign_in_with_apple:
 
