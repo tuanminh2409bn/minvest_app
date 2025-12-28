@@ -1276,7 +1276,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get performance => 'Гүйцэтгэл';
 
   @override
-  String get minvestSupport => 'Minvest Дэмжлэг';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>

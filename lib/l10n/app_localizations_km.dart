@@ -1266,7 +1266,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get performance => 'ការអនុវត្ត';
 
   @override
-  String get minvestSupport => 'ការគាំទ្រ Minvest';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>

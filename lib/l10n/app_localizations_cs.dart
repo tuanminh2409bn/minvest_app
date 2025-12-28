@@ -1270,7 +1270,7 @@ class AppLocalizationsCs extends AppLocalizations {
   String get performance => 'Výkon';
 
   @override
-  String get minvestSupport => 'Podpora Minvest';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>

@@ -11,6 +11,7 @@ import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
 import 'package:minvest_forex_app/web/theme/gradients.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
+import 'package:minvest_forex_app/web/widgets/signal_history_table.dart';
 
 class FeaturesPage extends StatelessWidget {
   const FeaturesPage({super.key});
@@ -36,13 +37,13 @@ class FeaturesPage extends StatelessWidget {
               const _ContentWrapper(child: LandingNavBar()),
               const SizedBox(height: 24),
               const WinMoreSection(),
-              const SizedBox(height: 96),
+              SizedBox(height: isMobile ? 48 : 96),
               const _ContentWrapper(child: SmartToolsSection()),
-              const SizedBox(height: 96),
+              SizedBox(height: isMobile ? 48 : 96),
               const _ContentWrapper(child: YourOnDemandSection()),
-              const SizedBox(height: 96),
+              SizedBox(height: isMobile ? 48 : 96),
               const _ContentWrapper(child: MaximizeResultsSection()),
-              const SizedBox(height: 48),
+              SizedBox(height: isMobile ? 24 : 48),
               const _ContentWrapper(child: FooterSection()),
             ],
           ),
@@ -635,8 +636,70 @@ class _SignalRowData {
   const _SignalRowData({required this.icon, required this.pair, required this.side});
 }
 
-class SmartToolsSection extends StatelessWidget {
+
+
+class SmartToolsSection extends StatefulWidget {
   const SmartToolsSection({super.key});
+
+  @override
+  State<SmartToolsSection> createState() => _SmartToolsSectionState();
+}
+
+class _SmartToolsSectionState extends State<SmartToolsSection> with SingleTickerProviderStateMixin {
+  bool _isFlipped = false;
+  late AnimationController _flipController;
+  late Animation<double> _frontAnimation;
+  late Animation<double> _backAnimation;
+
+  final List<HistoryRow> _demoHistoryRows = List.generate(8, (index) {
+    return HistoryRow(
+      date: '28/10/2025',
+      time: '10:${10 + index}',
+      asset: index % 2 == 0 ? 'GOLD' : 'BTC/USDT',
+      order: index % 2 == 0 ? 'BUY' : 'SELL',
+      status: index % 3 == 0 ? 'TP1' : (index % 3 == 1 ? 'TP2' : 'SL'),
+      pips: index % 3 == 2 ? '-50' : '+120',
+      entry: '203${index}',
+      sl: '2020',
+      tp1: '2040',
+      tp2: '2050',
+    );
+  });
+
+  @override
+  void initState() {
+    super.initState();
+    _flipController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
+    
+    // Create sequence for front side: 0 -> 90 degrees (disappear)
+    _frontAnimation = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: -math.pi / 2), weight: 50),
+      TweenSequenceItem(tween: ConstantTween(-math.pi / 2), weight: 50),
+    ]).animate(CurvedAnimation(parent: _flipController, curve: Curves.easeInOut));
+
+    // Create sequence for back side: -90 degrees -> 0 (appear)
+    _backAnimation = TweenSequence([
+      TweenSequenceItem(tween: ConstantTween(math.pi / 2), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: math.pi / 2, end: 0.0), weight: 50),
+    ]).animate(CurvedAnimation(parent: _flipController, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _flipController.dispose();
+    super.dispose();
+  }
+
+  void _toggleFlip() {
+    setState(() {
+      _isFlipped = !_isFlipped;
+      if (_isFlipped) {
+        _flipController.forward();
+      } else {
+        _flipController.reverse();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -656,167 +719,314 @@ class SmartToolsSection extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 48),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            height: 60,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0C132A), Color(0xFF0A0E1F)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
+          
+          // Flip Container
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: _toggleFlip,
+              child: Stack(
+                children: [
+                  // Front Side
+                  AnimatedBuilder(
+                    animation: _frontAnimation,
+                    builder: (context, child) {
+                      final angle = _frontAnimation.value;
+                      return Transform(
+                        transform: Matrix4.identity()
+                          ..setEntry(3, 2, 0.001)
+                          ..rotateX(angle),
+                        alignment: Alignment.center,
+                        child: angle < -math.pi / 2 + 0.01 ? const SizedBox.shrink() : _buildFrontSide(context),
+                      );
+                    },
+                  ),
+                  // Back Side
+                  AnimatedBuilder(
+                    animation: _backAnimation,
+                    builder: (context, child) {
+                      final angle = _backAnimation.value;
+                      return Transform(
+                        transform: Matrix4.identity()
+                          ..setEntry(3, 2, 0.001)
+                          ..rotateX(angle),
+                        alignment: Alignment.center,
+                        child: angle > math.pi / 2 - 0.01 ? const SizedBox.shrink() : _buildBackSide(context),
+                      );
+                    },
+                  ),
+                ],
               ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            child: Row(
-              children: const [
-                Icon(Icons.circle, size: 10, color: Colors.white24),
-                SizedBox(width: 8),
-                Icon(Icons.circle, size: 10, color: Colors.white24),
-                SizedBox(width: 8),
-                Icon(Icons.circle, size: 10, color: Colors.white24),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  child: Row(
-                    children: const [
-                      Icon(Icons.circle, size: 10, color: Colors.white30),
-                      SizedBox(width: 6),
-                      Icon(Icons.circle, size: 10, color: Colors.white30),
-                      SizedBox(width: 6),
-                      Icon(Icons.circle, size: 10, color: Colors.white30),
-                    ],
-                  ),
-                ),
-                const Divider(height: 1, color: Colors.white12),
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.performanceOverviewTitle,
-                        style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        AppLocalizations.of(context)!.performanceOverviewDesc,
-                        style: AppTextStyles.body.copyWith(color: Colors.white),
-                      ),
-                      const SizedBox(height: 24),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final bool isNarrow = constraints.maxWidth < 720;
-                          if (isNarrow) {
-                            return Column(
-                              children: [
-                                _StatCard(
-                                  title: AppLocalizations.of(context)!.totalProfit,
-                                  value: '9,250.8 pips',
-                                ),
-                                SizedBox(height: 12),
-                                _StatCard(
-                                  title: AppLocalizations.of(context)!.completionSignal,
-                                  value: '507',
-                                ),
-                                SizedBox(height: 12),
-                                _StatCard(
-                                  title: AppLocalizations.of(context)!.winRate,
-                                  value: '62.7%',
-                                ),
-                              ],
-                            );
-                          }
-                          return Row(
-                            children: [
-                              Expanded(
-                                child: _StatCard(
-                                  title: AppLocalizations.of(context)!.totalProfit,
-                                  value: '9,250.8 pips',
-                                ),
-                              ),
-                              SizedBox(width: 16),
-                              Expanded(
-                                child: _StatCard(
-                                  title: AppLocalizations.of(context)!.completionSignal,
-                                  value: '507',
-                                ),
-                              ),
-                              SizedBox(width: 16),
-                              Expanded(
-                                child: _StatCard(
-                                  title: AppLocalizations.of(context)!.winRate,
-                                  value: '62.7%',
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  const _StatCard({required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: Container(
-        padding: const EdgeInsets.all(1.5),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF00BFFF), Color(0xFF7B61FF), Color(0xFFD500F9)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+  Widget _buildFrontSide(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          height: 60,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0C132A), Color(0xFF0A0E1F)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            children: const [
+              Icon(Icons.circle, size: 10, color: Colors.white24),
+              SizedBox(width: 8),
+              Icon(Icons.circle, size: 10, color: Colors.white24),
+              SizedBox(width: 8),
+              Icon(Icons.circle, size: 10, color: Colors.white24),
+            ],
           ),
         ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        const SizedBox(height: 16),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24),
           decoration: BoxDecoration(
             color: Colors.black,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white12),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 10),
-              Text(
-                value,
-                style: AppTextStyles.h1.copyWith(fontSize: 26, fontWeight: FontWeight.w700, color: const Color(0xFF00BFFF)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: const [
+                    Icon(Icons.circle, size: 10, color: Colors.white30),
+                    SizedBox(width: 6),
+                    Icon(Icons.circle, size: 10, color: Colors.white30),
+                    SizedBox(width: 6),
+                    Icon(Icons.circle, size: 10, color: Colors.white30),
+                  ],
+                ),
+              ),
+              const Divider(height: 1, color: Colors.white12),
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.performanceOverviewTitle,
+                      style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      AppLocalizations.of(context)!.performanceOverviewDesc,
+                      style: AppTextStyles.body.copyWith(color: Colors.white),
+                    ),
+                    const SizedBox(height: 24),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final bool isNarrow = constraints.maxWidth < 900;
+                        if (isNarrow) {
+                          return Column(
+                            children: [
+                              _AnimatedStatCard(
+                                title: AppLocalizations.of(context)!.totalProfit,
+                                value: '9,250.8 pips',
+                              ),
+                              const SizedBox(height: 12),
+                              _AnimatedStatCard(
+                                title: AppLocalizations.of(context)!.completionSignal,
+                                value: '507',
+                              ),
+                              const SizedBox(height: 12),
+                              _AnimatedStatCard(
+                                title: AppLocalizations.of(context)!.winRate,
+                                value: '62.7%',
+                              ),
+                              const SizedBox(height: 12),
+                              const _AnimatedStatCard(
+                                title: 'Active Member',
+                                value: '+10,566',
+                              ),
+                            ],
+                          );
+                        }
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: _AnimatedStatCard(
+                                title: AppLocalizations.of(context)!.totalProfit,
+                                value: '9,250.8 pips',
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _AnimatedStatCard(
+                                title: AppLocalizations.of(context)!.completionSignal,
+                                value: '507',
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _AnimatedStatCard(
+                                title: AppLocalizations.of(context)!.winRate,
+                                value: '62.7%',
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            const Expanded(
+                              child: _AnimatedStatCard(
+                                title: 'Active Member',
+                                value: '+10,566',
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
-      ),
+      ],
+    );
+  }
+
+  Widget _buildBackSide(BuildContext context) {
+    // Reusing the same container style but showing history table
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          height: 60,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0C132A), Color(0xFF0A0E1F)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            children: [
+              const Icon(Icons.circle, size: 10, color: Colors.white24),
+              const SizedBox(width: 8),
+              const Icon(Icons.circle, size: 10, color: Colors.white24),
+              const SizedBox(width: 8),
+              const Icon(Icons.circle, size: 10, color: Colors.white24),
+              const Spacer(),
+              Text(
+                'Signal History',
+                style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SignalHistoryTable(rows: _demoHistoryRows),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AnimatedStatCard extends StatefulWidget {
+  final String title;
+  final String value;
+  const _AnimatedStatCard({required this.title, required this.value});
+
+  @override
+  State<_AnimatedStatCard> createState() => _AnimatedStatCardState();
+}
+
+class _AnimatedStatCardState extends State<_AnimatedStatCard> with SingleTickerProviderStateMixin {
+  late final AnimationController _borderController;
+
+  @override
+  void initState() {
+    super.initState();
+    _borderController = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _borderController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _borderController,
+      builder: (context, child) {
+        final t = _borderController.value;
+        final colors = const [Color(0xFF00BFFF), Color(0xFF7B61FF), Color(0xFFD500F9)];
+        // Create a shifting gradient
+        final stops = [
+          (t + 0.0) % 1,
+          (t + 0.33) % 1,
+          (t + 0.66) % 1,
+        ]..sort();
+        
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(1.5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            gradient: LinearGradient(
+              colors: colors,
+              stops: stops,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF00BFFF).withOpacity(0.15),
+                blurRadius: 10,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.title, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
+                Text(
+                  widget.value,
+                  style: AppTextStyles.h1.copyWith(fontSize: 26, fontWeight: FontWeight.w700, color: const Color(0xFF00BFFF)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -826,9 +1036,12 @@ class YourOnDemandSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     return Column(
       children: [
-        const SizedBox(height: 96),
+        SizedBox(height: isMobile ? 0 : 48),
         Column(
           children: [
             Text(
@@ -844,7 +1057,7 @@ class YourOnDemandSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 150),
+        SizedBox(height: isMobile ? 40 : 150),
         const _LaptopShowcase(),
       ],
     );

@@ -1271,7 +1271,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get performance => 'Kinerja';
 
   @override
-  String get minvestSupport => 'Dukungan Minvest';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>

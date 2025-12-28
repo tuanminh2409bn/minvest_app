@@ -1262,7 +1262,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get performance => 'ผลงาน';
 
   @override
-  String get minvestSupport => 'การสนับสนุน Minvest';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>

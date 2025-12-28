@@ -1234,7 +1234,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get performance => '성과';
 
   @override
-  String get minvestSupport => 'Minvest 지원';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>
