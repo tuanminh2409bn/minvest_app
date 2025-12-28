@@ -1270,7 +1270,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get performance => 'Suorituskyky';
 
   @override
-  String get minvestSupport => 'Minvest Tuki';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>

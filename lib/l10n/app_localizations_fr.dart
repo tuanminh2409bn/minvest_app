@@ -1287,7 +1287,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get performance => 'Performance';
 
   @override
-  String get minvestSupport => 'Support Minvest';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>

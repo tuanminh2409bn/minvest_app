@@ -1272,7 +1272,7 @@ class AppLocalizationsMs extends AppLocalizations {
   String get performance => 'Prestasi';
 
   @override
-  String get minvestSupport => 'Sokongan Minvest';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>

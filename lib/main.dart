@@ -260,7 +260,7 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp(
             navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
-            title: 'Minvest Forex App',
+              title: 'Signal GPT',
             theme: _buildAppTheme(),
             locale: languageProvider.locale,
                         localizationsDelegates: [
@@ -292,7 +292,7 @@ class _MyAppState extends State<MyApp> {
         return MaterialApp(
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
-          title: 'Minvest Forex App',
+            title: 'Signal GPT',
           theme: _buildAppTheme(),
           locale: languageProvider.locale,
                       localizationsDelegates: [

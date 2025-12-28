@@ -1276,7 +1276,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get performance => 'Teljesítmény';
 
   @override
-  String get minvestSupport => 'Minvest Támogatás';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>

@@ -1224,7 +1224,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get performance => '业绩';
 
   @override
-  String get minvestSupport => 'Minvest 支持';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 => '请留言，我们的团队将尽快回复。您也可以联系 ';

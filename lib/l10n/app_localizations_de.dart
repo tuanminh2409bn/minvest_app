@@ -1277,7 +1277,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get performance => 'Leistung';
 
   @override
-  String get minvestSupport => 'Minvest Support';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>

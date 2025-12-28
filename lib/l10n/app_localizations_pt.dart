@@ -1279,7 +1279,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get performance => 'Desempenho';
 
   @override
-  String get minvestSupport => 'Suporte Minvest';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>
