@@ -1374,4 +1374,49 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get signInToExploreSignal =>
       'Войдите, чтобы изучить этот торговый сигнал!';
+
+  @override
+  String get activeMember => 'Активный участник';
+
+  @override
+  String get last7Days => 'Последние 7 дней';
+
+  @override
+  String get last14Days => 'Последние 14 дней';
+
+  @override
+  String get last30Days => 'Последние 30 дней';
+
+  @override
+  String get last90Days => 'Последние 90 дней';
+
+  @override
+  String get profitStatistics => 'Статистика прибыли';
+
+  @override
+  String get winrateOfAllSignals => 'Винрейт всех сигналов';
+
+  @override
+  String get daily => 'Ежедневно';
+
+  @override
+  String get weekly => 'Еженедельно';
+
+  @override
+  String get lossRate => 'Уровень убытков';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "Log Masuk Diperlukan",
-    "signInToExploreSignal": "Log masuk untuk meneroka isyarat dagangan ini!"
+    "signInToExploreSignal": "Log masuk untuk meneroka isyarat dagangan ini!",
+    "activeMember": "Ahli aktif",
+    "last7Days": "7 hari lepas",
+    "last14Days": "14 hari lepas",
+    "last30Days": "30 hari lepas",
+    "last90Days": "90 hari lepas",
+    "profitStatistics": "Statistik keuntungan",
+    "winrateOfAllSignals": "Kadar kemenangan semua isyarat",
+    "daily": "Harian",
+    "weekly": "Mingguan",
+    "lossRate": "Kadar kerugian",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

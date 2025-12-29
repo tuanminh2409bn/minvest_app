@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "लॉग इन आवश्यक",
-    "signInToExploreSignal": "इस ट्रेडिंग सिग्नल को देखने के लिए लॉग इन करें!"
+    "signInToExploreSignal": "इस ट्रेडिंग सिग्नल का पता लगाने के लिए साइन इन करें!",
+    "activeMember": "सक्रिय सदस्य",
+    "last7Days": "पिछले 7 दिन",
+    "last14Days": "पिछले 14 दिन",
+    "last30Days": "पिछले 30 दिन",
+    "last90Days": "पिछले 90 दिन",
+    "profitStatistics": "लाभ के आंकड़े",
+    "winrateOfAllSignals": "सभी संकेतों की जीत दर",
+    "daily": "दैनिक",
+    "weekly": "साप्ताहिक",
+    "lossRate": "हानि दर",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

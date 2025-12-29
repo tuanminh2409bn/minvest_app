@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "로그인 필요",
-    "signInToExploreSignal": "이 거래 신호를 확인하려면 로그인하세요!"
+    "signInToExploreSignal": "로그인하여 이 거래 신호를 확인하세요!",
+    "activeMember": "활동 회원",
+    "last7Days": "지난 7일",
+    "last14Days": "지난 14일",
+    "last30Days": "지난 30일",
+    "last90Days": "지난 90일",
+    "profitStatistics": "수익 통계",
+    "winrateOfAllSignals": "모든 신호의 승률",
+    "daily": "매일",
+    "weekly": "매주",
+    "lossRate": "손실률",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

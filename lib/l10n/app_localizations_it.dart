@@ -1382,4 +1382,49 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get signInToExploreSignal =>
       'Accedi per esplorare questo segnale di trading!';
+
+  @override
+  String get activeMember => 'Membro attivo';
+
+  @override
+  String get last7Days => 'Ultimi 7 giorni';
+
+  @override
+  String get last14Days => 'Ultimi 14 giorni';
+
+  @override
+  String get last30Days => 'Ultimi 30 giorni';
+
+  @override
+  String get last90Days => 'Ultimi 90 giorni';
+
+  @override
+  String get profitStatistics => 'Statistiche sui profitti';
+
+  @override
+  String get winrateOfAllSignals => 'Tasso di vincita di tutti i segnali';
+
+  @override
+  String get daily => 'Giornaliero';
+
+  @override
+  String get weekly => 'Settimanale';
+
+  @override
+  String get lossRate => 'Tasso di perdita';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

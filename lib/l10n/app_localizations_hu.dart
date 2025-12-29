@@ -1374,5 +1374,50 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get signInToExploreSignal =>
-      'Jelentkezzen be a kereskedési szignál megtekintéséhez!';
+      'Jelentkezzen be, hogy felfedezze ezt a kereskedési jelet!';
+
+  @override
+  String get activeMember => 'Aktív tag';
+
+  @override
+  String get last7Days => 'Elmúlt 7 nap';
+
+  @override
+  String get last14Days => 'Elmúlt 14 nap';
+
+  @override
+  String get last30Days => 'Elmúlt 30 nap';
+
+  @override
+  String get last90Days => 'Elmúlt 90 nap';
+
+  @override
+  String get profitStatistics => 'Nyereségstatisztika';
+
+  @override
+  String get winrateOfAllSignals => 'Az összes jel nyerési aránya';
+
+  @override
+  String get daily => 'Napi';
+
+  @override
+  String get weekly => 'Heti';
+
+  @override
+  String get lossRate => 'Veszteségarány';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

@@ -17,7 +17,9 @@ class Signal {
   final String matchStatus;
   final List<int> hitTps;
   final bool isMatched;
-  final String? leverage; // Added leverage field
+  final String? leverage;
+  final double? closedPrice;
+  final double? closedPips;
 
   Signal({
     required this.id,
@@ -34,7 +36,9 @@ class Signal {
     required this.matchStatus,
     this.hitTps = const [],
     this.isMatched = false,
-    this.leverage, // Added leverage param
+    this.leverage,
+    this.closedPrice,
+    this.closedPips,
   });
 
   factory Signal.fromFirestore(DocumentSnapshot doc) {
@@ -54,7 +58,9 @@ class Signal {
       matchStatus: data['matchStatus'] ?? 'NOT MATCHED',
       hitTps: List<int>.from(data['hitTps'] ?? []),
       isMatched: data['isMatched'] ?? false,
-      leverage: data['leverage'], // Map leverage from Firestore
+      leverage: data['leverage'],
+      closedPrice: data['closedPrice'] != null ? (data['closedPrice'] as num).toDouble() : null,
+      closedPips: data['closedPips'] != null ? (data['closedPips'] as num).toDouble() : null,
     );
   }
 

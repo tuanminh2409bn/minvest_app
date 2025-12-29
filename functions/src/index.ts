@@ -207,26 +207,39 @@ export const telegramWebhook = functions.https.onRequest(
         let updatePayload: any = {};
         let logMessage = "";
 
+        // Logic parse giá đóng lệnh và pips từ tin nhắn reply
+        // Mẫu: "Giá: 1234.5 (+20p)" hoặc "Giá: 1234.5 (-10p)"
+        const priceRegex = /Giá:\s*([\d.,]+)\s*\(([+-][\d.,]+)p\)/i;
+        const priceMatch = updateText.match(priceRegex);
+
+        if (priceMatch) {
+            const parsedPrice = parseFloat(priceMatch[1].replace(/,/g, '')); // Loại bỏ dấu phẩy nếu có
+            const parsedPips = parseFloat(priceMatch[2].replace(/,/g, ''));
+            updatePayload.closedPrice = parsedPrice;
+            updatePayload.closedPips = parsedPips;
+            updatePayload.pips = parsedPips; // Cập nhật trường pips chính để tính toán thống kê
+        }
+
         if (updateText.includes("đã khớp entry tại giá")) {
-          updatePayload = { isMatched: true, result: "Matched", matchedAt: admin.firestore.FieldValue.serverTimestamp() };
+          updatePayload = { ...updatePayload, isMatched: true, result: "Matched", matchedAt: admin.firestore.FieldValue.serverTimestamp() };
           logMessage = `Tín hiệu ${signalDoc.id} đã KHỚP LỆNH (MATCHED).`;
         } else if (updateText.includes("tp1 hit")) {
-            updatePayload = { result: "TP1 Hit", hitTps: admin.firestore.FieldValue.arrayUnion(1) };
+            updatePayload = { ...updatePayload, result: "TP1 Hit", hitTps: admin.firestore.FieldValue.arrayUnion(1) };
             logMessage = `Tín hiệu ${signalDoc.id} đã TP1 Hit.`;
         } else if (updateText.includes("tp2 hit")) {
-            updatePayload = { result: "TP2 Hit", hitTps: admin.firestore.FieldValue.arrayUnion(1, 2) };
+            updatePayload = { ...updatePayload, result: "TP2 Hit", hitTps: admin.firestore.FieldValue.arrayUnion(1, 2) };
             logMessage = `Tín hiệu ${signalDoc.id} đã TP2 Hit.`;
         } else if (updateText.includes("sl hit")) {
-            updatePayload = { status: "closed", result: "SL Hit", closedAt: admin.firestore.FieldValue.serverTimestamp() };
+            updatePayload = { ...updatePayload, status: "closed", result: "SL Hit", closedAt: admin.firestore.FieldValue.serverTimestamp() };
             logMessage = `Tín hiệu ${signalDoc.id} đã SL Hit.`;
         } else if (updateText.includes("tp3 hit")) {
-            updatePayload = { status: "closed", result: "TP3 Hit", hitTps: admin.firestore.FieldValue.arrayUnion(1, 2, 3), closedAt: admin.firestore.FieldValue.serverTimestamp() };
+            updatePayload = { ...updatePayload, status: "closed", result: "TP3 Hit", hitTps: admin.firestore.FieldValue.arrayUnion(1, 2, 3), closedAt: admin.firestore.FieldValue.serverTimestamp() };
             logMessage = `Tín hiệu ${signalDoc.id} đã TP3 Hit.`;
         } else if (updateText.includes("exit tại giá") || updateText.includes("exit lệnh")) {
-            updatePayload = { status: "closed", result: "Exited by Admin", closedAt: admin.firestore.FieldValue.serverTimestamp() };
+            updatePayload = { ...updatePayload, status: "closed", result: "Exited by Admin", closedAt: admin.firestore.FieldValue.serverTimestamp() };
             logMessage = `Tín hiệu ${signalDoc.id} đã được đóng bởi admin.`;
         } else if (updateText.includes("bỏ tín hiệu")) {
-            updatePayload = { status: "closed", result: "Cancelled", closedAt: admin.firestore.FieldValue.serverTimestamp() };
+            updatePayload = { ...updatePayload, status: "closed", result: "Cancelled", closedAt: admin.firestore.FieldValue.serverTimestamp() };
             logMessage = `Tín hiệu ${signalDoc.id} đã bị hủy.`;
         }
 

@@ -1363,4 +1363,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signInToExploreSignal => 'Sign in to explore this trading signal!';
+
+  @override
+  String get activeMember => 'Active Member';
+
+  @override
+  String get last7Days => 'Last 7 days';
+
+  @override
+  String get last14Days => 'Last 14 days';
+
+  @override
+  String get last30Days => 'Last 30 days';
+
+  @override
+  String get last90Days => 'Last 90 days';
+
+  @override
+  String get profitStatistics => 'Profit Statistics';
+
+  @override
+  String get winrateOfAllSignals => 'Winrate of all signals';
+
+  @override
+  String get daily => 'Daily';
+
+  @override
+  String get weekly => 'Weekly';
+
+  @override
+  String get lossRate => 'Loss Rate';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Mật khẩu hiện tại không đúng",
     "signInRequired": "Yêu cầu đăng nhập",
-    "signInToExploreSignal": "Đăng nhập để khám phá tín hiệu giao dịch này!"
+    "signInToExploreSignal": "Đăng nhập để khám phá tín hiệu giao dịch này!",
+    "activeMember": "Thành viên hoạt động",
+    "last7Days": "7 ngày qua",
+    "last14Days": "14 ngày qua",
+    "last30Days": "30 ngày qua",
+    "last90Days": "90 ngày qua",
+    "profitStatistics": "Thống kê lợi nhuận",
+    "winrateOfAllSignals": "Tỷ lệ thắng tất cả tín hiệu",
+    "daily": "Hàng ngày",
+    "weekly": "Hàng tuần",
+    "lossRate": "Tỷ lệ thua",
+    "signalProgress": "Tiến trình tín hiệu",
+    "statusHistory": "Lịch sử trạng thái",
+    "signalCreated": "Tín hiệu được tạo",
+    "signalMatched": "Tín hiệu đã khớp",
+    "targetReached": "Đã đạt mục tiêu"
 }

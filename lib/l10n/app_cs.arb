@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "Vyžadováno přihlášení",
-    "signInToExploreSignal": "Přihlaste se a prozkoumejte tento obchodní signál!"
+    "signInToExploreSignal": "Přihlaste se a prozkoumejte tento obchodní signál!",
+    "activeMember": "Aktivní člen",
+    "last7Days": "Posledních 7 dní",
+    "last14Days": "Posledních 14 dní",
+    "last30Days": "Posledních 30 dní",
+    "last90Days": "Posledních 90 dní",
+    "profitStatistics": "Statistiky zisku",
+    "winrateOfAllSignals": "Míra výhry všech signálů",
+    "daily": "Denně",
+    "weekly": "Týdně",
+    "lossRate": "Míra ztráty",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

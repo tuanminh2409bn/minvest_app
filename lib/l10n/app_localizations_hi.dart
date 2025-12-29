@@ -1369,5 +1369,50 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get signInToExploreSignal =>
-      'इस ट्रेडिंग सिग्नल को देखने के लिए लॉग इन करें!';
+      'इस ट्रेडिंग सिग्नल का पता लगाने के लिए साइन इन करें!';
+
+  @override
+  String get activeMember => 'सक्रिय सदस्य';
+
+  @override
+  String get last7Days => 'पिछले 7 दिन';
+
+  @override
+  String get last14Days => 'पिछले 14 दिन';
+
+  @override
+  String get last30Days => 'पिछले 30 दिन';
+
+  @override
+  String get last90Days => 'पिछले 90 दिन';
+
+  @override
+  String get profitStatistics => 'लाभ के आंकड़े';
+
+  @override
+  String get winrateOfAllSignals => 'सभी संकेतों की जीत दर';
+
+  @override
+  String get daily => 'दैनिक';
+
+  @override
+  String get weekly => 'साप्ताहिक';
+
+  @override
+  String get lossRate => 'हानि दर';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

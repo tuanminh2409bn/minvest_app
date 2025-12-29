@@ -440,10 +440,18 @@ class _LanguagePopup extends StatelessWidget {
     final double popupWidth = isMobile ? size.width * 0.9 : 450;
     final double popupMaxHeight = 400;
 
-    // Calculate Position (Right aligned with button)
-    // Avoid overflow on right side
-    double right = size.width - (buttonPosition.dx + buttonSize.width);
-    if (right < 16) right = 16; // Margin from screen edge
+    // Calculate Position
+    double? left;
+    double? right;
+
+    if (isMobile) {
+      // Center on mobile
+      left = (size.width - popupWidth) / 2;
+    } else {
+      // Right aligned with button on desktop
+      right = size.width - (buttonPosition.dx + buttonSize.width);
+      if (right < 16) right = 16; // Margin from screen edge
+    }
 
     double top = buttonPosition.dy + buttonSize.height + 8;
 
@@ -460,6 +468,7 @@ class _LanguagePopup extends StatelessWidget {
         Positioned(
           top: top,
           right: right,
+          left: left,
           child: Material(
             color: Colors.transparent,
             elevation: 8,

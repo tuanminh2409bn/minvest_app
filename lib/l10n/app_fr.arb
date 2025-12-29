@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "Connexion requise",
-    "signInToExploreSignal": "Connectez-vous pour explorer ce signal de trading !"
+    "signInToExploreSignal": "Connectez-vous pour explorer ce signal de trading !",
+    "activeMember": "Membre actif",
+    "last7Days": "7 derniers jours",
+    "last14Days": "14 derniers jours",
+    "last30Days": "30 derniers jours",
+    "last90Days": "90 derniers jours",
+    "profitStatistics": "Statistiques de profit",
+    "winrateOfAllSignals": "Taux de réussite de tous les signaux",
+    "daily": "Quotidien",
+    "weekly": "Hebdomadaire",
+    "lossRate": "Taux de perte",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

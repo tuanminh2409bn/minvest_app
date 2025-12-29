@@ -1376,4 +1376,49 @@ class AppLocalizationsMn extends AppLocalizations {
   @override
   String get signInToExploreSignal =>
       'Энэхүү арилжааны дохиог үзэхийн туلد нэвтэрнэ үү!';
+
+  @override
+  String get activeMember => 'Идэвхтэй гишүүн';
+
+  @override
+  String get last7Days => 'Сүүлийн 7 хоног';
+
+  @override
+  String get last14Days => 'Сүүлийн 14 хоног';
+
+  @override
+  String get last30Days => 'Сүүлийн 30 хоног';
+
+  @override
+  String get last90Days => 'Сүүлийн 90 хоног';
+
+  @override
+  String get profitStatistics => 'Ашгийн статистик';
+
+  @override
+  String get winrateOfAllSignals => 'Бүх дохионы хожлын хувь';
+
+  @override
+  String get daily => 'Өдөр бүр';
+
+  @override
+  String get weekly => 'Долоо хоног бүр';
+
+  @override
+  String get lossRate => 'Алдагдлын хувь';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

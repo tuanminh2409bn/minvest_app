@@ -2647,6 +2647,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in to explore this trading signal!'**
   String get signInToExploreSignal;
+
+  /// No description provided for @activeMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Member'**
+  String get activeMember;
+
+  /// No description provided for @last7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get last7Days;
+
+  /// No description provided for @last14Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 14 days'**
+  String get last14Days;
+
+  /// No description provided for @last30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get last30Days;
+
+  /// No description provided for @last90Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 90 days'**
+  String get last90Days;
+
+  /// No description provided for @profitStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit Statistics'**
+  String get profitStatistics;
+
+  /// No description provided for @winrateOfAllSignals.
+  ///
+  /// In en, this message translates to:
+  /// **'Winrate of all signals'**
+  String get winrateOfAllSignals;
+
+  /// No description provided for @daily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get daily;
+
+  /// No description provided for @weekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get weekly;
+
+  /// No description provided for @lossRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Loss Rate'**
+  String get lossRate;
+
+  /// No description provided for @signalProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Signal Progress'**
+  String get signalProgress;
+
+  /// No description provided for @statusHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Status History'**
+  String get statusHistory;
+
+  /// No description provided for @signalCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Signal Created'**
+  String get signalCreated;
+
+  /// No description provided for @signalMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Signal Matched'**
+  String get signalMatched;
+
+  /// No description provided for @targetReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Target reached'**
+  String get targetReached;
 }
 
 class _AppLocalizationsDelegate

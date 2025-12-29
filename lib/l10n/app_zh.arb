@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "需要登录",
-    "signInToExploreSignal": "登录以查看此交易信号！"
+    "signInToExploreSignal": "登录以探索此交易信号！",
+    "activeMember": "活跃会员",
+    "last7Days": "过去7天",
+    "last14Days": "过去14天",
+    "last30Days": "过去30天",
+    "last90Days": "过去90天",
+    "profitStatistics": "利润统计",
+    "winrateOfAllSignals": "所有信号的胜率",
+    "daily": "每日",
+    "weekly": "每周",
+    "lossRate": "损失率",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

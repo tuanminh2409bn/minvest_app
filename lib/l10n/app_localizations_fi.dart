@@ -1369,4 +1369,49 @@ class AppLocalizationsFi extends AppLocalizations {
   @override
   String get signInToExploreSignal =>
       'Kirjaudu sisään tutkiaksesi tätä kaupankäyntisignaalia!';
+
+  @override
+  String get activeMember => 'Aktiivinen jäsen';
+
+  @override
+  String get last7Days => 'Viimeiset 7 päivää';
+
+  @override
+  String get last14Days => 'Viimeiset 14 päivää';
+
+  @override
+  String get last30Days => 'Viimeiset 30 päivää';
+
+  @override
+  String get last90Days => 'Viimeiset 90 päivää';
+
+  @override
+  String get profitStatistics => 'Voittotilastot';
+
+  @override
+  String get winrateOfAllSignals => 'Kaikkien signaalien voittoprosentti';
+
+  @override
+  String get daily => 'Päivittäin';
+
+  @override
+  String get weekly => 'Viikoittain';
+
+  @override
+  String get lossRate => 'Tappioprosentti';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "Autentificare necesară",
-    "signInToExploreSignal": "Conectați-vă pentru a explora acest semnal de tranzacționare!"
+    "signInToExploreSignal": "Conectați-vă pentru a explora acest semnal de tranzacționare!",
+    "activeMember": "Membru activ",
+    "last7Days": "Ultimele 7 zile",
+    "last14Days": "Ultimele 14 zile",
+    "last30Days": "Ultimele 30 de zile",
+    "last90Days": "Ultimele 90 de zile",
+    "profitStatistics": "Statistici profit",
+    "winrateOfAllSignals": "Rata de câștig a tuturor semnalelor",
+    "daily": "Zilnic",
+    "weekly": "Săptămânal",
+    "lossRate": "Rata pierderilor",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

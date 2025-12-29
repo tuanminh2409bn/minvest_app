@@ -1331,5 +1331,50 @@ class AppLocalizationsKo extends AppLocalizations {
   String get signInRequired => '로그인 필요';
 
   @override
-  String get signInToExploreSignal => '이 거래 신호를 확인하려면 로그인하세요!';
+  String get signInToExploreSignal => '로그인하여 이 거래 신호를 확인하세요!';
+
+  @override
+  String get activeMember => '활동 회원';
+
+  @override
+  String get last7Days => '지난 7일';
+
+  @override
+  String get last14Days => '지난 14일';
+
+  @override
+  String get last30Days => '지난 30일';
+
+  @override
+  String get last90Days => '지난 90일';
+
+  @override
+  String get profitStatistics => '수익 통계';
+
+  @override
+  String get winrateOfAllSignals => '모든 신호의 승률';
+
+  @override
+  String get daily => '매일';
+
+  @override
+  String get weekly => '매주';
+
+  @override
+  String get lossRate => '손실률';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

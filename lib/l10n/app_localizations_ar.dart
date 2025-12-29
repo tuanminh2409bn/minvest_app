@@ -1360,4 +1360,49 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get signInToExploreSignal =>
       'قم بتسجيل الدخول لاستكشاف إشارة التداول هذه!';
+
+  @override
+  String get activeMember => 'عضو نشط';
+
+  @override
+  String get last7Days => 'آخر 7 أيام';
+
+  @override
+  String get last14Days => 'آخر 14 يومًا';
+
+  @override
+  String get last30Days => 'آخر 30 يومًا';
+
+  @override
+  String get last90Days => 'آخر 90 يومًا';
+
+  @override
+  String get profitStatistics => 'إحصائيات الربح';
+
+  @override
+  String get winrateOfAllSignals => 'معدل فوز جميع الإشارات';
+
+  @override
+  String get daily => 'يومي';
+
+  @override
+  String get weekly => 'أسبوعي';
+
+  @override
+  String get lossRate => 'معدل الخسارة';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

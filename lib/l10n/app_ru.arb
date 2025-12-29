@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "Требуется вход",
-    "signInToExploreSignal": "Войдите, чтобы изучить этот торговый сигнал!"
+    "signInToExploreSignal": "Войдите, чтобы изучить этот торговый сигнал!",
+    "activeMember": "Активный участник",
+    "last7Days": "Последние 7 дней",
+    "last14Days": "Последние 14 дней",
+    "last30Days": "Последние 30 дней",
+    "last90Days": "Последние 90 дней",
+    "profitStatistics": "Статистика прибыли",
+    "winrateOfAllSignals": "Винрейт всех сигналов",
+    "daily": "Ежедневно",
+    "weekly": "Еженедельно",
+    "lossRate": "Уровень убытков",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

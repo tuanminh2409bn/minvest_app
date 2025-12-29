@@ -1366,4 +1366,49 @@ class AppLocalizationsDa extends AppLocalizations {
   @override
   String get signInToExploreSignal =>
       'Log ind for at udforske dette handelssignal!';
+
+  @override
+  String get activeMember => 'Aktivt medlem';
+
+  @override
+  String get last7Days => 'Sidste 7 dage';
+
+  @override
+  String get last14Days => 'Sidste 14 dage';
+
+  @override
+  String get last30Days => 'Sidste 30 dage';
+
+  @override
+  String get last90Days => 'Sidste 90 dage';
+
+  @override
+  String get profitStatistics => 'Profitstatistik';
+
+  @override
+  String get winrateOfAllSignals => 'Gevinstprocent for alle signaler';
+
+  @override
+  String get daily => 'Daglig';
+
+  @override
+  String get weekly => 'Ugentlig';
+
+  @override
+  String get lossRate => 'Tabsrate';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

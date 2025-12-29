@@ -1370,4 +1370,49 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get signInToExploreSignal =>
       'Đăng nhập để khám phá tín hiệu giao dịch này!';
+
+  @override
+  String get activeMember => 'Thành viên hoạt động';
+
+  @override
+  String get last7Days => '7 ngày qua';
+
+  @override
+  String get last14Days => '14 ngày qua';
+
+  @override
+  String get last30Days => '30 ngày qua';
+
+  @override
+  String get last90Days => '90 ngày qua';
+
+  @override
+  String get profitStatistics => 'Thống kê lợi nhuận';
+
+  @override
+  String get winrateOfAllSignals => 'Tỷ lệ thắng tất cả tín hiệu';
+
+  @override
+  String get daily => 'Hàng ngày';
+
+  @override
+  String get weekly => 'Hàng tuần';
+
+  @override
+  String get lossRate => 'Tỷ lệ thua';
+
+  @override
+  String get signalProgress => 'Tiến trình tín hiệu';
+
+  @override
+  String get statusHistory => 'Lịch sử trạng thái';
+
+  @override
+  String get signalCreated => 'Tín hiệu được tạo';
+
+  @override
+  String get signalMatched => 'Tín hiệu đã khớp';
+
+  @override
+  String get targetReached => 'Đã đạt mục tiêu';
 }
