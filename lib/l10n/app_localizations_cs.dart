@@ -1369,4 +1369,49 @@ class AppLocalizationsCs extends AppLocalizations {
   @override
   String get signInToExploreSignal =>
       'Přihlaste se a prozkoumejte tento obchodní signál!';
+
+  @override
+  String get activeMember => 'Aktivní člen';
+
+  @override
+  String get last7Days => 'Posledních 7 dní';
+
+  @override
+  String get last14Days => 'Posledních 14 dní';
+
+  @override
+  String get last30Days => 'Posledních 30 dní';
+
+  @override
+  String get last90Days => 'Posledních 90 dní';
+
+  @override
+  String get profitStatistics => 'Statistiky zisku';
+
+  @override
+  String get winrateOfAllSignals => 'Míra výhry všech signálů';
+
+  @override
+  String get daily => 'Denně';
+
+  @override
+  String get weekly => 'Týdně';
+
+  @override
+  String get lossRate => 'Míra ztráty';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

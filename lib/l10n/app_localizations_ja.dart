@@ -1331,5 +1331,50 @@ class AppLocalizationsJa extends AppLocalizations {
   String get signInRequired => 'ログインが必要です';
 
   @override
-  String get signInToExploreSignal => 'この取引シグナルを確認するにはログインしてください！';
+  String get signInToExploreSignal => 'サインインしてこの取引シグナルを探索してください！';
+
+  @override
+  String get activeMember => 'アクティブメンバー';
+
+  @override
+  String get last7Days => '過去7日間';
+
+  @override
+  String get last14Days => '過去14日間';
+
+  @override
+  String get last30Days => '過去30日間';
+
+  @override
+  String get last90Days => '過去90日間';
+
+  @override
+  String get profitStatistics => '利益統計';
+
+  @override
+  String get winrateOfAllSignals => '全シグナルの勝率';
+
+  @override
+  String get daily => '毎日';
+
+  @override
+  String get weekly => '毎週';
+
+  @override
+  String get lossRate => '損失率';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

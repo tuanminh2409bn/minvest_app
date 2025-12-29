@@ -38,24 +38,20 @@ class SignupScreenWeb extends StatelessWidget {
               return SingleChildScrollView(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: Stack(
+                  child: Column(
                     children: [
-                      Container(
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.only(top: 80, bottom: 40),
-                        child: SignalsBackground(
-                          child: const _SignupForm(),
+                      const SizedBox(height: 12),
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1200),
+                          child: LandingNavBar(),
                         ),
                       ),
-                      Positioned(
-                        top: 12,
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1200),
-                            child: LandingNavBar(),
-                          ),
+                      Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.only(top: 40, bottom: 40),
+                        child: SignalsBackground(
+                          child: const _SignupForm(),
                         ),
                       ),
                     ],

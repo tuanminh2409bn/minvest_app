@@ -24,14 +24,14 @@ class FooterSection extends StatelessWidget {
         final double padH = 0; // Đã loại bỏ padding ngang nội bộ để thẳng hàng với body
 
         final logoCol = Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: isMobileLayout ? CrossAxisAlignment.center : CrossAxisAlignment.start,
           children: [
             InkWell(
               onTap: () => Navigator.of(context).pushNamed('/'),
               child: Image.asset('assets/mockups/logo.png', height: 60, fit: BoxFit.contain),
             ),
             const SizedBox(height: AppSpacing.md),
-            // Explicitly align this column to the left
+            // Company info always left-aligned
             SizedBox(
               width: double.infinity,
               child: Column(

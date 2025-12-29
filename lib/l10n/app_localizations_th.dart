@@ -1360,5 +1360,50 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get signInToExploreSignal =>
-      'เข้าสู่ระบบเพื่อสำรวจสัญญาณการซื้อขายนี้!';
+      'ลงชื่อเข้าใช้เพื่อสำรวจสัญญาณการซื้อขายนี้!';
+
+  @override
+  String get activeMember => 'สมาชิกที่ใช้งานอยู่';
+
+  @override
+  String get last7Days => '7 วันที่ผ่านมา';
+
+  @override
+  String get last14Days => '14 วันที่ผ่านมา';
+
+  @override
+  String get last30Days => '30 วันที่ผ่านมา';
+
+  @override
+  String get last90Days => '90 วันที่ผ่านมา';
+
+  @override
+  String get profitStatistics => 'สถิติกำไร';
+
+  @override
+  String get winrateOfAllSignals => 'อัตราการชนะของสัญญาณทั้งหมด';
+
+  @override
+  String get daily => 'รายวัน';
+
+  @override
+  String get weekly => 'รายสัปดาห์';
+
+  @override
+  String get lossRate => 'อัตราการขาดทุน';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

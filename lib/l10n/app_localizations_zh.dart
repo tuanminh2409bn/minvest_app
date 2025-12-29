@@ -1320,5 +1320,50 @@ class AppLocalizationsZh extends AppLocalizations {
   String get signInRequired => '需要登录';
 
   @override
-  String get signInToExploreSignal => '登录以查看此交易信号！';
+  String get signInToExploreSignal => '登录以探索此交易信号！';
+
+  @override
+  String get activeMember => '活跃会员';
+
+  @override
+  String get last7Days => '过去7天';
+
+  @override
+  String get last14Days => '过去14天';
+
+  @override
+  String get last30Days => '过去30天';
+
+  @override
+  String get last90Days => '过去90天';
+
+  @override
+  String get profitStatistics => '利润统计';
+
+  @override
+  String get winrateOfAllSignals => '所有信号的胜率';
+
+  @override
+  String get daily => '每日';
+
+  @override
+  String get weekly => '每周';
+
+  @override
+  String get lossRate => '损失率';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

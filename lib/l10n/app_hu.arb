@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "Bejelentkezés szükséges",
-    "signInToExploreSignal": "Jelentkezzen be a kereskedési szignál megtekintéséhez!"
+    "signInToExploreSignal": "Jelentkezzen be, hogy felfedezze ezt a kereskedési jelet!",
+    "activeMember": "Aktív tag",
+    "last7Days": "Elmúlt 7 nap",
+    "last14Days": "Elmúlt 14 nap",
+    "last30Days": "Elmúlt 30 nap",
+    "last90Days": "Elmúlt 90 nap",
+    "profitStatistics": "Nyereségstatisztika",
+    "winrateOfAllSignals": "Az összes jel nyerési aránya",
+    "daily": "Napi",
+    "weekly": "Heti",
+    "lossRate": "Veszteségarány",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

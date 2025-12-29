@@ -461,6 +461,21 @@
         }
     },
     "reauthFailed": "Incorrect current password",
+    "activeMember": "Идэвхтэй гишүүн",
+    "last7Days": "Сүүлийн 7 хоног",
+    "last14Days": "Сүүлийн 14 хоног",
+    "last30Days": "Сүүлийн 30 хоног",
+    "last90Days": "Сүүлийн 90 хоног",
+    "profitStatistics": "Ашгийн статистик",
+    "winrateOfAllSignals": "Бүх дохионы хожлын хувь",
+    "daily": "Өдөр бүр",
+    "weekly": "Долоо хоног бүр",
+    "lossRate": "Алдагдлын хувь",
     "signInRequired": "Нэвтрэх шаардлагатай",
-    "signInToExploreSignal": "Энэхүү арилжааны дохиог үзэхийн туلد нэвтэрнэ үү!"
+    "signInToExploreSignal": "Энэхүү арилжааны дохиог үзэхийн туلد нэвтэрнэ үү!",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "តម្រូវឱ្យចូល",
-    "signInToExploreSignal": "សូមចូលក្នុងប្រព័ន្ធដើម្បីរុករកសញ្ញាជួញដូរនេះ!"
+    "signInToExploreSignal": "ចូលដើម្បីរុករកសញ្ញាជួញដូរនេះ!",
+    "activeMember": "សមាជិកសកម្ម",
+    "last7Days": "៧ ថ្ងៃចុងក្រោយ",
+    "last14Days": "១៤ ថ្ងៃចុងក្រោយ",
+    "last30Days": "៣០ ថ្ងៃចុងក្រោយ",
+    "last90Days": "៩០ ថ្ងៃចុងក្រោយ",
+    "profitStatistics": "ស្ថិតិប្រាក់ចំណេញ",
+    "winrateOfAllSignals": "អត្រាឈ្នះនៃសញ្ញាទាំងអស់",
+    "daily": "ប្រចាំថ្ងៃ",
+    "weekly": "ប្រចាំសប្តាហ៍",
+    "lossRate": "អត្រាខាតបង់",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

@@ -1369,5 +1369,50 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get signInToExploreSignal =>
-      'Masuk untuk menjelajahi sinyal trading ini!';
+      'Masuk untuk menjelajahi sinyal perdagangan ini!';
+
+  @override
+  String get activeMember => 'Anggota Aktif';
+
+  @override
+  String get last7Days => '7 hari terakhir';
+
+  @override
+  String get last14Days => '14 hari terakhir';
+
+  @override
+  String get last30Days => '30 hari terakhir';
+
+  @override
+  String get last90Days => '90 hari terakhir';
+
+  @override
+  String get profitStatistics => 'Statistik Keuntungan';
+
+  @override
+  String get winrateOfAllSignals => 'Tingkat kemenangan semua sinyal';
+
+  @override
+  String get daily => 'Harian';
+
+  @override
+  String get weekly => 'Mingguan';
+
+  @override
+  String get lossRate => 'Tingkat kerugian';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

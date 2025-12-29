@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "ต้องเข้าสู่ระบบ",
-    "signInToExploreSignal": "เข้าสู่ระบบเพื่อสำรวจสัญญาณการซื้อขายนี้!"
+    "signInToExploreSignal": "ลงชื่อเข้าใช้เพื่อสำรวจสัญญาณการซื้อขายนี้!",
+    "activeMember": "สมาชิกที่ใช้งานอยู่",
+    "last7Days": "7 วันที่ผ่านมา",
+    "last14Days": "14 วันที่ผ่านมา",
+    "last30Days": "30 วันที่ผ่านมา",
+    "last90Days": "90 วันที่ผ่านมา",
+    "profitStatistics": "สถิติกำไร",
+    "winrateOfAllSignals": "อัตราการชนะของสัญญาณทั้งหมด",
+    "daily": "รายวัน",
+    "weekly": "รายสัปดาห์",
+    "lossRate": "อัตราการขาดทุน",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

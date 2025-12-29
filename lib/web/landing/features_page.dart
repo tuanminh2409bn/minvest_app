@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:minvest_forex_app/web/theme/colors.dart';
 import 'package:minvest_forex_app/web/theme/spacing.dart';
@@ -12,6 +13,9 @@ import 'package:minvest_forex_app/web/theme/gradients.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 import 'package:minvest_forex_app/web/widgets/signal_history_table.dart';
+import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
+import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FeaturesPage extends StatelessWidget {
   const FeaturesPage({super.key});
@@ -647,24 +651,10 @@ class SmartToolsSection extends StatefulWidget {
 
 class _SmartToolsSectionState extends State<SmartToolsSection> with SingleTickerProviderStateMixin {
   bool _isFlipped = false;
+  int _pageIndex = 0;
   late AnimationController _flipController;
   late Animation<double> _frontAnimation;
   late Animation<double> _backAnimation;
-
-  final List<HistoryRow> _demoHistoryRows = List.generate(8, (index) {
-    return HistoryRow(
-      date: '28/10/2025',
-      time: '10:${10 + index}',
-      asset: index % 2 == 0 ? 'GOLD' : 'BTC/USDT',
-      order: index % 2 == 0 ? 'BUY' : 'SELL',
-      status: index % 3 == 0 ? 'TP1' : (index % 3 == 1 ? 'TP2' : 'SL'),
-      pips: index % 3 == 2 ? '-50' : '+120',
-      entry: '203${index}',
-      sl: '2020',
-      tp1: '2040',
-      tp2: '2050',
-    );
-  });
 
   @override
   void initState() {
@@ -682,6 +672,53 @@ class _SmartToolsSectionState extends State<SmartToolsSection> with SingleTicker
       TweenSequenceItem(tween: ConstantTween(math.pi / 2), weight: 50),
       TweenSequenceItem(tween: Tween(begin: math.pi / 2, end: 0.0), weight: 50),
     ]).animate(CurvedAnimation(parent: _flipController, curve: Curves.easeInOut));
+  }
+
+  HistoryRow _mapSignalToRow(Signal s) {
+    DateTime created = s.createdAt is Timestamp ? (s.createdAt as Timestamp).toDate() : DateTime.now();
+    // Default to GMT+7 for display consistency in this section
+    created = created.toUtc().add(const Duration(hours: 7));
+
+    final dateStr = DateFormat('dd/MM/yyyy').format(created);
+    final timeStr = DateFormat('HH:mm').format(created);
+    final parts = s.symbol.split('/');
+    final asset = parts.isNotEmpty ? (parts.first.toUpperCase() == 'XAU' ? 'GOLD' : parts.first.toUpperCase()) : s.symbol;
+    final order = s.type.toUpperCase();
+    final status = (s.result ?? s.status).toString();
+    final pips = s.pips != null ? (s.pips! >= 0 ? '+${s.pips}' : s.pips.toString()) : '-';
+
+    String _fmt(num? v) {
+      if (v == null) return '-';
+      if (v >= 1000) return v.toStringAsFixed(2);
+      if (v >= 100) return v.toStringAsFixed(3);
+      if (v >= 10) return v.toStringAsFixed(4);
+      return v.toStringAsFixed(5);
+    }
+
+    String _tp(int idx) {
+      if (s.takeProfits.length > idx) {
+        final v = s.takeProfits[idx];
+        if (v is num) return _fmt(v);
+        if (v is String) return v;
+      }
+      return '-';
+    }
+
+    return HistoryRow(
+      originalSignal: s,
+      date: dateStr,
+      time: timeStr,
+      asset: asset,
+      order: order,
+      status: status,
+      pips: pips,
+      entry: _fmt(s.entryPrice),
+      closedPrice: _fmt(s.closedPrice),
+      sl: _fmt(s.stopLoss),
+      tp1: _tp(0),
+      tp2: _tp(1),
+      tp3: _tp(2),
+    );
   }
 
   @override
@@ -942,7 +979,70 @@ class _SmartToolsSectionState extends State<SmartToolsSection> with SingleTicker
           ),
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: SignalHistoryTable(rows: _demoHistoryRows),
+            child: StreamBuilder<List<Signal>>(
+              stream: SignalService().getSignals(isLive: false, userTier: 'web', allowUnauthenticated: true, limit: 50),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Error loading data', style: TextStyle(color: Colors.white)));
+                }
+                final allSignals = snapshot.data ?? [];
+                if (allSignals.isEmpty) {
+                  return const Center(child: Text('No history available', style: TextStyle(color: Colors.white70)));
+                }
+
+                // Pagination Logic
+                const pageSize = 10;
+                final totalItems = allSignals.length;
+                final totalPages = (totalItems / pageSize).ceil();
+
+                // Ensure pageIndex is valid
+                if (_pageIndex >= totalPages) _pageIndex = 0;
+
+                final start = _pageIndex * pageSize;
+                final displayedSignals = allSignals.skip(start).take(pageSize).toList();
+
+                final rows = displayedSignals.map(_mapSignalToRow).toList();
+
+                return Column(
+                  children: [
+                    SignalHistoryTable(rows: rows),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.chevron_left, color: Colors.white),
+                          onPressed: _pageIndex > 0 ? () {
+                            setState(() {
+                              _pageIndex--;
+                            });
+                          } : null,
+                          disabledColor: Colors.white24,
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          '${_pageIndex + 1} / $totalPages',
+                          style: AppTextStyles.body.copyWith(color: Colors.white),
+                        ),
+                        const SizedBox(width: 16),
+                        IconButton(
+                          icon: const Icon(Icons.chevron_right, color: Colors.white),
+                          onPressed: _pageIndex < totalPages - 1 ? () {
+                            setState(() {
+                              _pageIndex++;
+                            });
+                          } : null,
+                          disabledColor: Colors.white24,
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ],

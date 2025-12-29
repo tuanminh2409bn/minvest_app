@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "ログインが必要です",
-    "signInToExploreSignal": "この取引シグナルを確認するにはログインしてください！"
+    "signInToExploreSignal": "サインインしてこの取引シグナルを探索してください！",
+    "activeMember": "アクティブメンバー",
+    "last7Days": "過去7日間",
+    "last14Days": "過去14日間",
+    "last30Days": "過去30日間",
+    "last90Days": "過去90日間",
+    "profitStatistics": "利益統計",
+    "winrateOfAllSignals": "全シグナルの勝率",
+    "daily": "毎日",
+    "weekly": "毎週",
+    "lossRate": "損失率",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

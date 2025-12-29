@@ -13,6 +13,7 @@ class SignalService {
     required String userTier,
     String? symbol,
     bool allowUnauthenticated = false,
+    int? limit,
   }) {
     if (_auth.currentUser == null && !allowUnauthenticated) {
       return Stream.value([]);
@@ -33,6 +34,8 @@ class SignalService {
 
     if (isLive && userTier == 'demo') {
       query = query.limit(20);
+    } else if (limit != null) {
+      query = query.limit(limit);
     }
 
     return query.snapshots().map((snapshot) {

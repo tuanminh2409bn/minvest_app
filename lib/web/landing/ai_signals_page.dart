@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
 import 'package:minvest_forex_app/features/signals/screens/signal_detail_screen_web.dart' as web_detail;
@@ -146,8 +147,13 @@ class _AISignalsPageState extends State<AISignalsPage> {
                             selectedTimezone: _selectedTimezone,
                             dateRange: _dateRange,
                           ),
-                        ] else if (selectedTab == AISignalsTab.performance) ...const [
-                          _PerformanceSection(),
+                        ] else if (selectedTab == AISignalsTab.performance) ...[
+                          _PerformanceSection(
+                            assetFilter: _assetFilter,
+                            selectedPair: _selectedCommodity,
+                            selectedTimezone: _selectedTimezone,
+                            dateRange: _dateRange,
+                          ),
                         ] else if (selectedTab == AISignalsTab.history) ...[
                           _HistorySection(
                             assetFilter: _assetFilter,
@@ -1939,140 +1945,346 @@ class _FlagStack extends StatelessWidget {
 }
 
 class _PerformanceSection extends StatefulWidget {
-  const _PerformanceSection();
+  final AssetFilter assetFilter;
+  final String selectedPair;
+  final String selectedTimezone;
+  final DateTimeRange? dateRange;
+
+  const _PerformanceSection({
+    required this.assetFilter,
+    required this.selectedPair,
+    required this.selectedTimezone,
+    required this.dateRange,
+  });
 
   @override
   State<_PerformanceSection> createState() => _PerformanceSectionState();
 }
 
 class _PerformanceSectionState extends State<_PerformanceSection> {
-  String _selectedTimeFilter = 'All Time';
-  final List<String> _timeFilters = [
-    'All Time',
-    'Last 7 days',
-    'Last 14 days',
-    'Last 30 days',
-    'Last 90 days'
-  ];
+  int _selectedFilterIndex = 0; // 0: All Time, 1: 7D, 2: 14D, 3: 30D, 4: 90D
+
+  bool _isGold(Signal s) => s.symbol.toUpperCase().contains('XAU');
+  bool _isCrypto(Signal s) {
+    final sym = s.symbol.toUpperCase();
+    return sym.contains('BTC') || sym.contains('ETH') || sym.contains('BNB') || sym.contains('USDT') || sym.contains('CRYPTO');
+  }
+  bool _isForex(Signal s) {
+    final sym = s.symbol.toUpperCase();
+    return sym.contains('/') && !sym.contains('XAU') && !_isCrypto(s);
+  }
+
+  List<Signal> _applyFilters(List<Signal> signals) {
+    // 1. Parent Filters (Asset, Pair, DateRange)
+    Iterable<Signal> filtered = signals;
+    
+    // Filter by Asset Type
+    switch (widget.assetFilter) {
+      case AssetFilter.gold:
+        filtered = filtered.where(_isGold);
+        break;
+      case AssetFilter.crypto:
+        filtered = filtered.where(_isCrypto);
+        break;
+      case AssetFilter.forex:
+        filtered = filtered.where(_isForex);
+        break;
+      case AssetFilter.all:
+        break;
+    }
+
+    // Filter by Specific Pair
+    if (widget.selectedPair != 'All Commodities' && 
+        widget.selectedPair != 'All Currency Pairs' &&
+        widget.selectedPair != 'All Crypto Pairs') {
+      filtered = filtered.where((s) => s.symbol == widget.selectedPair);
+    }
+
+    // Filter by Parent Date Range
+    if (widget.dateRange != null) {
+      final start = widget.dateRange!.start;
+      final end = widget.dateRange!.end.add(const Duration(days: 1));
+      filtered = filtered.where((s) {
+        if (s.createdAt is! Timestamp) return false;
+        final dt = (s.createdAt as Timestamp).toDate();
+        return dt.isAfter(start) && dt.isBefore(end);
+      });
+    }
+
+    // 2. Local Time Filter (All Time, 7D, 30D, etc.) - Only applies if Parent Date Range is null
+    if (widget.dateRange == null && _selectedFilterIndex > 0) {
+      final now = DateTime.now();
+      final Duration lookback;
+      switch (_selectedFilterIndex) {
+        case 1: lookback = const Duration(days: 7); break;
+        case 2: lookback = const Duration(days: 14); break;
+        case 3: lookback = const Duration(days: 30); break;
+        case 4: lookback = const Duration(days: 90); break;
+        default: lookback = Duration.zero;
+      }
+      final start = now.subtract(lookback);
+      filtered = filtered.where((s) {
+        if (s.createdAt is! Timestamp) return false;
+        final dt = (s.createdAt as Timestamp).toDate();
+        return dt.isAfter(start);
+      });
+    }
+
+    return filtered.toList();
+  }
+
+  Map<String, dynamic> _calculateStats(List<Signal> signals) {
+    if (signals.isEmpty) {
+      return {
+        'totalPips': 0.0,
+        'count': 0,
+        'winRate': 0.0,
+        'chartData': <_ChartPoint>[],
+        'distribution': <_DistributionBarData>[],
+      };
+    }
+
+    double totalPips = 0;
+    int wins = 0;
+    
+    // For Distribution Chart
+    int goldCount = 0; int goldWins = 0;
+    int cryptoCount = 0; int cryptoWins = 0;
+    int forexCount = 0; int forexWins = 0;
+
+    // For Profit Chart (Cumulative)
+    // Sort by date ascending
+    signals.sort((a, b) => (a.createdAt as Timestamp).compareTo(b.createdAt as Timestamp));
+    
+    List<_ChartPoint> chartPoints = [];
+    double runningPips = 0;
+
+    for (var s in signals) {
+      final pips = (s.pips ?? 0).toDouble();
+      totalPips += pips;
+      
+      if (pips > 0) wins++;
+
+      // Distribution stats
+      if (_isGold(s)) {
+        goldCount++;
+        if (pips > 0) goldWins++;
+      } else if (_isCrypto(s)) {
+        cryptoCount++;
+        if (pips > 0) cryptoWins++;
+      } else {
+        forexCount++;
+        if (pips > 0) forexWins++;
+      }
+
+      runningPips += pips;
+      final date = (s.createdAt as Timestamp).toDate();
+      // Simple daily aggregation for chart points could be done here, 
+      // but for now let's just add all points and let the chart handle or subsample.
+      // To avoid too many points, we can group by day.
+      if (chartPoints.isEmpty || 
+          !DateUtils.isSameDay(chartPoints.last.date, date)) {
+        chartPoints.add(_ChartPoint(date: date, value: runningPips));
+      } else {
+        // Update the last point for the same day with the new cumulative value
+        chartPoints.last = _ChartPoint(date: date, value: runningPips);
+      }
+    }
+
+    double winRate = signals.isNotEmpty ? (wins / signals.length) * 100 : 0;
+
+    // Prepare Distribution Data
+    List<_DistributionBarData> distribution = [];
+    if (goldCount > 0) distribution.add(_DistributionBarData(label: 'Gold', value: goldCount.toDouble(), winRate: goldWins / goldCount));
+    if (cryptoCount > 0) distribution.add(_DistributionBarData(label: 'Crypto', value: cryptoCount.toDouble(), winRate: cryptoWins / cryptoCount));
+    if (forexCount > 0) distribution.add(_DistributionBarData(label: 'Forex', value: forexCount.toDouble(), winRate: forexWins / forexCount));
+
+    return {
+      'totalPips': totalPips,
+      'count': signals.length,
+      'winRate': winRate,
+      'chartData': chartPoints,
+      'distribution': distribution,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth > 900;
-        final gap = 32.0;
-        // Calculate widths
-        final columnWidth = isDesktop 
-            ? (constraints.maxWidth - gap) / 2 
-            : constraints.maxWidth;
-        
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final l10n = AppLocalizations.of(context)!;
+    final timeFilters = [
+      l10n.allTime,
+      l10n.last7Days,
+      l10n.last14Days,
+      l10n.last30Days,
+      l10n.last90Days,
+    ];
+
+    return StreamBuilder<List<Signal>>(
+      // Only fetch completed signals (not live)
+      stream: SignalService().getSignals(isLive: false, userTier: 'web', allowUnauthenticated: true),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+           return const SizedBox(
+             height: 400, 
+             child: Center(child: CircularProgressIndicator())
+           );
+        }
+
+        if (snapshot.hasError) {
+          return SizedBox(
+             height: 400, 
+             child: Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)))
+           );
+        }
+
+        final allSignals = snapshot.data ?? [];
+        final filteredSignals = _applyFilters(allSignals);
+        final stats = _calculateStats(filteredSignals);
+
+        final totalPips = stats['totalPips'] as double;
+        final count = stats['count'] as int;
+        final winRate = stats['winRate'] as double;
+        final chartData = stats['chartData'] as List<_ChartPoint>;
+        final distribution = stats['distribution'] as List<_DistributionBarData>;
+
+        // Format Pips
+        final pipsFormatter = NumberFormat('#,##0.0', 'en_US');
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isDesktop = constraints.maxWidth > 900;
+            final gap = 32.0;
+            final columnWidth = isDesktop 
+                ? (constraints.maxWidth - gap) / 2 
+                : constraints.maxWidth;
+            
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  AppLocalizations.of(context)!.performanceOverview,
-                  style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.performanceOverview,
+                      style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                    ),
+                    // Only show time filter if no custom date range is selected
+                    if (widget.dateRange == null)
+                      _buildTimeFilterDropdown(timeFilters),
+                  ],
                 ),
-                _buildTimeFilterDropdown(),
+                const SizedBox(height: 24),
+                if (isDesktop)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Left Column: Profit Metrics + Profit Chart
+                      SizedBox(
+                        width: columnWidth,
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _MetricCard(
+                                    title: l10n.totalProfitPips,
+                                    value: pipsFormatter.format(totalPips),
+                                    valueColor: totalPips >= 0 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _MetricCard(
+                                    title: l10n.completionSignal,
+                                    value: count.toString(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            _ProfitChart(data: chartData),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: gap),
+                      // Right Column: Win/Member Metrics + Distribution Chart
+                      SizedBox(
+                        width: columnWidth,
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _MetricCard(
+                                    title: l10n.winRatePercent,
+                                    value: '${winRate.toStringAsFixed(1)}%',
+                                    valueColor: winRate >= 50 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _MetricCard(
+                                    title: l10n.activeMember, // Keeping this static or fetch from another source
+                                    value: '+10,500', // Placeholder as requested to focus on signals
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            _DistributionChart(data: distribution),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Column(
+                    children: [
+                       Row(
+                        children: [
+                          Expanded(
+                            child: _MetricCard(
+                              title: l10n.totalProfitPips, 
+                              value: pipsFormatter.format(totalPips),
+                              valueColor: totalPips >= 0 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
+                            )
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(child: _MetricCard(title: l10n.completionSignal, value: count.toString())),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                       Row(
+                        children: [
+                          Expanded(
+                            child: _MetricCard(
+                              title: l10n.winRatePercent, 
+                              value: '${winRate.toStringAsFixed(1)}%',
+                              valueColor: winRate >= 50 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
+                            )
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(child: _MetricCard(title: l10n.activeMember, value: '+10,500')),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      _ProfitChart(data: chartData),
+                      const SizedBox(height: 24),
+                      _DistributionChart(data: distribution),
+                    ],
+                  ),
               ],
-            ),
-            const SizedBox(height: 24),
-            if (isDesktop)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Left Column: Profit Metrics + Profit Chart
-                  SizedBox(
-                    width: columnWidth,
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _MetricCard(
-                                title: AppLocalizations.of(context)!.totalProfitPips,
-                                value: '9,250.8',
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _MetricCard(
-                                title: AppLocalizations.of(context)!.completionSignal,
-                                value: '507',
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        const _ProfitChart(),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: gap),
-                  // Right Column: Win/Member Metrics + Distribution Chart
-                  SizedBox(
-                    width: columnWidth,
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _MetricCard(
-                                title: AppLocalizations.of(context)!.winRatePercent,
-                                value: '62.7',
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _MetricCard(
-                                title: 'Active Member', // You might want to add this to localization later
-                                value: '+10,566',
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        const _DistributionChart(),
-                      ],
-                    ),
-                  ),
-                ],
-              )
-            else
-              Column(
-                children: [
-                   Row(
-                    children: [
-                      Expanded(child: _MetricCard(title: AppLocalizations.of(context)!.totalProfitPips, value: '9,250.8')),
-                      const SizedBox(width: 16),
-                      Expanded(child: _MetricCard(title: AppLocalizations.of(context)!.completionSignal, value: '507')),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const _ProfitChart(),
-                  const SizedBox(height: 24),
-                   Row(
-                    children: [
-                      Expanded(child: _MetricCard(title: AppLocalizations.of(context)!.winRatePercent, value: '62.7')),
-                      const SizedBox(width: 16),
-                      Expanded(child: _MetricCard(title: 'Active Member', value: '+10,566')),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const _DistributionChart(),
-                ],
-              ),
-          ],
+            );
+          },
         );
-      },
+      }
     );
   }
 
-  Widget _buildTimeFilterDropdown() {
+  Widget _buildTimeFilterDropdown(List<String> filters) {
+    if (_selectedFilterIndex >= filters.length) _selectedFilterIndex = 0;
+
     return Container(
       height: 36,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -2082,19 +2294,19 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
         border: Border.all(color: Colors.white12),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedTimeFilter,
+        child: DropdownButton<int>(
+          value: _selectedFilterIndex,
           dropdownColor: const Color(0xFF0D0D0D),
           icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 16),
           style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 13),
-          items: _timeFilters.map((filter) {
-            return DropdownMenuItem<String>(
-              value: filter,
-              child: Text(filter),
+          items: List.generate(filters.length, (index) {
+            return DropdownMenuItem<int>(
+              value: index,
+              child: Text(filters[index]),
             );
-          }).toList(),
+          }),
           onChanged: (v) {
-            if (v != null) setState(() => _selectedTimeFilter = v);
+            if (v != null) setState(() => _selectedFilterIndex = v);
           },
         ),
       ),
@@ -2105,12 +2317,12 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
 class _MetricCard extends StatelessWidget {
   final String title;
   final String value;
-  const _MetricCard({required this.title, required this.value});
+  final Color? valueColor;
+  const _MetricCard({required this.title, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Removed fixed width: 360
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
         color: const Color(0xFF0F0F0F),
@@ -2129,7 +2341,10 @@ class _MetricCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: AppTextStyles.h1.copyWith(color: const Color(0xFF1DA1F2), fontSize: 26), // Adjusted font size slightly
+            style: AppTextStyles.h1.copyWith(
+              color: valueColor ?? const Color(0xFF1DA1F2), 
+              fontSize: 26
+            ),
           ),
         ],
       ),
@@ -2137,18 +2352,37 @@ class _MetricCard extends StatelessWidget {
   }
 }
 
+class _ChartPoint {
+  final DateTime date;
+  final double value;
+  _ChartPoint({required this.date, required this.value});
+}
+
 class _ProfitChart extends StatefulWidget {
-  const _ProfitChart();
+  final List<_ChartPoint> data;
+  const _ProfitChart({required this.data});
 
   @override
   State<_ProfitChart> createState() => _ProfitChartState();
 }
 
 class _ProfitChartState extends State<_ProfitChart> {
-  String _selectedPeriod = 'Daily';
+  // 0: Daily, 1: Weekly, 2: Monthly
+  int _selectedPeriodIndex = 0;
+
+  List<_ChartPoint> _processData() {
+    // Basic aggregation based on period could go here
+    // For now, we use the passed data which is daily cumulative
+    // If the dataset is large, we should subsample here based on _selectedPeriodIndex
+    return widget.data;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final periods = [l10n.daily, l10n.weekly, l10n.monthly];
+    final processedData = _processData();
+
     return Container(
       width: double.infinity,
       height: 340,
@@ -2165,14 +2399,14 @@ class _ProfitChartState extends State<_ProfitChart> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Profit Statistics',
+                l10n.profitStatistics,
                 style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
               ),
               Row(
-                children: ['Daily', 'Weekly', 'Monthly'].map((period) {
-                  final isSelected = _selectedPeriod == period;
+                children: List.generate(periods.length, (index) {
+                  final isSelected = _selectedPeriodIndex == index;
                   return GestureDetector(
-                    onTap: () => setState(() => _selectedPeriod = period),
+                    onTap: () => setState(() => _selectedPeriodIndex = index),
                     child: Container(
                       margin: const EdgeInsets.only(left: 8),
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -2182,7 +2416,7 @@ class _ProfitChartState extends State<_ProfitChart> {
                         border: isSelected ? Border.all(color: Colors.white12) : null,
                       ),
                       child: Text(
-                        period,
+                        periods[index],
                         style: AppTextStyles.caption.copyWith(
                           color: isSelected ? Colors.white : Colors.white54,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -2191,16 +2425,18 @@ class _ProfitChartState extends State<_ProfitChart> {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
               ),
             ],
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: CustomPaint(
-              painter: _LineChartPainter(),
-              child: Container(),
-            ),
+            child: processedData.isEmpty 
+              ? Center(child: Text(l10n.noSignalsAvailable, style: const TextStyle(color: Colors.white54)))
+              : CustomPaint(
+                  painter: _LineChartPainter(data: processedData),
+                  child: Container(),
+                ),
           ),
         ],
       ),
@@ -2209,16 +2445,29 @@ class _ProfitChartState extends State<_ProfitChart> {
 }
 
 class _DistributionChart extends StatelessWidget {
-  const _DistributionChart();
+  final List<_DistributionBarData> data;
+  const _DistributionChart({required this.data});
 
   @override
   Widget build(BuildContext context) {
-    const bars = [
-      _DistributionBarData(label: 'Crypto', value: 6000, winRate: 0.65), // 65% Win
-      _DistributionBarData(label: 'Gold', value: 3000, winRate: 0.58),   // 58% Win
-      _DistributionBarData(label: 'Forex', value: 1200, winRate: 0.72),  // 72% Win
-    ];
-    final maxValue = bars.map((b) => b.value).reduce((a, b) => a > b ? a : b);
+    final l10n = AppLocalizations.of(context)!;
+    final isMobile = MediaQuery.of(context).size.width < Breakpoints.tablet;
+    final widthFactor = isMobile ? 0.45 : 0.30;
+    
+    if (data.isEmpty) {
+       return Container(
+        width: double.infinity,
+        height: 340,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B0D14),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Center(child: Text(l10n.noSignalsAvailable, style: const TextStyle(color: Colors.white54))),
+      );
+    }
+
+    final maxValue = data.map((b) => b.value).reduce((a, b) => a > b ? a : b);
     
     // Create grid steps (5 lines: 0%, 25%, 50%, 75%, 100%)
     final gridSteps = [1.0, 0.75, 0.5, 0.25, 0.0];
@@ -2236,7 +2485,7 @@ class _DistributionChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Winrate of all signals',
+            l10n.winrateOfAllSignals,
              style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 20),
@@ -2276,8 +2525,8 @@ class _DistributionChart extends StatelessWidget {
                         padding: const EdgeInsets.only(left: 43), // Offset for labels
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
-                          children: bars.map((bar) {
-                            final heightFactor = bar.value / maxValue;
+                          children: data.map((bar) {
+                            final heightFactor = maxValue > 0 ? bar.value / maxValue : 0.0;
                             return Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -2289,7 +2538,7 @@ class _DistributionChart extends StatelessWidget {
                                         alignment: Alignment.bottomCenter,
                                         child: FractionallySizedBox(
                                           heightFactor: heightFactor,
-                                          widthFactor: 0.45,
+                                          widthFactor: widthFactor,
                                           child: Container(
                                             decoration: BoxDecoration(
                                               borderRadius: BorderRadius.circular(4),
@@ -2335,9 +2584,9 @@ class _DistributionChart extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _LegendItem(color: const Color(0xFF1DA1F2), label: 'Win Rate'),
+                    _LegendItem(color: const Color(0xFF1DA1F2), label: l10n.winRate),
                     const SizedBox(width: 24),
-                    _LegendItem(color: const Color(0xFFE54747), label: 'Loss Rate'),
+                    _LegendItem(color: const Color(0xFFE54747), label: l10n.lossRate),
                   ],
                 )
               ],
@@ -2374,9 +2623,11 @@ class _LegendItem extends StatelessWidget {
 }
 
 class _LineChartPainter extends CustomPainter {
+  final List<_ChartPoint> data;
+  _LineChartPainter({required this.data});
+
   @override
   void paint(Canvas canvas, Size size) {
-    // Define chart area (leaving space for labels)
     const double leftPadding = 40.0;
     const double bottomPadding = 20.0;
     final chartRect = Rect.fromLTWH(
@@ -2403,63 +2654,76 @@ class _LineChartPainter extends CustomPainter {
         end: Alignment.bottomCenter,
       ).createShader(chartRect);
 
+    // Calculate Min/Max for Scaling
+    double minVal = 0;
+    double maxVal = 100;
+    if (data.isNotEmpty) {
+      minVal = data.map((e) => e.value).reduce(math.min);
+      maxVal = data.map((e) => e.value).reduce(math.max);
+      // Add padding
+      final range = maxVal - minVal;
+      maxVal += range * 0.1;
+      minVal -= range * 0.1;
+    }
+    if (maxVal == minVal) maxVal += 100;
+
     // Draw Grid & Y-Axis Labels
     const gridCount = 5;
-    const maxVal = 10000;
-    
     final textStyle = const TextStyle(color: Colors.white24, fontSize: 10);
 
     for (int i = 0; i <= gridCount; i++) {
-      final y = chartRect.top + (chartRect.height / gridCount * i);
-      // Draw Line
+      final y = chartRect.bottom - (chartRect.height / gridCount * i);
       canvas.drawLine(Offset(chartRect.left, y), Offset(chartRect.right, y), paintGrid);
 
-      // Draw Label
-      final value = (maxVal - (maxVal / gridCount * i)).toInt();
-      final textSpan = TextSpan(text: value == 0 ? '0' : '${value ~/ 1000}k', style: textStyle);
+      final value = minVal + ((maxVal - minVal) / gridCount * i);
+      final textSpan = TextSpan(text: value.toInt().toString(), style: textStyle);
       final textPainter = TextPainter(text: textSpan, textDirection: ui.TextDirection.ltr);
       textPainter.layout();
       textPainter.paint(canvas, Offset(0, y - textPainter.height / 2));
     }
 
-    // Draw X-Axis Labels (Sample dates)
-    final xLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    for (int i = 0; i < xLabels.length; i++) {
-      final x = chartRect.left + (chartRect.width / (xLabels.length - 1) * i);
-      final textSpan = TextSpan(text: xLabels[i], style: textStyle);
-      final textPainter = TextPainter(text: textSpan, textDirection: ui.TextDirection.ltr);
-      textPainter.layout();
-      textPainter.paint(canvas, Offset(x - textPainter.width / 2, size.height - textPainter.height));
+    // Draw X-Axis Labels (First and Last date)
+    if (data.isNotEmpty) {
+        final firstDate = DateFormat('MM/dd').format(data.first.date);
+        final lastDate = DateFormat('MM/dd').format(data.last.date);
+        
+        // Draw First
+        final tpFirst = TextPainter(text: TextSpan(text: firstDate, style: textStyle), textDirection: ui.TextDirection.ltr)..layout();
+        tpFirst.paint(canvas, Offset(chartRect.left, size.height - tpFirst.height));
+
+        // Draw Last
+        final tpLast = TextPainter(text: TextSpan(text: lastDate, style: textStyle), textDirection: ui.TextDirection.ltr)..layout();
+        tpLast.paint(canvas, Offset(chartRect.right - tpLast.width, size.height - tpLast.height));
     }
 
-    // Draw Data Line (Sample curve)
-    final points = [
-      Offset(chartRect.left, chartRect.bottom - (chartRect.height * 0.1)),
-      Offset(chartRect.left + chartRect.width * 0.1, chartRect.bottom - (chartRect.height * 0.15)),
-      Offset(chartRect.left + chartRect.width * 0.25, chartRect.bottom - (chartRect.height * 0.4)),
-      Offset(chartRect.left + chartRect.width * 0.4, chartRect.bottom - (chartRect.height * 0.35)),
-      Offset(chartRect.left + chartRect.width * 0.55, chartRect.bottom - (chartRect.height * 0.6)),
-      Offset(chartRect.left + chartRect.width * 0.7, chartRect.bottom - (chartRect.height * 0.55)),
-      Offset(chartRect.left + chartRect.width * 0.85, chartRect.bottom - (chartRect.height * 0.8)),
-      Offset(chartRect.right, chartRect.bottom - (chartRect.height * 0.75)),
-    ];
+    // Draw Line Path
+    if (data.isNotEmpty) {
+      final path = Path();
+      for (int i = 0; i < data.length; i++) {
+        final x = chartRect.left + (chartRect.width * (i / (data.length - 1)));
+        // Normalize value to height
+        final normalizedValue = (data[i].value - minVal) / (maxVal - minVal);
+        final y = chartRect.bottom - (normalizedValue * chartRect.height);
+        
+        if (i == 0) {
+          path.moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
+        }
+      }
 
-    final path = Path()..moveTo(points.first.dx, points.first.dy);
-    for (int i = 1; i < points.length; i++) {
-      path.lineTo(points[i].dx, points[i].dy);
+      final fillPath = Path.from(path)
+        ..lineTo(chartRect.right, chartRect.bottom)
+        ..lineTo(chartRect.left, chartRect.bottom)
+        ..close();
+
+      canvas.drawPath(fillPath, paintFill);
+      canvas.drawPath(path, paintLine);
     }
-
-    final fillPath = Path.from(path)
-      ..lineTo(chartRect.right, chartRect.bottom)
-      ..lineTo(chartRect.left, chartRect.bottom)
-      ..close();
-
-    canvas.drawPath(fillPath, paintFill);
-    canvas.drawPath(path, paintLine);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 class _DistributionBarData {
@@ -2524,8 +2788,20 @@ class _HistorySectionState extends State<_HistorySection> {
   }
 
   List<HistoryRow> _sampleRows() {
+    final dummySignal = Signal(
+        id: 'dummy',
+        symbol: 'XAU/USD',
+        type: 'buy',
+        status: 'closed',
+        entryPrice: 0,
+        stopLoss: 0,
+        takeProfits: [],
+        createdAt: Timestamp.now(),
+        matchStatus: 'MATCHED'
+    );
     return List.generate(8, (index) {
       return HistoryRow(
+        originalSignal: dummySignal,
         date: '28/10/2025',
         time: '10:1$index',
         asset: 'GOLD',
@@ -2533,9 +2809,11 @@ class _HistorySectionState extends State<_HistorySection> {
         status: index.isEven ? 'TP1' : 'SL',
         pips: index.isEven ? '+180' : '-170',
         entry: '4011',
+        closedPrice: index.isEven ? '4029' : '3994', // Added sample closedPrice
         sl: '3998',
         tp1: '4000',
         tp2: '3995',
+        tp3: '4005',
       );
     });
   }
@@ -2606,19 +2884,17 @@ class _HistorySectionState extends State<_HistorySection> {
             final waiting = snapshot.connectionState == ConnectionState.waiting;
             final hasError = snapshot.hasError;
             final signals = snapshot.data ?? [];
-            if (FirebaseAuth.instance.currentUser == null) {
-              rows.addAll(_sampleRows());
-            } else {
-              if (waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (hasError) {
-                return Text('${AppLocalizations.of(context)!.errorLoadingHistory}: ${snapshot.error}', style: AppTextStyles.body.copyWith(color: Colors.white));
-              }
-              
-              final filtered = _filteredSignals(signals);
-              rows.addAll(filtered.map((s) => _mapSignalToRow(s, widget.selectedTimezone)));
+            
+            if (waiting) {
+              return const Center(child: CircularProgressIndicator());
             }
+            if (hasError) {
+              return Text('${AppLocalizations.of(context)!.errorLoadingHistory}: ${snapshot.error}', style: AppTextStyles.body.copyWith(color: Colors.white));
+            }
+            
+            final filtered = _filteredSignals(signals);
+            rows.addAll(filtered.map((s) => _mapSignalToRow(s, widget.selectedTimezone)));
+            
             if (rows.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24),
@@ -2702,6 +2978,7 @@ HistoryRow _mapSignalToRow(Signal s, String timeZone) {
   }
 
   return HistoryRow(
+    originalSignal: s,
     date: dateStr,
     time: timeStr,
     asset: asset,
@@ -2709,8 +2986,10 @@ HistoryRow _mapSignalToRow(Signal s, String timeZone) {
     status: status,
     pips: pips,
     entry: _fmt(s.entryPrice),
+    closedPrice: _fmt(s.closedPrice), // Mapped closedPrice
     sl: _fmt(s.stopLoss),
     tp1: _tp(0),
     tp2: _tp(1),
+    tp3: _tp(2),
   );
 }

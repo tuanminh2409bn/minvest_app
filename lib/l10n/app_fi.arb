@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "Kirjautuminen vaaditaan",
-    "signInToExploreSignal": "Kirjaudu sisään tutkiaksesi tätä kaupankäyntisignaalia!"
+    "signInToExploreSignal": "Kirjaudu sisään tutkiaksesi tätä kaupankäyntisignaalia!",
+    "activeMember": "Aktiivinen jäsen",
+    "last7Days": "Viimeiset 7 päivää",
+    "last14Days": "Viimeiset 14 päivää",
+    "last30Days": "Viimeiset 30 päivää",
+    "last90Days": "Viimeiset 90 päivää",
+    "profitStatistics": "Voittotilastot",
+    "winrateOfAllSignals": "Kaikkien signaalien voittoprosentti",
+    "daily": "Päivittäin",
+    "weekly": "Viikoittain",
+    "lossRate": "Tappioprosentti",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

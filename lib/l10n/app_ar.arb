@@ -462,5 +462,20 @@
     },
     "reauthFailed": "Incorrect current password",
     "signInRequired": "تسجيل الدخول مطلوب",
-    "signInToExploreSignal": "قم بتسجيل الدخول لاستكشاف إشارة التداول هذه!"
+    "signInToExploreSignal": "قم بتسجيل الدخول لاستكشاف إشارة التداول هذه!",
+    "activeMember": "عضو نشط",
+    "last7Days": "آخر 7 أيام",
+    "last14Days": "آخر 14 يومًا",
+    "last30Days": "آخر 30 يومًا",
+    "last90Days": "آخر 90 يومًا",
+    "profitStatistics": "إحصائيات الربح",
+    "winrateOfAllSignals": "معدل فوز جميع الإشارات",
+    "daily": "يومي",
+    "weekly": "أسبوعي",
+    "lossRate": "معدل الخسارة",
+    "signalProgress": "Signal Progress",
+    "statusHistory": "Status History",
+    "signalCreated": "Signal Created",
+    "signalMatched": "Signal Matched",
+    "targetReached": "Target reached"
 }

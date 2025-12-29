@@ -1363,6 +1363,50 @@ class AppLocalizationsKm extends AppLocalizations {
   String get signInRequired => 'តម្រូវឱ្យចូល';
 
   @override
-  String get signInToExploreSignal =>
-      'សូមចូលក្នុងប្រព័ន្ធដើម្បីរុករកសញ្ញាជួញដូរនេះ!';
+  String get signInToExploreSignal => 'ចូលដើម្បីរុករកសញ្ញាជួញដូរនេះ!';
+
+  @override
+  String get activeMember => 'សមាជិកសកម្ម';
+
+  @override
+  String get last7Days => '៧ ថ្ងៃចុងក្រោយ';
+
+  @override
+  String get last14Days => '១៤ ថ្ងៃចុងក្រោយ';
+
+  @override
+  String get last30Days => '៣០ ថ្ងៃចុងក្រោយ';
+
+  @override
+  String get last90Days => '៩០ ថ្ងៃចុងក្រោយ';
+
+  @override
+  String get profitStatistics => 'ស្ថិតិប្រាក់ចំណេញ';
+
+  @override
+  String get winrateOfAllSignals => 'អត្រាឈ្នះនៃសញ្ញាទាំងអស់';
+
+  @override
+  String get daily => 'ប្រចាំថ្ងៃ';
+
+  @override
+  String get weekly => 'ប្រចាំសប្តាហ៍';
+
+  @override
+  String get lossRate => 'អត្រាខាតបង់';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }

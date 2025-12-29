@@ -1384,4 +1384,49 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get signInToExploreSignal =>
       'Conectați-vă pentru a explora acest semnal de tranzacționare!';
+
+  @override
+  String get activeMember => 'Membru activ';
+
+  @override
+  String get last7Days => 'Ultimele 7 zile';
+
+  @override
+  String get last14Days => 'Ultimele 14 zile';
+
+  @override
+  String get last30Days => 'Ultimele 30 de zile';
+
+  @override
+  String get last90Days => 'Ultimele 90 de zile';
+
+  @override
+  String get profitStatistics => 'Statistici profit';
+
+  @override
+  String get winrateOfAllSignals => 'Rata de câștig a tuturor semnalelor';
+
+  @override
+  String get daily => 'Zilnic';
+
+  @override
+  String get weekly => 'Săptămânal';
+
+  @override
+  String get lossRate => 'Rata pierderilor';
+
+  @override
+  String get signalProgress => 'Signal Progress';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get signalCreated => 'Signal Created';
+
+  @override
+  String get signalMatched => 'Signal Matched';
+
+  @override
+  String get targetReached => 'Target reached';
 }
