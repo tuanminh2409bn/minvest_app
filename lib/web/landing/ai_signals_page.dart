@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
 import 'package:minvest_forex_app/features/signals/screens/signal_detail_screen_web.dart' as web_detail;
@@ -1937,44 +1938,166 @@ class _FlagStack extends StatelessWidget {
   }
 }
 
-class _PerformanceSection extends StatelessWidget {
+class _PerformanceSection extends StatefulWidget {
   const _PerformanceSection();
 
   @override
+  State<_PerformanceSection> createState() => _PerformanceSectionState();
+}
+
+class _PerformanceSectionState extends State<_PerformanceSection> {
+  String _selectedTimeFilter = 'All Time';
+  final List<String> _timeFilters = [
+    'All Time',
+    'Last 7 days',
+    'Last 14 days',
+    'Last 30 days',
+    'Last 90 days'
+  ];
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        Text(
-          AppLocalizations.of(context)!.performanceOverview,
-          style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 16,
-          runSpacing: 12,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth > 900;
+        final gap = 32.0;
+        // Calculate widths
+        final columnWidth = isDesktop 
+            ? (constraints.maxWidth - gap) / 2 
+            : constraints.maxWidth;
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _MetricCard(title: AppLocalizations.of(context)!.totalProfitPips, value: '9,250.8'),
-            _MetricCard(title: AppLocalizations.of(context)!.completionSignal, value: '507'),
-            _MetricCard(title: AppLocalizations.of(context)!.winRatePercent, value: '62.7'),
-          ],
-        ),
-        const SizedBox(height: 24),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final itemWidth = (constraints.maxWidth - 16) / 2;
-            return Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: const [
-                _ProfitChart(),
-                _DistributionChart(),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.performanceOverview,
+                  style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                ),
+                _buildTimeFilterDropdown(),
               ],
+            ),
+            const SizedBox(height: 24),
+            if (isDesktop)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left Column: Profit Metrics + Profit Chart
+                  SizedBox(
+                    width: columnWidth,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _MetricCard(
+                                title: AppLocalizations.of(context)!.totalProfitPips,
+                                value: '9,250.8',
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _MetricCard(
+                                title: AppLocalizations.of(context)!.completionSignal,
+                                value: '507',
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const _ProfitChart(),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: gap),
+                  // Right Column: Win/Member Metrics + Distribution Chart
+                  SizedBox(
+                    width: columnWidth,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _MetricCard(
+                                title: AppLocalizations.of(context)!.winRatePercent,
+                                value: '62.7',
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _MetricCard(
+                                title: 'Active Member', // You might want to add this to localization later
+                                value: '+10,566',
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const _DistributionChart(),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            else
+              Column(
+                children: [
+                   Row(
+                    children: [
+                      Expanded(child: _MetricCard(title: AppLocalizations.of(context)!.totalProfitPips, value: '9,250.8')),
+                      const SizedBox(width: 16),
+                      Expanded(child: _MetricCard(title: AppLocalizations.of(context)!.completionSignal, value: '507')),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const _ProfitChart(),
+                  const SizedBox(height: 24),
+                   Row(
+                    children: [
+                      Expanded(child: _MetricCard(title: AppLocalizations.of(context)!.winRatePercent, value: '62.7')),
+                      const SizedBox(width: 16),
+                      Expanded(child: _MetricCard(title: 'Active Member', value: '+10,566')),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const _DistributionChart(),
+                ],
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildTimeFilterDropdown() {
+    return Container(
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D0D0D),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedTimeFilter,
+          dropdownColor: const Color(0xFF0D0D0D),
+          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 16),
+          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 13),
+          items: _timeFilters.map((filter) {
+            return DropdownMenuItem<String>(
+              value: filter,
+              child: Text(filter),
             );
+          }).toList(),
+          onChanged: (v) {
+            if (v != null) setState(() => _selectedTimeFilter = v);
           },
         ),
-      ],
+      ),
     );
   }
 }
@@ -1987,7 +2110,7 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 360,
+      // Removed fixed width: 360
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
         color: const Color(0xFF0F0F0F),
@@ -2000,11 +2123,13 @@ class _MetricCard extends StatelessWidget {
           Text(
             title,
             style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
           Text(
             value,
-            style: AppTextStyles.h1.copyWith(color: const Color(0xFF1DA1F2), fontSize: 30),
+            style: AppTextStyles.h1.copyWith(color: const Color(0xFF1DA1F2), fontSize: 26), // Adjusted font size slightly
           ),
         ],
       ),
@@ -2012,13 +2137,20 @@ class _MetricCard extends StatelessWidget {
   }
 }
 
-class _ProfitChart extends StatelessWidget {
+class _ProfitChart extends StatefulWidget {
   const _ProfitChart();
+
+  @override
+  State<_ProfitChart> createState() => _ProfitChartState();
+}
+
+class _ProfitChartState extends State<_ProfitChart> {
+  String _selectedPeriod = 'Daily';
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 560,
+      width: double.infinity,
       height: 340,
       decoration: BoxDecoration(
         color: const Color(0xFF0B0D14),
@@ -2026,9 +2158,51 @@ class _ProfitChart extends StatelessWidget {
         border: Border.all(color: Colors.white12),
       ),
       padding: const EdgeInsets.all(16),
-      child: CustomPaint(
-        painter: _LineChartPainter(),
-        child: Container(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Profit Statistics',
+                style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              Row(
+                children: ['Daily', 'Weekly', 'Monthly'].map((period) {
+                  final isSelected = _selectedPeriod == period;
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedPeriod = period),
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.white10 : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
+                        border: isSelected ? Border.all(color: Colors.white12) : null,
+                      ),
+                      child: Text(
+                        period,
+                        style: AppTextStyles.caption.copyWith(
+                          color: isSelected ? Colors.white : Colors.white54,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: CustomPaint(
+              painter: _LineChartPainter(),
+              child: Container(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -2040,57 +2214,133 @@ class _DistributionChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const bars = [
-      _BarData(label: 'Crypto', value: 6000),
-      _BarData(label: 'Gold', value: 3000),
-      _BarData(label: 'Forex', value: 1200),
+      _DistributionBarData(label: 'Crypto', value: 6000, winRate: 0.65), // 65% Win
+      _DistributionBarData(label: 'Gold', value: 3000, winRate: 0.58),   // 58% Win
+      _DistributionBarData(label: 'Forex', value: 1200, winRate: 0.72),  // 72% Win
     ];
     final maxValue = bars.map((b) => b.value).reduce((a, b) => a > b ? a : b);
+    
+    // Create grid steps (5 lines: 0%, 25%, 50%, 75%, 100%)
+    final gridSteps = [1.0, 0.75, 0.5, 0.25, 0.0];
+
     return Container(
-      width: 560,
+      width: double.infinity,
       height: 340,
       decoration: BoxDecoration(
         color: const Color(0xFF0B0D14),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.white12),
       ),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+      padding: const EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            'Winrate of all signals',
+             style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 20),
           Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: bars.map((bar) {
-                final heightFactor = bar.value / maxValue;
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: FractionallySizedBox(
-                              heightFactor: heightFactor,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF2E97FF),
-                                  borderRadius: BorderRadius.circular(6),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Stack(
+                    children: [
+                      // Background Grid
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: gridSteps.map((step) {
+                          return Row(
+                            children: [
+                              SizedBox(
+                                width: 35,
+                                child: Text(
+                                  (maxValue * step).toInt().toString(),
+                                  style: AppTextStyles.caption.copyWith(color: Colors.white24, fontSize: 10),
+                                  textAlign: TextAlign.right,
                                 ),
                               ),
-                            ),
-                          ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Container(
+                                  height: 1,
+                                  color: Colors.white.withOpacity(0.05),
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                      // Bars
+                      Padding(
+                        padding: const EdgeInsets.only(left: 43), // Offset for labels
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: bars.map((bar) {
+                            final heightFactor = bar.value / maxValue;
+                            return Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Expanded(
+                                      child: Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: FractionallySizedBox(
+                                          heightFactor: heightFactor,
+                                          widthFactor: 0.45,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            clipBehavior: Clip.antiAlias,
+                                            child: Column(
+                                              children: [
+                                                Expanded(
+                                                  flex: ((1 - bar.winRate) * 100).toInt(),
+                                                  child: Container(
+                                                    color: const Color(0xFFE54747), // Loss Color
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  flex: (bar.winRate * 100).toInt(),
+                                                  child: Container(
+                                                    color: const Color(0xFF1DA1F2), // Win Color
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      bar.label,
+                                      style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          bar.label,
-                          style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                );
-              }).toList(),
+                ),
+                const SizedBox(height: 16),
+                // Legend
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _LegendItem(color: const Color(0xFF1DA1F2), label: 'Win Rate'),
+                    const SizedBox(width: 24),
+                    _LegendItem(color: const Color(0xFFE54747), label: 'Loss Rate'),
+                  ],
+                )
+              ],
             ),
           ),
         ],
@@ -2099,51 +2349,109 @@ class _DistributionChart extends StatelessWidget {
   }
 }
 
+class _LegendItem extends StatelessWidget {
+  final Color color;
+  final String label;
+  const _LegendItem({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 12),
+        ),
+      ],
+    );
+  }
+}
+
 class _LineChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
+    // Define chart area (leaving space for labels)
+    const double leftPadding = 40.0;
+    const double bottomPadding = 20.0;
+    final chartRect = Rect.fromLTWH(
+      leftPadding, 
+      0, 
+      size.width - leftPadding, 
+      size.height - bottomPadding
+    );
+
     final paintGrid = Paint()
-      ..color = Colors.white12
+      ..color = Colors.white.withOpacity(0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
+
     final paintLine = Paint()
       ..color = const Color(0xFF2E97FF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
+    
     final paintFill = Paint()
       ..shader = const LinearGradient(
         colors: [Color(0xFF123F7A), Color(0x00123F7A)],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+      ).createShader(chartRect);
 
-    const gridCount = 6;
+    // Draw Grid & Y-Axis Labels
+    const gridCount = 5;
+    const maxVal = 10000;
+    
+    final textStyle = const TextStyle(color: Colors.white24, fontSize: 10);
+
     for (int i = 0; i <= gridCount; i++) {
-      final dy = size.height / gridCount * i;
-      canvas.drawLine(Offset(0, dy), Offset(size.width, dy), paintGrid);
+      final y = chartRect.top + (chartRect.height / gridCount * i);
+      // Draw Line
+      canvas.drawLine(Offset(chartRect.left, y), Offset(chartRect.right, y), paintGrid);
+
+      // Draw Label
+      final value = (maxVal - (maxVal / gridCount * i)).toInt();
+      final textSpan = TextSpan(text: value == 0 ? '0' : '${value ~/ 1000}k', style: textStyle);
+      final textPainter = TextPainter(text: textSpan, textDirection: ui.TextDirection.ltr);
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(0, y - textPainter.height / 2));
     }
 
+    // Draw X-Axis Labels (Sample dates)
+    final xLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    for (int i = 0; i < xLabels.length; i++) {
+      final x = chartRect.left + (chartRect.width / (xLabels.length - 1) * i);
+      final textSpan = TextSpan(text: xLabels[i], style: textStyle);
+      final textPainter = TextPainter(text: textSpan, textDirection: ui.TextDirection.ltr);
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(x - textPainter.width / 2, size.height - textPainter.height));
+    }
+
+    // Draw Data Line (Sample curve)
     final points = [
-      Offset(0, size.height * 0.9),
-      Offset(size.width * 0.1, size.height * 0.85),
-      Offset(size.width * 0.2, size.height * 0.78),
-      Offset(size.width * 0.32, size.height * 0.8),
-      Offset(size.width * 0.42, size.height * 0.7),
-      Offset(size.width * 0.5, size.height * 0.74),
-      Offset(size.width * 0.6, size.height * 0.6),
-      Offset(size.width * 0.7, size.height * 0.52),
-      Offset(size.width * 0.82, size.height * 0.4),
-      Offset(size.width * 0.92, size.height * 0.45),
+      Offset(chartRect.left, chartRect.bottom - (chartRect.height * 0.1)),
+      Offset(chartRect.left + chartRect.width * 0.1, chartRect.bottom - (chartRect.height * 0.15)),
+      Offset(chartRect.left + chartRect.width * 0.25, chartRect.bottom - (chartRect.height * 0.4)),
+      Offset(chartRect.left + chartRect.width * 0.4, chartRect.bottom - (chartRect.height * 0.35)),
+      Offset(chartRect.left + chartRect.width * 0.55, chartRect.bottom - (chartRect.height * 0.6)),
+      Offset(chartRect.left + chartRect.width * 0.7, chartRect.bottom - (chartRect.height * 0.55)),
+      Offset(chartRect.left + chartRect.width * 0.85, chartRect.bottom - (chartRect.height * 0.8)),
+      Offset(chartRect.right, chartRect.bottom - (chartRect.height * 0.75)),
     ];
 
     final path = Path()..moveTo(points.first.dx, points.first.dy);
-    for (var p in points.skip(1)) {
-      path.lineTo(p.dx, p.dy);
+    for (int i = 1; i < points.length; i++) {
+      path.lineTo(points[i].dx, points[i].dy);
     }
 
     final fillPath = Path.from(path)
-      ..lineTo(points.last.dx, size.height)
-      ..lineTo(points.first.dx, size.height)
+      ..lineTo(chartRect.right, chartRect.bottom)
+      ..lineTo(chartRect.left, chartRect.bottom)
       ..close();
 
     canvas.drawPath(fillPath, paintFill);
@@ -2154,10 +2462,11 @@ class _LineChartPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _BarData {
+class _DistributionBarData {
   final String label;
   final double value;
-  const _BarData({required this.label, required this.value});
+  final double winRate;
+  const _DistributionBarData({required this.label, required this.value, required this.winRate});
 }
 
 class _ComingSoonSection extends StatelessWidget {
