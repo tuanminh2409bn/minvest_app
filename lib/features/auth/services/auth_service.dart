@@ -20,8 +20,9 @@ import 'dart:math';
 class AuthService {
   FirebaseAuth get _firebaseAuth => FirebaseAuth.instance;
   FirebaseFirestore get _firestore => FirebaseFirestore.instance;
-  FirebaseFunctions get _functions => FirebaseFunctions.instanceFor(region: "asia-southeast1");
-  
+  FirebaseFunctions get _functions =>
+      FirebaseFunctions.instanceFor(region: "asia-southeast1");
+
   final _forceLogoutController = StreamController<String>.broadcast();
   Stream<String> get forceLogoutStream => _forceLogoutController.stream;
   StreamSubscription<DocumentSnapshot>? _sessionSubscription;
@@ -31,13 +32,6 @@ class AuthService {
   // Hàm khởi tạo service, gọi sau khi Firebase.initializeApp() hoàn tất
   Future<void> initialize() async {
     // Không cần logic listen thủ công nữa vì đã dùng trực tiếp stream của Firebase
-    try {
-      // Initialize Google Sign In (Required for v7.0.0+)
-      // Using default scopes as per previous behavior
-      await GoogleSignIn.instance.initialize(); 
-    } catch (e) {
-      print('Error initializing Google Sign In: $e');
-    }
   }
 
   Future<String> sendPhoneOtp(String phoneNumber) async {
@@ -73,13 +67,15 @@ class AuthService {
     required String verificationId,
     required String smsCode,
   }) async {
-    final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+    final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email, password: password);
     final user = userCredential.user;
     if (user == null) return null;
 
     await user.updateDisplayName(displayName);
 
-    final phoneCredential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: smsCode);
+    final phoneCredential = PhoneAuthProvider.credential(
+        verificationId: verificationId, smsCode: smsCode);
     try {
       await user.linkWithCredential(phoneCredential);
     } catch (e) {
@@ -118,7 +114,8 @@ class AuthService {
     await user.updateDisplayName(displayName);
 
     // Không cần OTP: chỉ lưu thông tin người dùng vào Firestore.
-    await _handleSuccessfulSignIn(userCredential, manualDisplayName: displayName);
+    await _handleSuccessfulSignIn(userCredential,
+        manualDisplayName: displayName);
 
     try {
       await _firestore.collection('users').doc(user.uid).set({
@@ -156,7 +153,8 @@ class AuthService {
     stopListeningForSessionChanges(); // Hủy listener cũ trước khi tạo cái mới
 
     final userDocRef = _firestore.collection('users').doc(user.uid);
-    _sessionSubscription = userDocRef.snapshots().listen((snapshot) async { // Thêm 'async'
+    _sessionSubscription = userDocRef.snapshots().listen((snapshot) async {
+      // Thêm 'async'
       if (snapshot.exists && snapshot.data() != null) {
         final data = snapshot.data()!;
 
@@ -169,13 +167,15 @@ class AuthService {
 
           // 3. Kích hoạt luồng đăng xuất bắt buộc
           if (!_forceLogoutController.isClosed) {
-            _forceLogoutController.add('Tài khoản của bạn đã được đăng nhập trên một thiết bị khác.');
+            _forceLogoutController.add(
+                'Tài khoản của bạn đã được đăng nhập trên một thiết bị khác.');
           }
 
           // 4. (RẤT QUAN TRỌNG) Xóa "lệnh" trên server sau khi đã nhận
           // Để tránh việc bị đăng xuất lặp lại nếu có lỗi xảy ra.
           try {
-            await userDocRef.update({'logoutTargetDeviceId': FieldValue.delete()});
+            await userDocRef
+                .update({'logoutTargetDeviceId': FieldValue.delete()});
           } catch (e) {
             print("Lỗi khi xóa logoutTargetDeviceId: $e");
           }
@@ -199,9 +199,11 @@ class AuthService {
   }
 
   String _generateNonce([int length = 32]) {
-    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
     final random = Random.secure();
-    return List.generate(length, (_) => charset[random.nextInt(charset.length)]).join();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
   }
 
   String _sha256(String input) {
@@ -210,7 +212,8 @@ class AuthService {
     return digest.toString();
   }
 
-  Future<User?> _handleSuccessfulSignIn(UserCredential userCredential, {
+  Future<User?> _handleSuccessfulSignIn(
+    UserCredential userCredential, {
     bool isAnonymous = false,
     Map<String, dynamic>? facebookUserData,
     String? appleEmail,
@@ -223,17 +226,18 @@ class AuthService {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final languageCode = prefs.getString('language_code') ?? 'en'; // Lấy ngôn ngữ, mặc định là 'en' nếu không có
+      final languageCode = prefs.getString('language_code') ??
+          'en'; // Lấy ngôn ngữ, mặc định là 'en' nếu không có
 
       await _firestore.runTransaction((transaction) async {
         final userDocRef = _firestore.collection('users').doc(user.uid);
         final userDoc = await transaction.get(userDocRef);
 
-      if (!userDoc.exists) {
-        if (isAnonymous) {
-          transaction.set(userDocRef, {
-            'uid': user.uid,
-            'email': 'guest_${user.uid}@minvest.com',
+        if (!userDoc.exists) {
+          if (isAnonymous) {
+            transaction.set(userDocRef, {
+              'uid': user.uid,
+              'email': 'guest_${user.uid}@minvest.com',
               'displayName': 'Guest',
               'photoURL': null,
               'createdAt': Timestamp.now(),
@@ -246,37 +250,49 @@ class AuthService {
               'activeSubscriptions': [],
             });
           } else {
-            String? email = googleEmail ?? appleEmail ?? facebookUserData?['email'] ?? user.email;
-            final displayName = manualDisplayName ?? appleFullName ?? facebookUserData?['name'] ?? user.displayName;
-            final photoURL = facebookUserData?['picture']?['data']?['url'] ?? user.photoURL;
+            String? email = googleEmail ??
+                appleEmail ??
+                facebookUserData?['email'] ??
+                user.email;
+            final displayName = manualDisplayName ??
+                appleFullName ??
+                facebookUserData?['name'] ??
+                user.displayName;
+            final photoURL =
+                facebookUserData?['picture']?['data']?['url'] ?? user.photoURL;
 
-            if (email == null && user.providerData.any((p) => p.providerId == 'apple.com')) {
+            if (email == null &&
+                user.providerData.any((p) => p.providerId == 'apple.com')) {
               email = '${user.uid}@appleid.placeholder.com';
             }
 
-          if (email == null) {
-            throw Exception("Không thể lấy được địa chỉ email. Vui lòng thử lại.");
-          }
+            if (email == null) {
+              throw Exception(
+                  "Không thể lấy được địa chỉ email. Vui lòng thử lại.");
+            }
 
-          transaction.set(userDocRef, {
-            'uid': user.uid,
-            'email': email,
-            'displayName': displayName,
-            'photoURL': photoURL,
-            'createdAt': Timestamp.now(),
-            'subscriptionTier': 'free',
-            'role': 'user',
-            'isSuspended': false,
-            'languageCode': languageCode, // 3. Thêm languageCode cho người dùng thường
-            'phone': user.phoneNumber,
-            'tokenBalance': 10, // Tặng 10 token cho user mới
-            'lastTokenGrantDate': Timestamp.now(),
-            'activeSubscriptions': [],
-          });
-        }
-      } else {
-        if (userDoc.data()?['isSuspended'] == true) {
-          throw SuspendedAccountException(userDoc.data()?['suspensionReason'] ?? 'Vui lòng liên hệ quản trị viên.');
+            transaction.set(userDocRef, {
+              'uid': user.uid,
+              'email': email,
+              'displayName': displayName,
+              'photoURL': photoURL,
+              'createdAt': Timestamp.now(),
+              'subscriptionTier': 'free',
+              'role': 'user',
+              'isSuspended': false,
+              'languageCode':
+                  languageCode, // 3. Thêm languageCode cho người dùng thường
+              'phone': user.phoneNumber,
+              'tokenBalance': 10, // Tặng 10 token cho user mới
+              'lastTokenGrantDate': Timestamp.now(),
+              'activeSubscriptions': [],
+            });
+          }
+        } else {
+          if (userDoc.data()?['isSuspended'] == true) {
+            throw SuspendedAccountException(
+                userDoc.data()?['suspensionReason'] ??
+                    'Vui lòng liên hệ quản trị viên.');
           }
         }
       });
@@ -304,17 +320,19 @@ class AuthService {
 
   Future<User?> signInWithGoogle() async {
     try {
-      // Use the singleton instance and authenticate() method (v7.0.0+)
-      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return null;
-      final String? googleEmail = googleUser.email;
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String googleEmail = googleUser.email;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: null, // accessToken is no longer directly available on GoogleSignInAuthentication
+        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      final userCredential = await _firebaseAuth.signInWithCredential(credential);
-      return await _handleSuccessfulSignIn(userCredential, googleEmail: googleEmail);
+      final userCredential =
+          await _firebaseAuth.signInWithCredential(credential);
+      return await _handleSuccessfulSignIn(userCredential,
+          googleEmail: googleEmail);
     } catch (e) {
       print('Lỗi đăng nhập Google: $e');
       rethrow;
@@ -327,7 +345,8 @@ class AuthService {
       Map<String, dynamic>? facebookUserData;
 
       if (kIsWeb) {
-        userCredential = await _firebaseAuth.signInWithPopup(FacebookAuthProvider());
+        userCredential =
+            await _firebaseAuth.signInWithPopup(FacebookAuthProvider());
       } else {
         await _requestTrackingPermission();
         final LoginResult result = await FacebookAuth.instance.login(
@@ -335,11 +354,14 @@ class AuthService {
           permissions: ['public_profile', 'email'],
         );
         if (result.status != LoginStatus.success) return null;
-        facebookUserData = await FacebookAuth.instance.getUserData(fields: "name,email,picture.width(200)");
-        final OAuthCredential credential = FacebookAuthProvider.credential(result.accessToken!.tokenString);
+        facebookUserData = await FacebookAuth.instance
+            .getUserData(fields: "name,email,picture.width(200)");
+        final OAuthCredential credential =
+            FacebookAuthProvider.credential(result.accessToken!.tokenString);
         userCredential = await _firebaseAuth.signInWithCredential(credential);
       }
-      return await _handleSuccessfulSignIn(userCredential, facebookUserData: facebookUserData);
+      return await _handleSuccessfulSignIn(userCredential,
+          facebookUserData: facebookUserData);
     } catch (e) {
       print('Lỗi đăng nhập Facebook: $e');
       rethrow;
@@ -352,28 +374,40 @@ class AuthService {
       String? appleEmail;
       String? appleFullName;
       if (kIsWeb) {
-        userCredential = await _firebaseAuth.signInWithPopup(AppleAuthProvider());
-      } else if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS)) {
+        userCredential =
+            await _firebaseAuth.signInWithPopup(AppleAuthProvider());
+      } else if (!kIsWeb &&
+          (defaultTargetPlatform == TargetPlatform.iOS ||
+              defaultTargetPlatform == TargetPlatform.macOS)) {
         final rawNonce = _generateNonce();
         final nonce = _sha256(rawNonce);
         final appleCredential = await SignInWithApple.getAppleIDCredential(
-          scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
+          scopes: [
+            AppleIDAuthorizationScopes.email,
+            AppleIDAuthorizationScopes.fullName
+          ],
           nonce: nonce,
         );
         appleEmail = appleCredential.email;
-        if (appleCredential.givenName != null || appleCredential.familyName != null) {
-          appleFullName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
+        if (appleCredential.givenName != null ||
+            appleCredential.familyName != null) {
+          appleFullName =
+              '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'
+                  .trim();
         }
         final oAuthCredential = OAuthProvider('apple.com').credential(
           idToken: appleCredential.identityToken,
           rawNonce: rawNonce,
           accessToken: appleCredential.authorizationCode,
         );
-        userCredential = await _firebaseAuth.signInWithCredential(oAuthCredential);
+        userCredential =
+            await _firebaseAuth.signInWithCredential(oAuthCredential);
       } else {
-        throw UnsupportedError('Đăng nhập Apple không được hỗ trợ trên thiết bị này.');
+        throw UnsupportedError(
+            'Đăng nhập Apple không được hỗ trợ trên thiết bị này.');
       }
-      return await _handleSuccessfulSignIn(userCredential, appleEmail: appleEmail, appleFullName: appleFullName);
+      return await _handleSuccessfulSignIn(userCredential,
+          appleEmail: appleEmail, appleFullName: appleFullName);
     } catch (e) {
       print('Lỗi đăng nhập Apple: $e');
       rethrow;
@@ -386,7 +420,7 @@ class AuthService {
       if (!kIsWeb) {
         await FacebookAuth.instance.logOut();
       }
-      await GoogleSignIn.instance.signOut();
+      await GoogleSignIn().signOut();
     } catch (e) {
       print("Lỗi khi đăng xuất khỏi các nhà cung cấp: $e");
     } finally {
@@ -399,7 +433,8 @@ class AuthService {
     try {
       final callable = _functions.httpsCallable('deleteUserAccount');
       final result = await callable.call();
-      print('Cloud function deleteUserAccount được gọi thành công: ${result.data}');
+      print(
+          'Cloud function deleteUserAccount được gọi thành công: ${result.data}');
       await signOut();
     } on FirebaseFunctionsException catch (e) {
       print('Lỗi khi gọi cloud function: ${e.code} - ${e.message}');

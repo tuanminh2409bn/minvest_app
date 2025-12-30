@@ -109,7 +109,10 @@ class _AISignalsPageState extends State<AISignalsPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 12),
-                  const LandingNavBar(),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: LandingNavBar(),
+                  ),
                   const SizedBox(height: 32),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -168,7 +171,10 @@ class _AISignalsPageState extends State<AISignalsPage> {
                     ),
                   ),
                   const SizedBox(height: 64),
-                  const FooterSection(),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: FooterSection(),
+                  ),
                 ],
               ),
             ),

@@ -1596,7 +1596,7 @@ class _ContentWrapper extends StatelessWidget {
           builder: (context, constraints) {
              final bool isNarrow = MediaQuery.of(context).size.width < 900;
              return Padding(
-               padding: EdgeInsets.symmetric(horizontal: isNarrow ? 12 : 0),
+               padding: EdgeInsets.symmetric(horizontal: isNarrow ? 16 : 0),
                child: child,
              );
           },
