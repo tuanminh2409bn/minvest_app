@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:minvest_forex_app/firebase_options.dart';
+import 'package:minvest_forex_app/services/web/web_notification.dart';
 import 'dart:convert';
 
 final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -101,13 +102,22 @@ class NotificationService {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint("🟢 [FCM_SERVICE] Foreground message received: ${message.data}");
-      final RemoteNotification? notification = message.notification;
-      if (notification != null && !kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      
+      String? title = message.notification?.title;
+      String? body = message.notification?.body;
+
+      // Fallback cho tin nhắn data-only
+      if (title == null && message.data.isNotEmpty) {
+        title = message.data['title'] ?? 'Minvest Signal';
+        body = message.data['body'] ?? message.data['message'] ?? 'Bạn có tin nhắn mới.';
+      }
+
+      if ((title != null && body != null) && (kIsWeb || defaultTargetPlatform == TargetPlatform.android)) {
         // TRUYỀN TOÀN BỘ message.data VÀO ĐÂY
         _showLocalNotification(
-          title: notification.title ?? '',
-          body: notification.body ?? '',
-          payload: message.data, // Sửa ở đây
+          title: title,
+          body: body,
+          payload: message.data,
         );
       }
     });
@@ -130,6 +140,12 @@ class NotificationService {
     required String body,
     required Map<String, dynamic> payload, // Sửa ở đây từ String -> Map
   }) {
+    if (kIsWeb) {
+      showWebNotification(title: title, body: body, payload: payload);
+      debugPrint("📱 [FCM_SERVICE] Hiển thị thông báo WEB thành công.");
+      return;
+    }
+
     _flutterLocalNotificationsPlugin.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
       title,

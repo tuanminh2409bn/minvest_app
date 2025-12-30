@@ -35,96 +35,110 @@ class LandingPage extends StatelessWidget {
             if (AppLocalizations.of(context) == null) {
               throw Exception("AppLocalizations is null!");
             }
-            
-            final isTablet = constraints.maxWidth < Breakpoints.desktop && constraints.maxWidth >= Breakpoints.tablet;
+
+            final isTablet = constraints.maxWidth < Breakpoints.desktop &&
+                constraints.maxWidth >= Breakpoints.tablet;
             final isMobile = constraints.maxWidth < Breakpoints.tablet;
-            final horizontalPadding = isMobile ? 16.0 : isTablet ? 24.0 : 32.0;
+            final horizontalPadding = isMobile
+                ? 16.0
+                : isTablet
+                    ? 24.0
+                    : 32.0;
             final double sectionSpacing = isMobile ? 60.0 : 100.0;
 
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(
-                textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+                textScaler: isMobile
+                    ? const TextScaler.linear(0.6)
+                    : const TextScaler.linear(1.0),
               ),
               child: Container(
                 color: AppColors.background,
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: horizontalPadding),
                     child: Align(
                       alignment: Alignment.topCenter,
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1200),
                         child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SizedBox(height: 12),
-                          LandingNavBar(),
-                          const HeroSection(),
-                          SizedBox(height: sectionSpacing),
-                                                                          const HeroSubtitleSection(),
-                                                                          SizedBox(height: sectionSpacing),
-                                                                          LayoutBuilder(                            builder: (context, constraints) {
-                              final bool isNarrow = constraints.maxWidth < 900;
-                                                                                                                                              if (isNarrow) {
-                                                                                                                                                return Column(
-                                                                                                                                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                                                                                                                                  children: const [
-                                                                                                                                                    LiveSignalsSection(),
-                                                                                                                                                    SizedBox(height: 24),
-                                                                                                                                                    HeroSignalsSection(),
-                                                                                                                                                  ],
-                                                                                                                                                );
-                                                                                                                                              }                              return Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  Expanded(child: HeroSignalsSection()),
-                                  SizedBox(width: 16),
-                                  Expanded(child: LiveSignalsSection()),
-                                ],
-                              );
-                            },
-                          ),
-                          SizedBox(height: sectionSpacing),
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final bool isNarrow = constraints.maxWidth < 900;
-                              if (isNarrow) {
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: 12),
+                            LandingNavBar(),
+                            const HeroSection(),
+                            SizedBox(height: sectionSpacing),
+                            const HeroSubtitleSection(),
+                            SizedBox(height: sectionSpacing),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final bool isNarrow =
+                                    constraints.maxWidth < 900;
+                                if (isNarrow) {
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: const [
+                                      LiveSignalsSection(),
+                                      SizedBox(height: 24),
+                                      HeroSignalsSection(),
+                                    ],
+                                  );
+                                }
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const [
+                                    Expanded(child: HeroSignalsSection()),
+                                    SizedBox(width: 16),
+                                    Expanded(child: LiveSignalsSection()),
+                                  ],
+                                );
+                              },
+                            ),
+                            SizedBox(height: sectionSpacing),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final bool isNarrow =
+                                    constraints.maxWidth < 900;
+                                if (isNarrow) {
+                                  return Column(
+                                    children: [
+                                      const OrderEngineSection(),
+                                      SizedBox(height: sectionSpacing),
+                                      const _TransparentCardAnimated(),
+                                      const SizedBox(height: 8),
+                                      const _SignalsPerformanceCard(),
+                                    ],
+                                  );
+                                }
                                 return Column(
-                                  children: [
-                                                                      const OrderEngineSection(),
-                                                                      SizedBox(height: sectionSpacing),
-                                                                      const _TransparentCardAnimated(),
-                                                                      const SizedBox(height: 8),
-                                                                      const _SignalsPerformanceCard(),
-                                                                    ],                                );
-                              }
-                              return Column(
-                                children: const [
-                                  OrderEngineSection(),
-                                  SizedBox(height: 72),
-                                  _SignalsPerformanceRow(),
-                                ],
-                              );
-                            },
-                          ),
-                          SizedBox(height: sectionSpacing),
-                          const CoreValueSection(),
-                          SizedBox(height: sectionSpacing),
-                          const PricingSection(),
-                          SizedBox(height: sectionSpacing),
-                          const FaqSection(),
-                          SizedBox(height: sectionSpacing),
-                          const CtaSection(),
-                          SizedBox(height: sectionSpacing),
-                          const FooterSection(),
-                        ],
+                                  children: const [
+                                    OrderEngineSection(),
+                                    SizedBox(height: 72),
+                                    _SignalsPerformanceRow(),
+                                  ],
+                                );
+                              },
+                            ),
+                            SizedBox(height: sectionSpacing),
+                            const CoreValueSection(),
+                            SizedBox(height: sectionSpacing),
+                            const PricingSection(),
+                            SizedBox(height: sectionSpacing),
+                            const FaqSection(),
+                            SizedBox(height: sectionSpacing),
+                            const CtaSection(),
+                            SizedBox(height: sectionSpacing),
+                            const FooterSection(),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
+            );
           } catch (e, stackTrace) {
             print("CRASH in LandingPage: $e\n$stackTrace");
             return Center(
@@ -171,12 +185,17 @@ class _HeroInteractive extends StatefulWidget {
   final bool enableHover;
   final Size baseSize;
   final bool expandToWidth;
-  const _HeroInteractive({super.key, this.enableHover = true, this.baseSize = const Size(1200, 800), this.expandToWidth = false});
+  const _HeroInteractive(
+      {super.key,
+      this.enableHover = true,
+      this.baseSize = const Size(1200, 800),
+      this.expandToWidth = false});
   @override
   State<_HeroInteractive> createState() => _HeroInteractiveState();
 }
 
-class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerProviderStateMixin {
+class _HeroInteractiveState extends State<_HeroInteractive>
+    with SingleTickerProviderStateMixin {
   Offset _pointer = Offset.zero;
   late final AnimationController _contentController;
   late final Animation<Offset> _titleSlide;
@@ -185,31 +204,46 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
   late final Animation<double> _subtitleFade;
   late final Animation<Offset> _ctaSlide;
   late final Animation<double> _ctaFade;
-  bool _contentPlayed = false;
+  final bool _contentPlayed = false;
 
   @override
   void initState() {
     super.initState();
-    _contentController = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
-    _titleSlide = Tween(begin: const Offset(-0.12, 0), end: Offset.zero).animate(
-      CurvedAnimation(parent: _contentController, curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic)),
+    _contentController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 900));
+    _titleSlide =
+        Tween(begin: const Offset(-0.12, 0), end: Offset.zero).animate(
+      CurvedAnimation(
+          parent: _contentController,
+          curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic)),
     );
     _titleFade = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _contentController, curve: const Interval(0.0, 0.55, curve: Curves.easeOut)),
+      CurvedAnimation(
+          parent: _contentController,
+          curve: const Interval(0.0, 0.55, curve: Curves.easeOut)),
     );
-    _subtitleSlide = Tween(begin: const Offset(-0.08, 0), end: Offset.zero).animate(
-      CurvedAnimation(parent: _contentController, curve: const Interval(0.15, 0.7, curve: Curves.easeOutCubic)),
+    _subtitleSlide =
+        Tween(begin: const Offset(-0.08, 0), end: Offset.zero).animate(
+      CurvedAnimation(
+          parent: _contentController,
+          curve: const Interval(0.15, 0.7, curve: Curves.easeOutCubic)),
     );
     _subtitleFade = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _contentController, curve: const Interval(0.15, 0.7, curve: Curves.easeOut)),
+      CurvedAnimation(
+          parent: _contentController,
+          curve: const Interval(0.15, 0.7, curve: Curves.easeOut)),
     );
     _ctaSlide = Tween(begin: const Offset(0, 0.16), end: Offset.zero).animate(
-      CurvedAnimation(parent: _contentController, curve: const Interval(0.35, 1.0, curve: Curves.easeOutCubic)),
+      CurvedAnimation(
+          parent: _contentController,
+          curve: const Interval(0.35, 1.0, curve: Curves.easeOutCubic)),
     );
     _ctaFade = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _contentController, curve: const Interval(0.35, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(
+          parent: _contentController,
+          curve: const Interval(0.35, 1.0, curve: Curves.easeOut)),
     );
-    
+
     // Start animation immediately since this is the Hero section (Above the fold)
     // Avoiding VisibilityDetector here prevents "invisible content" issues on initial load
     _contentController.forward();
@@ -225,8 +259,8 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
   Widget build(BuildContext context) {
     final size = widget.baseSize;
     final viewportWidth = MediaQuery.of(context).size.width;
-    final double targetWidth = widget.expandToWidth 
-        ? viewportWidth 
+    final double targetWidth = widget.expandToWidth
+        ? viewportWidth
         : viewportWidth.clamp(320, math.max(320.0, size.width));
     final double scaleFactor = targetWidth / size.width;
     final content = SizedBox(
@@ -237,7 +271,7 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
         children: [
           // Thay thế _buildBlob bằng OrbEffect
           const Positioned.fill(child: OrbEffect()),
-          
+
           // Lớp bắt sự kiện chuột (Catcher)
           Positioned.fill(
             child: MouseRegion(
@@ -249,17 +283,18 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                 final minSize = math.min(width, height);
                 final centerX = width / 2;
                 final centerY = height / 2;
-                
+
                 // Vì MouseRegion nằm trong SizedBox(size), local position chính là tọa độ trong khung 1200x800
-                final local = event.localPosition; 
-                
+                final local = event.localPosition;
+
                 final uvX = ((local.dx - centerX) / minSize) * 2.0;
                 final uvY = ((local.dy - centerY) / minSize) * 2.0;
 
-                final iframe = web.document.getElementById('orb-iframe') as web.HTMLIFrameElement?;
+                final iframe = web.document.getElementById('orb-iframe')
+                    as web.HTMLIFrameElement?;
                 if (iframe != null && iframe.contentWindow != null) {
-                   final jsonStr = jsonEncode({'uvX': uvX, 'uvY': uvY});
-                   iframe.contentWindow!.postMessage(jsonStr.toJS, '*'.toJS);
+                  final jsonStr = jsonEncode({'uvX': uvX, 'uvY': uvY});
+                  iframe.contentWindow!.postMessage(jsonStr.toJS, '*'.toJS);
                 }
 
                 setState(() {
@@ -270,16 +305,18 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                 });
               },
               onExit: (_) {
-                final iframe = web.document.getElementById('orb-iframe') as web.HTMLIFrameElement?;
+                final iframe = web.document.getElementById('orb-iframe')
+                    as web.HTMLIFrameElement?;
                 if (iframe != null && iframe.contentWindow != null) {
-                    iframe.contentWindow!.postMessage('mouseleave'.toJS, '*'.toJS);
+                  iframe.contentWindow!
+                      .postMessage('mouseleave'.toJS, '*'.toJS);
                 }
                 setState(() => _pointer = Offset.zero);
               },
               child: Container(color: Colors.transparent),
             ),
-          ), 
-          
+          ),
+
           _buildContent(),
         ],
       ),
@@ -340,7 +377,9 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                     children: [
                       GradientButton(
                         label: AppLocalizations.of(context)!.getSignalsNow,
-                        padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 32, vertical: isMobile ? 12 : 14),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: isMobile ? 24 : 32,
+                            vertical: isMobile ? 12 : 14),
                         borderRadius: isMobile ? 1 : 6,
                         textStyle: AppTextStyles.body.copyWith(
                           fontSize: isMobile ? 20 : 16,
@@ -348,7 +387,8 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                           color: Colors.white,
                           height: 1.1,
                         ),
-                        onPressed: () => Navigator.of(context).pushNamed('/signup'),
+                        onPressed: () =>
+                            Navigator.of(context).pushNamed('/signup'),
                       ),
                       InkWell(
                         borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
@@ -362,9 +402,14 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
+                            borderRadius:
+                                BorderRadius.circular(isMobile ? 1 : 8),
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                              colors: [
+                                Color(0xFF04B3E9),
+                                Color(0xFF2E60FF),
+                                Color(0xFFD500F9)
+                              ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -372,12 +417,15 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
                           padding: const EdgeInsets.all(1),
                           child: Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(isMobile ? 1 : 7),
+                              borderRadius:
+                                  BorderRadius.circular(isMobile ? 1 : 7),
                               color: Colors.black,
                             ),
                             padding: EdgeInsets.symmetric(
-                              horizontal: isMobile ? 24 : 32, 
-                              vertical: isMobile ? 11 : 13, // Reduced by 1 to match GradientButton (which has no border)
+                              horizontal: isMobile ? 24 : 32,
+                              vertical: isMobile
+                                  ? 11
+                                  : 13, // Reduced by 1 to match GradientButton (which has no border)
                             ),
                             child: Text(
                               AppLocalizations.of(context)!.freeTrial,
@@ -404,10 +452,22 @@ class _HeroInteractiveState extends State<_HeroInteractive> with SingleTickerPro
 
   Matrix4 _addSkew(Matrix4 matrix, double skewX, double skewY) {
     final skewMatrix = Matrix4(
-      1, skewX, 0, 0,
-      skewY, 1, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1,
+      1,
+      skewX,
+      0,
+      0,
+      skewY,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
     );
     return matrix..multiply(skewMatrix);
   }
@@ -422,14 +482,15 @@ class HeroSubtitleSection extends StatelessWidget {
     final isMobile = width < Breakpoints.tablet;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32, vertical: 0),
+      padding:
+          EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32, vertical: 0),
       child: Column(
         children: [
           Text(
             AppLocalizations.of(context)!.globalAiInnovationTitle,
             textAlign: TextAlign.center,
             style: AppTextStyles.h2.copyWith(
-              fontSize: isMobile ? 32 : 28, 
+              fontSize: isMobile ? 32 : 28,
               color: Colors.white,
               fontWeight: FontWeight.w800,
             ),
@@ -457,7 +518,8 @@ class HeroSignalsSection extends StatefulWidget {
   State<HeroSignalsSection> createState() => _HeroSignalsSectionState();
 }
 
-class _HeroSignalsSectionState extends State<HeroSignalsSection> with SingleTickerProviderStateMixin {
+class _HeroSignalsSectionState extends State<HeroSignalsSection>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _entranceController;
   late final Animation<Offset> _slideIn;
   late final Animation<double> _fadeIn;
@@ -512,7 +574,9 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection> with SingleTick
                     padding: EdgeInsets.all(isMobile ? 16 : AppSpacing.md),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: isMobile ? MainAxisAlignment.start : MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: isMobile
+                          ? MainAxisAlignment.start
+                          : MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Column(
@@ -547,7 +611,8 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection> with SingleTick
       ),
       child: Text(
         AppLocalizations.of(context)!.aiSignal,
-        style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+        style: AppTextStyles.body
+            .copyWith(color: Colors.white, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -605,13 +670,16 @@ class _AnimatedBorderCard extends StatefulWidget {
   State<_AnimatedBorderCard> createState() => _AnimatedBorderCardState();
 }
 
-class _AnimatedBorderCardState extends State<_AnimatedBorderCard> with SingleTickerProviderStateMixin {
+class _AnimatedBorderCardState extends State<_AnimatedBorderCard>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 4))
+          ..repeat();
   }
 
   @override
@@ -626,7 +694,11 @@ class _AnimatedBorderCardState extends State<_AnimatedBorderCard> with SingleTic
       animation: _controller,
       builder: (context, child) {
         final t = _controller.value;
-        final colors = const [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)];
+        final colors = const [
+          Color(0xFF04B3E9),
+          Color(0xFF2E60FF),
+          Color(0xFFD500F9)
+        ];
         final stops = [
           (t + 0.0) % 1,
           (t + 0.4) % 1,
@@ -666,13 +738,16 @@ class _AnimatedBorderCardState extends State<_AnimatedBorderCard> with SingleTic
   }
 }
 
-class _AnimatedGlowCardState extends State<_AnimatedGlowCard> with SingleTickerProviderStateMixin {
+class _AnimatedGlowCardState extends State<_AnimatedGlowCard>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 4))
+          ..repeat();
   }
 
   @override
@@ -687,7 +762,11 @@ class _AnimatedGlowCardState extends State<_AnimatedGlowCard> with SingleTickerP
       animation: _controller,
       builder: (context, child) {
         final t = _controller.value;
-        final colors = const [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)];
+        final colors = const [
+          Color(0xFF04B3E9),
+          Color(0xFF2E60FF),
+          Color(0xFFD500F9)
+        ];
         final stops = [
           (t + 0.0) % 1,
           (t + 0.4) % 1,
@@ -746,7 +825,8 @@ class _GlowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * (0.3 + 0.4 * progress), size.height * (0.7 - 0.4 * progress));
+    final center = Offset(size.width * (0.3 + 0.4 * progress),
+        size.height * (0.7 - 0.4 * progress));
     final radius = size.width * 0.9;
     final paint = Paint()
       ..shader = RadialGradient(
@@ -759,7 +839,8 @@ class _GlowPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _GlowPainter oldDelegate) => oldDelegate.progress != progress;
+  bool shouldRepaint(covariant _GlowPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
 
 class _StaggeredSignalCards extends StatefulWidget {
@@ -769,13 +850,16 @@ class _StaggeredSignalCards extends StatefulWidget {
   State<_StaggeredSignalCards> createState() => _StaggeredSignalCardsState();
 }
 
-class _StaggeredSignalCardsState extends State<_StaggeredSignalCards> with SingleTickerProviderStateMixin {
+class _StaggeredSignalCardsState extends State<_StaggeredSignalCards>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 8))..repeat();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 8))
+          ..repeat();
   }
 
   @override
@@ -837,7 +921,8 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards> with Singl
           final items = [
             (progress: (v + 0.0) % 1.0, widget: first),
             (progress: (v + 0.5) % 1.0, widget: second),
-          ]..sort((a, b) => b.progress.compareTo(a.progress)); // progress lớn hơn vẽ sau → nằm trên
+          ]..sort((a, b) => b.progress
+              .compareTo(a.progress)); // progress lớn hơn vẽ sau → nằm trên
 
           return SizedBox(
             height: viewportHeight,
@@ -868,7 +953,8 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards> with Singl
     }
     final slideT = Curves.easeInOut.transform(v);
     final travel = viewportHeight * 0.45;
-    final baseOffset = viewportHeight * 0.12; // đẩy điểm xuất phát xuống dưới một chút
+    final baseOffset =
+        viewportHeight * 0.12; // đẩy điểm xuất phát xuống dưới một chút
     final offsetY = (lerpDouble(travel, -travel, slideT) ?? 0) + baseOffset;
     return Opacity(
       opacity: opacity,
@@ -938,13 +1024,19 @@ class _SignalCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(pair, style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
-                        Text(date, style: AppTextStyles.body.copyWith(color: Colors.white70, fontWeight: FontWeight.w600)),
+                        Text(pair,
+                            style: AppTextStyles.h3
+                                .copyWith(fontSize: 22, color: Colors.white)),
+                        Text(date,
+                            style: AppTextStyles.body.copyWith(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 10),
                     decoration: BoxDecoration(
                       gradient: badgeGradient,
                       borderRadius: BorderRadius.circular(22),
@@ -1021,7 +1113,8 @@ class LiveSignalsSection extends StatefulWidget {
   State<LiveSignalsSection> createState() => _LiveSignalsSectionState();
 }
 
-class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProviderStateMixin {
+class _LiveSignalsSectionState extends State<LiveSignalsSection>
+    with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _slideIn;
   late final Animation<double> _fadeIn;
@@ -1039,18 +1132,23 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 700));
     _slideIn = Tween(begin: const Offset(0.18, 0), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
-    _typeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 4500))
+    _typeController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 4500))
       ..addListener(() {
         final phase = _typeController.value;
-        final typingPortion = phase <= 0.8 ? (phase / 0.8) : 1.0; // 0-0.8 gõ, 0.8-1.0 giữ ở cuối
-        final progress = (typingPortion * _fullText.length).clamp(0, _fullText.length).floor();
+        final typingPortion =
+            phase <= 0.8 ? (phase / 0.8) : 1.0; // 0-0.8 gõ, 0.8-1.0 giữ ở cuối
+        final progress = (typingPortion * _fullText.length)
+            .clamp(0, _fullText.length)
+            .floor();
         setState(() {
           _typedText = _fullText.substring(0, progress);
         });
@@ -1086,13 +1184,15 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
             opacity: _fadeIn,
             child: Container(
               constraints: BoxConstraints(minHeight: isMobile ? 0 : 480),
-              padding: isMobile 
-                  ? const EdgeInsets.only(bottom: 24) 
+              padding: isMobile
+                  ? const EdgeInsets.only(bottom: 24)
                   : const EdgeInsets.all(AppSpacing.lg),
-              decoration: isMobile ? null : BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(14),
-              ),
+              decoration: isMobile
+                  ? null
+                  : BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1113,9 +1213,13 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
                     spacing: AppSpacing.xs,
                     runSpacing: 6,
                     children: [
-                      _outlinedChip(AppLocalizations.of(context)!.aiSignal, isMobile),
-                      _outlinedChip(AppLocalizations.of(context)!.trendFollowing, isMobile),
-                      _outlinedChip(AppLocalizations.of(context)!.realtime, isMobile),
+                      _outlinedChip(
+                          AppLocalizations.of(context)!.aiSignal, isMobile),
+                      _outlinedChip(
+                          AppLocalizations.of(context)!.trendFollowing,
+                          isMobile),
+                      _outlinedChip(
+                          AppLocalizations.of(context)!.realtime, isMobile),
                     ],
                   ),
                 ],
@@ -1137,7 +1241,8 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(fontSize: 31, fontWeight: FontWeight.w800),
+      style:
+          AppTextStyles.h1.copyWith(fontSize: 31, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1145,7 +1250,8 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
   Widget _chip(BuildContext context, String text) {
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed('/ai-signals'),
-      child: Row( // Added Row with mainAxisSize.min
+      child: Row(
+        // Added Row with mainAxisSize.min
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
@@ -1153,7 +1259,11 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection> with TickerProv
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
               gradient: const LinearGradient(
-                colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                colors: [
+                  Color(0xFF04B3E9),
+                  Color(0xFF2E60FF),
+                  Color(0xFFD500F9)
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -1213,7 +1323,8 @@ class OrderEngineSection extends StatefulWidget {
   State<OrderEngineSection> createState() => _OrderEngineSectionState();
 }
 
-class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTickerProviderStateMixin {
+class _OrderEngineSectionState extends State<OrderEngineSection>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _leftSlide;
   late final Animation<Offset> _rightSlide;
@@ -1224,15 +1335,18 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 900));
     _leftSlide = Tween(begin: const Offset(-0.18, 0), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _rightSlide = Tween(begin: const Offset(0.18, 0), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
-    _leftFade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _rightFade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _leftFade = Tween(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _rightFade = Tween(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
 
   @override
@@ -1250,7 +1364,7 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
 
         return Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 0 : (isNarrow ? 16 : 32), 
+            horizontal: isMobile ? 0 : (isNarrow ? 16 : 32),
             vertical: 32,
           ),
           child: VisibilityDetector(
@@ -1265,7 +1379,8 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
                 ? Column(
                     children: [
                       ConstrainedBox(
-                        constraints: BoxConstraints(minHeight: isMobile ? 0 : 320),
+                        constraints:
+                            BoxConstraints(minHeight: isMobile ? 0 : 320),
                         child: SlideTransition(
                           position: _leftSlide,
                           child: FadeTransition(
@@ -1276,7 +1391,8 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
                       ),
                       const SizedBox(height: 8),
                       ConstrainedBox(
-                        constraints: BoxConstraints(minHeight: isMobile ? 0 : 320),
+                        constraints:
+                            BoxConstraints(minHeight: isMobile ? 0 : 320),
                         child: SlideTransition(
                           position: _rightSlide,
                           child: FadeTransition(
@@ -1293,7 +1409,8 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
                       Expanded(
                         child: Center(
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
+                            constraints: const BoxConstraints(
+                                minHeight: 520, maxWidth: 560),
                             child: SizedBox(
                               width: double.infinity,
                               child: SlideTransition(
@@ -1311,7 +1428,8 @@ class _OrderEngineSectionState extends State<OrderEngineSection> with SingleTick
                       Expanded(
                         child: Center(
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
+                            constraints: const BoxConstraints(
+                                minHeight: 520, maxWidth: 560),
                             child: SizedBox(
                               width: double.infinity,
                               child: SlideTransition(
@@ -1355,11 +1473,15 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _typeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 4500))
+    _typeController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 4500))
       ..addListener(() {
         final phase = _typeController.value;
-        final typingPortion = phase <= 0.8 ? (phase / 0.8) : 1.0; // 0-0.8 gõ, 0.8-1.0 giữ ở cuối
-        final progress = (typingPortion * _fullText.length).clamp(0, _fullText.length).floor();
+        final typingPortion =
+            phase <= 0.8 ? (phase / 0.8) : 1.0; // 0-0.8 gõ, 0.8-1.0 giữ ở cuối
+        final progress = (typingPortion * _fullText.length)
+            .clamp(0, _fullText.length)
+            .floor();
         setState(() {
           _typedText = _fullText.substring(0, progress);
         });
@@ -1381,13 +1503,15 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
-      padding: isMobile 
-          ? const EdgeInsets.only(bottom: 24) 
+      padding: isMobile
+          ? const EdgeInsets.only(bottom: 24)
           : const EdgeInsets.all(AppSpacing.lg),
-      decoration: isMobile ? null : BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(14),
-      ),
+      decoration: isMobile
+          ? null
+          : BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(14),
+            ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1426,7 +1550,8 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(fontSize: 34, fontWeight: FontWeight.w800),
+      style:
+          AppTextStyles.h1.copyWith(fontSize: 34, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1442,7 +1567,11 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
               gradient: const LinearGradient(
-                colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                colors: [
+                  Color(0xFF04B3E9),
+                  Color(0xFF2E60FF),
+                  Color(0xFFD500F9)
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -1499,10 +1628,12 @@ class _TransparentCardAnimated extends StatefulWidget {
   const _TransparentCardAnimated();
 
   @override
-  State<_TransparentCardAnimated> createState() => _TransparentCardAnimatedState();
+  State<_TransparentCardAnimated> createState() =>
+      _TransparentCardAnimatedState();
 }
 
-class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with TickerProviderStateMixin {
+class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
+    with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _slideIn;
   late final Animation<double> _fadeIn;
@@ -1521,16 +1652,21 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 900));
     _slideIn = Tween(begin: const Offset(0.16, 0), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
-    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _typeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 4500))
+    _fadeIn = Tween(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _typeController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 4500))
       ..addListener(() {
         final phase = _typeController.value;
         final typingPortion = phase <= 0.8 ? (phase / 0.8) : 1.0;
-        final progress = (typingPortion * _fullText.length).clamp(0, _fullText.length).floor();
+        final progress = (typingPortion * _fullText.length)
+            .clamp(0, _fullText.length)
+            .floor();
         setState(() {
           _typedText = _fullText.substring(0, progress);
         });
@@ -1568,13 +1704,15 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
           child: Container(
             width: double.infinity,
             constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
-            padding: isMobile 
-                ? const EdgeInsets.only(bottom: 24) 
+            padding: isMobile
+                ? const EdgeInsets.only(bottom: 24)
                 : const EdgeInsets.all(AppSpacing.lg),
-            decoration: isMobile ? null : BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(14),
-            ),
+            decoration: isMobile
+                ? null
+                : BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -1587,7 +1725,8 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
                     _buildTypingTitle(),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      AppLocalizations.of(context)!.transparentRealPerformanceDesc,
+                      AppLocalizations.of(context)!
+                          .transparentRealPerformanceDesc,
                       style: AppTextStyles.body.copyWith(
                         color: Colors.white,
                         fontSize: isMobile ? 18 : 14,
@@ -1600,9 +1739,13 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
                   spacing: 8,
                   runSpacing: 6,
                   children: [
-                    _TransparentCard()._pill(AppLocalizations.of(context)!.results, isMobile),
-                    _TransparentCard()._pill(AppLocalizations.of(context)!.performanceTracking, isMobile),
-                    _TransparentCard()._pill(AppLocalizations.of(context)!.accurate, isMobile),
+                    _TransparentCard()
+                        ._pill(AppLocalizations.of(context)!.results, isMobile),
+                    _TransparentCard()._pill(
+                        AppLocalizations.of(context)!.performanceTracking,
+                        isMobile),
+                    _TransparentCard()._pill(
+                        AppLocalizations.of(context)!.accurate, isMobile),
                   ],
                 ),
               ],
@@ -1622,7 +1765,8 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated> with
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(fontSize: 31, fontWeight: FontWeight.w800),
+      style:
+          AppTextStyles.h1.copyWith(fontSize: 31, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1635,13 +1779,16 @@ class _KeyFindingsCard extends StatefulWidget {
   State<_KeyFindingsCard> createState() => _KeyFindingsCardState();
 }
 
-class _KeyFindingsCardState extends State<_KeyFindingsCard> with SingleTickerProviderStateMixin {
+class _KeyFindingsCardState extends State<_KeyFindingsCard>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 4))
+          ..repeat();
   }
 
   @override
@@ -1656,7 +1803,11 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard> with SingleTickerPro
       animation: _controller,
       builder: (context, child) {
         final t = _controller.value;
-        final colors = const [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)];
+        final colors = const [
+          Color(0xFF04B3E9),
+          Color(0xFF2E60FF),
+          Color(0xFFD500F9)
+        ];
         final stops = [
           (t + 0.0) % 1,
           (t + 0.4) % 1,
@@ -1694,16 +1845,26 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard> with SingleTickerPro
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Key Findings', style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
+                Text('Key Findings',
+                    style: AppTextStyles.h3
+                        .copyWith(fontSize: 22, color: Colors.white)),
                 const SizedBox(height: AppSpacing.md),
                 _chartPlaceholder(_controller.value),
                 const SizedBox(height: AppSpacing.lg),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _Metric(label: AppLocalizations.of(context)!.predictiveAccuracy, value: '+81%'),
-                    _Metric(label: AppLocalizations.of(context)!.improvementInProfitability, value: '+37%'),
-                    _Metric(label: AppLocalizations.of(context)!.improvedRiskManagement, value: '+63%'),
+                    _Metric(
+                        label: AppLocalizations.of(context)!.predictiveAccuracy,
+                        value: '+81%'),
+                    _Metric(
+                        label: AppLocalizations.of(context)!
+                            .improvementInProfitability,
+                        value: '+37%'),
+                    _Metric(
+                        label: AppLocalizations.of(context)!
+                            .improvedRiskManagement,
+                        value: '+63%'),
                   ],
                 ),
               ],
@@ -1748,7 +1909,8 @@ class _Metric extends StatelessWidget {
         children: [
           Text(
             value,
-            style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w700),
+            style: AppTextStyles.h3.copyWith(
+                fontSize: 22, color: Colors.white, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
           Text(
@@ -1836,7 +1998,8 @@ class _ChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ChartPainter oldDelegate) => oldDelegate.progress != progress;
+  bool shouldRepaint(covariant _ChartPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
 
 class PerformanceSection extends StatelessWidget {
@@ -1872,10 +2035,12 @@ class _SignalsPerformanceCard extends StatefulWidget {
   const _SignalsPerformanceCard();
 
   @override
-  State<_SignalsPerformanceCard> createState() => _SignalsPerformanceCardState();
+  State<_SignalsPerformanceCard> createState() =>
+      _SignalsPerformanceCardState();
 }
 
-class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with TickerProviderStateMixin {
+class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
+    with TickerProviderStateMixin {
   late final AnimationController _entranceController;
   late final AnimationController _itemsController;
   late final Animation<Offset> _slideIn;
@@ -1885,12 +2050,15 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
   @override
   void initState() {
     super.initState();
-    _entranceController = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _entranceController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 900));
     _slideIn = Tween(begin: const Offset(-0.16, 0), end: Offset.zero).animate(
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
     );
-    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _entranceController, curve: Curves.easeOut));
-    _itemsController = AnimationController(vsync: this, duration: const Duration(seconds: 5));
+    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _entranceController, curve: Curves.easeOut));
+    _itemsController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 5));
   }
 
   @override
@@ -1924,7 +2092,8 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 24),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       gradient: const LinearGradient(
@@ -1933,12 +2102,30 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
                         end: Alignment.bottomRight,
                       ),
                     ),
-                    child: Text(AppLocalizations.of(context)!.signalsPerformanceTitle, style: AppTextStyles.h3.copyWith(color: Colors.white)),
+                    child: Text(
+                        AppLocalizations.of(context)!.signalsPerformanceTitle,
+                        style: AppTextStyles.h3.copyWith(color: Colors.white)),
                   ),
-                  _staggerItem(0, Icons.balance, AppLocalizations.of(context)!.riskToRewardRatio, AppLocalizations.of(context)!.howRiskComparesToReward),
-                  _staggerItem(1, Icons.attach_money, AppLocalizations.of(context)!.profitLossOverview, AppLocalizations.of(context)!.netGainVsLoss),
-                  _staggerItem(2, Icons.emoji_events, AppLocalizations.of(context)!.winRate, AppLocalizations.of(context)!.percentageOfWinningTrades),
-                  _staggerItem(3, Icons.track_changes, AppLocalizations.of(context)!.accuracyRate, AppLocalizations.of(context)!.howPreciseOurSignalsAre),
+                  _staggerItem(
+                      0,
+                      Icons.balance,
+                      AppLocalizations.of(context)!.riskToRewardRatio,
+                      AppLocalizations.of(context)!.howRiskComparesToReward),
+                  _staggerItem(
+                      1,
+                      Icons.attach_money,
+                      AppLocalizations.of(context)!.profitLossOverview,
+                      AppLocalizations.of(context)!.netGainVsLoss),
+                  _staggerItem(
+                      2,
+                      Icons.emoji_events,
+                      AppLocalizations.of(context)!.winRate,
+                      AppLocalizations.of(context)!.percentageOfWinningTrades),
+                  _staggerItem(
+                      3,
+                      Icons.track_changes,
+                      AppLocalizations.of(context)!.accuracyRate,
+                      AppLocalizations.of(context)!.howPreciseOurSignalsAre),
                 ],
               ),
             ),
@@ -1993,9 +2180,13 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard> with T
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white)),
+                    Text(title,
+                        style: AppTextStyles.h3
+                            .copyWith(fontSize: 22, color: Colors.white)),
                     const SizedBox(height: 4),
-                    Text(subtitle, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                    Text(subtitle,
+                        style: AppTextStyles.caption
+                            .copyWith(color: Colors.white70)),
                   ],
                 ),
               ),
@@ -2043,8 +2234,10 @@ class _SignalsPerformanceRow extends StatelessWidget {
       ],
     );
   }
-} class _TransparentCard extends StatelessWidget {
-   const _TransparentCard();
+}
+
+class _TransparentCard extends StatelessWidget {
+  const _TransparentCard();
 
   @override
   Widget build(BuildContext context) {
@@ -2065,7 +2258,11 @@ class _SignalsPerformanceRow extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
               gradient: const LinearGradient(
-                colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                colors: [
+                  Color(0xFF04B3E9),
+                  Color(0xFF2E60FF),
+                  Color(0xFFD500F9)
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -2146,23 +2343,24 @@ class CoreValueSection extends StatelessWidget {
     ];
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
+      padding:
+          EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
       child: Column(
         children: [
-        Text(
-          AppLocalizations.of(context)!.minvestAiCoreValueTitle,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.h1.copyWith(
-            color: Colors.white, 
-            fontSize: isMobile ? 32 : 36,
-            fontWeight: FontWeight.w800,
+          Text(
+            AppLocalizations.of(context)!.minvestAiCoreValueTitle,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.h1.copyWith(
+              color: Colors.white,
+              fontSize: isMobile ? 32 : 36,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppLocalizations.of(context)!.minvestAiCoreValueDesc,
             style: AppTextStyles.body.copyWith(
-              color: Colors.white, 
+              color: Colors.white,
               fontSize: isMobile ? 18 : 16,
             ),
             textAlign: TextAlign.center,
@@ -2216,8 +2414,8 @@ class _CoreValueCard extends StatelessWidget {
             title,
             textAlign: TextAlign.start,
             style: AppTextStyles.h3.copyWith(
-              fontSize: isMobile ? 20 : 22, 
-              color: Colors.white, 
+              fontSize: isMobile ? 20 : 22,
+              color: Colors.white,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -2226,7 +2424,7 @@ class _CoreValueCard extends StatelessWidget {
             description,
             textAlign: TextAlign.start,
             style: AppTextStyles.body.copyWith(
-              color: Colors.white, 
+              color: Colors.white,
               fontSize: isMobile ? 18 : 16,
             ),
           ),
@@ -2251,7 +2449,8 @@ class _AnimatedCoreValueCard extends StatefulWidget {
   State<_AnimatedCoreValueCard> createState() => _AnimatedCoreValueCardState();
 }
 
-class _AnimatedCoreValueCardState extends State<_AnimatedCoreValueCard> with SingleTickerProviderStateMixin {
+class _AnimatedCoreValueCardState extends State<_AnimatedCoreValueCard>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _slide;
   late final Animation<double> _fade;
@@ -2260,8 +2459,10 @@ class _AnimatedCoreValueCardState extends State<_AnimatedCoreValueCard> with Sin
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
-    final beginOffset = widget.slideFromLeft ? const Offset(-0.16, 0) : const Offset(0.16, 0);
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 900));
+    final beginOffset =
+        widget.slideFromLeft ? const Offset(-0.16, 0) : const Offset(0.16, 0);
     _slide = Tween(begin: beginOffset, end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
@@ -2329,7 +2530,8 @@ class FaqSection extends StatelessWidget {
       },
     ];
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 24, vertical: 32),
+      padding:
+          EdgeInsets.symmetric(horizontal: isMobile ? 0 : 24, vertical: 32),
       child: Column(
         children: [
           Text(
@@ -2346,14 +2548,15 @@ class FaqSection extends StatelessWidget {
             child: Text(
               AppLocalizations.of(context)!.faqSubtitle,
               style: AppTextStyles.body.copyWith(
-                color: Colors.white, 
+                color: Colors.white,
                 fontSize: isMobile ? 18 : 16,
               ),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          ...faqItems.map((item) => _FaqItem(question: item['question']!, answer: item['answer']!)),
+          ...faqItems.map((item) =>
+              _FaqItem(question: item['question']!, answer: item['answer']!)),
         ],
       ),
     );
@@ -2376,14 +2579,20 @@ class _FaqItem extends StatelessWidget {
       ),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        title: Text(question, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
-        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        title: Text(question,
+            style: AppTextStyles.body.copyWith(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700)),
+        childrenPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
               answer.isEmpty ? 'Content updating...' : answer,
-              style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 14),
+              style: AppTextStyles.caption
+                  .copyWith(color: Colors.white, fontSize: 14),
               textAlign: TextAlign.start,
             ),
           ),
@@ -2402,7 +2611,8 @@ class CtaSection extends StatelessWidget {
     final isMobile = width < Breakpoints.tablet;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
+      padding:
+          EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -2413,26 +2623,26 @@ class CtaSection extends StatelessWidget {
         ),
         child: Column(
           children: [
-          Text(
-            AppLocalizations.of(context)!.maximizeResultsTitle,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.h1.copyWith(
-              fontSize: isMobile ? 32 : 32, 
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-            const SizedBox(height: AppSpacing.sm),
-          Container(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Text(
-              AppLocalizations.of(context)!.minvestAiRegistrationDesc,
+            Text(
+              AppLocalizations.of(context)!.maximizeResultsTitle,
               textAlign: TextAlign.center,
-              style: AppTextStyles.body.copyWith(
-                color: Colors.white,
-                fontSize: isMobile ? 18 : 16,
+              style: AppTextStyles.h1.copyWith(
+                fontSize: isMobile ? 32 : 32,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ),
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: Text(
+                AppLocalizations.of(context)!.minvestAiRegistrationDesc,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontSize: isMobile ? 18 : 16,
+                ),
+              ),
+            ),
             const SizedBox(height: AppSpacing.lg),
             Center(
               child: GradientButton(

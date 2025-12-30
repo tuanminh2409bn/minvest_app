@@ -16,4 +16,17 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
+messaging.onBackgroundMessage((payload) => {
+  console.log('[firebase-messaging-sw.js] Received background message ', payload);
+  // Customize notification here
+  const notificationTitle = payload.notification?.title || payload.data?.title || 'Minvest Notification';
+  const notificationOptions = {
+    body: payload.notification?.body || payload.data?.body || 'You have a new message.',
+    icon: '/icons/Icon-192.png', // Fallback icon
+    data: payload.data
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
 console.log("Firebase Messaging Service Worker has been set up correctly.");
