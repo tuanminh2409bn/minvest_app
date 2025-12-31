@@ -208,8 +208,10 @@ export const telegramWebhook = functions.https.onRequest(
         let logMessage = "";
 
         // Logic parse giá đóng lệnh và pips từ tin nhắn reply
-        // Mẫu: "Giá: 1234.5 (+20p)" hoặc "Giá: 1234.5 (-10p)"
-        const priceRegex = /Giá:\s*([\d.,]+)\s*\(([+-][\d.,]+)p\)/i;
+        // Hỗ trợ các mẫu: 
+        // 1. "Giá: 1234.5 (+20p)"
+        // 2. "⏳ Exit tại giá 4387.38 (-11.4p)"
+        const priceRegex = /(?:Giá|giá):\s*([\d.,]+)\s*\(([+-][\d.,]+)p\)/i;
         const priceMatch = updateText.match(priceRegex);
 
         if (priceMatch) {
