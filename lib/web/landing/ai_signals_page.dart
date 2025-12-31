@@ -2117,16 +2117,9 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
 
       runningPips += pips;
       final date = (s.createdAt as Timestamp).toDate();
-      // Simple daily aggregation for chart points could be done here, 
-      // but for now let's just add all points and let the chart handle or subsample.
-      // To avoid too many points, we can group by day.
-      if (chartPoints.isEmpty || 
-          !DateUtils.isSameDay(chartPoints.last.date, date)) {
-        chartPoints.add(_ChartPoint(date: date, value: runningPips));
-      } else {
-        // Update the last point for the same day with the new cumulative value
-        chartPoints.last = _ChartPoint(date: date, value: runningPips);
-      }
+      
+      // Add every signal point to show detailed up/down movement (Visualizing volatility)
+      chartPoints.add(_ChartPoint(date: date, value: runningPips));
     }
 
     double winRate = signals.isNotEmpty ? (wins / signals.length) * 100 : 0;
