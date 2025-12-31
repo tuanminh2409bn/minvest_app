@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -213,7 +214,13 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
           _ContentWrapper(
             child: Builder(
               builder: (context) => GestureDetector(
-                onTap: () => Navigator.of(context).pushNamed('/signup'),
+                onTap: () {
+                  if (FirebaseAuth.instance.currentUser != null) {
+                    Navigator.of(context).pushNamed('/ai-signals');
+                  } else {
+                    Navigator.of(context).pushNamed('/signup');
+                  }
+                },
                 child: Container(
                   padding: const EdgeInsets.all(1.2),
                   decoration: BoxDecoration(
@@ -1552,7 +1559,13 @@ class MaximizeResultsSection extends StatelessWidget {
   Widget _ctaButton() {
     return Builder(
       builder: (context) => GestureDetector(
-        onTap: () => Navigator.of(context).pushNamed('/signup'),
+        onTap: () {
+          if (FirebaseAuth.instance.currentUser != null) {
+            Navigator.of(context).pushNamed('/ai-signals');
+          } else {
+            Navigator.of(context).pushNamed('/signup');
+          }
+        },
         child: Container(
           padding: const EdgeInsets.all(1.2),
           decoration: BoxDecoration(
