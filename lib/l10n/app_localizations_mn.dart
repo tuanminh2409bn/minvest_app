@@ -1417,8 +1417,28 @@ class AppLocalizationsMn extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'Сигнал таарлаа';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'Зорилтот хүрсэн';
+
+  @override
+  String get freeSignalsInfo => 'Үнэгүй Сигналын Мэдээлэл';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'Та өдөрт 1 үнэгүй сигнал авах болно.\nАшиглагдаагүй сигналууд дараагийн өдөрт шилжинэ.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Үнэгүй Сигнал';
+  }
+
+  @override
+  String get close => 'Хаах';
+
+  @override
+  String validUntil(String date) {
+    return '$date хүртэл хүчинтэй';
+  }
 }

@@ -1410,8 +1410,28 @@ class AppLocalizationsCs extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'Signál odpovídá';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'Cíl dosažen';
+
+  @override
+  String get freeSignalsInfo => 'Info o bezplatných signálech';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'Obdržíte 1 bezplatný signál denně.\nNevyužité signály se převádějí do dalšího dne.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Bezplatných signálů';
+  }
+
+  @override
+  String get close => 'Zavřít';
+
+  @override
+  String validUntil(String date) {
+    return 'Platné do $date';
+  }
 }

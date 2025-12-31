@@ -1428,8 +1428,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'Signal correspondant';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'Cible atteinte';
+
+  @override
+  String get freeSignalsInfo => 'Info Signaux Gratuits';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'Vous recevrez 1 signal gratuit par jour.\nLes signaux non utilisés sont reportés au jour suivant.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Signaux Gratuits';
+  }
+
+  @override
+  String get close => 'Fermer';
+
+  @override
+  String validUntil(String date) {
+    return 'Valable jusqu\'au $date';
+  }
 }

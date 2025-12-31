@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "Isyarat Dipadankan",
+    "targetReached": "Sasaran dicapai",
+    "freeSignalsInfo": "Maklumat Isyarat Percuma",
+    "freeSignalsInfoDesc": "Anda akan menerima 1 isyarat percuma setiap hari.\nIsyarat yang tidak digunakan akan dibawa ke hari berikutnya.",
+    "freeSignalsCount": "{count} Isyarat Percuma",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Tutup",
+    "validUntil": "Sah sehingga {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

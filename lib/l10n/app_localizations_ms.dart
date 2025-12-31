@@ -1412,8 +1412,28 @@ class AppLocalizationsMs extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'Isyarat Dipadankan';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'Sasaran dicapai';
+
+  @override
+  String get freeSignalsInfo => 'Maklumat Isyarat Percuma';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'Anda akan menerima 1 isyarat percuma setiap hari.\nIsyarat yang tidak digunakan akan dibawa ke hari berikutnya.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Isyarat Percuma';
+  }
+
+  @override
+  String get close => 'Tutup';
+
+  @override
+  String validUntil(String date) {
+    return 'Sah sehingga $date';
+  }
 }

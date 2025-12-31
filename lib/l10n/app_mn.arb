@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "Сигнал таарлаа",
+    "targetReached": "Зорилтот хүрсэн",
+    "freeSignalsInfo": "Үнэгүй Сигналын Мэдээлэл",
+    "freeSignalsInfoDesc": "Та өдөрт 1 үнэгүй сигнал авах болно.\nАшиглагдаагүй сигналууд дараагийн өдөрт шилжинэ.",
+    "freeSignalsCount": "{count} Үнэгүй Сигнал",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Хаах",
+    "validUntil": "{date} хүртэл хүчинтэй",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

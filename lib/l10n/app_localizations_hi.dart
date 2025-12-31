@@ -1411,8 +1411,28 @@ class AppLocalizationsHi extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'संकेत मेल खाता है';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'लक्ष्य तक पहुंच गया';
+
+  @override
+  String get freeSignalsInfo => 'मुफ़्त संकेत जानकारी';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'आपको प्रति दिन 1 मुफ़्त संकेत प्राप्त होगा।\nअप्रयुक्त संकेत अगले दिन के लिए रोल ओवर हो जाते हैं।';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count मुफ़्त संकेत';
+  }
+
+  @override
+  String get close => 'बंद करें';
+
+  @override
+  String validUntil(String date) {
+    return '$date तक मान्य';
+  }
 }

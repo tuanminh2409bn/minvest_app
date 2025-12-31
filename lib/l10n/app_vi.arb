@@ -477,5 +477,24 @@
     "statusHistory": "Lịch sử trạng thái",
     "signalCreated": "Tín hiệu được tạo",
     "signalMatched": "Tín hiệu đã khớp",
-    "targetReached": "Đã đạt mục tiêu"
+    "targetReached": "Đã đạt mục tiêu",
+    "freeSignalsInfo": "Thông tin Free Signals",
+    "freeSignalsInfoDesc": "Bạn sẽ nhận được 1 tín hiệu miễn phí mỗi ngày.\nCác tín hiệu chưa sử dụng sẽ được cộng dồn sang ngày hôm sau.",
+    "freeSignalsCount": "{count} Free Signals",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Đóng",
+    "validUntil": "Hết hạn ngày {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

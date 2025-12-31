@@ -477,6 +477,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "Señal Coincidente",
+    "targetReached": "Objetivo alcanzado",
+    "freeSignalsInfo": "Info Señales Gratis",
+    "freeSignalsInfoDesc": "Recibirás 1 señal gratis por día.\nLas señales no utilizadas se acumulan para el día siguiente.",
+    "freeSignalsCount": "{count} Señales Gratis",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Cerrar",
+    "validUntil": "Válido hasta {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

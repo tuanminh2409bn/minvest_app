@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "संकेत मेल खाता है",
+    "targetReached": "लक्ष्य तक पहुंच गया",
+    "freeSignalsInfo": "मुफ़्त संकेत जानकारी",
+    "freeSignalsInfoDesc": "आपको प्रति दिन 1 मुफ़्त संकेत प्राप्त होगा।\nअप्रयुक्त संकेत अगले दिन के लिए रोल ओवर हो जाते हैं।",
+    "freeSignalsCount": "{count} मुफ़्त संकेत",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "बंद करें",
+    "validUntil": "{date} तक मान्य",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

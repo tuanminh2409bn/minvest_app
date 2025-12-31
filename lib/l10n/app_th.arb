@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "สัญญาณตรงกัน",
+    "targetReached": "ถึงเป้าหมายแล้ว",
+    "freeSignalsInfo": "ข้อมูลสัญญาณฟรี",
+    "freeSignalsInfoDesc": "คุณจะได้รับ 1 สัญญาณฟรีต่อวัน\nสัญญาณที่ไม่ได้ใช้จะถูกทบไปวันถัดไป",
+    "freeSignalsCount": "{count} สัญญาณฟรี",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "ปิด",
+    "validUntil": "ใช้ได้ถึง {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

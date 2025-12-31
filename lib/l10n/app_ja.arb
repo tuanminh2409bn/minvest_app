@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "シグナル一致",
+    "targetReached": "目標達成",
+    "freeSignalsInfo": "無料シグナル情報",
+    "freeSignalsInfoDesc": "毎日1つの無料シグナルを受け取れます。\n未使用のシグナルは翌日に繰り越されます。",
+    "freeSignalsCount": "無料シグナル {count} 個",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "閉じる",
+    "validUntil": "有効期限 {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

@@ -26,6 +26,8 @@ class UserProvider with ChangeNotifier {
   // --- THAY ĐỔI: Token & Subscriptions ---
   int _tokenBalance = 0;
   List<String> _activeSubscriptions = [];
+  DateTime? _subscriptionExpiryDate;
+  Map<String, DateTime> _subscriptionsExpiry = {};
 
   String? get uid => _uid;
   String? get userTier => _userTier;
@@ -40,6 +42,8 @@ class UserProvider with ChangeNotifier {
   String? get sessionResetReason => _sessionResetReason;
   int get tokenBalance => _tokenBalance;
   List<String> get activeSubscriptions => _activeSubscriptions;
+  DateTime? get subscriptionExpiryDate => _subscriptionExpiryDate;
+  Map<String, DateTime> get subscriptionsExpiry => _subscriptionsExpiry;
 
   StreamSubscription<DocumentSnapshot>? _userSubscription;
   StreamSubscription<User?>? _authStateSubscription;
@@ -88,6 +92,24 @@ class UserProvider with ChangeNotifier {
         
         _tokenBalance = (data['tokenBalance'] ?? 0) as int;
         _activeSubscriptions = List<String>.from(data['activeSubscriptions'] ?? []);
+
+        // Parse subscriptionExpiryDate
+        if (data['subscriptionExpiryDate'] != null && data['subscriptionExpiryDate'] is Timestamp) {
+          _subscriptionExpiryDate = (data['subscriptionExpiryDate'] as Timestamp).toDate();
+        } else {
+          _subscriptionExpiryDate = null;
+        }
+
+        // Parse subscriptionsExpiry map
+        _subscriptionsExpiry = {};
+        if (data['subscriptionsExpiry'] != null && data['subscriptionsExpiry'] is Map) {
+          final map = data['subscriptionsExpiry'] as Map<String, dynamic>;
+          map.forEach((key, value) {
+            if (value is Timestamp) {
+              _subscriptionsExpiry[key] = value.toDate();
+            }
+          });
+        }
 
         _status =
         isFromCache ? UserDataStatus.fromCache : UserDataStatus.fromServer;
@@ -140,6 +162,8 @@ class UserProvider with ChangeNotifier {
     _sessionResetReason = null;
     _tokenBalance = 0;
     _activeSubscriptions = [];
+    _subscriptionExpiryDate = null;
+    _subscriptionsExpiry = {};
   }
 
   void clearVerificationStatus() {

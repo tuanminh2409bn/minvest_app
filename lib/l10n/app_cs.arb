@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "Signál odpovídá",
+    "targetReached": "Cíl dosažen",
+    "freeSignalsInfo": "Info o bezplatných signálech",
+    "freeSignalsInfoDesc": "Obdržíte 1 bezplatný signál denně.\nNevyužité signály se převádějí do dalšího dne.",
+    "freeSignalsCount": "{count} Bezplatných signálů",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Zavřít",
+    "validUntil": "Platné do {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

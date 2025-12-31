@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "Signal matchet",
+    "targetReached": "Mål nået",
+    "freeSignalsInfo": "Info om gratis signaler",
+    "freeSignalsInfoDesc": "Du modtager 1 gratis signal om dagen.\nUbrugte signaler overføres til næste dag.",
+    "freeSignalsCount": "{count} Gratis signaler",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Luk",
+    "validUntil": "Gyldig indtil {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }
