@@ -323,98 +323,110 @@ class _SignalProgressPopup extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
           children: [
-            // Header Updated
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.white12)),
-              ),
-              child: Row(
-                children: [
-                  // Asset Group
-                  Flexible(
-                    child: Text(
-                      assetGroup,
-                      style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header Updated
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.white12)),
                   ),
-                  const SizedBox(width: 12),
-                  
-                  // Status Text (Instead of Price)
-                  Flexible(
-                    child: Text(
-                      statusText,
-                      style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w600),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  // Icon Up/Down Diagonal
-                  Icon(
-                    isBuy ? Icons.north_east : Icons.south_east, 
-                    color: accentColor,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 4),
-
-                  // Buy/Sell Text
-                  Text(
-                    typeText.toUpperCase(),
-                    style: AppTextStyles.body.copyWith(color: accentColor, fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white70),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-            ),
-            
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Progress Stepper
-                    Text(
-                      l10n.signalProgress,
-                      style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 12),
-                    ),
-                    const SizedBox(height: 24),
-                    _VisualStepper(
-                      steps: steps,
-                      activeIndex: activeStepIndex,
-                      accentColor: accentColor,
-                    ),
-                    
-                    const SizedBox(height: 40),
-                    
-                    // Status History
-                    Text(
-                      l10n.statusHistory,
-                      style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 12),
-                    ),
-                    const SizedBox(height: 16),
-                    ...logs.map((log) => _HistoryLogItem(log: log)),
-                    
-                    if (logs.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    children: [
+                      // Asset Group
+                      Flexible(
                         child: Text(
-                          l10n.noHistoryAvailable,
-                          style: AppTextStyles.body.copyWith(color: Colors.white30, fontSize: 13),
+                          assetGroup,
+                          style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                  ],
+                      const SizedBox(width: 12),
+                      
+                      // Status Text (Instead of Price)
+                      Flexible(
+                        child: Text(
+                          statusText,
+                          style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w600),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+
+                      // Icon Up/Down Diagonal
+                      Icon(
+                        isBuy ? Icons.north_east : Icons.south_east, 
+                        color: accentColor,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 4),
+
+                      // Buy/Sell Text
+                      Text(
+                        typeText.toUpperCase(),
+                        style: AppTextStyles.body.copyWith(color: accentColor, fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      
+                      // Add spacer to push content left, leaving room for X button
+                      const Spacer(),
+                      const SizedBox(width: 32), // Reserve space for the close button
+                    ],
+                  ),
                 ),
+                
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Progress Stepper
+                        Text(
+                          l10n.signalProgress,
+                          style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 12),
+                        ),
+                        const SizedBox(height: 24),
+                        _VisualStepper(
+                          steps: steps,
+                          activeIndex: activeStepIndex,
+                          accentColor: accentColor,
+                        ),
+                        
+                        const SizedBox(height: 40),
+                        
+                        // Status History
+                        Text(
+                          l10n.statusHistory,
+                          style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 12),
+                        ),
+                        const SizedBox(height: 16),
+                        ...logs.map((log) => _HistoryLogItem(log: log)),
+                        
+                        if (logs.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              l10n.noHistoryAvailable,
+                              style: AppTextStyles.body.copyWith(color: Colors.white30, fontSize: 13),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
+            // Absolute Close Button
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white70),
+                onPressed: () => Navigator.pop(context),
               ),
             ),
           ],

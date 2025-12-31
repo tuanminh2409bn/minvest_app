@@ -2924,7 +2924,7 @@ class _HistorySectionState extends State<_HistorySection> {
             }
             
             final filtered = _filteredSignals(signals);
-            rows.addAll(filtered.map((s) => _mapSignalToRow(s, widget.selectedTimezone)));
+            rows.addAll(filtered.map((s) => _mapSignalToRow(s, widget.selectedTimezone, context)));
             
             if (rows.isEmpty) {
               return Padding(
@@ -2932,7 +2932,8 @@ class _HistorySectionState extends State<_HistorySection> {
                 child: Text(AppLocalizations.of(context)!.noHistoryAvailable, style: AppTextStyles.body.copyWith(color: Colors.white70)),
               );
             }
-            final totalPages = (rows.length / _pageSize).ceil().clamp(1, 9999);
+            // Limit max pages to 50
+            final totalPages = (rows.length / _pageSize).ceil().clamp(1, 50);
             final currentPage = _page.clamp(0, totalPages - 1);
             final visible = rows.skip(currentPage * _pageSize).take(_pageSize).toList();
 
@@ -2966,7 +2967,7 @@ class _HistorySectionState extends State<_HistorySection> {
   }
 }
 
-HistoryRow _mapSignalToRow(Signal s, String timeZone) {
+HistoryRow _mapSignalToRow(Signal s, String timeZone, BuildContext context) {
   DateTime created = s.createdAt is Timestamp ? (s.createdAt as Timestamp).toDate() : DateTime.now();
   
   if (timeZone.isNotEmpty) {
@@ -2988,7 +2989,8 @@ HistoryRow _mapSignalToRow(Signal s, String timeZone) {
   final parts = s.symbol.split('/');
   final asset = parts.isNotEmpty ? (parts.first.toUpperCase() == 'XAU' ? 'GOLD' : parts.first.toUpperCase()) : s.symbol;
   final order = s.type.toUpperCase();
-  final status = (s.result ?? s.status).toString();
+  // Use getTranslatedResult for consistent status display
+  final status = s.getTranslatedResult(AppLocalizations.of(context)!);
   final pips = s.pips != null ? (s.pips! >= 0 ? '+${s.pips}' : s.pips.toString()) : '-';
 
   String _fmt(num? v) {
