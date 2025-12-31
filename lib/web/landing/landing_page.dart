@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
@@ -387,8 +388,13 @@ class _HeroInteractiveState extends State<_HeroInteractive>
                           color: Colors.white,
                           height: 1.1,
                         ),
-                        onPressed: () =>
-                            Navigator.of(context).pushNamed('/signup'),
+                        onPressed: () {
+                          if (FirebaseAuth.instance.currentUser != null) {
+                            Navigator.of(context).pushNamed('/ai-signals');
+                          } else {
+                            Navigator.of(context).pushNamed('/signup');
+                          }
+                        },
                       ),
                       InkWell(
                         borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
@@ -2655,7 +2661,13 @@ class CtaSection extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   fontSize: isMobile ? 18 : 14,
                 ),
-                onPressed: () => Navigator.of(context).pushNamed('/signup'),
+                onPressed: () {
+                  if (FirebaseAuth.instance.currentUser != null) {
+                    Navigator.of(context).pushNamed('/ai-signals');
+                  } else {
+                    Navigator.of(context).pushNamed('/signup');
+                  }
+                },
               ),
             ),
           ],
