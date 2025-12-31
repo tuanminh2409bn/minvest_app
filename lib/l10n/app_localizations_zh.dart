@@ -1362,8 +1362,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => '信号已匹配';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => '达到目标';
+
+  @override
+  String get freeSignalsInfo => '免费信号信息';
+
+  @override
+  String get freeSignalsInfoDesc => '您每天将收到 1 个免费信号。\n未使用的信号将累积到第二天。';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count 个免费信号';
+  }
+
+  @override
+  String get close => '关闭';
+
+  @override
+  String validUntil(String date) {
+    return '有效期至 $date';
+  }
 }

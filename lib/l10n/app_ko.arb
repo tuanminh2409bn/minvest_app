@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "신호 일치",
+    "targetReached": "목표 달성",
+    "freeSignalsInfo": "무료 신호 정보",
+    "freeSignalsInfoDesc": "매일 1개의 무료 신호를 받습니다.\n사용하지 않은 신호는 다음 날로 이월됩니다.",
+    "freeSignalsCount": "무료 신호 {count}개",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "닫기",
+    "validUntil": "{date}까지 유효",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

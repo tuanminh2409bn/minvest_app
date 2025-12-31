@@ -1410,8 +1410,28 @@ class AppLocalizationsFi extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'Signaali täsmää';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'Tavoite saavutettu';
+
+  @override
+  String get freeSignalsInfo => 'Ilmaiset signaalitiedot';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'Saat 1 ilmaisen signaalin päivässä.\nKäyttämättömät signaalit siirtyvät seuraavalle päivälle.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Ilmaista signaalia';
+  }
+
+  @override
+  String get close => 'Sulje';
+
+  @override
+  String validUntil(String date) {
+    return 'Voimassa $date asti';
+  }
 }

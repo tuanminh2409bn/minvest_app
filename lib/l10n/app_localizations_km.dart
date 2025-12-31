@@ -1405,8 +1405,28 @@ class AppLocalizationsKm extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'សញ្ញាត្រូវគ្នា';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'បានដល់គោលដៅ';
+
+  @override
+  String get freeSignalsInfo => 'ព័ត៌មានសញ្ញាឥតគិតថ្លៃ';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'អ្នកនឹងទទួលបានសញ្ញាឥតគិតថ្លៃ ១ ក្នុងមួយថ្ងៃ។\nសញ្ញាដែលមិនបានប្រើនឹងត្រូវបូកសរុបទៅថ្ងៃបន្ទាប់។';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count សញ្ញាឥតគិតថ្លៃ';
+  }
+
+  @override
+  String get close => 'បិទ';
+
+  @override
+  String validUntil(String date) {
+    return 'មានសុពលភាពរហូតដល់ $date';
+  }
 }

@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "Sinyal Cocok",
+    "targetReached": "Target tercapai",
+    "freeSignalsInfo": "Info Sinyal Gratis",
+    "freeSignalsInfoDesc": "Anda akan menerima 1 sinyal gratis per hari.\nSinyal yang tidak terpakai akan diakumulasi ke hari berikutnya.",
+    "freeSignalsCount": "{count} Sinyal Gratis",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Tutup",
+    "validUntil": "Berlaku hingga {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

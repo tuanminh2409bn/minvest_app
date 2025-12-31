@@ -2737,6 +2737,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Target reached'**
   String get targetReached;
+
+  /// No description provided for @freeSignalsInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Signals Info'**
+  String get freeSignalsInfo;
+
+  /// No description provided for @freeSignalsInfoDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll receive 1 free signal per day.\nUnused signals roll over to the next day.'**
+  String get freeSignalsInfoDesc;
+
+  /// No description provided for @freeSignalsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Free Signals'**
+  String freeSignalsCount(int count);
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @validUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {date}'**
+  String validUntil(String date);
 }
 
 class _AppLocalizationsDelegate

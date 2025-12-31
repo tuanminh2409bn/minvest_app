@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "信号已匹配",
+    "targetReached": "达到目标",
+    "freeSignalsInfo": "免费信号信息",
+    "freeSignalsInfoDesc": "您每天将收到 1 个免费信号。\n未使用的信号将累积到第二天。",
+    "freeSignalsCount": "{count} 个免费信号",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "关闭",
+    "validUntil": "有效期至 {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

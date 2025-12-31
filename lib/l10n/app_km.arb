@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "សញ្ញាត្រូវគ្នា",
+    "targetReached": "បានដល់គោលដៅ",
+    "freeSignalsInfo": "ព័ត៌មានសញ្ញាឥតគិតថ្លៃ",
+    "freeSignalsInfoDesc": "អ្នកនឹងទទួលបានសញ្ញាឥតគិតថ្លៃ ១ ក្នុងមួយថ្ងៃ។\nសញ្ញាដែលមិនបានប្រើនឹងត្រូវបូកសរុបទៅថ្ងៃបន្ទាប់។",
+    "freeSignalsCount": "{count} សញ្ញាឥតគិតថ្លៃ",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "បិទ",
+    "validUntil": "មានសុពលភាពរហូតដល់ {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

@@ -477,5 +477,24 @@
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
     "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "targetReached": "Target reached",
+    "freeSignalsInfo": "Free Signals Info",
+    "freeSignalsInfoDesc": "You'll receive 1 free signal per day.\nUnused signals roll over to the next day.",
+    "freeSignalsCount": "{count} Free Signals",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Close",
+    "validUntil": "Valid until {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

@@ -1415,4 +1415,24 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get targetReached => 'Đã đạt mục tiêu';
+
+  @override
+  String get freeSignalsInfo => 'Thông tin Free Signals';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'Bạn sẽ nhận được 1 tín hiệu miễn phí mỗi ngày.\nCác tín hiệu chưa sử dụng sẽ được cộng dồn sang ngày hôm sau.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Free Signals';
+  }
+
+  @override
+  String get close => 'Đóng';
+
+  @override
+  String validUntil(String date) {
+    return 'Hết hạn ngày $date';
+  }
 }

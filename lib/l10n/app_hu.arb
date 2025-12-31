@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "Jel egyezés",
+    "targetReached": "Cél elérve",
+    "freeSignalsInfo": "Ingyenes jelek info",
+    "freeSignalsInfoDesc": "Napi 1 ingyenes jelet kapsz.\nA fel nem használt jelek átvitelre kerülnek a következő napra.",
+    "freeSignalsCount": "{count} Ingyenes jel",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Bezárás",
+    "validUntil": "Érvényes eddig: {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

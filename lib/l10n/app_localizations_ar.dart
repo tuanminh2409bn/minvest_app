@@ -1401,8 +1401,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'تطابق الإشارة';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'تم الوصول للهدف';
+
+  @override
+  String get freeSignalsInfo => 'معلومات الإشارات المجانية';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'ستحصل على إشارة مجانية واحدة يوميًا.\nيتم ترحيل الإشارات غير المستخدمة إلى اليوم التالي.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count إشارات مجانية';
+  }
+
+  @override
+  String get close => 'إغلاق';
+
+  @override
+  String validUntil(String date) {
+    return 'صالح حتى $date';
+  }
 }

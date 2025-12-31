@@ -119,13 +119,25 @@ class _AISignalsPageState extends State<AISignalsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const _TitleSection(),
+                        _TitleSection(isMobile: isMobile),
                         const SizedBox(height: 24),
-                        _TabBar(
-                          selected: selectedTab,
-                          onSelect: (tab) {
-                            setState(() => selectedTab = tab);
-                          },
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: _TabBar(
+                                  selected: selectedTab,
+                                  onSelect: (tab) {
+                                    setState(() => selectedTab = tab);
+                                  },
+                                ),
+                              ),
+                            ),
+                            if (!isMobile && FirebaseAuth.instance.currentUser != null)
+                               const _UserSubscriptionStatus(),
+                          ],
                         ),
                         const SizedBox(height: 24),
                         if (selectedTab == AISignalsTab.aiSignals || selectedTab == AISignalsTab.history) ...[
@@ -186,11 +198,12 @@ class _AISignalsPageState extends State<AISignalsPage> {
 }
 
 class _TitleSection extends StatelessWidget {
-  const _TitleSection();
+  final bool isMobile;
+  const _TitleSection({this.isMobile = false});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
+    final title = Text(
       AppLocalizations.of(context)!.aiSignal,
       style: AppTextStyles.h1.copyWith(
         fontSize: 34,
@@ -198,6 +211,25 @@ class _TitleSection extends StatelessWidget {
         color: Colors.white,
       ),
     );
+
+    if (isMobile && FirebaseAuth.instance.currentUser != null) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          title,
+          // Use FittedBox to ensure it scales down if screen is too narrow
+          const Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: _UserSubscriptionStatus(),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return title;
   }
 }
 
@@ -2998,4 +3030,237 @@ HistoryRow _mapSignalToRow(Signal s, String timeZone) {
     tp2: _tp(1),
     tp3: _tp(2),
   );
+}
+
+class _UserSubscriptionStatus extends StatefulWidget {
+  const _UserSubscriptionStatus();
+
+  @override
+  State<_UserSubscriptionStatus> createState() => _UserSubscriptionStatusState();
+}
+
+class _UserSubscriptionStatusState extends State<_UserSubscriptionStatus> {
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _overlayEntry;
+
+  void _toggleTooltip() {
+    if (_overlayEntry != null) {
+      _removeTooltip();
+    } else {
+      _showTooltip();
+    }
+  }
+
+  void _removeTooltip() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void _showTooltip() {
+    final l10n = AppLocalizations.of(context)!;
+    final isMobile = MediaQuery.of(context).size.width < Breakpoints.tablet;
+    final bubbleWidth = isMobile ? 200.0 : 280.0;
+    
+    _overlayEntry = OverlayEntry(
+      builder: (context) {
+        return Stack(
+          children: [
+            // Transparent barrier to close on click outside
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: _removeTooltip,
+                behavior: HitTestBehavior.translucent,
+                child: Container(color: Colors.transparent),
+              ),
+            ),
+            // The Bubble
+            Positioned(
+              width: bubbleWidth, // Dynamic width based on screen size
+              child: CompositedTransformFollower(
+                link: _layerLink,
+                showWhenUnlinked: false,
+                followerAnchor: Alignment.bottomRight,
+                targetAnchor: Alignment.topLeft,
+                offset: const Offset(8, 8), // Updated offset
+                child: Material(
+                  elevation: 8,
+                  color: const Color(0xFF1E1E1E),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: const BorderSide(color: Colors.white24),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.freeSignalsInfo,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: isMobile ? 12 : 14, // Smaller on mobile
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          l10n.freeSignalsInfoDesc,
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: isMobile ? 10 : 12, // Smaller on mobile
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  @override
+  void dispose() {
+    _removeTooltip();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider?>(context);
+    final l10n = AppLocalizations.of(context)!;
+    final isMobile = MediaQuery.of(context).size.width < Breakpoints.tablet;
+    final boxHeight = isMobile ? 28.0 : 36.0;
+
+    if (userProvider == null) return const SizedBox.shrink();
+
+    final isElite = (userProvider.userTier ?? '').toLowerCase() == 'elite';
+    final tokenBalance = userProvider.tokenBalance;
+    final activeSubs = userProvider.activeSubscriptions;
+    final subsExpiry = userProvider.subscriptionsExpiry;
+
+    if (isElite) {
+      return Container(
+        height: boxHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(1),
+          border: Border.all(color: Colors.white),
+        ),
+        child: Text(
+          l10n.unlimited,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+            fontSize: 13,
+          ),
+        ),
+      );
+    }
+
+    // Determine expiry text for standard users with packages
+    String? expiryText;
+    if (activeSubs.isNotEmpty) {
+      DateTime? maxExpiry;
+      for (final sub in activeSubs) {
+        final date = subsExpiry[sub];
+        if (date != null) {
+          if (maxExpiry == null || date.isAfter(maxExpiry)) {
+            maxExpiry = date;
+          }
+        }
+      }
+      
+      if (maxExpiry != null) {
+        expiryText = l10n.validUntil(DateFormat('dd.MM.yyyy').format(maxExpiry));
+      }
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Token Box (Always show for non-Elite)
+        Container(
+          height: boxHeight,
+          clipBehavior: Clip.none, // Allow icon to overflow
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(1),
+            border: Border.all(color: Colors.white),
+          ),
+          child: Stack(
+            clipBehavior: Clip.none, // Important for overflow
+            children: [
+              // Icon Top-Left (Overlapping border)
+              Positioned(
+                top: -6,
+                left: -6,
+                child: CompositedTransformTarget(
+                  link: _layerLink,
+                  child: GestureDetector(
+                    onTap: _toggleTooltip,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: Colors.black, // Background to make icon clearer over border
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.info_outline, color: Colors.white, size: 14),
+                    ),
+                  ),
+                ),
+              ),
+              
+              // Text Content
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Center(
+                  child: Text(
+                    l10n.freeSignalsCount(tokenBalance),
+                    style: const TextStyle(
+                      color: Color(0xFF3DCC5C),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Expiry Box (only if has active subs)
+        if (expiryText != null) ...[
+          const SizedBox(width: 12),
+          Container(
+            height: boxHeight,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(1),
+              border: Border.all(color: Colors.white),
+            ),
+            child: Text(
+              expiryText,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 }

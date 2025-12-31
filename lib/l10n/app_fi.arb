@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "Signaali täsmää",
+    "targetReached": "Tavoite saavutettu",
+    "freeSignalsInfo": "Ilmaiset signaalitiedot",
+    "freeSignalsInfoDesc": "Saat 1 ilmaisen signaalin päivässä.\nKäyttämättömät signaalit siirtyvät seuraavalle päivälle.",
+    "freeSignalsCount": "{count} Ilmaista signaalia",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Sulje",
+    "validUntil": "Voimassa {date} asti",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

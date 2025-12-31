@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "Semnal potrivit",
+    "targetReached": "Țintă atinsă",
+    "freeSignalsInfo": "Info Semnale Gratuite",
+    "freeSignalsInfoDesc": "Veți primi 1 semnal gratuit pe zi.\nSemnalele neutilizate se reportează pentru ziua următoare.",
+    "freeSignalsCount": "{count} Semnale Gratuite",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "Închide",
+    "validUntil": "Valabil până la {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

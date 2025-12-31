@@ -1407,8 +1407,28 @@ class AppLocalizationsDa extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'Signal matchet';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'Mål nået';
+
+  @override
+  String get freeSignalsInfo => 'Info om gratis signaler';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'Du modtager 1 gratis signal om dagen.\nUbrugte signaler overføres til næste dag.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Gratis signaler';
+  }
+
+  @override
+  String get close => 'Luk';
+
+  @override
+  String validUntil(String date) {
+    return 'Gyldig indtil $date';
+  }
 }

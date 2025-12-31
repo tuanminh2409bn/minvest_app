@@ -1415,8 +1415,28 @@ class AppLocalizationsRu extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'Сигнал совпал';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'Цель достигнута';
+
+  @override
+  String get freeSignalsInfo => 'Инфо о бесплатных сигналах';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'Вы будете получать 1 бесплатный сигнал в день.\nНеиспользованные сигналы переносятся на следующий день.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Бесплатных сигналов';
+  }
+
+  @override
+  String get close => 'Закрыть';
+
+  @override
+  String validUntil(String date) {
+    return 'Действует до $date';
+  }
 }

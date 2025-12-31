@@ -1416,8 +1416,28 @@ class AppLocalizationsHu extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'Jel egyezés';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'Cél elérve';
+
+  @override
+  String get freeSignalsInfo => 'Ingyenes jelek info';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'Napi 1 ingyenes jelet kapsz.\nA fel nem használt jelek átvitelre kerülnek a következő napra.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Ingyenes jel';
+  }
+
+  @override
+  String get close => 'Bezárás';
+
+  @override
+  String validUntil(String date) {
+    return 'Érvényes eddig: $date';
+  }
 }

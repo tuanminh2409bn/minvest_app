@@ -1425,8 +1425,28 @@ class AppLocalizationsRo extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'Semnal potrivit';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => 'Țintă atinsă';
+
+  @override
+  String get freeSignalsInfo => 'Info Semnale Gratuite';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'Veți primi 1 semnal gratuit pe zi.\nSemnalele neutilizate se reportează pentru ziua următoare.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Semnale Gratuite';
+  }
+
+  @override
+  String get close => 'Închide';
+
+  @override
+  String validUntil(String date) {
+    return 'Valabil până la $date';
+  }
 }

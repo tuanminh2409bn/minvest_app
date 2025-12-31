@@ -1373,8 +1373,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => '신호 일치';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => '목표 달성';
+
+  @override
+  String get freeSignalsInfo => '무료 신호 정보';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      '매일 1개의 무료 신호를 받습니다.\n사용하지 않은 신호는 다음 날로 이월됩니다.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '무료 신호 $count개';
+  }
+
+  @override
+  String get close => '닫기';
+
+  @override
+  String validUntil(String date) {
+    return '$date까지 유효';
+  }
 }

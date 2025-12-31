@@ -1408,4 +1408,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get targetReached => 'Target reached';
+
+  @override
+  String get freeSignalsInfo => 'Free Signals Info';
+
+  @override
+  String get freeSignalsInfoDesc =>
+      'You\'ll receive 1 free signal per day.\nUnused signals roll over to the next day.';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '$count Free Signals';
+  }
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String validUntil(String date) {
+    return 'Valid until $date';
+  }
 }

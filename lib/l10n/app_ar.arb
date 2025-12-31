@@ -476,6 +476,25 @@
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
-    "signalMatched": "Signal Matched",
-    "targetReached": "Target reached"
+    "signalMatched": "تطابق الإشارة",
+    "targetReached": "تم الوصول للهدف",
+    "freeSignalsInfo": "معلومات الإشارات المجانية",
+    "freeSignalsInfoDesc": "ستحصل على إشارة مجانية واحدة يوميًا.\nيتم ترحيل الإشارات غير المستخدمة إلى اليوم التالي.",
+    "freeSignalsCount": "{count} إشارات مجانية",
+    "@freeSignalsCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "close": "إغلاق",
+    "validUntil": "صالح حتى {date}",
+    "@validUntil": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    }
 }

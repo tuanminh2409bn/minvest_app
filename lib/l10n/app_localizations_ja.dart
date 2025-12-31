@@ -1373,8 +1373,27 @@ class AppLocalizationsJa extends AppLocalizations {
   String get signalCreated => 'Signal Created';
 
   @override
-  String get signalMatched => 'Signal Matched';
+  String get signalMatched => 'シグナル一致';
 
   @override
-  String get targetReached => 'Target reached';
+  String get targetReached => '目標達成';
+
+  @override
+  String get freeSignalsInfo => '無料シグナル情報';
+
+  @override
+  String get freeSignalsInfoDesc => '毎日1つの無料シグナルを受け取れます。\n未使用のシグナルは翌日に繰り越されます。';
+
+  @override
+  String freeSignalsCount(int count) {
+    return '無料シグナル $count 個';
+  }
+
+  @override
+  String get close => '閉じる';
+
+  @override
+  String validUntil(String date) {
+    return '有効期限 $date';
+  }
 }
