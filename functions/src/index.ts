@@ -245,6 +245,27 @@ export const telegramWebhook = functions.https.onRequest(
             logMessage = `Tín hiệu ${signalDoc.id} đã bị hủy.`;
         }
 
+        // Logic xử lý tin nhắn Giải thích (Reply)
+        const reasonRegex = /===\s*GIẢI\s*THÍCH\s*===/i;
+        const reasonMatch = message.text.match(reasonRegex); // Dùng message.text gốc để giữ format
+        if (reasonMatch && reasonMatch.index !== undefined) {
+            const reasonContent = message.text.substring(reasonMatch.index + reasonMatch[0].length).trim();
+            if (reasonContent) {
+                let reasonData: any = { vi: reasonContent };
+                try {
+                    functions.logger.log(`Đang dịch phần giải thích (Reply): "${reasonContent}"`);
+                    const [translation] = await translateClient.translate(reasonContent, "en");
+                    reasonData.en = translation;
+                    functions.logger.log(`Dịch thành công: "${translation}"`);
+                } catch (translationError) {
+                    functions.logger.error("Lỗi khi dịch phần giải thích (Reply):", translationError);
+                    reasonData.en = "Translation failed.";
+                }
+                updatePayload.reason = reasonData;
+                logMessage = logMessage ? `${logMessage} & Đã cập nhật Lý do.` : `Tín hiệu ${signalDoc.id} đã cập nhật Lý do.`;
+            }
+        }
+
         if (Object.keys(updatePayload).length > 0) {
           await signalRef.update(updatePayload);
           functions.logger.log(logMessage);
@@ -315,8 +336,14 @@ export const telegramWebhook = functions.https.onRequest(
 
 function parseSignalMessage(text: string): any | null {
     const signal: any = { takeProfits: [] };
-    const signalPart = text.split("=== GIẢI THÍCH ===")[0];
+    
+    // Sử dụng Regex để tìm phần giải thích (không phân biệt hoa thường)
+    const reasonRegex = /===\s*GIẢI\s*THÍCH\s*===/i;
+    const match = text.match(reasonRegex);
+    
+    const signalPart = match ? text.split(match[0])[0] : text;
     if (!signalPart) return null;
+    
     const lines = signalPart.split("\n");
     const titleLine = lines.find((line) => line.includes("Tín hiệu:"));
     if (!titleLine) return null;
@@ -327,15 +354,12 @@ function parseSignalMessage(text: string): any | null {
     else return null;
 
     // 2. Parse Symbol (Improved for Crypto)
-    // Try standard regex first (for XAU/USD)
     const symbolRegex = /\b([A-Z]{3}\/[A-Z]{3}|XAU\/USD)\b/i;
     const symbolMatch = titleLine.match(symbolRegex);
     
     if (symbolMatch) {
         signal.symbol = symbolMatch[0].toUpperCase();
     } else {
-        // Fallback: Get the last word if it looks like a symbol (e.g. ETHUSDT)
-        // Only accept if it's NOT a keyword
         const words = titleLine.trim().split(/\s+/);
         if (words.length > 0) {
             const lastWord = words[words.length - 1].toUpperCase();
@@ -344,14 +368,9 @@ function parseSignalMessage(text: string): any | null {
                  signal.symbol = lastWord.toUpperCase();
             }
         }
-        
-        // Final fallback default
-        if (!signal.symbol) {
-             signal.symbol = "XAU/USD";
-        }
+        if (!signal.symbol) signal.symbol = "XAU/USD";
     }
 
-    // 3. Format Symbol (UI Friendly)
     if (signal.symbol && !signal.symbol.includes('/')) {
         if (signal.symbol.endsWith('USDT')) {
             signal.symbol = signal.symbol.replace('USDT', '/USDT');
@@ -362,26 +381,22 @@ function parseSignalMessage(text: string): any | null {
         }
     }
 
-    // 4. Parse Entry, SL, TP (Robust for Emojis and Pipes)
+    // 4. Parse Entry, SL, TP
     for (const line of lines) {
-        // Entry: Match number after "Entry:" (ignoring emojis/spaces)
         const entryRegex = /Entry:.*?([\d.]+)/;
         const entryMatch = line.match(entryRegex);
         if (entryMatch) signal.entryPrice = parseFloat(entryMatch[1]);
         
-        // SL: Match number after "SL:" anywhere in line
         const slRegex = /SL:.*?([\d.]+)/;
         const slMatch = line.match(slRegex);
         if (slMatch) signal.stopLoss = parseFloat(slMatch[1]);
         
-        // TP: Global match for all TPs in the line
         const tpRegex = /TP\d*:.*?([\d.]+)/g;
         let tpMatch;
         while ((tpMatch = tpRegex.exec(line)) !== null) {
             signal.takeProfits.push(parseFloat(tpMatch[1]));
         }
 
-        // Leverage: Match "Đòn bẩy: x..."
         const leverageRegex = /(?:Đòn bẩy|Leverage):\s*(x\d+)/i;
         const leverageMatch = line.match(leverageRegex);
         if (leverageMatch) {
@@ -389,9 +404,12 @@ function parseSignalMessage(text: string): any | null {
         }
     }
 
-    const reasonIndex = text.indexOf("=== GIẢI THÍCH ===");
-    if (reasonIndex !== -1) {
-        signal.reason = text.substring(reasonIndex).replace(/=== GIẢI THÍCH ===/i, "").trim();
+    // Lấy phần nội dung giải thích nếu có
+    if (match && match.index !== undefined) {
+        const reasonPart = text.substring(match.index + match[0].length);
+        if (reasonPart && reasonPart.trim().length > 0) {
+            signal.reason = reasonPart.trim();
+        }
     }
     
     if (signal.type && signal.symbol && signal.entryPrice && signal.stopLoss && signal.takeProfits.length > 0) {

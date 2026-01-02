@@ -2605,15 +2605,13 @@ class _LineChartPainter extends CustomPainter {
 
     // Draw X-Axis Labels (First and Last date)
     if (data.isNotEmpty) {
-        // X-Axis uses shorter format for space
-        final firstDate = DateFormat('dd/MM').format(data.first.date);
-        final lastDate = DateFormat('dd/MM').format(data.last.date);
+        // Sử dụng định dạng dd/MM/yyyy cho trục X theo yêu cầu
+        final firstDate = DateFormat('dd/MM/yyyy').format(data.first.date);
+        final lastDate = DateFormat('dd/MM/yyyy').format(data.last.date);
         
-        // Draw First
         final tpFirst = TextPainter(text: TextSpan(text: firstDate, style: textStyle), textDirection: ui.TextDirection.ltr)..layout();
         tpFirst.paint(canvas, Offset(chartRect.left, size.height - tpFirst.height));
 
-        // Draw Last
         final tpLast = TextPainter(text: TextSpan(text: lastDate, style: textStyle), textDirection: ui.TextDirection.ltr)..layout();
         tpLast.paint(canvas, Offset(chartRect.right - tpLast.width, size.height - tpLast.height));
     }
