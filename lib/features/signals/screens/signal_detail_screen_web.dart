@@ -55,13 +55,13 @@ class SignalDetailScreen extends StatelessWidget {
 
     if (reasonData is Map) {
       final langCode = currentLocale?.languageCode ?? 'en';
-      final translatedText = reasonData[langCode];
-      if (translatedText is String && translatedText.isNotEmpty) {
-        return translatedText;
-      }
-      final fallbackText = reasonData['en'];
-      if (fallbackText is String && fallbackText.isNotEmpty) {
-        return fallbackText;
+      
+      if (langCode == 'vi') {
+        // Nếu khách chọn Tiếng Việt -> Ưu tiên hiện bản tiếng Việt
+        return reasonData['vi']?.toString() ?? reasonData['en']?.toString() ?? l10n.noReasonProvided;
+      } else {
+        // Tất cả ngôn ngữ khác (bao gồm cả mặc định) -> Ưu tiên hiện bản tiếng Anh
+        return reasonData['en']?.toString() ?? reasonData['vi']?.toString() ?? l10n.noReasonProvided;
       }
     }
 
