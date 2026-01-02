@@ -23,6 +23,8 @@ class SignalService {
 
     if (isLive) {
       query = query.where('status', isEqualTo: 'running');
+    } else {
+      query = query.where('status', isEqualTo: 'closed');
     }
     
     // Add symbol filter
