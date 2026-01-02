@@ -272,11 +272,24 @@ export const telegramWebhook = functions.https.onRequest(
           }
 
           const batch = firestore.batch();
-          const unmatchedQuery = await firestore.collection("signals").where("status", "==", "running").where("isMatched", "==", false).get();
+          // Chỉ đóng các lệnh "Running" + "Not Matched" CÙNG CẶP TIỀN
+          const unmatchedQuery = await firestore.collection("signals")
+            .where("status", "==", "running")
+            .where("isMatched", "==", false)
+            .where("symbol", "==", signalData.symbol)
+            .get();
+            
           unmatchedQuery.forEach(doc => batch.update(doc.ref, { status: "closed", result: "Cancelled (new signal)" }));
 
           const oppositeType = signalData.type === 'buy' ? 'sell' : 'buy';
-          const runningTpQuery = await firestore.collection("signals").where("status", "==", "running").where("type", "==", oppositeType).where("result", "in", ["TP1 Hit", "TP2 Hit"]).get();
+          // Chỉ đóng các lệnh "Running" + "TP Hit" ngược chiều CÙNG CẶP TIỀN
+          const runningTpQuery = await firestore.collection("signals")
+            .where("status", "==", "running")
+            .where("type", "==", oppositeType)
+            .where("result", "in", ["TP1 Hit", "TP2 Hit"])
+            .where("symbol", "==", signalData.symbol)
+            .get();
+            
           runningTpQuery.forEach(doc => batch.update(doc.ref, { status: "closed", result: "Exited (new signal)" }));
 
           const newSignalRef = firestore.collection("signals").doc();

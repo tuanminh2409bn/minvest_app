@@ -2072,7 +2072,13 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
   }
 
   Map<String, dynamic> _calculateStats(List<Signal> signals) {
-    if (signals.isEmpty) {
+    // Chỉ tính toán dựa trên các lệnh thực sự khớp (loại bỏ các lệnh bị Hủy)
+    final validSignals = signals.where((s) {
+      final res = s.result?.toLowerCase() ?? '';
+      return !res.contains('cancelled');
+    }).toList();
+
+    if (validSignals.isEmpty) {
       return {
         'totalPips': 0.0,
         'count': 0,
@@ -2085,25 +2091,23 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
     double totalPips = 0;
     int wins = 0;
     
-    // For Distribution Chart
+    // Thống kê cho biểu đồ phân bổ
     int goldCount = 0; int goldWins = 0;
     int cryptoCount = 0; int cryptoWins = 0;
     int forexCount = 0; int forexWins = 0;
 
-    // For Profit Chart (Cumulative)
-    // Sort by date ascending
-    signals.sort((a, b) => (a.createdAt as Timestamp).compareTo(b.createdAt as Timestamp));
+    // Sắp xếp theo ngày tăng dần để vẽ biểu đồ đường
+    validSignals.sort((a, b) => (a.createdAt as Timestamp).compareTo(b.createdAt as Timestamp));
     
     List<_ChartPoint> chartPoints = [];
     double runningPips = 0;
 
-    for (var s in signals) {
+    for (var s in validSignals) {
       final pips = (s.pips ?? 0).toDouble();
       totalPips += pips;
       
       if (pips > 0) wins++;
 
-      // Distribution stats
       if (_isGold(s)) {
         goldCount++;
         if (pips > 0) goldWins++;
@@ -2117,22 +2121,19 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
 
       runningPips += pips;
       final date = (s.createdAt as Timestamp).toDate();
-      
-      // Add every signal point to show detailed up/down movement (Visualizing volatility)
       chartPoints.add(_ChartPoint(date: date, value: runningPips));
     }
 
-    double winRate = signals.isNotEmpty ? (wins / signals.length) * 100 : 0;
+    double winRate = (wins / validSignals.length) * 100;
 
-    // Prepare Distribution Data
     List<_DistributionBarData> distribution = [];
-    if (goldCount > 0) distribution.add(_DistributionBarData(label: 'Gold', value: goldCount.toDouble(), winRate: goldWins / goldCount));
-    if (cryptoCount > 0) distribution.add(_DistributionBarData(label: 'Crypto', value: cryptoCount.toDouble(), winRate: cryptoWins / cryptoCount));
-    if (forexCount > 0) distribution.add(_DistributionBarData(label: 'Forex', value: forexCount.toDouble(), winRate: forexWins / forexCount));
+    if (goldCount > 0) distribution.add(_DistributionBarData(label: 'Gold', value: goldCount.toDouble(), winRate: goldWins / goldCount, wins: goldWins, losses: goldCount - goldWins));
+    if (cryptoCount > 0) distribution.add(_DistributionBarData(label: 'Crypto', value: cryptoCount.toDouble(), winRate: cryptoWins / cryptoCount, wins: cryptoWins, losses: cryptoCount - cryptoWins));
+    if (forexCount > 0) distribution.add(_DistributionBarData(label: 'Forex', value: forexCount.toDouble(), winRate: forexWins / forexCount, wins: forexWins, losses: forexCount - forexWins));
 
     return {
       'totalPips': totalPips,
-      'count': signals.length,
+      'count': validSignals.length,
       'winRate': winRate,
       'chartData': chartPoints,
       'distribution': distribution,
@@ -2400,12 +2401,66 @@ class _ProfitChart extends StatefulWidget {
 class _ProfitChartState extends State<_ProfitChart> {
   // 0: Daily, 1: Weekly, 2: Monthly
   int _selectedPeriodIndex = 0;
+  _ChartPoint? _hoverPoint;
 
   List<_ChartPoint> _processData() {
-    // Basic aggregation based on period could go here
-    // For now, we use the passed data which is daily cumulative
-    // If the dataset is large, we should subsample here based on _selectedPeriodIndex
-    return widget.data;
+    if (widget.data.isEmpty) return [];
+
+    // 1. Sort by date
+    final sorted = List<_ChartPoint>.from(widget.data)
+      ..sort((a, b) => a.date.compareTo(b.date));
+
+    // 2. Map to Map<String, _ChartPoint> where Key is the time bucket
+    final Map<String, _ChartPoint> buckets = {};
+
+    for (var point in sorted) {
+      String key;
+      final date = point.date;
+      
+      if (_selectedPeriodIndex == 0) {
+        // Daily
+        key = DateFormat('yyyyMMdd').format(date);
+      } else if (_selectedPeriodIndex == 1) {
+        // Weekly (Year + Week Number)
+        // Simple approximation: key by ISO week would be better, but standard lib doesn't have it easily.
+        // We'll use start of week date.
+        // Subtract weekday-1 to get Monday.
+        final startOfWeek = DateTime(date.year, date.month, date.day).subtract(Duration(days: date.weekday - 1));
+        key = DateFormat('yyyyMMdd').format(startOfWeek);
+      } else {
+        // Monthly
+        key = DateFormat('yyyyMM').format(date);
+      }
+      
+      // We want the LAST value of the period for cumulative chart
+      buckets[key] = point;
+    }
+
+    return buckets.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+  }
+
+  void _onHover(Offset localPosition, Size size, List<_ChartPoint> data) {
+    if (data.isEmpty) return;
+    
+    const double leftPadding = 40.0;
+    const double bottomPadding = 20.0;
+    final chartWidth = size.width - leftPadding;
+    
+    // Map x position to index
+    // x = leftPadding + (chartWidth * (i / (data.length - 1)))
+    // (x - leftPadding) / chartWidth = i / (data.length - 1)
+    // i = ((x - leftPadding) / chartWidth) * (data.length - 1)
+    
+    double relativeX = localPosition.dx - leftPadding;
+    if (relativeX < 0) relativeX = 0;
+    if (relativeX > chartWidth) relativeX = chartWidth;
+    
+    final index = ((relativeX / chartWidth) * (data.length - 1)).round();
+    final safeIndex = index.clamp(0, data.length - 1);
+    
+    setState(() {
+      _hoverPoint = data[safeIndex];
+    });
   }
 
   @override
@@ -2437,7 +2492,10 @@ class _ProfitChartState extends State<_ProfitChart> {
                 children: List.generate(periods.length, (index) {
                   final isSelected = _selectedPeriodIndex == index;
                   return GestureDetector(
-                    onTap: () => setState(() => _selectedPeriodIndex = index),
+                    onTap: () => setState(() {
+                        _selectedPeriodIndex = index;
+                        _hoverPoint = null; // Reset hover
+                    }),
                     child: Container(
                       margin: const EdgeInsets.only(left: 8),
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -2464,198 +2522,30 @@ class _ProfitChartState extends State<_ProfitChart> {
           Expanded(
             child: processedData.isEmpty 
               ? Center(child: Text(l10n.noSignalsAvailable, style: const TextStyle(color: Colors.white54)))
-              : CustomPaint(
-                  painter: _LineChartPainter(data: processedData),
-                  child: Container(),
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    return MouseRegion(
+                      onHover: (event) => _onHover(event.localPosition, constraints.biggest, processedData),
+                      onExit: (_) => setState(() => _hoverPoint = null),
+                      child: CustomPaint(
+                        size: Size(constraints.maxWidth, constraints.maxHeight),
+                        painter: _LineChartPainter(data: processedData, hoverPoint: _hoverPoint),
+                      ),
+                    );
+                  }
                 ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DistributionChart extends StatelessWidget {
-  final List<_DistributionBarData> data;
-  const _DistributionChart({required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final isMobile = MediaQuery.of(context).size.width < Breakpoints.tablet;
-    final widthFactor = isMobile ? 0.45 : 0.30;
-    
-    if (data.isEmpty) {
-       return Container(
-        width: double.infinity,
-        height: 340,
-        decoration: BoxDecoration(
-          color: const Color(0xFF0B0D14),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white12),
-        ),
-        child: Center(child: Text(l10n.noSignalsAvailable, style: const TextStyle(color: Colors.white54))),
-      );
-    }
-
-    final maxValue = data.map((b) => b.value).reduce((a, b) => a > b ? a : b);
-    
-    // Create grid steps (5 lines: 0%, 25%, 50%, 75%, 100%)
-    final gridSteps = [1.0, 0.75, 0.5, 0.25, 0.0];
-
-    return Container(
-      width: double.infinity,
-      height: 340,
-      decoration: BoxDecoration(
-        color: const Color(0xFF0B0D14),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white12),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.winrateOfAllSignals,
-             style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: Column(
-              children: [
-                Expanded(
-                  child: Stack(
-                    children: [
-                      // Background Grid
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: gridSteps.map((step) {
-                          return Row(
-                            children: [
-                              SizedBox(
-                                width: 35,
-                                child: Text(
-                                  (maxValue * step).toInt().toString(),
-                                  style: AppTextStyles.caption.copyWith(color: Colors.white24, fontSize: 10),
-                                  textAlign: TextAlign.right,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  color: Colors.white.withOpacity(0.05),
-                                ),
-                              ),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                      // Bars
-                      Padding(
-                        padding: const EdgeInsets.only(left: 43), // Offset for labels
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: data.map((bar) {
-                            final heightFactor = maxValue > 0 ? bar.value / maxValue : 0.0;
-                            return Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Expanded(
-                                      child: Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: FractionallySizedBox(
-                                          heightFactor: heightFactor,
-                                          widthFactor: widthFactor,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(4),
-                                            ),
-                                            clipBehavior: Clip.antiAlias,
-                                            child: Column(
-                                              children: [
-                                                Expanded(
-                                                  flex: ((1 - bar.winRate) * 100).toInt(),
-                                                  child: Container(
-                                                    color: const Color(0xFFE54747), // Loss Color
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  flex: (bar.winRate * 100).toInt(),
-                                                  child: Container(
-                                                    color: const Color(0xFF1DA1F2), // Win Color
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      bar.label,
-                                      style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Legend
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _LegendItem(color: const Color(0xFF1DA1F2), label: l10n.winRate),
-                    const SizedBox(width: 24),
-                    _LegendItem(color: const Color(0xFFE54747), label: l10n.lossRate),
-                  ],
-                )
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LegendItem extends StatelessWidget {
-  final Color color;
-  final String label;
-  const _LegendItem({required this.color, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 12),
-        ),
-      ],
     );
   }
 }
 
 class _LineChartPainter extends CustomPainter {
   final List<_ChartPoint> data;
-  _LineChartPainter({required this.data});
+  final _ChartPoint? hoverPoint;
+  
+  _LineChartPainter({required this.data, this.hoverPoint});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2715,8 +2605,9 @@ class _LineChartPainter extends CustomPainter {
 
     // Draw X-Axis Labels (First and Last date)
     if (data.isNotEmpty) {
-        final firstDate = DateFormat('MM/dd').format(data.first.date);
-        final lastDate = DateFormat('MM/dd').format(data.last.date);
+        // X-Axis uses shorter format for space
+        final firstDate = DateFormat('dd/MM').format(data.first.date);
+        final lastDate = DateFormat('dd/MM').format(data.last.date);
         
         // Draw First
         final tpFirst = TextPainter(text: TextSpan(text: firstDate, style: textStyle), textDirection: ui.TextDirection.ltr)..layout();
@@ -2730,6 +2621,8 @@ class _LineChartPainter extends CustomPainter {
     // Draw Line Path
     if (data.isNotEmpty) {
       final path = Path();
+      Offset? hoverOffset;
+
       for (int i = 0; i < data.length; i++) {
         final x = chartRect.left + (chartRect.width * (i / (data.length - 1)));
         // Normalize value to height
@@ -2741,6 +2634,10 @@ class _LineChartPainter extends CustomPainter {
         } else {
           path.lineTo(x, y);
         }
+
+        if (hoverPoint != null && data[i] == hoverPoint) {
+           hoverOffset = Offset(x, y);
+        }
       }
 
       final fillPath = Path.from(path)
@@ -2750,6 +2647,52 @@ class _LineChartPainter extends CustomPainter {
 
       canvas.drawPath(fillPath, paintFill);
       canvas.drawPath(path, paintLine);
+
+      // Draw Tooltip if Hovered
+      if (hoverOffset != null && hoverPoint != null) {
+          // Draw vertical line
+          canvas.drawLine(
+             Offset(hoverOffset.dx, chartRect.top),
+             Offset(hoverOffset.dx, chartRect.bottom),
+             Paint()..color = Colors.white54..strokeWidth = 1..style = PaintingStyle.stroke
+          );
+
+          // Draw circle
+          canvas.drawCircle(hoverOffset, 4, Paint()..color = const Color(0xFF2E97FF));
+          canvas.drawCircle(hoverOffset, 2, Paint()..color = Colors.white);
+
+          // Draw Tooltip Box
+          final dateStr = DateFormat('dd/MM/yyyy').format(hoverPoint!.date);
+          final valueStr = '${hoverPoint!.value.toStringAsFixed(1)} Pips';
+          final textSpan = TextSpan(
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+              children: [
+                 TextSpan(text: '$dateStr\n', style: const TextStyle(fontWeight: FontWeight.bold)),
+                 TextSpan(text: valueStr),
+              ]
+          );
+          final tp = TextPainter(text: textSpan, textDirection: ui.TextDirection.ltr, textAlign: TextAlign.center)..layout();
+          
+          final tooltipWidth = tp.width + 16;
+          final tooltipHeight = tp.height + 12;
+          double tooltipX = hoverOffset.dx - tooltipWidth / 2;
+          double tooltipY = hoverOffset.dy - tooltipHeight - 10;
+
+          // Bounds check
+          if (tooltipX < 0) tooltipX = 0;
+          if (tooltipX + tooltipWidth > size.width) tooltipX = size.width - tooltipWidth;
+          if (tooltipY < 0) tooltipY = hoverOffset.dy + 10;
+
+          final rrect = RRect.fromRectAndRadius(
+              Rect.fromLTWH(tooltipX, tooltipY, tooltipWidth, tooltipHeight), 
+              const Radius.circular(6)
+          );
+          
+          canvas.drawRRect(rrect, Paint()..color = const Color(0xFF1E1E1E).withOpacity(0.9));
+          canvas.drawRRect(rrect, Paint()..color = Colors.white24..style = PaintingStyle.stroke);
+          
+          tp.paint(canvas, Offset(tooltipX + 8, tooltipY + 6));
+      }
     }
   }
 
@@ -2761,7 +2704,255 @@ class _DistributionBarData {
   final String label;
   final double value;
   final double winRate;
-  const _DistributionBarData({required this.label, required this.value, required this.winRate});
+  final int wins;
+  final int losses;
+  const _DistributionBarData({
+    required this.label, 
+    required this.value, 
+    required this.winRate,
+    this.wins = 0,
+    this.losses = 0,
+  });
+}
+
+class _DistributionChart extends StatefulWidget {
+  final List<_DistributionBarData> data;
+  const _DistributionChart({required this.data});
+
+  @override
+  State<_DistributionChart> createState() => _DistributionChartState();
+}
+
+class _DistributionChartState extends State<_DistributionChart> {
+  int? _hoveredIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    if (widget.data.isEmpty) {
+       return Container(
+        width: double.infinity,
+        height: 340,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B0D14),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Center(child: Text(l10n.noSignalsAvailable, style: const TextStyle(color: Colors.white54))),
+      );
+    }
+
+    final maxValue = widget.data.map((b) => b.value).reduce((a, b) => a > b ? a : b);
+    final gridSteps = [1.0, 0.75, 0.5, 0.25, 0.0];
+
+    return Container(
+      width: double.infinity,
+      height: 340,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B0D14),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.winrateOfAllSignals,
+             style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Grid
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: gridSteps.map((step) {
+                          return Row(
+                            children: [
+                              SizedBox(
+                                width: 35,
+                                child: Text(
+                                  (maxValue * step).toInt().toString(),
+                                  style: AppTextStyles.caption.copyWith(color: Colors.white24, fontSize: 10),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Container(height: 1, color: Colors.white.withOpacity(0.05)),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                      // Bars
+                      Padding(
+                        padding: const EdgeInsets.only(left: 43),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: widget.data.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final bar = entry.value;
+                            final heightFactor = maxValue > 0 ? bar.value / maxValue : 0.0;
+                            final isHovered = _hoveredIndex == index;
+
+                            return Expanded(
+                              child: MouseRegion(
+                                onEnter: (_) => setState(() => _hoveredIndex = index),
+                                onExit: (_) => setState(() => _hoveredIndex = null),
+                                child: Stack(
+                                  alignment: Alignment.bottomCenter,
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          Expanded(
+                                            child: Align(
+                                              alignment: Alignment.bottomCenter,
+                                              child: FractionallySizedBox(
+                                                heightFactor: heightFactor,
+                                                widthFactor: 0.30,
+                                                child: AnimatedContainer(
+                                                  duration: const Duration(milliseconds: 200),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(4),
+                                                    border: isHovered ? Border.all(color: Colors.white, width: 1.5) : null,
+                                                    boxShadow: isHovered ? [BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 8)] : null,
+                                                  ),
+                                                  clipBehavior: Clip.antiAlias,
+                                                  child: Column(
+                                                    children: [
+                                                      Expanded(
+                                                        flex: (bar.losses * 100).toInt() == 0 && (bar.wins * 100).toInt() == 0 ? 1 : (bar.losses * 100).toInt(),
+                                                        child: Container(color: const Color(0xFFE54747)),
+                                                      ),
+                                                      Expanded(
+                                                        flex: (bar.wins * 100).toInt(),
+                                                        child: Container(color: const Color(0xFF1DA1F2)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            bar.label,
+                                            style: AppTextStyles.caption.copyWith(
+                                                color: isHovered ? Colors.white : Colors.white70,
+                                                fontSize: 13,
+                                                fontWeight: isHovered ? FontWeight.bold : FontWeight.w600
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (isHovered)
+                                      Positioned(
+                                        bottom: (heightFactor * 250) + 10,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF1E1E1E).withOpacity(0.95),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: Colors.white24),
+                                            boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2))],
+                                          ),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(bar.label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                                              const SizedBox(height: 6),
+                                              _TooltipRow(color: const Color(0xFF1DA1F2), label: 'Thắng', value: '${bar.wins} (${(bar.winRate * 100).toStringAsFixed(1)}%)'),
+                                              const SizedBox(height: 4),
+                                              _TooltipRow(color: const Color(0xFFE54747), label: 'Thua', value: '${bar.losses} (${((1 - bar.winRate) * 100).toStringAsFixed(1)}%)'),
+                                              const Divider(color: Colors.white10),
+                                              Text('Tổng cộng: ${bar.value.toInt()} lệnh', style: const TextStyle(color: Colors.white54, fontSize: 10)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _LegendItem(color: const Color(0xFF1DA1F2), label: l10n.winRate),
+                    const SizedBox(width: 24),
+                    _LegendItem(color: const Color(0xFFE54747), label: l10n.lossRate),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TooltipRow extends StatelessWidget {
+  final Color color;
+  final String label;
+  final String value;
+  const _TooltipRow({required this.color, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 6),
+        Text('$label: ', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
+      ],
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  final Color color;
+  final String label;
+  const _LegendItem({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 12),
+        ),
+      ],
+    );
+  }
 }
 
 class _ComingSoonSection extends StatelessWidget {
@@ -3161,24 +3352,6 @@ class _UserSubscriptionStatusState extends State<_UserSubscriptionStatus> {
       );
     }
 
-    // Determine expiry text for standard users with packages
-    String? expiryText;
-    if (activeSubs.isNotEmpty) {
-      DateTime? maxExpiry;
-      for (final sub in activeSubs) {
-        final date = subsExpiry[sub];
-        if (date != null) {
-          if (maxExpiry == null || date.isAfter(maxExpiry)) {
-            maxExpiry = date;
-          }
-        }
-      }
-      
-      if (maxExpiry != null) {
-        expiryText = l10n.validUntil(DateFormat('dd.MM.yyyy').format(maxExpiry));
-      }
-    }
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -3232,29 +3405,6 @@ class _UserSubscriptionStatusState extends State<_UserSubscriptionStatus> {
             ],
           ),
         ),
-        
-        // Expiry Box (only if has active subs)
-        if (expiryText != null) ...[
-          const SizedBox(width: 12),
-          Container(
-            height: boxHeight,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(1),
-              border: Border.all(color: Colors.white),
-            ),
-            child: Text(
-              expiryText,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ],
       ],
     );
   }
