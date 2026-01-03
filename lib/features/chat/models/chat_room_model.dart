@@ -10,6 +10,7 @@ class ChatRoom {
   final bool isReadByUser; // Thêm trường này
   final bool isUserTyping;
   final bool isSupportTyping;
+  final Map<String, dynamic>? typingStatus; // Thêm trường này
 
   ChatRoom({
     required this.userId,
@@ -21,6 +22,7 @@ class ChatRoom {
     required this.isReadByUser, // Thêm vào constructor
     this.isUserTyping = false,
     this.isSupportTyping = false,
+    this.typingStatus,
   });
 
   factory ChatRoom.fromFirestore(DocumentSnapshot doc) {
@@ -37,6 +39,7 @@ class ChatRoom {
       isReadByUser: data['isReadByUser'] ?? true, // Đọc giá trị từ Firestore
       isUserTyping: typingStatus[doc.id] ?? false,
       isSupportTyping: typingStatus['support'] ?? false,
+      typingStatus: typingStatus,
     );
   }
 }
