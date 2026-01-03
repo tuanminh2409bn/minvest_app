@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -23,31 +24,62 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
   Timer? _typingTimer;
   bool _isTyping = false;
   User? _currentUser;
+  
+  // Support Logic
+  bool _isSupport = false;
+  String? _selectedChatRoomId;
 
   @override
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser;
-    // Lắng nghe thay đổi trạng thái đăng nhập
+    _checkUserRole();
+
     FirebaseAuth.instance.authStateChanges().listen((user) {
       if (mounted) {
         setState(() {
           _currentUser = user;
         });
         if (user != null) {
-          _markAsReadIfVisible(user.uid);
+          _checkUserRole();
+        } else {
+          setState(() {
+            _isSupport = false;
+            _selectedChatRoomId = null;
+          });
         }
       }
     });
 
     _messageController.addListener(_onTyping);
-    if (_currentUser != null) {
-      _markAsReadIfVisible(_currentUser!.uid);
+  }
+
+  Future<void> _checkUserRole() async {
+    if (_currentUser == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(_currentUser!.uid).get();
+      final role = doc.data()?['role'];
+      if (mounted) {
+        setState(() {
+          // Chỉ role 'support' mới được quản lý chat
+          _isSupport = role == 'support';
+          // Nếu là user thường (hoặc admin), luôn mark as read phòng của chính mình
+          if (!_isSupport) {
+            _markAsReadIfVisible(_currentUser!.uid);
+          }
+        });
+      }
+    } catch (e) {
+      print('Error checking role: $e');
     }
   }
 
   void _markAsReadIfVisible(String uid) {
-    _chatService.markAsReadByUser(uid);
+    if (_isSupport) {
+      _chatService.markAsReadBySupport(uid);
+    } else {
+      _chatService.markAsReadByUser(uid);
+    }
   }
 
   @override
@@ -59,13 +91,15 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
 
   void _onTyping() {
     if (_currentUser == null) return;
-    final uid = _currentUser!.uid;
+    // Nếu là support thì roomId là phòng đang chọn, nếu user thì là uid của mình
+    final roomId = _isSupport ? _selectedChatRoomId : _currentUser!.uid;
+    if (roomId == null) return;
 
     if (!_isTyping) {
       _isTyping = true;
       _chatService.updateTypingStatus(
-        chatRoomId: uid,
-        typingUserId: uid,
+        chatRoomId: roomId,
+        typingUserId: _currentUser!.uid,
         isTyping: true,
       );
     }
@@ -75,8 +109,8 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
       if (mounted && _currentUser != null) {
         _isTyping = false;
         _chatService.updateTypingStatus(
-          chatRoomId: uid,
-          typingUserId: uid,
+          chatRoomId: roomId,
+          typingUserId: _currentUser!.uid,
           isTyping: false,
         );
       }
@@ -85,24 +119,26 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
 
   void _sendTextMessage() {
     if (_currentUser == null) return;
-    final uid = _currentUser!.uid;
+    final roomId = _isSupport ? _selectedChatRoomId : _currentUser!.uid;
+    if (roomId == null) return;
+
     final l10n = AppLocalizations.of(context)!;
 
     if (_messageController.text.isNotEmpty) {
       _chatService.sendTextMessage(
-        userId: uid,
+        userId: roomId,
         text: _messageController.text,
-        senderId: uid,
-        senderName: _currentUser!.displayName ?? l10n.chatDefaultUserName,
-        isSentBySupport: false,
+        senderId: _currentUser!.uid,
+        senderName: _currentUser!.displayName ?? (_isSupport ? l10n.chatDefaultSupportName : l10n.chatDefaultUserName),
+        isSentBySupport: _isSupport,
       );
       _messageController.clear();
       _typingTimer?.cancel();
       if (_isTyping) {
         _isTyping = false;
         _chatService.updateTypingStatus(
-          chatRoomId: uid,
-          typingUserId: uid,
+          chatRoomId: roomId,
+          typingUserId: _currentUser!.uid,
           isTyping: false,
         );
       }
@@ -111,9 +147,12 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
 
   void _sendImageMessage() {
     if (_currentUser == null) return;
+    final roomId = _isSupport ? _selectedChatRoomId : _currentUser!.uid;
+    if (roomId == null) return;
+
     _chatService.pickAndSendImage(
-      chatRoomId: _currentUser!.uid,
-      isSentBySupport: false,
+      chatRoomId: roomId,
+      isSentBySupport: _isSupport,
     );
   }
 
@@ -125,11 +164,123 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
       return _buildLoginPrompt(l10n);
     }
 
+    // Nếu là Support và CHƯA chọn phòng chat -> Hiển thị danh sách
+    if (_isSupport && _selectedChatRoomId == null) {
+      return _buildChatRoomList(l10n);
+    }
+
+    // Ngược lại (User thường HOẶC Support đã chọn phòng) -> Hiển thị khung chat
+    return _buildChatInterface(l10n);
+  }
+
+  Widget _buildChatRoomList(AppLocalizations l10n) {
+    return StreamBuilder<List<ChatRoom>>(
+      stream: _chatService.getChatRoomsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final rooms = snapshot.data ?? [];
+        if (rooms.isEmpty) {
+          return Center(
+            child: Text(
+              "Chưa có tin nhắn nào",
+              style: TextStyle(color: Colors.white.withOpacity(0.5)),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          itemCount: rooms.length,
+          separatorBuilder: (ctx, i) => const Divider(height: 1, color: Color(0xFF30363D)),
+          itemBuilder: (context, index) {
+            final room = rooms[index];
+            final isUnread = !room.isReadBySupport;
+            final time = room.lastMessageTimestamp != null 
+                ? _formatTime(room.lastMessageTimestamp!.toDate()) 
+                : '';
+
+            return ListTile(
+              tileColor: isUnread ? const Color(0xFF1C2128) : Colors.transparent,
+              leading: CircleAvatar(
+                backgroundColor: const Color(0xFF3C4BFE),
+                child: Text(
+                  (room.userName ?? 'U').substring(0, 1).toUpperCase(),
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              title: Text(
+                room.userName ?? 'User ${room.userId.substring(0, 5)}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 14,
+                ),
+                maxLines: 1, overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(
+                room.lastMessageText ?? '',
+                style: TextStyle(
+                  color: isUnread ? Colors.white70 : Colors.grey,
+                  fontWeight: isUnread ? FontWeight.w500 : FontWeight.normal,
+                  fontSize: 12,
+                ),
+                maxLines: 1, overflow: TextOverflow.ellipsis,
+              ),
+              trailing: Text(
+                time,
+                style: const TextStyle(color: Colors.grey, fontSize: 10),
+              ),
+              onTap: () {
+                setState(() {
+                  _selectedChatRoomId = room.userId;
+                });
+                _markAsReadIfVisible(room.userId);
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _formatTime(DateTime date) {
+    final now = DateTime.now();
+    if (now.difference(date).inDays > 0) {
+      return '${date.day}/${date.month}';
+    }
+    return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  Widget _buildChatInterface(AppLocalizations l10n) {
+    // Xác định ID phòng chat: Nếu là support thì lấy phòng đang chọn, user thì lấy chính mình
+    final roomId = _isSupport ? _selectedChatRoomId! : _currentUser!.uid;
+
     return Column(
       children: [
+        // Header phụ cho Support để back về danh sách
+        if (_isSupport)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            color: const Color(0xFF161B22),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                  onPressed: () => setState(() => _selectedChatRoomId = null),
+                ),
+                const SizedBox(width: 4),
+                const Text(
+                  "Danh sách tin nhắn",
+                  style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+
         Expanded(
           child: StreamBuilder<List<ChatMessage>>(
-            stream: _chatService.getMessagesStream(_currentUser!.uid),
+            stream: _chatService.getMessagesStream(roomId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -137,7 +288,6 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
 
               final messages = snapshot.data ?? [];
               
-              // Luôn hiển thị Welcome Header ở đầu list (cuối danh sách vì reverse: true)
               return ListView.builder(
                 controller: _scrollController,
                 reverse: true,
@@ -145,9 +295,11 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
                 padding: const EdgeInsets.all(12.0),
                 itemBuilder: (context, index) {
                   if (index == messages.length) {
-                    return const _WebWelcomeHeader();
+                    // Chỉ hiện Welcome Header cho User, Support không cần thiết lắm hoặc có thể custom
+                    return _isSupport ? const SizedBox(height: 20) : const _WebWelcomeHeader();
                   }
                   final message = messages[index];
+                  // Logic hiển thị tin nhắn của "tôi"
                   final isMyMessage = message.senderId == _currentUser!.uid;
                   return _buildMessageBubble(message, isMyMessage);
                 },
@@ -155,7 +307,7 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
             },
           ),
         ),
-        _buildTypingIndicator(l10n),
+        _buildTypingIndicator(l10n, roomId),
         _buildMessageComposer(l10n),
       ],
     );
@@ -192,22 +344,45 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
     );
   }
 
-  Widget _buildTypingIndicator(AppLocalizations l10n) {
+  Widget _buildTypingIndicator(AppLocalizations l10n, String roomId) {
     return StreamBuilder<ChatRoom?>(
-      stream: _chatService.getChatRoomStream(_currentUser!.uid),
+      stream: _chatService.getChatRoomStream(roomId),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data == null) {
           return const SizedBox.shrink();
         }
         final room = snapshot.data!;
         
-        if (room.isSupportTyping) {
+        // Logic hiển thị:
+        // - Nếu mình là User: xem support có gõ không (isSupportTyping)
+        // - Nếu mình là Support: xem user có gõ không (isUserTyping - cần thêm field này vào model nếu chưa có, hoặc dùng logic typingStatus map)
+        
+        // Tuy nhiên ChatService hiện tại dùng map `typingStatus`.
+        // Cần kiểm tra kỹ model. Giả sử model ChatRoom có getter helper.
+        // Tạm thời dùng logic đơn giản:
+        // Nếu là Support -> Check xem User có đang gõ không?
+        // Nếu là User -> Check xem Support có đang gõ không?
+
+        bool isOtherTyping = false;
+        if (_isSupport) {
+           // Check user typing (User ID là roomId)
+           isOtherTyping = room.typingStatus?[roomId] == true;
+        } else {
+           // Check support typing (Tìm bất kỳ key nào khác mình đang true? Hoặc quy ước support ID?)
+           // Đơn giản hóa: Web chat thường support dùng tool riêng, hoặc ở đây ta check map
+           // Giả sử support có ID cố định hoặc check bất kỳ ai khác mình.
+           room.typingStatus?.forEach((key, value) {
+             if (key != _currentUser!.uid && value == true) isOtherTyping = true;
+           });
+        }
+        
+        if (isOtherTyping) {
           return Padding(
             padding: const EdgeInsets.only(left: 16, bottom: 8),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                l10n.chatSupportIsTyping,
+                _isSupport ? "${room.userName} đang gõ..." : l10n.chatSupportIsTyping,
                 style: const TextStyle(
                   color: Colors.grey,
                   fontSize: 12,
@@ -274,7 +449,6 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
             ),
             child: messageContent,
           ),
-          // Có thể thêm "Seen" indicator ở đây nếu cần, nhưng cho popup nhỏ thì có thể bỏ qua cho gọn
         ],
       ),
     );
@@ -299,7 +473,7 @@ class _WebChatContentWidgetState extends State<WebChatContentWidget> {
           Expanded(
             child: TextField(
               controller: _messageController,
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14, color: Colors.white), // Thêm color white để dễ nhìn nền tối
               decoration: InputDecoration(
                 hintText: l10n.chatTypeMessage,
                 hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),

@@ -211,7 +211,7 @@ export const telegramWebhook = functions.https.onRequest(
         // Hỗ trợ các mẫu: 
         // 1. "Giá: 1234.5 (+20p)"
         // 2. "⏳ Exit tại giá 4387.38 (-11.4p)"
-        const priceRegex = /(?:Giá|giá):\s*([\d.,]+)\s*\(([+-][\d.,]+)p\)/i;
+        const priceRegex = /(?:Giá|giá|Exit tại giá|Close tại giá).*?\s*([\d.,]+)\s*\(([+-]?[\d.,]+)p\)/i;
         const priceMatch = updateText.match(priceRegex);
 
         if (priceMatch) {
