@@ -2002,83 +2002,8 @@ class _PerformanceSection extends StatefulWidget {
 class _PerformanceSectionState extends State<_PerformanceSection> {
   int _selectedFilterIndex = 0; // 0: All Time, 1: 7D, 2: 14D, 3: 30D, 4: 90D
 
-  bool _isGold(Signal s) => s.symbol.toUpperCase().contains('XAU');
-  bool _isCrypto(Signal s) {
-    final sym = s.symbol.toUpperCase();
-    return sym.contains('BTC') || sym.contains('ETH') || sym.contains('BNB') || sym.contains('USDT') || sym.contains('CRYPTO');
-  }
-  bool _isForex(Signal s) {
-    final sym = s.symbol.toUpperCase();
-    return sym.contains('/') && !sym.contains('XAU') && !_isCrypto(s);
-  }
-
-  List<Signal> _applyFilters(List<Signal> signals) {
-    // 1. Parent Filters (Asset, Pair, DateRange)
-    Iterable<Signal> filtered = signals;
-    
-    // Filter by Asset Type
-    switch (widget.assetFilter) {
-      case AssetFilter.gold:
-        filtered = filtered.where(_isGold);
-        break;
-      case AssetFilter.crypto:
-        filtered = filtered.where(_isCrypto);
-        break;
-      case AssetFilter.forex:
-        filtered = filtered.where(_isForex);
-        break;
-      case AssetFilter.all:
-        break;
-    }
-
-    // Filter by Specific Pair
-    if (widget.selectedPair != 'All Commodities' && 
-        widget.selectedPair != 'All Currency Pairs' &&
-        widget.selectedPair != 'All Crypto Pairs') {
-      filtered = filtered.where((s) => s.symbol == widget.selectedPair);
-    }
-
-    // Filter by Parent Date Range
-    if (widget.dateRange != null) {
-      final start = widget.dateRange!.start;
-      final end = widget.dateRange!.end.add(const Duration(days: 1));
-      filtered = filtered.where((s) {
-        if (s.createdAt is! Timestamp) return false;
-        final dt = (s.createdAt as Timestamp).toDate();
-        return dt.isAfter(start) && dt.isBefore(end);
-      });
-    }
-
-    // 2. Local Time Filter (All Time, 7D, 30D, etc.) - Only applies if Parent Date Range is null
-    if (widget.dateRange == null && _selectedFilterIndex > 0) {
-      final now = DateTime.now();
-      final Duration lookback;
-      switch (_selectedFilterIndex) {
-        case 1: lookback = const Duration(days: 7); break;
-        case 2: lookback = const Duration(days: 14); break;
-        case 3: lookback = const Duration(days: 30); break;
-        case 4: lookback = const Duration(days: 90); break;
-        default: lookback = Duration.zero;
-      }
-      final start = now.subtract(lookback);
-      filtered = filtered.where((s) {
-        if (s.createdAt is! Timestamp) return false;
-        final dt = (s.createdAt as Timestamp).toDate();
-        return dt.isAfter(start);
-      });
-    }
-
-    return filtered.toList();
-  }
-
-  Map<String, dynamic> _calculateStats(List<Signal> signals) {
-    // Chỉ tính toán dựa trên các lệnh thực sự khớp (loại bỏ các lệnh bị Hủy)
-    final validSignals = signals.where((s) {
-      final res = s.result?.toLowerCase() ?? '';
-      return !res.contains('cancelled');
-    }).toList();
-
-    if (validSignals.isEmpty) {
+  Map<String, dynamic> _processStats(List<QueryDocumentSnapshot> docs) {
+    if (docs.isEmpty) {
       return {
         'totalPips': 0.0,
         'count': 0,
@@ -2089,51 +2014,130 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
     }
 
     double totalPips = 0;
-    int wins = 0;
+    int totalTp = 0;
+    int totalSl = 0;
     
-    // Thống kê cho biểu đồ phân bổ
-    int goldCount = 0; int goldWins = 0;
-    int cryptoCount = 0; int cryptoWins = 0;
-    int forexCount = 0; int forexWins = 0;
-
-    // Sắp xếp theo ngày tăng dần để vẽ biểu đồ đường
-    validSignals.sort((a, b) => (a.createdAt as Timestamp).compareTo(b.createdAt as Timestamp));
+    // Distribution stats specific to XAU when viewing All
+    int goldTp = 0;
+    int goldSl = 0;
+    int goldCount = 0;
     
     List<_ChartPoint> chartPoints = [];
     double runningPips = 0;
 
-    for (var s in validSignals) {
-      final pips = (s.pips ?? 0).toDouble();
-      totalPips += pips;
-      
-      if (pips > 0) wins++;
+    // Apply Date Filter locally
+    DateTime? startDate;
+    DateTime? endDate;
 
-      if (_isGold(s)) {
-        goldCount++;
-        if (pips > 0) goldWins++;
-      } else if (_isCrypto(s)) {
-        cryptoCount++;
-        if (pips > 0) cryptoWins++;
+    if (widget.dateRange != null) {
+      startDate = widget.dateRange!.start;
+      endDate = widget.dateRange!.end.add(const Duration(days: 1));
+    } else if (_selectedFilterIndex > 0) {
+      final now = DateTime.now();
+      final Duration lookback;
+      switch (_selectedFilterIndex) {
+        case 1: lookback = const Duration(days: 7); break;
+        case 2: lookback = const Duration(days: 14); break;
+        case 3: lookback = const Duration(days: 30); break;
+        case 4: lookback = const Duration(days: 90); break;
+        default: lookback = Duration.zero;
+      }
+      startDate = now.subtract(lookback);
+    }
+
+    for (var doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final date = (data['date'] as Timestamp).toDate();
+
+      if (startDate != null && date.isBefore(startDate)) continue;
+      if (endDate != null && date.isAfter(endDate)) continue;
+
+      double dailyPips = 0;
+      
+      // Determine which data to use based on AssetFilter
+      if (widget.assetFilter == AssetFilter.gold) {
+         if (data['xau'] != null) {
+            dailyPips = (data['xau']['pips'] ?? 0).toDouble();
+            totalTp += (data['xau']['tpCount'] ?? 0) as int;
+            totalSl += (data['xau']['slCount'] ?? 0) as int;
+         }
       } else {
-        forexCount++;
-        if (pips > 0) forexWins++;
+         // Default to ALL
+         if (data['all'] != null) {
+            dailyPips = (data['all']['pips'] ?? 0).toDouble();
+            totalTp += (data['all']['tpCount'] ?? 0) as int;
+            totalSl += (data['all']['slCount'] ?? 0) as int;
+         }
+         
+         // Aggregate Gold for distribution breakdown
+         if (data['xau'] != null) {
+             final gTp = (data['xau']['tpCount'] ?? 0) as int;
+             final gSl = (data['xau']['slCount'] ?? 0) as int;
+             goldTp += gTp;
+             goldSl += gSl;
+             goldCount += (gTp + gSl);
+         }
       }
 
-      runningPips += pips;
-      final date = (s.createdAt as Timestamp).toDate();
+      totalPips += dailyPips;
+      runningPips += dailyPips;
       chartPoints.add(_ChartPoint(date: date, value: runningPips));
     }
 
-    double winRate = (wins / validSignals.length) * 100;
+    // Win Rate Calculation
+    // Use TP vs SL only for simplicity as Exit is neutral
+    int totalOutcomes = totalTp + totalSl;
+    double winRate = totalOutcomes > 0 ? (totalTp / totalOutcomes) * 100 : 0.0;
 
+    // Distribution Data
     List<_DistributionBarData> distribution = [];
-    if (goldCount > 0) distribution.add(_DistributionBarData(label: 'Gold', value: goldCount.toDouble(), winRate: goldWins / goldCount, wins: goldWins, losses: goldCount - goldWins));
-    if (cryptoCount > 0) distribution.add(_DistributionBarData(label: 'Crypto', value: cryptoCount.toDouble(), winRate: cryptoWins / cryptoCount, wins: cryptoWins, losses: cryptoCount - cryptoWins));
-    if (forexCount > 0) distribution.add(_DistributionBarData(label: 'Forex', value: forexCount.toDouble(), winRate: forexWins / forexCount, wins: forexWins, losses: forexCount - forexWins));
+    
+    if (widget.assetFilter == AssetFilter.all) {
+        // Bar 1: Gold
+        int goldTotal = goldTp + goldSl;
+        double goldWinRate = goldTotal > 0 ? goldTp / goldTotal : 0.0;
+        
+        if (goldTotal > 0) {
+            distribution.add(_DistributionBarData(
+                label: 'Gold', 
+                value: goldTotal.toDouble(), 
+                winRate: goldWinRate, 
+                wins: goldTp, 
+                losses: goldSl
+            ));
+        }
+
+        // Bar 2: Others (All - Gold)
+        int otherTp = totalTp - goldTp;
+        int otherSl = totalSl - goldSl;
+        int otherTotal = otherTp + otherSl;
+        double otherWinRate = otherTotal > 0 ? otherTp / otherTotal : 0.0;
+
+        if (otherTotal > 0) {
+            distribution.add(_DistributionBarData(
+                label: 'General', 
+                value: otherTotal.toDouble(), 
+                winRate: otherWinRate, 
+                wins: otherTp, 
+                losses: otherSl
+            ));
+        }
+        
+    } else if (widget.assetFilter == AssetFilter.gold) {
+         if (totalOutcomes > 0) {
+             distribution.add(_DistributionBarData(
+                label: 'Gold', 
+                value: totalOutcomes.toDouble(), 
+                winRate: winRate / 100, 
+                wins: totalTp, 
+                losses: totalSl
+            ));
+         }
+    }
 
     return {
       'totalPips': totalPips,
-      'count': validSignals.length,
+      'count': totalOutcomes, // Changed from totalSignals to reflect TP+SL count
       'winRate': winRate,
       'chartData': chartPoints,
       'distribution': distribution,
@@ -2151,9 +2155,8 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
       l10n.last90Days,
     ];
 
-    return StreamBuilder<List<Signal>>(
-      // Only fetch completed signals (not live)
-      stream: SignalService().getSignals(isLive: false, userTier: 'web', allowUnauthenticated: true),
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('profit_stats').orderBy('date').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
            return const SizedBox(
@@ -2165,13 +2168,11 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
         if (snapshot.hasError) {
           return SizedBox(
              height: 400, 
-             child: Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)))
+             child: Center(child: Text('Error loading stats: ${snapshot.error}', style: const TextStyle(color: Colors.white)))
            );
         }
 
-        final allSignals = snapshot.data ?? [];
-        final filteredSignals = _applyFilters(allSignals);
-        final stats = _calculateStats(filteredSignals);
+        final stats = _processStats(snapshot.data?.docs ?? []);
 
         final totalPips = stats['totalPips'] as double;
         final count = stats['count'] as int;
@@ -2179,7 +2180,6 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
         final chartData = stats['chartData'] as List<_ChartPoint>;
         final distribution = stats['distribution'] as List<_DistributionBarData>;
 
-        // Format Pips
         final pipsFormatter = NumberFormat('#,##0.0', 'en_US');
 
         return LayoutBuilder(
@@ -2201,7 +2201,6 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
                       l10n.performanceOverview,
                       style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
                     ),
-                    // Only show time filter if no custom date range is selected
                     if (widget.dateRange == null)
                       _buildTimeFilterDropdown(timeFilters),
                   ],
@@ -2211,7 +2210,6 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Left Column: Profit Metrics + Profit Chart
                       SizedBox(
                         width: columnWidth,
                         child: Column(
@@ -2235,12 +2233,11 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            _ProfitChart(data: chartData),
+                            _ProfitChart(docs: snapshot.data?.docs ?? [], assetFilter: widget.assetFilter),
                           ],
                         ),
                       ),
                       SizedBox(width: gap),
-                      // Right Column: Win/Member Metrics + Distribution Chart
                       SizedBox(
                         width: columnWidth,
                         child: Column(
@@ -2257,8 +2254,8 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: _MetricCard(
-                                    title: l10n.activeMember, // Keeping this static or fetch from another source
-                                    value: '+10,500', // Placeholder as requested to focus on signals
+                                    title: l10n.activeMember,
+                                    value: '+10,500',
                                   ),
                                 ),
                               ],
@@ -2301,7 +2298,7 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      _ProfitChart(data: chartData),
+                      _ProfitChart(docs: snapshot.data?.docs ?? [], assetFilter: widget.assetFilter),
                       const SizedBox(height: 24),
                       _DistributionChart(data: distribution),
                     ],
@@ -2391,65 +2388,136 @@ class _ChartPoint {
 }
 
 class _ProfitChart extends StatefulWidget {
-  final List<_ChartPoint> data;
-  const _ProfitChart({required this.data});
+  final List<QueryDocumentSnapshot> docs; // Changed from List<_ChartPoint> data
+  final AssetFilter assetFilter; // Need to know if we are filtering Gold vs All
+
+  const _ProfitChart({required this.docs, required this.assetFilter});
 
   @override
   State<_ProfitChart> createState() => _ProfitChartState();
 }
 
-class _ProfitChartState extends State<_ProfitChart> {
-  // 0: Daily, 1: Weekly, 2: Monthly
+class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderStateMixin {
+  // 0: Daily (Intraday of Today), 1: Weekly (This Week), 2: Monthly (This Month)
   int _selectedPeriodIndex = 0;
   _ChartPoint? _hoverPoint;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic);
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ProfitChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If data changed significantly or period changed, we might want to animate?
+    // For now, let's re-animate if document count changes drastically or forced
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   List<_ChartPoint> _processData() {
-    if (widget.data.isEmpty) return [];
+    if (widget.docs.isEmpty) return [];
 
-    // 1. Sort by date
-    final sorted = List<_ChartPoint>.from(widget.data)
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final now = DateTime.now();
+    List<_ChartPoint> points = [];
 
-    // 2. Map to Map<String, _ChartPoint> where Key is the time bucket
-    final Map<String, _ChartPoint> buckets = {};
-
-    for (var point in sorted) {
-      String key;
-      final date = point.date;
+    if (_selectedPeriodIndex == 0) {
+      // === DAILY (Intraday) ===
+      // Find the document for TODAY
+      final todayStr = DateFormat('yyyy-MM-dd').format(now);
       
-      if (_selectedPeriodIndex == 0) {
-        // Daily
-        key = DateFormat('yyyyMMdd').format(date);
-      } else if (_selectedPeriodIndex == 1) {
-        // Weekly (Year + Week Number)
-        // Simple approximation: key by ISO week would be better, but standard lib doesn't have it easily.
-        // We'll use start of week date.
-        // Subtract weekday-1 to get Monday.
-        final startOfWeek = DateTime(date.year, date.month, date.day).subtract(Duration(days: date.weekday - 1));
-        key = DateFormat('yyyyMMdd').format(startOfWeek);
-      } else {
-        // Monthly
-        key = DateFormat('yyyyMM').format(date);
+      // Try to find today's doc. If not found, maybe show yesterday? 
+      // Let's stick to today first. If empty, chart is empty.
+      QueryDocumentSnapshot? todayDoc;
+      try {
+        todayDoc = widget.docs.firstWhere((d) {
+           final date = (d['date'] as Timestamp).toDate();
+           return DateFormat('yyyy-MM-dd').format(date) == todayStr;
+        });
+      } catch (e) {
+        // No doc for today
       }
-      
-      // We want the LAST value of the period for cumulative chart
-      buckets[key] = point;
+
+      if (todayDoc != null) {
+          final data = todayDoc.data() as Map<String, dynamic>;
+          // We only have intraday for XAU currently based on the webhook logic.
+          // If AssetFilter is ALL, we might still want to show XAU Intraday if that's the only real-time source?
+          // Or we show nothing if we don't have "All" intraday.
+          // Let's assume we show XAU Intraday for Daily view regardless or just for Gold.
+          // But user wants "Daily" to show variations.
+          
+          if (data['xau_intraday'] != null) {
+              final List<dynamic> snapshots = data['xau_intraday'];
+              for (var snap in snapshots) {
+                  if (snap['timestamp'] != null && snap['pips'] != null) {
+                      points.add(_ChartPoint(
+                          date: (snap['timestamp'] as Timestamp).toDate(),
+                          value: (snap['pips'] as num).toDouble()
+                      ));
+                  }
+              }
+          }
+      }
+
+    } else {
+      // === WEEKLY / MONTHLY (Aggregated Daily) ===
+      DateTime startDate;
+      if (_selectedPeriodIndex == 1) {
+        // Weekly (Mon - Sun)
+        startDate = now.subtract(Duration(days: now.weekday - 1));
+        startDate = DateTime(startDate.year, startDate.month, startDate.day);
+      } else {
+        // Monthly (1st - Now)
+        startDate = DateTime(now.year, now.month, 1);
+      }
+
+      for (var doc in widget.docs) {
+         final data = doc.data() as Map<String, dynamic>;
+         final date = (data['date'] as Timestamp).toDate();
+
+         if (date.isBefore(startDate)) continue;
+
+         double pips = 0;
+         if (widget.assetFilter == AssetFilter.gold) {
+             if (data['xau'] != null) {
+                 pips = (data['xau']['pips'] ?? 0).toDouble();
+             }
+         } else {
+             // Default All
+             if (data['all'] != null) {
+                 pips = (data['all']['pips'] ?? 0).toDouble();
+             }
+         }
+         
+         // For aggregated view, we take the END of day value.
+         // Chart point date is the day itself.
+         points.add(_ChartPoint(date: date, value: pips));
+      }
     }
 
-    return buckets.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+    // Sort by date/time
+    points.sort((a, b) => a.date.compareTo(b.date));
+    return points;
   }
 
   void _onHover(Offset localPosition, Size size, List<_ChartPoint> data) {
     if (data.isEmpty) return;
     
     const double leftPadding = 40.0;
-    const double bottomPadding = 20.0;
     final chartWidth = size.width - leftPadding;
-    
-    // Map x position to index
-    // x = leftPadding + (chartWidth * (i / (data.length - 1)))
-    // (x - leftPadding) / chartWidth = i / (data.length - 1)
-    // i = ((x - leftPadding) / chartWidth) * (data.length - 1)
     
     double relativeX = localPosition.dx - leftPadding;
     if (relativeX < 0) relativeX = 0;
@@ -2461,6 +2529,16 @@ class _ProfitChartState extends State<_ProfitChart> {
     setState(() {
       _hoverPoint = data[safeIndex];
     });
+  }
+
+  void _changePeriod(int index) {
+      if (_selectedPeriodIndex == index) return;
+      setState(() {
+          _selectedPeriodIndex = index;
+          _hoverPoint = null;
+      });
+      _controller.reset();
+      _controller.forward();
   }
 
   @override
@@ -2492,10 +2570,7 @@ class _ProfitChartState extends State<_ProfitChart> {
                 children: List.generate(periods.length, (index) {
                   final isSelected = _selectedPeriodIndex == index;
                   return GestureDetector(
-                    onTap: () => setState(() {
-                        _selectedPeriodIndex = index;
-                        _hoverPoint = null; // Reset hover
-                    }),
+                    onTap: () => _changePeriod(index),
                     child: Container(
                       margin: const EdgeInsets.only(left: 8),
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -2527,9 +2602,19 @@ class _ProfitChartState extends State<_ProfitChart> {
                     return MouseRegion(
                       onHover: (event) => _onHover(event.localPosition, constraints.biggest, processedData),
                       onExit: (_) => setState(() => _hoverPoint = null),
-                      child: CustomPaint(
-                        size: Size(constraints.maxWidth, constraints.maxHeight),
-                        painter: _LineChartPainter(data: processedData, hoverPoint: _hoverPoint),
+                      child: AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, child) {
+                          return CustomPaint(
+                            size: Size(constraints.maxWidth, constraints.maxHeight),
+                            painter: _LineChartPainter(
+                                data: processedData, 
+                                hoverPoint: _hoverPoint,
+                                animationValue: _animation.value,
+                                isDaily: _selectedPeriodIndex == 0
+                            ),
+                          );
+                        }
                       ),
                     );
                   }
@@ -2544,8 +2629,10 @@ class _ProfitChartState extends State<_ProfitChart> {
 class _LineChartPainter extends CustomPainter {
   final List<_ChartPoint> data;
   final _ChartPoint? hoverPoint;
+  final double animationValue;
+  final bool isDaily;
   
-  _LineChartPainter({required this.data, this.hoverPoint});
+  _LineChartPainter({required this.data, this.hoverPoint, required this.animationValue, required this.isDaily});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2581,12 +2668,16 @@ class _LineChartPainter extends CustomPainter {
     if (data.isNotEmpty) {
       minVal = data.map((e) => e.value).reduce(math.min);
       maxVal = data.map((e) => e.value).reduce(math.max);
-      // Add padding
+      
       final range = maxVal - minVal;
-      maxVal += range * 0.1;
-      minVal -= range * 0.1;
+      if (range == 0) {
+          maxVal += 50;
+          minVal -= 50;
+      } else {
+          maxVal += range * 0.1;
+          minVal -= range * 0.1;
+      }
     }
-    if (maxVal == minVal) maxVal += 100;
 
     // Draw Grid & Y-Axis Labels
     const gridCount = 5;
@@ -2605,9 +2696,9 @@ class _LineChartPainter extends CustomPainter {
 
     // Draw X-Axis Labels (First and Last date)
     if (data.isNotEmpty) {
-        // Sử dụng định dạng dd/MM/yyyy cho trục X theo yêu cầu
-        final firstDate = DateFormat('dd/MM/yyyy').format(data.first.date);
-        final lastDate = DateFormat('dd/MM/yyyy').format(data.last.date);
+        final formatStr = isDaily ? 'HH:mm' : 'dd/MM';
+        final firstDate = DateFormat(formatStr).format(data.first.date);
+        final lastDate = DateFormat(formatStr).format(data.last.date);
         
         final tpFirst = TextPainter(text: TextSpan(text: firstDate, style: textStyle), textDirection: ui.TextDirection.ltr)..layout();
         tpFirst.paint(canvas, Offset(chartRect.left, size.height - tpFirst.height));
@@ -2616,14 +2707,13 @@ class _LineChartPainter extends CustomPainter {
         tpLast.paint(canvas, Offset(chartRect.right - tpLast.width, size.height - tpLast.height));
     }
 
-    // Draw Line Path
+    // Draw Line Path with Animation
     if (data.isNotEmpty) {
       final path = Path();
       Offset? hoverOffset;
 
       for (int i = 0; i < data.length; i++) {
         final x = chartRect.left + (chartRect.width * (i / (data.length - 1)));
-        // Normalize value to height
         final normalizedValue = (data[i].value - minVal) / (maxVal - minVal);
         final y = chartRect.bottom - (normalizedValue * chartRect.height);
         
@@ -2638,29 +2728,47 @@ class _LineChartPainter extends CustomPainter {
         }
       }
 
-      final fillPath = Path.from(path)
-        ..lineTo(chartRect.right, chartRect.bottom)
-        ..lineTo(chartRect.left, chartRect.bottom)
-        ..close();
+      // 1. Create Animated Path
+      final pathMetrics = path.computeMetrics();
+      final animatedPath = Path();
+      
+      for (final metric in pathMetrics) {
+        animatedPath.addPath(
+          metric.extractPath(0.0, metric.length * animationValue),
+          Offset.zero,
+        );
+      }
 
-      canvas.drawPath(fillPath, paintFill);
-      canvas.drawPath(path, paintLine);
+      // 2. Draw Fill
+      if (animationValue > 0) {
+          final fillPath = Path.from(animatedPath);
+          final metrics = animatedPath.computeMetrics().toList();
+          if (metrics.isNotEmpty) {
+              final lastMetric = metrics.last;
+              final endPoint = lastMetric.getTangentForOffset(lastMetric.length)?.position ?? Offset(chartRect.left, chartRect.bottom);
+              final startPoint = metrics.first.getTangentForOffset(0)?.position ?? Offset(chartRect.left, chartRect.bottom);
+              
+              fillPath.lineTo(endPoint.dx, chartRect.bottom);
+              fillPath.lineTo(startPoint.dx, chartRect.bottom);
+              fillPath.close();
+              
+              canvas.drawPath(fillPath, paintFill);
+          }
+          canvas.drawPath(animatedPath, paintLine);
+      }
 
-      // Draw Tooltip if Hovered
-      if (hoverOffset != null && hoverPoint != null) {
-          // Draw vertical line
+      // Draw Tooltip (Only if fully animated)
+      if (animationValue >= 0.95 && hoverOffset != null && hoverPoint != null) {
           canvas.drawLine(
              Offset(hoverOffset.dx, chartRect.top),
              Offset(hoverOffset.dx, chartRect.bottom),
              Paint()..color = Colors.white54..strokeWidth = 1..style = PaintingStyle.stroke
           );
 
-          // Draw circle
           canvas.drawCircle(hoverOffset, 4, Paint()..color = const Color(0xFF2E97FF));
           canvas.drawCircle(hoverOffset, 2, Paint()..color = Colors.white);
 
-          // Draw Tooltip Box
-          final dateStr = DateFormat('dd/MM/yyyy').format(hoverPoint!.date);
+          final dateStr = DateFormat(isDaily ? 'HH:mm' : 'dd/MM').format(hoverPoint!.date);
           final valueStr = '${hoverPoint!.value.toStringAsFixed(1)} Pips';
           final textSpan = TextSpan(
               style: const TextStyle(color: Colors.white, fontSize: 12),
@@ -2676,7 +2784,6 @@ class _LineChartPainter extends CustomPainter {
           double tooltipX = hoverOffset.dx - tooltipWidth / 2;
           double tooltipY = hoverOffset.dy - tooltipHeight - 10;
 
-          // Bounds check
           if (tooltipX < 0) tooltipX = 0;
           if (tooltipX + tooltipWidth > size.width) tooltipX = size.width - tooltipWidth;
           if (tooltipY < 0) tooltipY = hoverOffset.dy + 10;
@@ -2695,7 +2802,11 @@ class _LineChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _LineChartPainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue || 
+           oldDelegate.hoverPoint != hoverPoint ||
+           oldDelegate.data != data;
+  }
 }
 
 class _DistributionBarData {
