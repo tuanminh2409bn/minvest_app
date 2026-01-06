@@ -29,6 +29,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /profit_stats/{docId} {
+      allow read: if true;
+      allow write: if false; // Chỉ Cloud Function mới có quyền ghi (qua Admin SDK)
+    }
+
     // Collection `users`
     match /users/{userId} {
       // ▼▼▼ BẮT ĐẦU SỬA LỖI: THÊM `isSupport()` VÀO QUY TẮC ĐỌC ▼▼▼

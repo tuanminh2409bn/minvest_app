@@ -1384,7 +1384,7 @@ export const grantDailyFreeTokens = onSchedule(
 // =================================================================
 // === FUNCTION KIỂM TRA VÀ HỦY GÓI HẾT HẠN ===
 // =================================================================
-export const checkExpiredSubscriptions = onSchedule(
+export const checkExpiredSubscriptions = onSchedule (
     {
         schedule: "0 * * * *", // Chạy mỗi giờ
         timeZone: "Asia/Ho_Chi_Minh",
@@ -1448,3 +1448,171 @@ export const checkExpiredSubscriptions = onSchedule(
         }
     }
 );
+
+// =================================================================
+// === STATS WEBHOOK CHO TELEGRAM BOT (BÁO CÁO LỢI NHUẬN) ===
+// =================================================================
+const STATS_CHAT_ID = "-1003103146104";
+
+export const telegramStatsWebhook = functions.https.onRequest(
+    { region: "asia-southeast1", timeoutSeconds: 30, memory: "256MiB" },
+    async (req: functions.https.Request, res: Response) => {
+        // FORCE LOG: Log toàn bộ body để debug
+        functions.logger.info("🔥 WEBHOOK TRIGGERED! Body:", JSON.stringify(req.body));
+
+        if (req.method !== "POST") {
+            res.status(403).send("Forbidden!");
+            return;
+        }
+        const update = req.body;
+        const message = update.message || update.channel_post;
+        
+        if (!message) {
+            functions.logger.warn("⚠️ No message found in update.");
+            res.status(200).send("OK");
+            return;
+        }
+
+        if (message.chat.id.toString() !== STATS_CHAT_ID) {
+            functions.logger.info(`ℹ️ Chat ID mismatch. Expected: ${STATS_CHAT_ID}, Got: ${message.chat.id}`);
+            res.status(200).send("OK");
+            return;
+        }
+
+        const text = message.text;
+        const messageDate = message.date; // Unix timestamp in seconds
+        
+        if (!text) {
+            res.status(200).send("OK");
+            return;
+        }
+
+        // DEBUG: Log nội dung tin nhắn nhận được để kiểm tra format
+        functions.logger.log("Received Text Raw:", JSON.stringify(text));
+
+        try {
+            // 1. Xử lý "Tổng hợp lệnh XAU" (Intraday Update)
+            // Mẫu: 📊 Tổng hợp lệnh XAU ngày 06/01/2026: ... 🧮 Tổng lệnh: +398.2 pip
+            if (text.includes("Tổng hợp lệnh XAU")) {
+                // Regex tinh chỉnh cho format nhiều dòng
+                const dateRegex = /ngày\s+(\d{1,2}\/\d{1,2}\/\d{4})/i;
+                const pipsRegex = /Tổng lệnh:\s*([+-]?[\d.,]+)\s*pip/i;
+                const tpRegex = /TP:\s*(\d+)/i;
+                const slRegex = /SL:\s*(\d+)/i;
+                const exitRegex = /Exit:?\s*(\d+)/i; // Dấu : có thể có hoặc không tùy icon
+                
+                const dateMatch = text.match(dateRegex);
+                const pipsMatch = text.match(pipsRegex);
+                const tpMatch = text.match(tpRegex);
+                const slMatch = text.match(slRegex);
+                const exitMatch = text.match(exitRegex);
+
+                if (dateMatch && pipsMatch) {
+                    const dateStr = dateMatch[1];
+                    // Thay thế dấu phẩy thành dấu chấm và loại bỏ khoảng trắng thừa
+                    const pipsStr = pipsMatch[1].replace(/,/g, '.').trim();
+                    const pips = parseFloat(pipsStr);
+                    
+                    const tpCount = tpMatch ? parseInt(tpMatch[1]) : 0;
+                    const slCount = slMatch ? parseInt(slMatch[1]) : 0;
+                    const exitCount = exitMatch ? parseInt(exitMatch[1]) : 0;
+                    
+                    const [day, month, year] = dateStr.split('/');
+                    const docId = `${year}-${month}-${day}`;
+                    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
+                    // Tạo snapshot dữ liệu intraday
+                    const intradaySnapshot = {
+                        pips: pips,
+                        tpCount: tpCount,
+                        slCount: slCount,
+                        exitCount: exitCount,
+                        timestamp: admin.firestore.Timestamp.fromMillis(messageDate * 1000)
+                    };
+
+                    await firestore.collection("profit_stats").doc(docId).set({
+                        date: admin.firestore.Timestamp.fromDate(dateObj),
+                        // Thêm vào mảng intraday
+                        xau_intraday: admin.firestore.FieldValue.arrayUnion(intradaySnapshot),
+                        // Cập nhật giá trị tổng kết mới nhất cho XAU trong ngày
+                        xau: {
+                            pips: pips,
+                            tpCount: tpCount,
+                            slCount: slCount,
+                            exitCount: exitCount,
+                            lastUpdated: intradaySnapshot.timestamp
+                        },
+                        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                    
+                    functions.logger.log(`✅ Đã cập nhật XAU [${docId}]: Pips=${pips}, TP=${tpCount}, SL=${slCount}, Exit=${exitCount}`);
+                } else {
+                     functions.logger.warn("⚠️ Không khớp Regex XAU.", { 
+                        hasDate: !!dateMatch, 
+                        hasPips: !!pipsMatch, 
+                        textSample: text.substring(0, 50) 
+                     });
+                }
+            }
+
+            // 2. Xử lý "Báo cáo tổng hợp toàn bộ lệnh" (End of Day Summary)
+            // Mẫu: 📅 Báo cáo tổng hợp toàn bộ lệnh ngày 05/01/2026 ...
+            if (text.includes("Báo cáo tổng hợp toàn bộ lệnh")) {
+                 const dateRegex = /ngày\s+(\d{1,2}\/\d{1,2}\/\d{4})/;
+                 const tpRegex = /Số lệnh TP:\s*(\d+)\s*\(Tổng\s*([+-]?[\d.]+)\s*pip\)/;
+                 const slRegex = /Số lệnh SL:\s*(\d+)\s*\(Tổng\s*([+-]?[\d.]+)\s*pip\)/;
+                 const exitRegex = /Số lệnh Exit:\s*(\d+)\s*\(Tổng\s*([+-]?[\d.]+)\s*pip\)/;
+
+                 const dateMatch = text.match(dateRegex);
+                 const tpMatch = text.match(tpRegex);
+                 const slMatch = text.match(slRegex);
+                 const exitMatch = text.match(exitRegex);
+
+                 if (dateMatch) {
+                    const dateStr = dateMatch[1];
+                    const [day, month, year] = dateStr.split('/');
+                    const docId = `${year}-${month}-${day}`;
+                    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
+                    let totalPips = 0;
+                    let tpCount = 0;
+                    let slCount = 0;
+                    let exitCount = 0;
+
+                    if (tpMatch) {
+                        tpCount = parseInt(tpMatch[1]);
+                        totalPips += parseFloat(tpMatch[2]);
+                    }
+                    if (slMatch) {
+                        slCount = parseInt(slMatch[1]);
+                        totalPips += parseFloat(slMatch[2]);
+                    }
+                    if (exitMatch) {
+                        exitCount = parseInt(exitMatch[1]);
+                        totalPips += parseFloat(exitMatch[2]);
+                    }
+
+                    await firestore.collection("profit_stats").doc(docId).set({
+                        date: admin.firestore.Timestamp.fromDate(dateObj),
+                        all: {
+                            pips: totalPips,
+                            tpCount: tpCount,
+                            slCount: slCount,
+                            exitCount: exitCount
+                        },
+                        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    functions.logger.log(`Đã cập nhật Stats ALL (End of Day) cho ngày ${docId}: ${totalPips} pips`);
+                 }
+            }
+
+            res.status(200).send("OK");
+        } catch (error) {
+            functions.logger.error("Lỗi xử lý Stats Webhook:", error);
+            res.status(500).send("Error");
+        }
+    }
+);
+
+
