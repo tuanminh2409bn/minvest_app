@@ -87,15 +87,7 @@ class SignalDetailScreen extends StatelessWidget {
     final String createdLabel =
         '(GMT +7) ${DateFormat('dd/MM/yyyy, HH:mm:ss').format(created)}';
 
-    // Access Control Logic
-    final userProvider = Provider.of<UserProvider>(context);
-    final canViewEntry = SignalAccessHelper.canViewEntry(
-      signal, 
-      userProvider.userTier, 
-      userProvider.activeSubscriptions
-    );
-
-    final String entryText = canViewEntry ? _formatPrice(signal.entryPrice) : '****';
+    final String entryText = _formatPrice(signal.entryPrice);
     final String slText = _formatPrice(signal.stopLoss);
     final String tp1 = signal.takeProfits.isNotEmpty
         ? _formatPrice(signal.takeProfits[0])

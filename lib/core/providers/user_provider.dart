@@ -26,6 +26,7 @@ class UserProvider with ChangeNotifier {
   // --- THAY ĐỔI: Token & Subscriptions ---
   int _tokenBalance = 0;
   List<String> _activeSubscriptions = [];
+  List<String> _unlockedSignals = []; // New Field
   DateTime? _subscriptionExpiryDate;
   Map<String, DateTime> _subscriptionsExpiry = {};
 
@@ -42,6 +43,7 @@ class UserProvider with ChangeNotifier {
   String? get sessionResetReason => _sessionResetReason;
   int get tokenBalance => _tokenBalance;
   List<String> get activeSubscriptions => _activeSubscriptions;
+  List<String> get unlockedSignals => _unlockedSignals; // New Getter
   DateTime? get subscriptionExpiryDate => _subscriptionExpiryDate;
   Map<String, DateTime> get subscriptionsExpiry => _subscriptionsExpiry;
 
@@ -92,6 +94,7 @@ class UserProvider with ChangeNotifier {
         
         _tokenBalance = (data['tokenBalance'] ?? 0) as int;
         _activeSubscriptions = List<String>.from(data['activeSubscriptions'] ?? []);
+        _unlockedSignals = List<String>.from(data['unlockedSignals'] ?? []); // Parse unlockedSignals
 
         // Parse subscriptionExpiryDate
         if (data['subscriptionExpiryDate'] != null && data['subscriptionExpiryDate'] is Timestamp) {
@@ -162,6 +165,7 @@ class UserProvider with ChangeNotifier {
     _sessionResetReason = null;
     _tokenBalance = 0;
     _activeSubscriptions = [];
+    _unlockedSignals = []; // Reset unlockedSignals
     _subscriptionExpiryDate = null;
     _subscriptionsExpiry = {};
   }

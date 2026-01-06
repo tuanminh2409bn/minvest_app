@@ -1595,6 +1595,7 @@ class _SignalWebCard extends StatelessWidget {
         if (currentBalance > 0) {
           tx.update(docRef, {
             'tokenBalance': FieldValue.increment(-1),
+            'unlockedSignals': FieldValue.arrayUnion([signal.id])
           });
           return true;
         } else {
@@ -1690,8 +1691,10 @@ class _SignalWebCard extends StatelessWidget {
     final userProvider = Provider.of<UserProvider?>(context, listen: false);
     final tier = userProvider?.userTier?.toLowerCase() ?? 'free';
     final activeSubs = userProvider?.activeSubscriptions ?? [];
+    final unlockedSignals = userProvider?.unlockedSignals ?? [];
 
-    if (tier == 'elite' || _isSignalUnlocked(signal, activeSubs)) {
+    // Check if user has Elite access, active subscription for this signal, OR has already unlocked it with token
+    if (tier == 'elite' || _isSignalUnlocked(signal, activeSubs) || unlockedSignals.contains(signal.id)) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -1744,7 +1747,12 @@ class _SignalWebCard extends StatelessWidget {
     // Check permission to view Entry
     final userProvider = Provider.of<UserProvider?>(context);
     final canViewEntry = userProvider != null && 
-        SignalAccessHelper.canViewEntry(signal, userProvider.userTier, userProvider.activeSubscriptions);
+        SignalAccessHelper.canViewEntry(
+            signal, 
+            userProvider.userTier, 
+            userProvider.activeSubscriptions,
+            unlockedSignals: userProvider.unlockedSignals
+        );
 
     return GestureDetector(
       onTap: () => _openDetail(context),
@@ -1791,46 +1799,47 @@ class _SignalWebCard extends StatelessWidget {
               style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
             ),
             const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isBuy ? Icons.north_east : Icons.south_east,
-                    size: 16,
-                    color: actionColor,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    typeText,
-                    style: AppTextStyles.body.copyWith(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (canViewEntry)
+                  Row(
+                    children: [
+                      Text(
+                        'Entry:',
+                        style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        signal.entryPrice.toString(),
+                        style: AppTextStyles.body.copyWith(color: const Color(0xFF289EFF), fontSize: 14, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  )
+                else
+                  const SizedBox(),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isBuy ? Icons.north_east : Icons.south_east,
+                      size: 16,
                       color: actionColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(width: 6),
+                    Text(
+                      typeText,
+                      style: AppTextStyles.body.copyWith(
+                        color: actionColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            if (canViewEntry) ...[
-               Row(
-                children: [
-                  Text(
-                    'Entry:',
-                    style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    signal.entryPrice.toString(),
-                    style: AppTextStyles.body.copyWith(color: const Color(0xFF289EFF), fontSize: 14, fontWeight: FontWeight.w700),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-            ],
-            const SizedBox(height: 4),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Text(
