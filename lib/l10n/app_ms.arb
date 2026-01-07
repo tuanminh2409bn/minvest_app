@@ -491,10 +491,21 @@
     "close": "Tutup",
     "validUntil": "Sah sehingga {date}",
     "@validUntil": {
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
+      "placeholders": {
+        "date": {
+          "type": "String"
         }
-    }
+      }
+    },
+    "wins": "Menang",
+    "losses": "Kalah",
+    "totalOrdersCount": "Jumlah: {count} pesanan",
+    "@totalOrdersCount": {
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "passwordResetEmailSent": "E-mel tetapan semula kata laluan telah dihantar! Sila semak peti masuk anda."
 }

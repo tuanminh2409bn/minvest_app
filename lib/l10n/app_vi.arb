@@ -489,12 +489,23 @@
         }
     },
     "close": "Đóng",
-    "validUntil": "Hết hạn ngày {date}",
+    "validUntil": "Có hiệu lực đến {date}",
     "@validUntil": {
+      "placeholders": {
+        "date": {
+          "type": "String"
+        }
+      }
+    },
+    "wins": "Thắng",
+    "losses": "Thua",
+    "totalOrdersCount": "Tổng cộng: {count} lệnh",
+    "@totalOrdersCount": {
         "placeholders": {
-            "date": {
-                "type": "String"
+            "count": {
+                "type": "int"
             }
         }
-    }
+    },
+    "passwordResetEmailSent": "Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn."
 }

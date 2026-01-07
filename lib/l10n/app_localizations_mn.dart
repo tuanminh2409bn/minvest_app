@@ -1441,4 +1441,19 @@ class AppLocalizationsMn extends AppLocalizations {
   String validUntil(String date) {
     return '$date хүртэл хүчинтэй';
   }
+
+  @override
+  String get wins => 'Ялалт';
+
+  @override
+  String get losses => 'Ялагдал';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Нийт: $count захиалга';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'Нууц үг сэргээх имэйл илгээгдлээ! Та ирсэн имэйлээ шалгана уу.';
 }

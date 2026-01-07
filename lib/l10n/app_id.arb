@@ -489,12 +489,23 @@
         }
     },
     "close": "Tutup",
-    "validUntil": "Berlaku hingga {date}",
-    "@validUntil": {
-        "placeholders": {
+        "validUntil": "Berlaku hingga {date}",
+        "@validUntil": {
+          "placeholders": {
             "date": {
-                "type": "String"
+              "type": "String"
             }
-        }
-    }
-}
+          }
+        },
+        "wins": "Menang",
+        "losses": "Kalah",
+                "totalOrdersCount": "Total: {count} pesanan",
+                "@totalOrdersCount": {
+                  "placeholders": {
+                    "count": {
+                      "type": "int"
+                    }
+                  }
+                },
+                "passwordResetEmailSent": "Email reset kata sandi telah dikirim! Silakan periksa kotak masuk Anda."
+            }

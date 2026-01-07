@@ -491,10 +491,21 @@
     "close": "Хаах",
     "validUntil": "{date} хүртэл хүчинтэй",
     "@validUntil": {
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
+      "placeholders": {
+        "date": {
+          "type": "String"
         }
-    }
+      }
+    },
+    "wins": "Ялалт",
+    "losses": "Ялагдал",
+    "totalOrdersCount": "Нийт: {count} захиалга",
+    "@totalOrdersCount": {
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "passwordResetEmailSent": "Нууц үг сэргээх имэйл илгээгдлээ! Та ирсэн имэйлээ шалгана уу."
 }

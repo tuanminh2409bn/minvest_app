@@ -1435,4 +1435,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String validUntil(String date) {
     return '$date तक मान्य';
   }
+
+  @override
+  String get wins => 'जीत';
+
+  @override
+  String get losses => 'हार';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'कुल: $count आदेश';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'पासवर्ड रीसेट ईमेल भेज दिया गया! कृपया अपना इनबॉक्स जांचें।';
 }

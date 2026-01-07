@@ -1385,4 +1385,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String validUntil(String date) {
     return '有效期至 $date';
   }
+
+  @override
+  String get wins => '获胜';
+
+  @override
+  String get losses => '失败';
+
+  @override
+  String totalOrdersCount(int count) {
+    return '共 $count 个订单';
+  }
+
+  @override
+  String get passwordResetEmailSent => '重置密码邮件已发送！请检查您的收件箱。';
 }

@@ -491,10 +491,21 @@
     "close": "Închide",
     "validUntil": "Valabil până la {date}",
     "@validUntil": {
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
+      "placeholders": {
+        "date": {
+          "type": "String"
         }
-    }
+      }
+    },
+    "wins": "Câștiguri",
+    "losses": "Pierderi",
+    "totalOrdersCount": "Total: {count} comenzi",
+    "@totalOrdersCount": {
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "passwordResetEmailSent": "E-mailul de resetare a parolei a fost trimis! Vă rugăm să vă verificați căsuța poștală."
 }

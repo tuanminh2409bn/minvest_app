@@ -491,10 +491,21 @@
     "close": "Fechar",
     "validUntil": "Válido até {date}",
     "@validUntil": {
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
+      "placeholders": {
+        "date": {
+          "type": "String"
         }
-    }
+      }
+    },
+    "wins": "Vitórias",
+    "losses": "Derrotas",
+    "totalOrdersCount": "Total: {count} ordens",
+    "@totalOrdersCount": {
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "passwordResetEmailSent": "E-mail de redefinição de senha enviado! Por favor, verifique sua caixa de entrada."
 }

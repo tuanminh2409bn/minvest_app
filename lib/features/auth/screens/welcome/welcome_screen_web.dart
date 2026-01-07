@@ -116,6 +116,73 @@ class _LoginFormState extends State<_LoginForm> {
     }
   }
 
+  void _showForgotPasswordDialog() {
+    final emailController = TextEditingController(text: _emailController.text);
+    bool resetting = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF0F0F0F),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Colors.white12)),
+          title: Text(AppLocalizations.of(context)!.forgotPassword, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.enterPersonalData, // Reusing or similar
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              _TextField(
+                label: AppLocalizations.of(context)!.email,
+                hint: AppLocalizations.of(context)!.emailHint,
+                controller: emailController,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: resetting ? null : () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.white54)),
+            ),
+            ElevatedButton(
+              onPressed: resetting ? null : () async {
+                final email = emailController.text.trim();
+                if (email.isEmpty) return;
+                
+                setDialogState(() => resetting = true);
+                try {
+                  await context.read<AuthService>().sendPasswordResetEmail(email);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.passwordResetEmailSent)),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.errorWithMessage(e.toString()))),
+                    );
+                  }
+                } finally {
+                  if (context.mounted) setDialogState(() => resetting = false);
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E97FF)),
+              child: resetting 
+                ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : Text(AppLocalizations.of(context)!.send, style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -162,7 +229,20 @@ class _LoginFormState extends State<_LoginForm> {
                 const SizedBox(height: 12),
                 _TextField(label: AppLocalizations.of(context)!.password, hint: AppLocalizations.of(context)!.enterPassword, controller: _passwordController, obscure: true),
                 const SizedBox(height: 10),
-                Align(alignment: Alignment.centerLeft, child: Text(AppLocalizations.of(context)!.forgotPassword, style: const TextStyle(color: Colors.white70, fontSize: 12))),
+                Align(
+                  alignment: Alignment.centerLeft, 
+                  child: GestureDetector(
+                    onTap: _showForgotPasswordDialog,
+                    child: Text(
+                      AppLocalizations.of(context)!.forgotPassword, 
+                      style: const TextStyle(
+                        color: Colors.white70, 
+                        fontSize: 12,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 _PrimaryButton(
                   text: AppLocalizations.of(context)!.signIn,

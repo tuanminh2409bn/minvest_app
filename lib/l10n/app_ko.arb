@@ -491,10 +491,21 @@
     "close": "닫기",
     "validUntil": "{date}까지 유효",
     "@validUntil": {
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
+      "placeholders": {
+        "date": {
+          "type": "String"
         }
-    }
+      }
+    },
+    "wins": "승리",
+    "losses": "패배",
+    "totalOrdersCount": "총 {count}개 주문",
+    "@totalOrdersCount": {
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "passwordResetEmailSent": "비밀번호 재설정 이메일이 전송되었습니다! 받은 편지함을 확인해 주세요."
 }

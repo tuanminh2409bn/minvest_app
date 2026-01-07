@@ -1425,4 +1425,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String validUntil(String date) {
     return 'صالح حتى $date';
   }
+
+  @override
+  String get wins => 'انتصارات';
+
+  @override
+  String get losses => 'خسائر';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'الإجمالي: $count أوامر';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'تم إرسال بريد إعادة تعيين كلمة المرور! يرجى التحقق من بريدك الوارد.';
 }

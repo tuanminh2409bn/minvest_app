@@ -1450,6 +1450,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String validUntil(String date) {
-    return 'Valable jusqu\'au $date';
+    return 'Valide jusqu\'au $date';
   }
+
+  @override
+  String get wins => 'Gagnés';
+
+  @override
+  String get losses => 'Perdus';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Total : $count ordres';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'E-mail de réinitialisation du mot de passe envoyé ! Veuillez consulter votre boîte de réception.';
 }

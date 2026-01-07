@@ -1424,6 +1424,21 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String validUntil(String date) {
-    return 'ใช้ได้ถึง $date';
+    return 'ใช้ได้จนถึง $date';
   }
+
+  @override
+  String get wins => 'ชนะ';
+
+  @override
+  String get losses => 'แพ้';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'รวม: $count ออเดอร์';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'ส่งอีเมลรีเซ็ตรหัสผ่านแล้ว! โปรดตรวจสอบกล่องจดหมายของคุณ';
 }

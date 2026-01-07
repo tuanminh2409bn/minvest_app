@@ -1397,4 +1397,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String validUntil(String date) {
     return '$date까지 유효';
   }
+
+  @override
+  String get wins => '승리';
+
+  @override
+  String get losses => '패배';
+
+  @override
+  String totalOrdersCount(int count) {
+    return '총 $count개 주문';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      '비밀번호 재설정 이메일이 전송되었습니다! 받은 편지함을 확인해 주세요.';
 }

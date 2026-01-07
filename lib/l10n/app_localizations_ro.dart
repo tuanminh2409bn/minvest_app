@@ -1449,4 +1449,19 @@ class AppLocalizationsRo extends AppLocalizations {
   String validUntil(String date) {
     return 'Valabil până la $date';
   }
+
+  @override
+  String get wins => 'Câștiguri';
+
+  @override
+  String get losses => 'Pierderi';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Total: $count comenzi';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'E-mailul de resetare a parolei a fost trimis! Vă rugăm să vă verificați căsuța poștală.';
 }

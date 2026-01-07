@@ -1433,6 +1433,21 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String validUntil(String date) {
-    return 'Hết hạn ngày $date';
+    return 'Có hiệu lực đến $date';
   }
+
+  @override
+  String get wins => 'Thắng';
+
+  @override
+  String get losses => 'Thua';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Tổng cộng: $count lệnh';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn.';
 }

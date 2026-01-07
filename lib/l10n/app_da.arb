@@ -489,12 +489,23 @@
         }
     },
     "close": "Luk",
-    "validUntil": "Gyldig indtil {date}",
-    "@validUntil": {
-        "placeholders": {
+        "validUntil": "Gyldig indtil {date}",
+        "@validUntil": {
+          "placeholders": {
             "date": {
-                "type": "String"
+              "type": "String"
             }
-        }
-    }
-}
+          }
+        },
+        "wins": "Gevinst",
+        "losses": "Tab",
+                "totalOrdersCount": "Total: {count} ordrer",
+                "@totalOrdersCount": {
+                  "placeholders": {
+                    "count": {
+                      "type": "int"
+                    }
+                  }
+                },
+                "passwordResetEmailSent": "E-mail til nulstilling af adgangskode er sendt! Tjek venligst din indbakke."
+            }

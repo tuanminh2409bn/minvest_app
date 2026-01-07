@@ -1432,6 +1432,21 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String validUntil(String date) {
-    return 'Voimassa $date asti';
+    return 'Voimassa asti $date';
   }
+
+  @override
+  String get wins => 'Voitot';
+
+  @override
+  String get losses => 'Tappiot';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Yhteensä: $count tilausta';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'Salasanan palautussähköposti lähetetty! Tarkista sähköpostisi.';
 }

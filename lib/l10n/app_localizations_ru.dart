@@ -1437,6 +1437,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String validUntil(String date) {
-    return 'Действует до $date';
+    return 'Действительно до $date';
   }
+
+  @override
+  String get wins => 'Победы';
+
+  @override
+  String get losses => 'Поражения';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Всего: $count ордеров';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'Письмо для сброса пароля отправлено! Пожалуйста, проверьте свой почтовый ящик.';
 }

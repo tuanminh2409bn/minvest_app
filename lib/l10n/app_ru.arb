@@ -489,12 +489,23 @@
         }
     },
     "close": "Закрыть",
-    "validUntil": "Действует до {date}",
+    "validUntil": "Действительно до {date}",
     "@validUntil": {
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
+      "placeholders": {
+        "date": {
+          "type": "String"
         }
-    }
+      }
+    },
+    "wins": "Победы",
+    "losses": "Поражения",
+    "totalOrdersCount": "Всего: {count} ордеров",
+    "@totalOrdersCount": {
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "passwordResetEmailSent": "Письмо для сброса пароля отправлено! Пожалуйста, проверьте свой почтовый ящик."
 }
