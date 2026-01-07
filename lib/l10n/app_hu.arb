@@ -489,12 +489,23 @@
         }
     },
     "close": "Bezárás",
-    "validUntil": "Érvényes eddig: {date}",
-    "@validUntil": {
-        "placeholders": {
+        "validUntil": "Érvényes eddig: {date}",
+        "@validUntil": {
+          "placeholders": {
             "date": {
-                "type": "String"
+              "type": "String"
             }
-        }
-    }
-}
+          }
+        },
+        "wins": "Nyerő",
+        "losses": "Vesztes",
+                "totalOrdersCount": "Összesen: {count} rendelés",
+                "@totalOrdersCount": {
+                  "placeholders": {
+                    "count": {
+                      "type": "int"
+                    }
+                  }
+                },
+                "passwordResetEmailSent": "Jelszó-visszaállító e-mail elküldve! Kérjük, ellenőrizze a bejövő leveleit."
+            }

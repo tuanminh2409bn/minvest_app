@@ -1436,4 +1436,19 @@ class AppLocalizationsMs extends AppLocalizations {
   String validUntil(String date) {
     return 'Sah sehingga $date';
   }
+
+  @override
+  String get wins => 'Menang';
+
+  @override
+  String get losses => 'Kalah';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Jumlah: $count pesanan';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'E-mel tetapan semula kata laluan telah dihantar! Sila semak peti masuk anda.';
 }

@@ -489,12 +489,23 @@
         }
     },
     "close": "Zavřít",
-    "validUntil": "Platné do {date}",
+    "validUntil": "Platí do {date}",
     "@validUntil": {
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
+      "placeholders": {
+        "date": {
+          "type": "String"
         }
-    }
+      }
+    },
+    "wins": "Výhry",
+    "losses": "Prohry",
+    "totalOrdersCount": "Celkem: {count} objednávek",
+    "@totalOrdersCount": {
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "passwordResetEmailSent": "E-mail pro resetování hesla byl odeslán! Zkontrolujte prosím svou doručenou poštu."
 }

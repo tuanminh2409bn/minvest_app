@@ -429,6 +429,15 @@ class AuthService {
     }
   }
 
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      print('Lỗi gửi email đặt lại mật khẩu: $e');
+      rethrow;
+    }
+  }
+
   Future<void> deleteAccountAndData() async {
     try {
       final callable = _functions.httpsCallable('deleteUserAccount');

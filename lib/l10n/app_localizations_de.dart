@@ -1442,4 +1442,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String validUntil(String date) {
     return 'Gültig bis $date';
   }
+
+  @override
+  String get wins => 'Gewinne';
+
+  @override
+  String get losses => 'Verluste';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Gesamt: $count Aufträge';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'E-Mail zum Zurücksetzen của Passwords gesendet! Bitte kiểm tra Sie Ihren Posteingang.';
 }

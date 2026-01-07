@@ -1447,4 +1447,19 @@ class AppLocalizationsIt extends AppLocalizations {
   String validUntil(String date) {
     return 'Valido fino al $date';
   }
+
+  @override
+  String get wins => 'Vinte';
+
+  @override
+  String get losses => 'Perse';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Totale: $count ordini';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'Email di ripristino della password inviata! Controlla la tua casella di posta.';
 }

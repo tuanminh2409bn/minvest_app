@@ -496,5 +496,16 @@
                 "type": "String"
             }
         }
-    }
+    },
+    "wins": "Wins",
+    "losses": "Losses",
+    "totalOrdersCount": "Total: {count} orders",
+    "@totalOrdersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "passwordResetEmailSent": "Password reset email sent! Please check your inbox."
 }

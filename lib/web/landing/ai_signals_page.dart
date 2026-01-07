@@ -164,10 +164,10 @@ class _AISignalsPageState extends State<AISignalsPage> {
                           ),
                         ] else if (selectedTab == AISignalsTab.performance) ...[
                           _PerformanceSection(
-                            assetFilter: _assetFilter,
-                            selectedPair: _selectedCommodity,
+                            assetFilter: AssetFilter.all, // Always show All Assets
+                            selectedPair: 'All Commodities', // Always show All Pairs
                             selectedTimezone: _selectedTimezone,
-                            dateRange: _dateRange,
+                            dateRange: null, // Ignore parent date range, use internal time filter
                           ),
                         ] else if (selectedTab == AISignalsTab.history) ...[
                           _HistorySection(
@@ -2072,10 +2072,17 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
          }
       } else {
          // Default to ALL
-         if (data['all'] != null) {
+         // Priority 1: Use 'all' data if available (End of Day report)
+         if (data['all'] != null && (data['all']['pips'] ?? 0) != 0) {
             dailyPips = (data['all']['pips'] ?? 0).toDouble();
             totalTp += (data['all']['tpCount'] ?? 0) as int;
             totalSl += (data['all']['slCount'] ?? 0) as int;
+         } 
+         // Priority 2: Fallback to component sums (e.g., xau) for real-time intraday updates
+         else if (data['xau'] != null) {
+            dailyPips = (data['xau']['pips'] ?? 0).toDouble();
+            totalTp += (data['xau']['tpCount'] ?? 0) as int;
+            totalSl += (data['xau']['slCount'] ?? 0) as int;
          }
          
          // Aggregate Gold for distribution breakdown
@@ -2102,35 +2109,36 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
     List<_DistributionBarData> distribution = [];
     
     if (widget.assetFilter == AssetFilter.all) {
-        // Bar 1: Gold
+        // Luôn hiển thị 3 cột: Gold, Crypto, Forex để giữ layout ổn định
+        
+        // 1. Gold (Lấy từ dữ liệu XAU đã tổng hợp)
         int goldTotal = goldTp + goldSl;
         double goldWinRate = goldTotal > 0 ? goldTp / goldTotal : 0.0;
-        
-        if (goldTotal > 0) {
-            distribution.add(_DistributionBarData(
-                label: 'Gold', 
-                value: goldTotal.toDouble(), 
-                winRate: goldWinRate, 
-                wins: goldTp, 
-                losses: goldSl
-            ));
-        }
+        distribution.add(_DistributionBarData(
+            label: 'Gold', 
+            value: goldTotal > 0 ? goldTotal.toDouble() : 0.1, // Để 0.1 để cột hiện 1 chút nếu 0
+            winRate: goldWinRate, 
+            wins: goldTp, 
+            losses: goldSl
+        ));
 
-        // Bar 2: Others (All - Gold)
-        int otherTp = totalTp - goldTp;
-        int otherSl = totalSl - goldSl;
-        int otherTotal = otherTp + otherSl;
-        double otherWinRate = otherTotal > 0 ? otherTp / otherTotal : 0.0;
+        // 2. Crypto (Placeholder - Chưa có dữ liệu tách biệt từ Tele)
+        distribution.add(const _DistributionBarData(
+            label: 'Crypto', 
+            value: 0.1, // Placeholder visual
+            winRate: 0.0, 
+            wins: 0, 
+            losses: 0
+        ));
 
-        if (otherTotal > 0) {
-            distribution.add(_DistributionBarData(
-                label: 'General', 
-                value: otherTotal.toDouble(), 
-                winRate: otherWinRate, 
-                wins: otherTp, 
-                losses: otherSl
-            ));
-        }
+        // 3. Forex (Placeholder - Chưa có dữ liệu tách biệt từ Tele)
+        distribution.add(const _DistributionBarData(
+            label: 'Forex', 
+            value: 0.1, // Placeholder visual
+            winRate: 0.0, 
+            wins: 0, 
+            losses: 0
+        ));
         
     } else if (widget.assetFilter == AssetFilter.gold) {
          if (totalOutcomes > 0) {
@@ -2409,7 +2417,7 @@ class _ProfitChart extends StatefulWidget {
 class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderStateMixin {
   // 0: Daily (Intraday of Today), 1: Weekly (This Week), 2: Monthly (This Month)
   int _selectedPeriodIndex = 0;
-  _ChartPoint? _hoverPoint;
+  int? _hoveredIndex;
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -2427,8 +2435,10 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
   @override
   void didUpdateWidget(covariant _ProfitChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If data changed significantly or period changed, we might want to animate?
-    // For now, let's re-animate if document count changes drastically or forced
+    if (oldWidget.docs.length != widget.docs.length || oldWidget.assetFilter != widget.assetFilter) {
+      _controller.reset();
+      _controller.forward();
+    }
   }
 
   @override
@@ -2445,28 +2455,22 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
 
     if (_selectedPeriodIndex == 0) {
       // === DAILY (Intraday) ===
-      // Find the document for TODAY
       final todayStr = DateFormat('yyyy-MM-dd').format(now);
       
-      // Try to find today's doc. If not found, maybe show yesterday? 
-      // Let's stick to today first. If empty, chart is empty.
+      // Try to find today's doc by ID directly (ID format is YYYY-MM-DD)
       QueryDocumentSnapshot? todayDoc;
       try {
-        todayDoc = widget.docs.firstWhere((d) {
-           final date = (d['date'] as Timestamp).toDate();
-           return DateFormat('yyyy-MM-dd').format(date) == todayStr;
-        });
+        todayDoc = widget.docs.firstWhere((d) => d.id == todayStr);
       } catch (e) {
         // No doc for today
       }
 
       if (todayDoc != null) {
           final data = todayDoc.data() as Map<String, dynamic>;
-          // We only have intraday for XAU currently based on the webhook logic.
-          // If AssetFilter is ALL, we might still want to show XAU Intraday if that's the only real-time source?
-          // Or we show nothing if we don't have "All" intraday.
-          // Let's assume we show XAU Intraday for Daily view regardless or just for Gold.
-          // But user wants "Daily" to show variations.
+          
+          // Logic: Nếu chọn Gold -> Chỉ hiện XAU Intraday
+          // Nếu chọn All -> Cũng hiện XAU Intraday (vì hiện tại chưa có All Intraday)
+          // Tương lai nếu có Crypto/Forex Intraday thì cần gộp lại.
           
           if (data['xau_intraday'] != null) {
               final List<dynamic> snapshots = data['xau_intraday'];
@@ -2482,7 +2486,7 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
       }
 
     } else {
-      // === WEEKLY / MONTHLY (Aggregated Daily) ===
+      // === WEEKLY / MONTHLY (Aggregated Daily - CUMULATIVE) ===
       DateTime startDate;
       if (_selectedPeriodIndex == 1) {
         // Weekly (Mon - Sun)
@@ -2493,27 +2497,34 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
         startDate = DateTime(now.year, now.month, 1);
       }
 
+      double runningPips = 0; // Biến tích lũy
+
       for (var doc in widget.docs) {
          final data = doc.data() as Map<String, dynamic>;
          final date = (data['date'] as Timestamp).toDate();
 
          if (date.isBefore(startDate)) continue;
 
-         double pips = 0;
+         double dailyPips = 0;
          if (widget.assetFilter == AssetFilter.gold) {
              if (data['xau'] != null) {
-                 pips = (data['xau']['pips'] ?? 0).toDouble();
+                 dailyPips = (data['xau']['pips'] ?? 0).toDouble();
              }
          } else {
              // Default All
-             if (data['all'] != null) {
-                 pips = (data['all']['pips'] ?? 0).toDouble();
+             // Ưu tiên lấy 'all' (số liệu chốt ngày)
+             if (data['all'] != null && (data['all']['pips'] ?? 0) != 0) {
+                 dailyPips = (data['all']['pips'] ?? 0).toDouble();
+             } 
+             // Nếu chưa có 'all' (hoặc = 0), fallback sang lấy tổng các thành phần (hiện tại là xau)
+             // Điều này giúp hiển thị dữ liệu realtime trong ngày khi chưa có báo cáo EOD
+             else if (data['xau'] != null) {
+                 dailyPips = (data['xau']['pips'] ?? 0).toDouble();
              }
          }
          
-         // For aggregated view, we take the END of day value.
-         // Chart point date is the day itself.
-         points.add(_ChartPoint(date: date, value: pips));
+         runningPips += dailyPips; // Cộng dồn
+         points.add(_ChartPoint(date: date, value: runningPips));
       }
     }
 
@@ -2535,16 +2546,18 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
     final index = ((relativeX / chartWidth) * (data.length - 1)).round();
     final safeIndex = index.clamp(0, data.length - 1);
     
-    setState(() {
-      _hoverPoint = data[safeIndex];
-    });
+    if (_hoveredIndex != safeIndex) {
+      setState(() {
+        _hoveredIndex = safeIndex;
+      });
+    }
   }
 
   void _changePeriod(int index) {
       if (_selectedPeriodIndex == index) return;
       setState(() {
           _selectedPeriodIndex = index;
-          _hoverPoint = null;
+          _hoveredIndex = null;
       });
       _controller.reset();
       _controller.forward();
@@ -2610,7 +2623,7 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
                   builder: (context, constraints) {
                     return MouseRegion(
                       onHover: (event) => _onHover(event.localPosition, constraints.biggest, processedData),
-                      onExit: (_) => setState(() => _hoverPoint = null),
+                      onExit: (_) => setState(() => _hoveredIndex = null),
                       child: AnimatedBuilder(
                         animation: _animation,
                         builder: (context, child) {
@@ -2618,7 +2631,7 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
                             size: Size(constraints.maxWidth, constraints.maxHeight),
                             painter: _LineChartPainter(
                                 data: processedData, 
-                                hoverPoint: _hoverPoint,
+                                hoveredIndex: _hoveredIndex,
                                 animationValue: _animation.value,
                                 isDaily: _selectedPeriodIndex == 0
                             ),
@@ -2637,11 +2650,11 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
 
 class _LineChartPainter extends CustomPainter {
   final List<_ChartPoint> data;
-  final _ChartPoint? hoverPoint;
+  final int? hoveredIndex;
   final double animationValue;
   final bool isDaily;
   
-  _LineChartPainter({required this.data, this.hoverPoint, required this.animationValue, required this.isDaily});
+  _LineChartPainter({required this.data, this.hoveredIndex, required this.animationValue, required this.isDaily});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2721,53 +2734,111 @@ class _LineChartPainter extends CustomPainter {
       final path = Path();
       Offset? hoverOffset;
 
-      for (int i = 0; i < data.length; i++) {
-        final x = chartRect.left + (chartRect.width * (i / (data.length - 1)));
-        final normalizedValue = (data[i].value - minVal) / (maxVal - minVal);
-        final y = chartRect.bottom - (normalizedValue * chartRect.height);
+      if (data.length == 1) {
+        // Special case: Only 1 point, draw from Bottom-Left to Center-Value (Diagonal rising)
+        final dotX = chartRect.left + (chartRect.width / 2);
+        final y = chartRect.bottom - ((data[0].value - minVal) / (maxVal - minVal) * chartRect.height);
         
-        if (i == 0) {
-          path.moveTo(x, y);
-        } else {
-          path.lineTo(x, y);
+        // Define path: Start at bottom-left, go to data point
+        path.moveTo(chartRect.left, chartRect.bottom);
+        path.lineTo(dotX, y);
+
+        // 1. Create Animated Path
+        final pathMetrics = path.computeMetrics();
+        final animatedPath = Path();
+        
+        for (final metric in pathMetrics) {
+          animatedPath.addPath(
+            metric.extractPath(0.0, metric.length * animationValue),
+            Offset.zero,
+          );
         }
 
-        if (hoverPoint != null && data[i] == hoverPoint) {
-           hoverOffset = Offset(x, y);
+        // 2. Draw Fill
+        if (animationValue > 0) {
+            final metrics = animatedPath.computeMetrics().toList();
+            if (metrics.isNotEmpty) {
+                final lastMetric = metrics.last;
+                // Get current end point of the animation
+                final endPoint = lastMetric.getTangentForOffset(lastMetric.length)?.position ?? Offset(chartRect.left, chartRect.bottom);
+                
+                final fillPath = Path()
+                  ..moveTo(chartRect.left, chartRect.bottom) // Start corner
+                  ..lineTo(endPoint.dx, endPoint.dy) // Current line end
+                  ..lineTo(endPoint.dx, chartRect.bottom) // Drop down
+                  ..close();
+                
+                canvas.drawPath(fillPath, paintFill);
+            }
+            canvas.drawPath(animatedPath, paintLine);
         }
-      }
 
-      // 1. Create Animated Path
-      final pathMetrics = path.computeMetrics();
-      final animatedPath = Path();
-      
-      for (final metric in pathMetrics) {
-        animatedPath.addPath(
-          metric.extractPath(0.0, metric.length * animationValue),
-          Offset.zero,
-        );
-      }
-
-      // 2. Draw Fill
-      if (animationValue > 0) {
-          final fillPath = Path.from(animatedPath);
-          final metrics = animatedPath.computeMetrics().toList();
-          if (metrics.isNotEmpty) {
-              final lastMetric = metrics.last;
-              final endPoint = lastMetric.getTangentForOffset(lastMetric.length)?.position ?? Offset(chartRect.left, chartRect.bottom);
-              final startPoint = metrics.first.getTangentForOffset(0)?.position ?? Offset(chartRect.left, chartRect.bottom);
-              
-              fillPath.lineTo(endPoint.dx, chartRect.bottom);
-              fillPath.lineTo(startPoint.dx, chartRect.bottom);
-              fillPath.close();
-              
-              canvas.drawPath(fillPath, paintFill);
+        // Draw Dot at the end (only if fully animated)
+        if (animationValue >= 0.95) {
+           canvas.drawCircle(Offset(dotX, y), 4, paintLine);
+           canvas.drawCircle(Offset(dotX, y), 2, Paint()..color = Colors.white);
+        }
+        
+        if (hoveredIndex == 0) {
+           hoverOffset = Offset(dotX, y);
+        }
+      } else {
+        // Normal case: Multiple points, draw a line
+        for (int i = 0; i < data.length; i++) {
+          // Fix division by zero if only 1 point
+          double progress = 0.5; // Default center for 1 point
+          if (data.length > 1) {
+              progress = i / (data.length - 1);
           }
-          canvas.drawPath(animatedPath, paintLine);
+          
+          final x = chartRect.left + (chartRect.width * progress);
+          final normalizedValue = (data[i].value - minVal) / (maxVal - minVal);
+          final y = chartRect.bottom - (normalizedValue * chartRect.height);
+          
+          if (i == 0) {
+            path.moveTo(x, y);
+          } else {
+            path.lineTo(x, y);
+          }
+
+          if (hoveredIndex == i) {
+             hoverOffset = Offset(x, y);
+          }
+        }
+
+        // 1. Create Animated Path
+        final pathMetrics = path.computeMetrics();
+        final animatedPath = Path();
+        
+        for (final metric in pathMetrics) {
+          animatedPath.addPath(
+            metric.extractPath(0.0, metric.length * animationValue),
+            Offset.zero,
+          );
+        }
+
+        // 2. Draw Fill
+        if (animationValue > 0) {
+            final fillPath = Path.from(animatedPath);
+            final metrics = animatedPath.computeMetrics().toList();
+            if (metrics.isNotEmpty) {
+                final lastMetric = metrics.last;
+                final endPoint = lastMetric.getTangentForOffset(lastMetric.length)?.position ?? Offset(chartRect.left, chartRect.bottom);
+                final startPoint = metrics.first.getTangentForOffset(0)?.position ?? Offset(chartRect.left, chartRect.bottom);
+                
+                fillPath.lineTo(endPoint.dx, chartRect.bottom);
+                fillPath.lineTo(startPoint.dx, chartRect.bottom);
+                fillPath.close();
+                
+                canvas.drawPath(fillPath, paintFill);
+            }
+            canvas.drawPath(animatedPath, paintLine);
+        }
       }
 
       // Draw Tooltip (Only if fully animated)
-      if (animationValue >= 0.95 && hoverOffset != null && hoverPoint != null) {
+      if (animationValue >= 0.95 && hoverOffset != null && hoveredIndex != null && hoveredIndex! < data.length) {
+          final hoverPoint = data[hoveredIndex!];
           canvas.drawLine(
              Offset(hoverOffset.dx, chartRect.top),
              Offset(hoverOffset.dx, chartRect.bottom),
@@ -2777,8 +2848,8 @@ class _LineChartPainter extends CustomPainter {
           canvas.drawCircle(hoverOffset, 4, Paint()..color = const Color(0xFF2E97FF));
           canvas.drawCircle(hoverOffset, 2, Paint()..color = Colors.white);
 
-          final dateStr = DateFormat(isDaily ? 'HH:mm' : 'dd/MM').format(hoverPoint!.date);
-          final valueStr = '${hoverPoint!.value.toStringAsFixed(1)} Pips';
+          final dateStr = DateFormat(isDaily ? 'HH:mm' : 'dd/MM').format(hoverPoint.date);
+          final valueStr = '${hoverPoint.value.toStringAsFixed(1)} Pips';
           final textSpan = TextSpan(
               style: const TextStyle(color: Colors.white, fontSize: 12),
               children: [
@@ -2813,7 +2884,7 @@ class _LineChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _LineChartPainter oldDelegate) {
     return oldDelegate.animationValue != animationValue || 
-           oldDelegate.hoverPoint != hoverPoint ||
+           oldDelegate.hoveredIndex != hoveredIndex ||
            oldDelegate.data != data;
   }
 }
@@ -2937,30 +3008,35 @@ class _DistributionChartState extends State<_DistributionChart> {
                                           Expanded(
                                             child: Align(
                                               alignment: Alignment.bottomCenter,
-                                              child: FractionallySizedBox(
-                                                heightFactor: heightFactor,
-                                                widthFactor: 0.30,
-                                                child: AnimatedContainer(
-                                                  duration: const Duration(milliseconds: 200),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(4),
-                                                    border: isHovered ? Border.all(color: Colors.white, width: 1.5) : null,
-                                                    boxShadow: isHovered ? [BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 8)] : null,
-                                                  ),
-                                                  clipBehavior: Clip.antiAlias,
-                                                  child: Column(
-                                                    children: [
-                                                      Expanded(
-                                                        flex: (bar.losses * 100).toInt() == 0 && (bar.wins * 100).toInt() == 0 ? 1 : (bar.losses * 100).toInt(),
-                                                        child: Container(color: const Color(0xFFE54747)),
+                                              child: LayoutBuilder(
+                                                builder: (context, constraints) {
+                                                  final isDesktop = MediaQuery.of(context).size.width > 900;
+                                                  return FractionallySizedBox(
+                                                    heightFactor: heightFactor,
+                                                    widthFactor: isDesktop ? 0.50 : 0.60,
+                                                    child: AnimatedContainer(
+                                                      duration: const Duration(milliseconds: 200),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(4),
+                                                        border: isHovered ? Border.all(color: Colors.white, width: 1.5) : null,
+                                                        boxShadow: isHovered ? [BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 8)] : null,
                                                       ),
-                                                      Expanded(
-                                                        flex: (bar.wins * 100).toInt(),
-                                                        child: Container(color: const Color(0xFF1DA1F2)),
+                                                      clipBehavior: Clip.antiAlias,
+                                                      child: Column(
+                                                        children: [
+                                                          Expanded(
+                                                            flex: (bar.losses * 100).toInt() == 0 && (bar.wins * 100).toInt() == 0 ? 1 : (bar.losses * 100).toInt(),
+                                                            child: Container(color: const Color(0xFFE54747)),
+                                                          ),
+                                                          Expanded(
+                                                            flex: (bar.wins * 100).toInt(),
+                                                            child: Container(color: const Color(0xFF1DA1F2)),
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ],
-                                                  ),
-                                                ),
+                                                    ),
+                                                  );
+                                                }
                                               ),
                                             ),
                                           ),
@@ -2992,11 +3068,11 @@ class _DistributionChartState extends State<_DistributionChart> {
                                             children: [
                                               Text(bar.label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                                               const SizedBox(height: 6),
-                                              _TooltipRow(color: const Color(0xFF1DA1F2), label: 'Thắng', value: '${bar.wins} (${(bar.winRate * 100).toStringAsFixed(1)}%)'),
+                                              _TooltipRow(color: const Color(0xFF1DA1F2), label: l10n.wins, value: '${bar.wins} (${(bar.winRate * 100).toStringAsFixed(1)}%)'),
                                               const SizedBox(height: 4),
-                                              _TooltipRow(color: const Color(0xFFE54747), label: 'Thua', value: '${bar.losses} (${((1 - bar.winRate) * 100).toStringAsFixed(1)}%)'),
+                                              _TooltipRow(color: const Color(0xFFE54747), label: l10n.losses, value: '${bar.losses} (${((1 - bar.winRate) * 100).toStringAsFixed(1)}%)'),
                                               const Divider(color: Colors.white10),
-                                              Text('Tổng cộng: ${bar.value.toInt()} lệnh', style: const TextStyle(color: Colors.white54, fontSize: 10)),
+                                              Text(l10n.totalOrdersCount(bar.value.toInt()), style: const TextStyle(color: Colors.white54, fontSize: 10)),
                                             ],
                                           ),
                                         ),

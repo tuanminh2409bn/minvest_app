@@ -491,10 +491,21 @@
     "close": "Chiudi",
     "validUntil": "Valido fino al {date}",
     "@validUntil": {
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
+      "placeholders": {
+        "date": {
+          "type": "String"
         }
-    }
+      }
+    },
+    "wins": "Vinte",
+    "losses": "Perse",
+    "totalOrdersCount": "Totale: {count} ordini",
+    "@totalOrdersCount": {
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "passwordResetEmailSent": "Email di ripristino della password inviata! Controlla la tua casella di posta."
 }

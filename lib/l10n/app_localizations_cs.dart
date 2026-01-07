@@ -1432,6 +1432,21 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String validUntil(String date) {
-    return 'Platné do $date';
+    return 'Platí do $date';
   }
+
+  @override
+  String get wins => 'Výhry';
+
+  @override
+  String get losses => 'Prohry';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Celkem: $count objednávek';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'E-mail pro resetování hesla byl odeslán! Zkontrolujte prosím svou doručenou poštu.';
 }

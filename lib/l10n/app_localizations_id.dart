@@ -1435,4 +1435,19 @@ class AppLocalizationsId extends AppLocalizations {
   String validUntil(String date) {
     return 'Berlaku hingga $date';
   }
+
+  @override
+  String get wins => 'Menang';
+
+  @override
+  String get losses => 'Kalah';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Total: $count pesanan';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'Email reset kata sandi telah dikirim! Silakan periksa kotak masuk Anda.';
 }

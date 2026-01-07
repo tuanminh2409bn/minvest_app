@@ -489,12 +489,23 @@
         }
     },
     "close": "Fermer",
-    "validUntil": "Valable jusqu'au {date}",
+    "validUntil": "Valide jusqu'au {date}",
     "@validUntil": {
-        "placeholders": {
-            "date": {
-                "type": "String"
-            }
+      "placeholders": {
+        "date": {
+          "type": "String"
         }
-    }
+      }
+    },
+    "wins": "Gagnés",
+    "losses": "Perdus",
+    "totalOrdersCount": "Total : {count} ordres",
+    "@totalOrdersCount": {
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "passwordResetEmailSent": "E-mail de réinitialisation du mot de passe envoyé ! Veuillez consulter votre boîte de réception."
 }

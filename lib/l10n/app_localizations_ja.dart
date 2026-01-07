@@ -1394,6 +1394,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String validUntil(String date) {
-    return '有効期限 $date';
+    return '$date まで有効';
   }
+
+  @override
+  String get wins => '勝ち';
+
+  @override
+  String get losses => '負け';
+
+  @override
+  String totalOrdersCount(int count) {
+    return '合計: $count 注文';
+  }
+
+  @override
+  String get passwordResetEmailSent => 'パスワード再設定メールを送信しました！受信トレイを確認してください。';
 }

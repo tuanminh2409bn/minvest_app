@@ -1427,6 +1427,21 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String validUntil(String date) {
-    return 'មានសុពលភាពរហូតដល់ $date';
+    return 'សុពលភាពរហូតដល់ $date';
   }
+
+  @override
+  String get wins => 'ឈ្នះ';
+
+  @override
+  String get losses => 'ចាញ់';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'សរុប: $count ការបញ្ជាទិញ';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'អ៊ីមែលសម្រាប់កំណត់ពាក្យសម្ងាត់ឡើងវិញត្រូវបានផ្ញើហើយ! សូមពិនិត្យមើលប្រអប់សំបុត្ររបស់អ្នក។';
 }

@@ -2767,6 +2767,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Valid until {date}'**
   String validUntil(String date);
+
+  /// No description provided for @wins.
+  ///
+  /// In en, this message translates to:
+  /// **'Wins'**
+  String get wins;
+
+  /// No description provided for @losses.
+  ///
+  /// In en, this message translates to:
+  /// **'Losses'**
+  String get losses;
+
+  /// No description provided for @totalOrdersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {count} orders'**
+  String totalOrdersCount(int count);
+
+  /// No description provided for @passwordResetEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset email sent! Please check your inbox.'**
+  String get passwordResetEmailSent;
 }
 
 class _AppLocalizationsDelegate

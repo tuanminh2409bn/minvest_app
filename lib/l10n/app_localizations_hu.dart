@@ -1440,4 +1440,19 @@ class AppLocalizationsHu extends AppLocalizations {
   String validUntil(String date) {
     return 'Érvényes eddig: $date';
   }
+
+  @override
+  String get wins => 'Nyerő';
+
+  @override
+  String get losses => 'Vesztes';
+
+  @override
+  String totalOrdersCount(int count) {
+    return 'Összesen: $count rendelés';
+  }
+
+  @override
+  String get passwordResetEmailSent =>
+      'Jelszó-visszaállító e-mail elküldve! Kérjük, ellenőrizze a bejövő leveleit.';
 }
