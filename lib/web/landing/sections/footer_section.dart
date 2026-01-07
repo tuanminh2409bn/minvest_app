@@ -15,11 +15,11 @@ class FooterSection extends StatelessWidget {
     final isMobile = width < Breakpoints.tablet;
 
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
-      ),
-      child: LayoutBuilder(builder: (context, constraints) {
-        // Breakpoint cho mobile/tablet tăng lên 1100 để đảm bảo không gian cho các cột
+        data: MediaQuery.of(context).copyWith(
+          textScaler: isMobile ? const TextScaler.linear(0.72) : const TextScaler.linear(1.0),
+        ),
+        child: LayoutBuilder(
+      builder: (context, constraints) {
         final bool isMobileLayout = constraints.maxWidth < 1100;
         final double padH = 0; // Đã loại bỏ padding ngang nội bộ để thẳng hàng với body
 

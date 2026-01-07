@@ -12,12 +12,11 @@ class PaymentCallbackScreen extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.black,
+        return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: isMobile ? const TextScaler.linear(0.72) : const TextScaler.linear(1.0),
+            ),
+            child: Scaffold(        backgroundColor: Colors.black,
         body: Center(
           child: Container(
             padding: const EdgeInsets.all(32),

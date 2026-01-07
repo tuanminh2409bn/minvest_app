@@ -50,7 +50,7 @@ class LandingPage extends StatelessWidget {
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(
                 textScaler: isMobile
-                    ? const TextScaler.linear(0.6)
+                    ? const TextScaler.linear(0.72)
                     : const TextScaler.linear(1.0),
               ),
               child: Container(
@@ -767,6 +767,8 @@ class _AnimatedGlowCardState extends State<_AnimatedGlowCard>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
+        final width = MediaQuery.of(context).size.width;
+        final isMobile = width < Breakpoints.tablet;
         final t = _controller.value;
         final colors = const [
           Color(0xFF04B3E9),
@@ -782,7 +784,7 @@ class _AnimatedGlowCardState extends State<_AnimatedGlowCard>
         return Container(
           width: widget.width,
           padding: const EdgeInsets.all(2),
-          constraints: const BoxConstraints(minHeight: 520),
+          constraints: BoxConstraints(minHeight: isMobile ? 400 : 520),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: colors,
@@ -876,7 +878,9 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards>
 
   @override
   Widget build(BuildContext context) {
-    const double viewportHeight = 370;
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+    final double viewportHeight = isMobile ? 280 : 370;
     return ClipRect(
       child: AnimatedBuilder(
         animation: _controller,
@@ -1205,7 +1209,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
                 children: [
                   _chip(context, AppLocalizations.of(context)!.aiSignal),
                   const SizedBox(height: AppSpacing.lg),
-                  _buildTypingTitle(),
+                  _buildTypingTitle(isMobile),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     AppLocalizations.of(context)!.liveTradingSignalsDesc,
@@ -1237,7 +1241,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
     );
   }
 
-  Widget _buildTypingTitle() {
+  Widget _buildTypingTitle(bool isMobile) {
     // Con trỏ nhấp nháy, bắt đầu ngay từ đầu chu kỳ.
     final showCursor = (_typeController.value % 0.6) < 0.3;
     return Text.rich(
@@ -1247,8 +1251,8 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style:
-          AppTextStyles.h1.copyWith(fontSize: 31, fontWeight: FontWeight.w800),
+      style: AppTextStyles.h1.copyWith(
+          fontSize: isMobile ? 27.8 : 29, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1523,7 +1527,7 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
         children: [
           _chip(context),
           const SizedBox(height: AppSpacing.lg),
-          _buildTypingTitle(),
+          _buildTypingTitle(isMobile),
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppLocalizations.of(context)!.orderExplanationEngineDesc,
@@ -1547,7 +1551,7 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildTypingTitle() {
+  Widget _buildTypingTitle(bool isMobile) {
     final showCursor = (_typeController.value % 0.6) > 0.3; // blink chậm
     return Text.rich(
       TextSpan(
@@ -1556,8 +1560,8 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style:
-          AppTextStyles.h1.copyWith(fontSize: 34, fontWeight: FontWeight.w800),
+      style: AppTextStyles.h1.copyWith(
+          fontSize: isMobile ? 27.8 : 29, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1728,7 +1732,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
                   children: [
                     _TransparentCard()._chip(context),
                     const SizedBox(height: AppSpacing.lg),
-                    _buildTypingTitle(),
+                    _buildTypingTitle(isMobile),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
                       AppLocalizations.of(context)!
@@ -1762,7 +1766,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
     );
   }
 
-  Widget _buildTypingTitle() {
+  Widget _buildTypingTitle(bool isMobile) {
     final showCursor = (_typeController.value % 0.6) > 0.3;
     return Text.rich(
       TextSpan(
@@ -1771,8 +1775,8 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style:
-          AppTextStyles.h1.copyWith(fontSize: 31, fontWeight: FontWeight.w800),
+      style: AppTextStyles.h1.copyWith(
+          fontSize: isMobile ? 26.4 : 29, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1808,6 +1812,8 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
+        final width = MediaQuery.of(context).size.width;
+        final isMobile = width < Breakpoints.tablet;
         final t = _controller.value;
         final colors = const [
           Color(0xFF04B3E9),
@@ -1822,7 +1828,7 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard>
 
         return Container(
           width: double.infinity,
-          constraints: const BoxConstraints(minHeight: 520),
+          constraints: BoxConstraints(minHeight: isMobile ? 400 : 520),
           padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -2076,6 +2082,9 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     return VisibilityDetector(
       key: const Key('signals_performance_visibility'),
       onVisibilityChanged: (info) {
@@ -2092,7 +2101,7 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
           child: _AnimatedBorderCard(
             child: Container(
               width: double.infinity,
-              constraints: const BoxConstraints(minHeight: 520),
+              constraints: BoxConstraints(minHeight: isMobile ? 280 : 520),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
