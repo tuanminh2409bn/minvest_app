@@ -28,10 +28,10 @@ class LandingNavBar extends StatelessWidget {
     ];
 
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
-      ),
-      child: StreamBuilder<User?>(
+        data: MediaQuery.of(context).copyWith(
+          textScaler: isMobile ? const TextScaler.linear(0.72) : const TextScaler.linear(1.0),
+        ),
+        child: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           final user = snapshot.data;

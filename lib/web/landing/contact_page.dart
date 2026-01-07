@@ -75,12 +75,11 @@ class _ContactPageState extends State<ContactPage> {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
-      ),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
+        return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: isMobile ? const TextScaler.linear(0.72) : const TextScaler.linear(1.0),
+            ),
+            child: Scaffold(        backgroundColor: AppColors.background,
         floatingActionButton: const WebChatBubble(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SingleChildScrollView(

@@ -92,10 +92,10 @@ class _PricingSectionState extends State<PricingSection> {
     ];
 
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
-      ),
-      child: Padding(
+        data: MediaQuery.of(context).copyWith(
+          textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+        ),
+        child: Padding(
         padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
