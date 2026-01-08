@@ -1252,7 +1252,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
         ],
       ),
       style: AppTextStyles.h1.copyWith(
-          fontSize: isMobile ? 27.8 : 29, fontWeight: FontWeight.w800),
+          fontSize: isMobile ? 25.0 : 29, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -1776,7 +1776,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
         ],
       ),
       style: AppTextStyles.h1.copyWith(
-          fontSize: isMobile ? 26.4 : 29, fontWeight: FontWeight.w800),
+          fontSize: isMobile ? 23.6 : 29, fontWeight: FontWeight.w800),
       softWrap: true,
     );
   }
@@ -2107,8 +2107,8 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 24),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: isMobile ? 12 : 24),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       gradient: const LinearGradient(
@@ -2119,7 +2119,8 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
                     ),
                     child: Text(
                         AppLocalizations.of(context)!.signalsPerformanceTitle,
-                        style: AppTextStyles.h3.copyWith(color: Colors.white)),
+                        style: AppTextStyles.h3.copyWith(
+                            color: Colors.white, fontSize: isMobile ? 18 : 22)),
                   ),
                   _staggerItem(
                       0,
@@ -2154,6 +2155,8 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
     return AnimatedBuilder(
       animation: _itemsController,
       builder: (context, child) {
+        final width = MediaQuery.of(context).size.width;
+        final isMobile = width < Breakpoints.tablet;
         final phase = (_itemsController.value + index * 0.22) % 1.0;
         double opacity;
         if (phase < 0.2) {
@@ -2173,42 +2176,49 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
           child: Transform.translate(offset: Offset(0, offsetY), child: child),
         );
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-        child: Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0D101A), Color(0xFF0A0B13)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            border: Border.all(color: Colors.white12),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: Colors.white70, size: 28),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: AppTextStyles.h3
-                            .copyWith(fontSize: 22, color: Colors.white)),
-                    const SizedBox(height: 4),
-                    Text(subtitle,
-                        style: AppTextStyles.caption
-                            .copyWith(color: Colors.white70)),
-                  ],
-                ),
+      child: LayoutBuilder(builder: (context, constraints) {
+        final width = MediaQuery.of(context).size.width;
+        final isMobile = width < Breakpoints.tablet;
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+              horizontal: 8, vertical: 8),
+          child: Container(
+            padding: EdgeInsets.all(isMobile ? 12 : 22),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0D101A), Color(0xFF0A0B13)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ],
+              border: Border.all(color: Colors.white12),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: Colors.white70, size: isMobile ? 20 : 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: AppTextStyles.h3.copyWith(
+                              fontSize: isMobile ? 16 : 22,
+                              color: Colors.white)),
+                      const SizedBox(height: 4),
+                      Text(subtitle,
+                          style: AppTextStyles.caption.copyWith(
+                              color: Colors.white70,
+                              fontSize: isMobile ? 10 : 12)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

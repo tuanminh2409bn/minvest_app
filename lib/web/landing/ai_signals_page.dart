@@ -2992,28 +2992,34 @@ class _DistributionChartState extends State<_DistributionChart> {
                             final isHovered = _hoveredIndex == index;
 
                             return Expanded(
-                              child: MouseRegion(
-                                onEnter: (_) => setState(() => _hoveredIndex = index),
-                                onExit: (_) => setState(() => _hoveredIndex = null),
-                                child: Stack(
-                                  alignment: Alignment.bottomCenter,
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          Expanded(
-                                            child: Align(
-                                              alignment: Alignment.bottomCenter,
-                                              child: LayoutBuilder(
-                                                builder: (context, constraints) {
-                                                  final isDesktop = MediaQuery.of(context).size.width > 900;
-                                                  return FractionallySizedBox(
-                                                    heightFactor: heightFactor,
-                                                    widthFactor: isDesktop ? 0.50 : 0.60,
-                                                    child: AnimatedContainer(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _hoveredIndex = _hoveredIndex == index ? null : index;
+                                  });
+                                },
+                                child: MouseRegion(
+                                  onEnter: (_) => setState(() => _hoveredIndex = index),
+                                  onExit: (_) => setState(() => _hoveredIndex = null),
+                                  child: Stack(
+                                    alignment: Alignment.bottomCenter,
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Expanded(
+                                              child: Align(
+                                                alignment: Alignment.bottomCenter,
+                                                child: LayoutBuilder(
+                                                  builder: (context, constraints) {
+                                                    final isDesktop = MediaQuery.of(context).size.width > 900;
+                                                    return FractionallySizedBox(
+                                                      heightFactor: heightFactor,
+                                                      widthFactor: isDesktop ? 0.50 : 0.85,
+                                                      child: AnimatedContainer(
                                                       duration: const Duration(milliseconds: 200),
                                                       decoration: BoxDecoration(
                                                         borderRadius: BorderRadius.circular(4),
@@ -3076,7 +3082,8 @@ class _DistributionChartState extends State<_DistributionChart> {
                                           ),
                                         ),
                                       ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
