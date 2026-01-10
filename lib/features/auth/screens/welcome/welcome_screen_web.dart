@@ -158,8 +158,36 @@ class _LoginFormState extends State<_LoginForm> {
                   await context.read<AuthService>().sendPasswordResetEmail(email);
                   if (context.mounted) {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.passwordResetEmailSent)),
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        backgroundColor: const Color(0xFF0F0F0F),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: Colors.white12)),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.check_circle_outline,
+                                color: Colors.green, size: 48),
+                            const SizedBox(height: 16),
+                            Text(
+                              AppLocalizations.of(context)!
+                                  .passwordResetEmailSent,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("OK",
+                                style: TextStyle(color: Colors.blue)),
+                          ),
+                        ],
+                      ),
                     );
                   }
                 } catch (e) {

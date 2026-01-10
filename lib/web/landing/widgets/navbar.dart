@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
@@ -262,23 +263,48 @@ class LandingNavBar extends StatelessWidget {
     final userProvider = Provider.of<UserProvider>(context);
     final String name = (userProvider.displayName ?? user.displayName ?? user.email ?? 'User').trim();
     
+    // Check for premium status
+    final tier = userProvider.userTier?.toLowerCase() ?? 'free';
+    final activeSubs = userProvider.activeSubscriptions;
+    final isPremium = tier == 'elite' || (activeSubs != null && activeSubs.isNotEmpty);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        // Removed border and background as requested
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white24),
-          color: Colors.white.withOpacity(0.06),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _userAvatar(user, onTap: onTap),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _userAvatar(user, onTap: onTap),
+                if (isPremium)
+                  Positioned(
+                    top: -16,
+                    right: -10,
+                    child: Transform.rotate(
+                      angle: 40 * math.pi / 180,
+                      child: Image.asset(
+                        'assets/images/crown_icon.png',
+                        width: 30,
+                        height: 30,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             const SizedBox(width: 8),
             Text(
               name,
-              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
+              style: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700),
             ),
           ],
         ),

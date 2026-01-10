@@ -99,7 +99,17 @@ class FooterSection extends StatelessWidget {
             Text(AppLocalizations.of(context)!.contactTitle, 
                 style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: isMobileLayout ? 16 : 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: AppSpacing.md),
-            _ContactItem(icon: Icons.phone, text: '+84 969.15.6969', isMobile: isMobileLayout),
+            _ContactItem(
+              icon: Icons.phone,
+              text: '+84 969.15.6969',
+              isMobile: isMobileLayout,
+              onTap: () async {
+                final Uri uri = Uri.parse('https://wa.me/84969156969');
+                if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                  debugPrint('Could not launch $uri');
+                }
+              },
+            ),
             const SizedBox(height: 8),
             _ContactItem(icon: Icons.email, text: 'contact@minvest.vn', isMobile: isMobileLayout),
           ],
@@ -114,7 +124,7 @@ class FooterSection extends StatelessWidget {
             _SocialIcon(iconPath: 'assets/images/tiktok_logo.png', url: 'https://www.tiktok.com/@minvest.minh'),
             _SocialIcon(iconPath: 'assets/images/youtube_logo.png', url: 'https://www.youtube.com/@minvestvn'),
             _SocialIcon(iconPath: 'assets/images/telegram_logo.png', url: 'https://t.me/minvest_free', size: 32),
-            _SocialIcon(iconPath: 'assets/images/web_logo.png', url: 'https://minvest.vn/'),
+            _SocialIcon(iconPath: 'assets/images/web_logo.png', url: 'https://minvest.live/'),
           ],
         );
 
@@ -186,12 +196,18 @@ class _ContactItem extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool isMobile;
+  final VoidCallback? onTap;
 
-  const _ContactItem({required this.icon, required this.text, this.isMobile = false});
+  const _ContactItem({
+    required this.icon,
+    required this.text,
+    this.isMobile = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    Widget content = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -208,6 +224,18 @@ class _ContactItem extends StatelessWidget {
         ),
       ],
     );
+
+    if (onTap != null) {
+      return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: onTap,
+          child: content,
+        ),
+      );
+    }
+
+    return content;
   }
 }
 
