@@ -200,8 +200,10 @@ class _HeroInteractiveState extends State<_HeroInteractive>
   Offset _pointer = Offset.zero;
   late final AnimationController _contentController;
   late final Animation<Offset> _titleSlide;
+  late final Animation<Offset> _titleSlideUp;
   late final Animation<double> _titleFade;
   late final Animation<Offset> _subtitleSlide;
+  late final Animation<Offset> _subtitleSlideUp;
   late final Animation<double> _subtitleFade;
   late final Animation<Offset> _ctaSlide;
   late final Animation<double> _ctaFade;
@@ -212,16 +214,13 @@ class _HeroInteractiveState extends State<_HeroInteractive>
     super.initState();
     _contentController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 900));
+    
+    // Desktop Horizontal Slides
     _titleSlide =
         Tween(begin: const Offset(-0.12, 0), end: Offset.zero).animate(
       CurvedAnimation(
           parent: _contentController,
           curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic)),
-    );
-    _titleFade = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-          parent: _contentController,
-          curve: const Interval(0.0, 0.55, curve: Curves.easeOut)),
     );
     _subtitleSlide =
         Tween(begin: const Offset(-0.08, 0), end: Offset.zero).animate(
@@ -229,11 +228,34 @@ class _HeroInteractiveState extends State<_HeroInteractive>
           parent: _contentController,
           curve: const Interval(0.15, 0.7, curve: Curves.easeOutCubic)),
     );
+
+    // Mobile Vertical Slides (Nổi lên)
+    _titleSlideUp =
+        Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+      CurvedAnimation(
+          parent: _contentController,
+          curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic)),
+    );
+    _subtitleSlideUp =
+        Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+      CurvedAnimation(
+          parent: _contentController,
+          curve: const Interval(0.15, 0.7, curve: Curves.easeOutCubic)),
+    );
+
+    _titleFade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+          parent: _contentController,
+          curve: const Interval(0.0, 0.55, curve: Curves.easeOut)),
+    );
+    
     _subtitleFade = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
           parent: _contentController,
           curve: const Interval(0.15, 0.7, curve: Curves.easeOut)),
     );
+    
+    // CTA is already sliding up, can reuse for both
     _ctaSlide = Tween(begin: const Offset(0, 0.16), end: Offset.zero).animate(
       CurvedAnimation(
           parent: _contentController,
@@ -260,10 +282,12 @@ class _HeroInteractiveState extends State<_HeroInteractive>
   Widget build(BuildContext context) {
     final size = widget.baseSize;
     final viewportWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = viewportWidth < Breakpoints.tablet;
     final double targetWidth = widget.expandToWidth
         ? viewportWidth
         : viewportWidth.clamp(320, math.max(320.0, size.width));
     final double scaleFactor = targetWidth / size.width;
+    
     final content = SizedBox(
       width: size.width,
       height: size.height,
@@ -318,7 +342,19 @@ class _HeroInteractiveState extends State<_HeroInteractive>
             ),
           ),
 
-          _buildContent(),
+          Positioned.fill(
+            child: VisibilityDetector(
+              key: const Key('hero_content_visibility'),
+              onVisibilityChanged: (info) {
+                 if (!_contentPlayed && info.visibleFraction > 0.1) {
+                   if (_contentController.status == AnimationStatus.dismissed) {
+                      _contentController.forward();
+                   }
+                 }
+              },
+              child: _buildContent(isMobile),
+            ),
+          ),
         ],
       ),
     );
@@ -332,127 +368,128 @@ class _HeroInteractiveState extends State<_HeroInteractive>
     return scaled;
   }
 
-  Widget _buildContent() {
-    final viewportWidth = MediaQuery.of(context).size.width;
-    final bool isMobile = viewportWidth < Breakpoints.tablet;
-
-    return Positioned.fill(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SlideTransition(
-                position: _titleSlide,
-                child: FadeTransition(
-                  opacity: _titleFade,
-                  child: Text(
-                    AppLocalizations.of(context)!.heroTitle,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.h1.copyWith(fontSize: 44),
-                  ),
-                ),
+  Widget _buildContent(bool isMobile) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 900),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildAnimatedWidget(
+              slideAnim: isMobile ? _titleSlideUp : _titleSlide,
+              fadeAnim: _titleFade,
+              child: Text(
+                AppLocalizations.of(context)!.heroTitle,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.h1.copyWith(fontSize: 44),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              SlideTransition(
-                position: _subtitleSlide,
-                child: FadeTransition(
-                  opacity: _subtitleFade,
-                  child: Text(
-                    AppLocalizations.of(context)!.heroSubtitle,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.h3.copyWith(color: Colors.white),
-                  ),
-                ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            _buildAnimatedWidget(
+              slideAnim: isMobile ? _subtitleSlideUp : _subtitleSlide,
+              fadeAnim: _subtitleFade,
+              child: Text(
+                AppLocalizations.of(context)!.heroSubtitle,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.h3.copyWith(color: Colors.white),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              SlideTransition(
-                position: _ctaSlide,
-                child: FadeTransition(
-                  opacity: _ctaFade,
-                  child: Wrap(
-                    spacing: AppSpacing.md,
-                    runSpacing: AppSpacing.sm,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      GradientButton(
-                        label: AppLocalizations.of(context)!.getSignalsNow,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: isMobile ? 24 : 32,
-                            vertical: isMobile ? 12 : 14),
-                        borderRadius: isMobile ? 1 : 6,
-                        textStyle: AppTextStyles.body.copyWith(
-                          fontSize: isMobile ? 20 : 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          height: 1.1,
-                        ),
-                        onPressed: () {
-                          if (FirebaseAuth.instance.currentUser != null) {
-                            Navigator.of(context).pushNamed('/ai-signals');
-                          } else {
-                            Navigator.of(context).pushNamed('/signup');
-                          }
-                        },
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _buildAnimatedWidget(
+              slideAnim: _ctaSlide, // CTA is always vertical slide up
+              fadeAnim: _ctaFade,
+              child: Wrap(
+                  spacing: AppSpacing.md,
+                  runSpacing: AppSpacing.sm,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    GradientButton(
+                      label: AppLocalizations.of(context)!.getSignalsNow,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? 24 : 32,
+                          vertical: isMobile ? 12 : 14),
+                      borderRadius: isMobile ? 1 : 6,
+                      textStyle: AppTextStyles.body.copyWith(
+                        fontSize: isMobile ? 20 : 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        height: 1.1,
                       ),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
-                        onTap: () {
-                          final authState = context.read<AuthBloc>().state;
-                          if (authState.status == AuthStatus.authenticated) {
-                            Navigator.of(context).pushNamed('/ai-signals');
-                          } else {
-                            Navigator.of(context).pushNamed('/signin');
-                          }
-                        },
+                      onPressed: () {
+                        if (FirebaseAuth.instance.currentUser != null) {
+                          Navigator.of(context).pushNamed('/ai-signals');
+                        } else {
+                          Navigator.of(context).pushNamed('/signup');
+                        }
+                      },
+                    ),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
+                      onTap: () {
+                        final authState = context.read<AuthBloc>().state;
+                        if (authState.status == AuthStatus.authenticated) {
+                          Navigator.of(context).pushNamed('/ai-signals');
+                        } else {
+                          Navigator.of(context).pushNamed('/signin');
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(isMobile ? 1 : 8),
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFF04B3E9),
+                              Color(0xFF2E60FF),
+                              Color(0xFFD500F9)
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(1),
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius:
-                                BorderRadius.circular(isMobile ? 1 : 8),
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF04B3E9),
-                                Color(0xFF2E60FF),
-                                Color(0xFFD500F9)
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
+                                BorderRadius.circular(isMobile ? 1 : 7),
+                            color: Colors.black,
                           ),
-                          padding: const EdgeInsets.all(1),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(isMobile ? 1 : 7),
-                              color: Colors.black,
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: isMobile ? 24 : 32,
-                              vertical: isMobile
-                                  ? 11
-                                  : 13, // Reduced by 1 to match GradientButton (which has no border)
-                            ),
-                            child: Text(
-                              AppLocalizations.of(context)!.freeTrial,
-                              style: AppTextStyles.body.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: isMobile ? 20 : 16,
-                                height: 1.1, // Sync with GradientButton
-                              ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile ? 24 : 32,
+                            vertical: isMobile
+                                ? 11
+                                : 13, // Reduced by 1 to match GradientButton (which has no border)
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)!.freeTrial,
+                            style: AppTextStyles.body.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: isMobile ? 20 : 16,
+                              height: 1.1, // Sync with GradientButton
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAnimatedWidget({
+    required Animation<Offset> slideAnim,
+    required Animation<double> fadeAnim,
+    required Widget child,
+  }) {
+    // Always use SlideTransition for "Nổi lên" effect (Vertical slide)
+    return SlideTransition(
+      position: slideAnim,
+      child: FadeTransition(opacity: fadeAnim, child: child),
     );
   }
 
@@ -487,31 +524,33 @@ class HeroSubtitleSection extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32, vertical: 0),
-      child: Column(
-        children: [
-          Text(
-            AppLocalizations.of(context)!.globalAiInnovationTitle,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.h2.copyWith(
-              fontSize: isMobile ? 32 : 28,
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
+    return _RevealOnScroll(
+      child: Padding(
+        padding:
+            EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32, vertical: 0),
+        child: Column(
+          children: [
+            Text(
+              AppLocalizations.of(context)!.globalAiInnovationTitle,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.h2.copyWith(
+                fontSize: isMobile ? 32 : 28,
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            AppLocalizations.of(context)!.globalAiInnovationDesc,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontSize: isMobile ? 18 : 16,
-              height: 1.5,
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              AppLocalizations.of(context)!.globalAiInnovationDesc,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body.copyWith(
+                color: Colors.white,
+                fontSize: isMobile ? 18 : 16,
+                height: 1.5,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -525,86 +564,175 @@ class HeroSignalsSection extends StatefulWidget {
 }
 
 class _HeroSignalsSectionState extends State<HeroSignalsSection>
+
     with SingleTickerProviderStateMixin {
+
   late final AnimationController _entranceController;
+
   late final Animation<Offset> _slideIn;
+
+  late final Animation<Offset> _slideUp;
+
   late final Animation<double> _fadeIn;
+
   bool _hasPlayed = false;
 
+
+
   @override
+
   void initState() {
+
     super.initState();
+
     _entranceController = AnimationController(
+
       vsync: this,
+
       duration: const Duration(milliseconds: 950),
+
     );
+
     _slideIn = Tween(begin: const Offset(-0.2, 0), end: Offset.zero).animate(
+
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
+
     );
+
+    _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+
+      CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
+
+    );
+
     _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
+
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOut),
+
     );
+
   }
 
+
+
   @override
+
   void dispose() {
+
     _entranceController.dispose();
+
     super.dispose();
+
   }
 
+
+
   @override
+
   Widget build(BuildContext context) {
+
     final width = MediaQuery.of(context).size.width;
+
     final isMobile = width < Breakpoints.tablet;
 
+
+
     return LayoutBuilder(
+
       builder: (context, constraints) {
+
         final maxWidth = constraints.maxWidth.clamp(320.0, 560.0);
+
         return Center(
+
           child: VisibilityDetector(
+
             key: const Key('hero_signals_visibility'),
+
             onVisibilityChanged: (info) {
+
               if (!_hasPlayed && info.visibleFraction > 0.2) {
+
                 _hasPlayed = true;
+
                 _entranceController.forward();
+
               }
+
             },
+
             child: SlideTransition(
-              position: _slideIn,
+
+              position: isMobile ? _slideUp : _slideIn,
+
               child: FadeTransition(
+
                 opacity: _fadeIn,
+
                 child: _AnimatedGlowCard(
+
                   width: maxWidth,
+
                   child: Container(
+
                     constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
+
                     padding: EdgeInsets.all(isMobile ? 16 : AppSpacing.md),
+
                     child: Column(
+
                       mainAxisSize: MainAxisSize.min,
+
                       mainAxisAlignment: isMobile
+
                           ? MainAxisAlignment.start
+
                           : MainAxisAlignment.spaceBetween,
+
                       crossAxisAlignment: CrossAxisAlignment.start,
+
                       children: [
+
                         Column(
+
                           crossAxisAlignment: CrossAxisAlignment.start,
+
                           children: [
+
                             _buildSearchBar(context),
+
                             const SizedBox(height: AppSpacing.md),
+
                             _buildTabs(context),
+
                           ],
+
                         ),
+
                         if (isMobile) const SizedBox(height: 24),
+
                         const _StaggeredSignalCards(),
+
                       ],
+
                     ),
+
                   ),
+
                 ),
+
               ),
+
             ),
+
           ),
+
         );
+
       },
+
     );
+
   }
 
   Widget _buildSearchBar(BuildContext context) {
@@ -1127,6 +1255,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
     with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _slideIn;
+  late final Animation<Offset> _slideUp;
   late final Animation<double> _fadeIn;
   bool _hasPlayed = false;
   late final AnimationController _typeController;
@@ -1145,6 +1274,9 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 700));
     _slideIn = Tween(begin: const Offset(0.18, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
@@ -1189,54 +1321,55 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
           }
         },
         child: SlideTransition(
-          position: _slideIn,
+          position: isMobile ? _slideUp : _slideIn,
           child: FadeTransition(
             opacity: _fadeIn,
-            child: Container(
-              constraints: BoxConstraints(minHeight: isMobile ? 0 : 480),
-              padding: isMobile
-                  ? const EdgeInsets.only(bottom: 24)
-                  : const EdgeInsets.all(AppSpacing.lg),
-              decoration: isMobile
-                  ? null
-                  : BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _chip(context, AppLocalizations.of(context)!.aiSignal),
-                  const SizedBox(height: AppSpacing.lg),
-                  _buildTypingTitle(isMobile),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    AppLocalizations.of(context)!.liveTradingSignalsDesc,
-                    style: AppTextStyles.body.copyWith(
-                      color: Colors.white,
-                      fontSize: isMobile ? 18 : 14,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Wrap(
-                    spacing: AppSpacing.xs,
-                    runSpacing: 6,
-                    children: [
-                      _outlinedChip(
-                          AppLocalizations.of(context)!.aiSignal, isMobile),
-                      _outlinedChip(
-                          AppLocalizations.of(context)!.trendFollowing,
-                          isMobile),
-                      _outlinedChip(
-                          AppLocalizations.of(context)!.realtime, isMobile),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            child: _buildContent(isMobile),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildContent(bool isMobile) {
+    return Container(
+      constraints: BoxConstraints(minHeight: isMobile ? 0 : 480),
+      padding: isMobile
+          ? const EdgeInsets.only(bottom: 24)
+          : const EdgeInsets.all(AppSpacing.lg),
+      decoration: isMobile
+          ? null
+          : BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(14),
+            ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _chip(context, AppLocalizations.of(context)!.aiSignal),
+          const SizedBox(height: AppSpacing.lg),
+          _buildTypingTitle(isMobile),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            AppLocalizations.of(context)!.liveTradingSignalsDesc,
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontSize: isMobile ? 18 : 14,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: 6,
+            children: [
+              _outlinedChip(AppLocalizations.of(context)!.aiSignal, isMobile),
+              _outlinedChip(
+                  AppLocalizations.of(context)!.trendFollowing, isMobile),
+              _outlinedChip(AppLocalizations.of(context)!.realtime, isMobile),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1338,15 +1471,20 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
   late final AnimationController _controller;
   late final Animation<Offset> _leftSlide;
   late final Animation<Offset> _rightSlide;
+  late final Animation<Offset> _slideUp;
+  late final Animation<Offset> _slideUpDelayed;
   late final Animation<double> _leftFade;
   late final Animation<double> _rightFade;
+  late final Animation<double> _fadeDelayed;
   bool _hasPlayed = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900));
+        vsync: this, duration: const Duration(milliseconds: 1100)); // Tăng duration một chút để thấy rõ hiệu ứng
+
+    // Desktop Animations
     _leftSlide = Tween(begin: const Offset(-0.18, 0), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
@@ -1357,6 +1495,26 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _rightFade = Tween(begin: 0.0, end: 1.0)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    // Mobile Animations (Staggered)
+    // Card 1: Xuất hiện trước (0.0 -> 0.6)
+    _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+      CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic)),
+    );
+
+    // Card 2: Xuất hiện sau (0.2 -> 0.8)
+    _slideUpDelayed = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+      CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic)),
+    );
+    _fadeDelayed = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.2, 0.8, curve: Curves.easeOut)),
+    );
   }
 
   @override
@@ -1380,7 +1538,7 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
           child: VisibilityDetector(
             key: const Key('order_engine_visibility'),
             onVisibilityChanged: (info) {
-              if (!_hasPlayed && info.visibleFraction > 0.2) {
+              if (!_hasPlayed && info.visibleFraction > 0.15) { // Giảm ngưỡng kích hoạt để nhạy hơn trên mobile
                 _hasPlayed = true;
                 _controller.forward();
               }
@@ -1392,9 +1550,9 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
                         constraints:
                             BoxConstraints(minHeight: isMobile ? 0 : 320),
                         child: SlideTransition(
-                          position: _leftSlide,
+                          position: isMobile ? _slideUp : _leftSlide,
                           child: FadeTransition(
-                            opacity: _leftFade,
+                            opacity: isMobile ? _leftFade : _leftFade, // _leftFade dùng chung cho card 1 (mobile & desktop)
                             child: const _OrderCard(),
                           ),
                         ),
@@ -1404,9 +1562,9 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
                         constraints:
                             BoxConstraints(minHeight: isMobile ? 0 : 320),
                         child: SlideTransition(
-                          position: _rightSlide,
+                          position: isMobile ? _slideUpDelayed : _rightSlide,
                           child: FadeTransition(
-                            opacity: _rightFade,
+                            opacity: isMobile ? _fadeDelayed : _rightFade,
                             child: const _KeyFindingsCard(),
                           ),
                         ),
@@ -1646,6 +1804,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
     with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _slideIn;
+  late final Animation<Offset> _slideUp;
   late final Animation<double> _fadeIn;
   bool _hasPlayed = false;
   late final AnimationController _typeController;
@@ -1665,6 +1824,9 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 900));
     _slideIn = Tween(begin: const Offset(0.16, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _fadeIn = Tween(begin: 0.0, end: 1.0)
@@ -1708,7 +1870,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
         }
       },
       child: SlideTransition(
-        position: _slideIn,
+        position: isMobile ? _slideUp : _slideIn,
         child: FadeTransition(
           opacity: _fadeIn,
           child: Container(
@@ -2056,6 +2218,7 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
   late final AnimationController _entranceController;
   late final AnimationController _itemsController;
   late final Animation<Offset> _slideIn;
+  late final Animation<Offset> _slideUp;
   late final Animation<double> _fadeIn;
   bool _hasPlayed = false;
 
@@ -2065,6 +2228,9 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
     _entranceController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 900));
     _slideIn = Tween(begin: const Offset(-0.16, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
+    );
+    _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
     );
     _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
@@ -2095,7 +2261,7 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
         }
       },
       child: SlideTransition(
-        position: _slideIn,
+        position: isMobile ? _slideUp : _slideIn,
         child: FadeTransition(
           opacity: _fadeIn,
           child: _AnimatedBorderCard(
@@ -2478,6 +2644,7 @@ class _AnimatedCoreValueCardState extends State<_AnimatedCoreValueCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _slide;
+  late final Animation<Offset> _slideUp;
   late final Animation<double> _fade;
   bool _hasPlayed = false;
 
@@ -2489,6 +2656,9 @@ class _AnimatedCoreValueCardState extends State<_AnimatedCoreValueCard>
     final beginOffset =
         widget.slideFromLeft ? const Offset(-0.16, 0) : const Offset(0.16, 0);
     _slide = Tween(begin: beginOffset, end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _fade = Tween(begin: 0.0, end: 1.0).animate(
@@ -2504,6 +2674,9 @@ class _AnimatedCoreValueCardState extends State<_AnimatedCoreValueCard>
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     return VisibilityDetector(
       key: Key('core_value_${widget.title}'),
       onVisibilityChanged: (info) {
@@ -2513,7 +2686,7 @@ class _AnimatedCoreValueCardState extends State<_AnimatedCoreValueCard>
         }
       },
       child: SlideTransition(
-        position: _slide,
+        position: isMobile ? _slideUp : _slide,
         child: FadeTransition(
           opacity: _fade,
           child: _AnimatedBorderCard(
@@ -2554,35 +2727,37 @@ class FaqSection extends StatelessWidget {
         'answer': AppLocalizations.of(context)!.faqAnswer4,
       },
     ];
-    return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: isMobile ? 0 : 24, vertical: 32),
-      child: Column(
-        children: [
-          Text(
-            AppLocalizations.of(context)!.frequentlyAskedQuestions,
-            style: AppTextStyles.h1.copyWith(
-              fontSize: isMobile ? 32 : 32, // Keep as is or adjust if needed
-              fontWeight: FontWeight.w700,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Container(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Text(
-              AppLocalizations.of(context)!.faqSubtitle,
-              style: AppTextStyles.body.copyWith(
-                color: Colors.white,
-                fontSize: isMobile ? 18 : 16,
+    return _RevealOnScroll(
+      child: Padding(
+        padding:
+            EdgeInsets.symmetric(horizontal: isMobile ? 0 : 24, vertical: 32),
+        child: Column(
+          children: [
+            Text(
+              AppLocalizations.of(context)!.frequentlyAskedQuestions,
+              style: AppTextStyles.h1.copyWith(
+                fontSize: isMobile ? 32 : 32, // Keep as is or adjust if needed
+                fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          ...faqItems.map((item) =>
-              _FaqItem(question: item['question']!, answer: item['answer']!)),
-        ],
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: Text(
+                AppLocalizations.of(context)!.faqSubtitle,
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontSize: isMobile ? 18 : 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            ...faqItems.map((item) =>
+                _FaqItem(question: item['question']!, answer: item['answer']!)),
+          ],
+        ),
       ),
     );
   }
@@ -2635,61 +2810,118 @@ class CtaSection extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.02),
-          borderRadius: BorderRadius.circular(isMobile ? 0 : 16),
-          border: Border.all(color: AppColors.cardBorder),
-        ),
-        child: Column(
-          children: [
-            Text(
-              AppLocalizations.of(context)!.maximizeResultsTitle,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.h1.copyWith(
-                fontSize: isMobile ? 32 : 32,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: Text(
-                AppLocalizations.of(context)!.minvestAiRegistrationDesc,
+    return _RevealOnScroll(
+      child: Padding(
+        padding:
+            EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.02),
+            borderRadius: BorderRadius.circular(isMobile ? 0 : 16),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Column(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.maximizeResultsTitle,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.body.copyWith(
-                  color: Colors.white,
-                  fontSize: isMobile ? 18 : 16,
+                style: AppTextStyles.h1.copyWith(
+                  fontSize: isMobile ? 32 : 32,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Center(
-              child: GradientButton(
-                label: AppLocalizations.of(context)!.startNow,
-                height: 38,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                borderRadius: isMobile ? 1 : 6,
-                textStyle: AppTextStyles.body.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: isMobile ? 18 : 14,
+              const SizedBox(height: AppSpacing.sm),
+              Container(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: Text(
+                  AppLocalizations.of(context)!.minvestAiRegistrationDesc,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body.copyWith(
+                    color: Colors.white,
+                    fontSize: isMobile ? 18 : 16,
+                  ),
                 ),
-                onPressed: () {
-                  if (FirebaseAuth.instance.currentUser != null) {
-                    Navigator.of(context).pushNamed('/ai-signals');
-                  } else {
-                    Navigator.of(context).pushNamed('/signup');
-                  }
-                },
               ),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.lg),
+              Center(
+                child: GradientButton(
+                  label: AppLocalizations.of(context)!.startNow,
+                  height: 38,
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  borderRadius: isMobile ? 1 : 6,
+                  textStyle: AppTextStyles.body.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: isMobile ? 18 : 14,
+                  ),
+                  onPressed: () {
+                    if (FirebaseAuth.instance.currentUser != null) {
+                      Navigator.of(context).pushNamed('/ai-signals');
+                    } else {
+                      Navigator.of(context).pushNamed('/signup');
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RevealOnScroll extends StatefulWidget {
+  final Widget child;
+  const _RevealOnScroll({required this.child});
+
+  @override
+  State<_RevealOnScroll> createState() => _RevealOnScrollState();
+}
+
+class _RevealOnScrollState extends State<_RevealOnScroll>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slideUp;
+  late final Animation<double> _fadeIn;
+  bool _hasPlayed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 900));
+    _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: Key('reveal_${widget.hashCode}'),
+      onVisibilityChanged: (info) {
+        if (!_hasPlayed && info.visibleFraction > 0.15) {
+          _hasPlayed = true;
+          _controller.forward();
+        }
+      },
+      child: SlideTransition(
+        position: _slideUp,
+        child: FadeTransition(
+          opacity: _fadeIn,
+          child: widget.child,
         ),
       ),
     );

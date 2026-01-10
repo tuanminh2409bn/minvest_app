@@ -18,11 +18,15 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  // Customize notification here
+  
   const notificationTitle = payload.notification?.title || payload.data?.title || 'Minvest Notification';
   const notificationOptions = {
     body: payload.notification?.body || payload.data?.body || 'You have a new message.',
-    icon: '/icons/Icon-192.png', // Fallback icon
+    icon: '/icons/Icon-192.png',
+    badge: '/icons/Icon-192.png',
+    tag: payload.data?.signalId || 'minvest-notification', // Tránh trùng lặp
+    renotify: true, // Thông báo mới sẽ đè lên tag cũ và rung/chuông lại
+    requireInteraction: true, // Giúp hiển thị rõ hơn trên Windows
     data: payload.data
   };
 
