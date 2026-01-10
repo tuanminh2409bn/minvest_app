@@ -16,7 +16,7 @@ if (keyPropertiesFile.exists()) {
 
 android {
     namespace = "com.minvest.aisignals"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -32,7 +32,7 @@ android {
     defaultConfig {
         applicationId = "com.minvest.aisignals"
         minSdkVersion(24)
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
