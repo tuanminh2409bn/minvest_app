@@ -284,7 +284,7 @@
     "page": "Página",
     "next": "Próximo",
     "date": "Data",
-    "timeGmt7": "Hora (GMT)",
+    "timeGmt7": "Hora",
     "orders": "Ordens",
     "pips": "Pips",
     "smallScreenRotationHint": "Tela pequena: gire para paisagem ou role horizontalmente para ver a tabela completa.",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "E-mail de redefinição de senha enviado! Por favor, verifique sua caixa de entrada."
+,
+    "pageOf": "de"
+,
+    "keyFindings": "Key Findings"
 }

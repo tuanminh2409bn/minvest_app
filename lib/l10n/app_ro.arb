@@ -284,7 +284,7 @@
     "page": "Pagina",
     "next": "Următorul",
     "date": "Data",
-    "timeGmt7": "Ora (GMT)",
+    "timeGmt7": "Ora",
     "orders": "Comenzi",
     "pips": "Pips",
     "smallScreenRotationHint": "Ecran mic: rotiți peisaj sau derulați orizontal pentru a vizualiza tabelul complet.",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "E-mailul de resetare a parolei a fost trimis! Vă rugăm să vă verificați căsuța poștală."
+,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
 }

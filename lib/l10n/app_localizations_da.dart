@@ -855,7 +855,7 @@ class AppLocalizationsDa extends AppLocalizations {
   String get date => 'Dato';
 
   @override
-  String get timeGmt7 => 'Tid (GMT)';
+  String get timeGmt7 => 'Tid';
 
   @override
   String get orders => 'Ordrer';
@@ -1446,4 +1446,10 @@ class AppLocalizationsDa extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'E-mail til nulstilling af adgangskode er sendt! Tjek venligst din indbakke.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

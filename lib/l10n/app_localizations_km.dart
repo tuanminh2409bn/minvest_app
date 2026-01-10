@@ -855,7 +855,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get date => 'កាលបរិច្ឆេទ';
 
   @override
-  String get timeGmt7 => 'ម៉ោង (GMT)';
+  String get timeGmt7 => 'ម៉ោង';
 
   @override
   String get orders => 'ការបញ្ជាទិញ';
@@ -1444,4 +1444,10 @@ class AppLocalizationsKm extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'អ៊ីមែលសម្រាប់កំណត់ពាក្យសម្ងាត់ឡើងវិញត្រូវបានផ្ញើហើយ! សូមពិនិត្យមើលប្រអប់សំបុត្ររបស់អ្នក។';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

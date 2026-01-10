@@ -853,7 +853,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get date => 'วันที่';
 
   @override
-  String get timeGmt7 => 'เวลา (GMT)';
+  String get timeGmt7 => 'เวลา';
 
   @override
   String get orders => 'คำสั่ง';
@@ -1441,4 +1441,10 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'ส่งอีเมลรีเซ็ตรหัสผ่านแล้ว! โปรดตรวจสอบกล่องจดหมายของคุณ';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

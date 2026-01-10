@@ -284,7 +284,7 @@
     "page": "Seite",
     "next": "Weiter",
     "date": "Datum",
-    "timeGmt7": "Zeit (GMT)",
+    "timeGmt7": "Zeit",
     "orders": "Aufträge",
     "pips": "Pips",
     "smallScreenRotationHint": "Kleiner Bildschirm: Drehen Sie ins Querformat oder scrollen Sie horizontal, um die vollständige Tabelle zu sehen.",
@@ -508,4 +508,8 @@
                   }
                 },
                 "passwordResetEmailSent": "E-Mail zum Zurücksetzen của Passwords gesendet! Bitte kiểm tra Sie Ihren Posteingang."
-            }
+            ,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
+}

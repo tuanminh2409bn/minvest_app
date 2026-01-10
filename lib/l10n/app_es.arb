@@ -284,7 +284,7 @@
     "page": "Página",
     "next": "Siguiente",
     "date": "Fecha",
-    "timeGmt7": "Hora (GMT)",
+    "timeGmt7": "Hora",
     "orders": "Órdenes",
     "pips": "Pips",
     "smallScreenRotationHint": "Pantalla pequeña: rote horizontalmente o desplace horizontalmente para ver la tabla completa.",
@@ -509,4 +509,8 @@
                   }
                 },
                 "passwordResetEmailSent": "¡Correo electrónico de restablecimiento de contraseña enviado! Por favor, revisa tu bandeja de entrada."
-            }
+            ,
+    "pageOf": "de"
+,
+    "keyFindings": "Key Findings"
+}

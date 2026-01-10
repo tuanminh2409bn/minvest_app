@@ -284,7 +284,7 @@
     "page": "页",
     "next": "下一页",
     "date": "日期",
-    "timeGmt7": "时间 (GMT)",
+    "timeGmt7": "时间",
     "orders": "订单",
     "pips": "点",
     "smallScreenRotationHint": "小屏幕：请横屏旋转或水平滚动以查看完整表格。",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "重置密码邮件已发送！请检查您的收件箱。"
+,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
 }

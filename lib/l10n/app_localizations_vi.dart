@@ -859,7 +859,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get date => 'Ngày';
 
   @override
-  String get timeGmt7 => 'Thời gian (GMT)';
+  String get timeGmt7 => 'Thời gian';
 
   @override
   String get orders => 'Lệnh';
@@ -1450,4 +1450,10 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn.';
+
+  @override
+  String get pageOf => 'của';
+
+  @override
+  String get keyFindings => 'Kết quả chính';
 }

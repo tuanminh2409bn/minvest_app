@@ -284,7 +284,7 @@
     "page": "Halaman",
     "next": "Berikutnya",
     "date": "Tanggal",
-    "timeGmt7": "Waktu (GMT)",
+    "timeGmt7": "Waktu",
     "orders": "Pesanan",
     "pips": "Pips",
     "smallScreenRotationHint": "Layar kecil: putar lanskap atau gulir horizontal untuk melihat tabel lengkap.",
@@ -508,4 +508,8 @@
                   }
                 },
                 "passwordResetEmailSent": "Email reset kata sandi telah dikirim! Silakan periksa kotak masuk Anda."
-            }
+            ,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
+}

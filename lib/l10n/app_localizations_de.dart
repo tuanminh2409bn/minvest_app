@@ -860,7 +860,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get date => 'Datum';
 
   @override
-  String get timeGmt7 => 'Zeit (GMT)';
+  String get timeGmt7 => 'Zeit';
 
   @override
   String get orders => 'Aufträge';
@@ -1457,4 +1457,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'E-Mail zum Zurücksetzen của Passwords gesendet! Bitte kiểm tra Sie Ihren Posteingang.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

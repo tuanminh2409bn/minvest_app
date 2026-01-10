@@ -864,7 +864,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get date => 'Data';
 
   @override
-  String get timeGmt7 => 'Ora (GMT)';
+  String get timeGmt7 => 'Ora';
 
   @override
   String get orders => 'Ordini';
@@ -1462,4 +1462,10 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'Email di ripristino della password inviata! Controlla la tua casella di posta.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

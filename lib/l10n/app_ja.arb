@@ -284,7 +284,7 @@
     "page": "ページ",
     "next": "次へ",
     "date": "日付",
-    "timeGmt7": "時間 (GMT)",
+    "timeGmt7": "時間",
     "orders": "注文",
     "pips": "Pips",
     "smallScreenRotationHint": "小さな画面：横向きに回転するか、水平方向にスクロールして完全な表を表示してください。",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "パスワード再設定メールを送信しました！受信トレイを確認してください。"
+,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
 }

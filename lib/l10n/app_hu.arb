@@ -284,7 +284,7 @@
     "page": "Oldal",
     "next": "Következő",
     "date": "Dátum",
-    "timeGmt7": "Idő (GMT)",
+    "timeGmt7": "Idő",
     "orders": "Megbízások",
     "pips": "Pips",
     "smallScreenRotationHint": "Kis képernyő: forgassa el fekvő tájolásba vagy görgessen vízszintesen a teljes táblázat megtekintéséhez.",
@@ -508,4 +508,8 @@
                   }
                 },
                 "passwordResetEmailSent": "Jelszó-visszaállító e-mail elküldve! Kérjük, ellenőrizze a bejövő leveleit."
-            }
+            ,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
+}

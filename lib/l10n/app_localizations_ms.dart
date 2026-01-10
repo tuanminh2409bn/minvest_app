@@ -859,7 +859,7 @@ class AppLocalizationsMs extends AppLocalizations {
   String get date => 'Tarikh';
 
   @override
-  String get timeGmt7 => 'Masa (GMT)';
+  String get timeGmt7 => 'Masa';
 
   @override
   String get orders => 'Pesanan';
@@ -1451,4 +1451,10 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'E-mel tetapan semula kata laluan telah dihantar! Sila semak peti masuk anda.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

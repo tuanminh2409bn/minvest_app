@@ -861,7 +861,7 @@ class AppLocalizationsCs extends AppLocalizations {
   String get date => 'Datum';
 
   @override
-  String get timeGmt7 => 'Čas (GMT)';
+  String get timeGmt7 => 'Čas';
 
   @override
   String get orders => 'Objednávky';
@@ -1449,4 +1449,10 @@ class AppLocalizationsCs extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'E-mail pro resetování hesla byl odeslán! Zkontrolujte prosím svou doručenou poštu.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

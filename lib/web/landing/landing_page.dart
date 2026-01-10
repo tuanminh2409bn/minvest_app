@@ -2019,7 +2019,7 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard>
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Key Findings',
+                Text(AppLocalizations.of(context)!.keyFindings,
                     style: AppTextStyles.h3
                         .copyWith(fontSize: 22, color: Colors.white)),
                 const SizedBox(height: AppSpacing.md),

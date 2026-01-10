@@ -861,7 +861,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get date => 'Дата';
 
   @override
-  String get timeGmt7 => 'Время (GMT)';
+  String get timeGmt7 => 'Время';
 
   @override
   String get orders => 'Ордера';
@@ -1454,4 +1454,10 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'Письмо для сброса пароля отправлено! Пожалуйста, проверьте свой почтовый ящик.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

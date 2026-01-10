@@ -837,7 +837,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get date => '날짜';
 
   @override
-  String get timeGmt7 => '시간 (GMT)';
+  String get timeGmt7 => '시간';
 
   @override
   String get orders => '주문';
@@ -1412,4 +1412,10 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       '비밀번호 재설정 이메일이 전송되었습니다! 받은 편지함을 확인해 주세요.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

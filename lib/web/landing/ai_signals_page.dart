@@ -3197,6 +3197,19 @@ class _HistorySection extends StatefulWidget {
 class _HistorySectionState extends State<_HistorySection> {
   static const int _pageSize = 10;
   int _page = 0;
+  late TextEditingController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = TextEditingController(text: '1');
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(covariant _HistorySection oldWidget) {
@@ -3328,6 +3341,11 @@ class _HistorySectionState extends State<_HistorySection> {
             final currentPage = _page.clamp(0, totalPages - 1);
             final visible = rows.skip(currentPage * _pageSize).take(_pageSize).toList();
 
+            // Sync controller if page changed by buttons
+            if (_pageController.text != (currentPage + 1).toString()) {
+               _pageController.text = (currentPage + 1).toString();
+            }
+
             return Column(
               children: [
                 SignalHistoryTable(rows: visible),
@@ -3340,7 +3358,54 @@ class _HistorySectionState extends State<_HistorySection> {
                       child: Text(AppLocalizations.of(context)!.previous),
                     ),
                     const SizedBox(width: 24),
-                    Text('${AppLocalizations.of(context)!.page} ${currentPage + 1} of $totalPages', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('${AppLocalizations.of(context)!.page}', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 32,
+                          height: 24,
+                          child: TextField(
+                            controller: _pageController,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 13),
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.zero,
+                              isDense: true,
+                              filled: true,
+                              fillColor: const Color(0xFF0D0D0D),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide: const BorderSide(color: Colors.white24),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide: const BorderSide(color: Colors.white24),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide: const BorderSide(color: Colors.blue),
+                              ),
+                            ),
+                            onSubmitted: (value) {
+                              final int? newPage = int.tryParse(value);
+                              if (newPage != null && newPage >= 1 && newPage <= totalPages) {
+                                setState(() {
+                                  _page = newPage - 1;
+                                });
+                              } else {
+                                // Reset to current valid page if invalid
+                                _pageController.text = (currentPage + 1).toString();
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('${AppLocalizations.of(context)!.pageOf} $totalPages', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 13)),
+                      ],
+                    ),
                     const SizedBox(width: 24),
                     TextButton(
                       onPressed: currentPage < totalPages - 1 ? () => setState(() => _page = currentPage + 1) : null,

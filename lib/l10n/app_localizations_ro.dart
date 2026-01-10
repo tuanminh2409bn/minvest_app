@@ -866,7 +866,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get date => 'Data';
 
   @override
-  String get timeGmt7 => 'Ora (GMT)';
+  String get timeGmt7 => 'Ora';
 
   @override
   String get orders => 'Comenzi';
@@ -1464,4 +1464,10 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'E-mailul de resetare a parolei a fost trimis! Vă rugăm să vă verificați căsuța poștală.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

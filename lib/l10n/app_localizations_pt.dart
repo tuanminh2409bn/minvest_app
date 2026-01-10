@@ -863,7 +863,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get date => 'Data';
 
   @override
-  String get timeGmt7 => 'Hora (GMT)';
+  String get timeGmt7 => 'Hora';
 
   @override
   String get orders => 'Ordens';
@@ -1458,4 +1458,10 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'E-mail de redefinição de senha enviado! Por favor, verifique sua caixa de entrada.';
+
+  @override
+  String get pageOf => 'de';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }
