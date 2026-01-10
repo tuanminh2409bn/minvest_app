@@ -284,7 +284,7 @@
     "page": "Halaman",
     "next": "Seterusnya",
     "date": "Tarikh",
-    "timeGmt7": "Masa (GMT)",
+    "timeGmt7": "Masa",
     "orders": "Pesanan",
     "pips": "Pips",
     "smallScreenRotationHint": "Skrin kecil: putar landskap atau tatal mendatar untuk melihat jadual penuh.",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "E-mel tetapan semula kata laluan telah dihantar! Sila semak peti masuk anda."
+,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
 }

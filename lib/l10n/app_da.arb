@@ -284,7 +284,7 @@
     "page": "Side",
     "next": "Næste",
     "date": "Dato",
-    "timeGmt7": "Tid (GMT)",
+    "timeGmt7": "Tid",
     "orders": "Ordrer",
     "pips": "Pips",
     "smallScreenRotationHint": "Lille skærm: roter landskab eller scroll vandret for at se hele tabellen.",
@@ -508,4 +508,8 @@
                   }
                 },
                 "passwordResetEmailSent": "E-mail til nulstilling af adgangskode er sendt! Tjek venligst din indbakke."
-            }
+            ,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
+}

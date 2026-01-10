@@ -828,7 +828,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get date => '日期';
 
   @override
-  String get timeGmt7 => '时间 (GMT)';
+  String get timeGmt7 => '时间';
 
   @override
   String get orders => '订单';
@@ -1399,4 +1399,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get passwordResetEmailSent => '重置密码邮件已发送！请检查您的收件箱。';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

@@ -1703,7 +1703,7 @@ abstract class AppLocalizations {
   /// No description provided for @timeGmt7.
   ///
   /// In en, this message translates to:
-  /// **'Time (GMT)'**
+  /// **'Time'**
   String get timeGmt7;
 
   /// No description provided for @orders.
@@ -2791,6 +2791,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password reset email sent! Please check your inbox.'**
   String get passwordResetEmailSent;
+
+  /// No description provided for @pageOf.
+  ///
+  /// In en, this message translates to:
+  /// **'of'**
+  String get pageOf;
+
+  /// No description provided for @keyFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'Key Findings'**
+  String get keyFindings;
 }
 
 class _AppLocalizationsDelegate

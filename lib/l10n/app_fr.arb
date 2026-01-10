@@ -284,7 +284,7 @@
     "page": "Page",
     "next": "Suivant",
     "date": "Date",
-    "timeGmt7": "Heure (GMT)",
+    "timeGmt7": "Heure",
     "orders": "Ordres",
     "pips": "Pips",
     "smallScreenRotationHint": "Petit écran : tournez en paysage ou faites défiler horizontalement pour voir le tableau complet.",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "E-mail de réinitialisation du mot de passe envoyé ! Veuillez consulter votre boîte de réception."
+,
+    "pageOf": "sur"
+,
+    "keyFindings": "Key Findings"
 }

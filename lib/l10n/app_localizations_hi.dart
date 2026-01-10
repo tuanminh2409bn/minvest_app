@@ -859,7 +859,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get date => 'दिनांक';
 
   @override
-  String get timeGmt7 => 'समय (GMT)';
+  String get timeGmt7 => 'समय';
 
   @override
   String get orders => 'आदेश';
@@ -1450,4 +1450,10 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'पासवर्ड रीसेट ईमेल भेज दिया गया! कृपया अपना इनबॉक्स जांचें।';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

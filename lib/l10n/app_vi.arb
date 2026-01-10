@@ -284,7 +284,7 @@
     "page": "Trang",
     "next": "Tiếp",
     "date": "Ngày",
-    "timeGmt7": "Thời gian (GMT)",
+    "timeGmt7": "Thời gian",
     "orders": "Lệnh",
     "pips": "Pips",
     "smallScreenRotationHint": "Màn hình nhỏ: xoay ngang hoặc cuộn ngang để xem đầy đủ bảng.",
@@ -507,5 +507,7 @@
             }
         }
     },
-    "passwordResetEmailSent": "Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn."
+    "passwordResetEmailSent": "Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn.",
+    "pageOf": "của",
+    "keyFindings": "Kết quả chính"
 }

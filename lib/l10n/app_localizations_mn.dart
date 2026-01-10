@@ -862,7 +862,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get date => 'Огноо';
 
   @override
-  String get timeGmt7 => 'Цаг (GMT)';
+  String get timeGmt7 => 'Цаг';
 
   @override
   String get orders => 'Захиалгууд';
@@ -1456,4 +1456,10 @@ class AppLocalizationsMn extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'Нууц үг сэргээх имэйл илгээгдлээ! Та ирсэн имэйлээ шалгана уу.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

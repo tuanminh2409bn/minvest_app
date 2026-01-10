@@ -851,7 +851,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get date => 'التاريخ';
 
   @override
-  String get timeGmt7 => 'الوقت (GMT)';
+  String get timeGmt7 => 'الوقت';
 
   @override
   String get orders => 'الطلبات';
@@ -1440,4 +1440,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'تم إرسال بريد إعادة تعيين كلمة المرور! يرجى التحقق من بريدك الوارد.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

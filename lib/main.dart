@@ -260,14 +260,20 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp(
             navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
-              title: 'Signal GPT',
+            title: 'Signal GPT',
             theme: _buildAppTheme(),
             locale: languageProvider.locale,
-                        localizationsDelegates: [
+            localizationsDelegates: [
               ...AppLocalizations.localizationsDelegates,
               FlutterQuillLocalizations.delegate,
             ],
             supportedLocales: AppLocalizations.supportedLocales,
+            builder: (context, child) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: child!,
+              );
+            },
             routes: {
               '/': (context) => const LandingPage(),
               '/features': (context) => const FeaturesPage(),
@@ -292,14 +298,20 @@ class _MyAppState extends State<MyApp> {
         return MaterialApp(
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
-            title: 'Signal GPT',
+          title: 'Signal GPT',
           theme: _buildAppTheme(),
           locale: languageProvider.locale,
-                      localizationsDelegates: [
-              ...AppLocalizations.localizationsDelegates,
-              FlutterQuillLocalizations.delegate,
-            ],
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            FlutterQuillLocalizations.delegate,
+          ],
           supportedLocales: AppLocalizations.supportedLocales,
+          builder: (context, child) {
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: child!,
+            );
+          },
           home: const AuthGate(),
         );
       },

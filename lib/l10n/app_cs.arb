@@ -284,7 +284,7 @@
     "page": "Stránka",
     "next": "Další",
     "date": "Datum",
-    "timeGmt7": "Čas (GMT)",
+    "timeGmt7": "Čas",
     "orders": "Objednávky",
     "pips": "Pips",
     "smallScreenRotationHint": "Malá obrazovka: otočte na šířku nebo posuňte vodorovně pro zobrazení celé tabulky.",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "E-mail pro resetování hesla byl odeslán! Zkontrolujte prosím svou doručenou poštu."
+,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
 }

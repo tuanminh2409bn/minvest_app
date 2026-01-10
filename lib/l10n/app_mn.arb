@@ -284,7 +284,7 @@
     "page": "Хуудас",
     "next": "Дараах",
     "date": "Огноо",
-    "timeGmt7": "Цаг (GMT)",
+    "timeGmt7": "Цаг",
     "orders": "Захиалгууд",
     "pips": "Pips",
     "smallScreenRotationHint": "Жижиг дэлгэц: бүтэн хүснэгтийг харахын тулд хэвтээ эргүүлэх эсвэл гүйлгэнэ үү.",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "Нууц үг сэргээх имэйл илгээгдлээ! Та ирсэн имэйлээ шалгана уу."
+,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
 }

@@ -858,7 +858,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get date => 'Tanggal';
 
   @override
-  String get timeGmt7 => 'Waktu (GMT)';
+  String get timeGmt7 => 'Waktu';
 
   @override
   String get orders => 'Pesanan';
@@ -1450,4 +1450,10 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'Email reset kata sandi telah dikirim! Silakan periksa kotak masuk Anda.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

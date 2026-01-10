@@ -859,7 +859,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get date => 'Päivämäärä';
 
   @override
-  String get timeGmt7 => 'Aika (GMT)';
+  String get timeGmt7 => 'Aika';
 
   @override
   String get orders => 'Tilaukset';
@@ -1449,4 +1449,10 @@ class AppLocalizationsFi extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'Salasanan palautussähköposti lähetetty! Tarkista sähköpostisi.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

@@ -284,7 +284,7 @@
     "page": "Page",
     "next": "Next",
     "date": "Date",
-    "timeGmt7": "Time (GMT)",
+    "timeGmt7": "Time",
     "orders": "Orders",
     "pips": "Pips",
     "smallScreenRotationHint": "Small screen: rotate landscape or scroll horizontally to view the full table.",
@@ -507,5 +507,7 @@
             }
         }
     },
-    "passwordResetEmailSent": "Password reset email sent! Please check your inbox."
+    "passwordResetEmailSent": "Password reset email sent! Please check your inbox.",
+    "pageOf": "of",
+    "keyFindings": "Key Findings"
 }

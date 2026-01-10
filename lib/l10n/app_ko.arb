@@ -284,7 +284,7 @@
     "page": "페이지",
     "next": "다음",
     "date": "날짜",
-    "timeGmt7": "시간 (GMT)",
+    "timeGmt7": "시간",
     "orders": "주문",
     "pips": "핍",
     "smallScreenRotationHint": "작은 화면: 전체 표를 보려면 가로로 회전하거나 수평으로 스크롤하세요.",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "비밀번호 재설정 이메일이 전송되었습니다! 받은 편지함을 확인해 주세요."
+,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
 }

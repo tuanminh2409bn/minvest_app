@@ -284,7 +284,7 @@
     "page": "หน้า",
     "next": "ถัดไป",
     "date": "วันที่",
-    "timeGmt7": "เวลา (GMT)",
+    "timeGmt7": "เวลา",
     "orders": "คำสั่ง",
     "pips": "Pips",
     "smallScreenRotationHint": "หน้าจอขนาดเล็ก: หมุนแนวนอนหรือเลื่อนในแนวนอนเพื่อดูตารางเต็ม",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "ส่งอีเมลรีเซ็ตรหัสผ่านแล้ว! โปรดตรวจสอบกล่องจดหมายของคุณ"
+,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
 }

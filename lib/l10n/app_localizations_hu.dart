@@ -861,7 +861,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get date => 'Dátum';
 
   @override
-  String get timeGmt7 => 'Idő (GMT)';
+  String get timeGmt7 => 'Idő';
 
   @override
   String get orders => 'Megbízások';
@@ -1455,4 +1455,10 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get passwordResetEmailSent =>
       'Jelszó-visszaállító e-mail elküldve! Kérjük, ellenőrizze a bejövő leveleit.';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

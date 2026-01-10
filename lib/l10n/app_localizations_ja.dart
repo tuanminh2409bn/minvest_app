@@ -835,7 +835,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get date => '日付';
 
   @override
-  String get timeGmt7 => '時間 (GMT)';
+  String get timeGmt7 => '時間';
 
   @override
   String get orders => '注文';
@@ -1410,4 +1410,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get passwordResetEmailSent => 'パスワード再設定メールを送信しました！受信トレイを確認してください。';
+
+  @override
+  String get pageOf => '/';
+
+  @override
+  String get keyFindings => 'Key Findings';
 }

@@ -284,7 +284,7 @@
     "page": "Pagina",
     "next": "Successivo",
     "date": "Data",
-    "timeGmt7": "Ora (GMT)",
+    "timeGmt7": "Ora",
     "orders": "Ordini",
     "pips": "Pips",
     "smallScreenRotationHint": "Schermo piccolo: ruota in orizzontale o scorri orizzontalmente per visualizzare la tabella completa.",
@@ -508,4 +508,8 @@
       }
     },
     "passwordResetEmailSent": "Email di ripristino della password inviata! Controlla la tua casella di posta."
+,
+    "pageOf": "/"
+,
+    "keyFindings": "Key Findings"
 }
