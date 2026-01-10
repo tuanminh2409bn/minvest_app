@@ -75,7 +75,7 @@ class WelcomeScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Image.asset(
-                      'assets/images/minvest_logo.png', height: 150),
+                      'assets/images/minvest_ai.png', height: 150),
                 ),
                 Text(l10n.appSlogan, textAlign: TextAlign.center,
                     style: const TextStyle(
