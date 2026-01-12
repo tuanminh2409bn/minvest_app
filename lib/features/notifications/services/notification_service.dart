@@ -61,4 +61,18 @@ class NotificationService {
     }
     await batch.commit();
   }
+
+  // Đánh dấu MỘT thông báo là ĐÃ ĐỌC
+  Future<void> markAsRead(String notificationId) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final docRef = _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('notifications')
+        .doc(notificationId);
+
+    await docRef.update({'isRead': true});
+  }
 }

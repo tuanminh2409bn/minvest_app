@@ -22,7 +22,7 @@ dependencies:
 
   # Authentication
   google_sign_in: 6.3.0
-  flutter_facebook_auth:
+  flutter_facebook_auth: 7.0.1
   sign_in_with_apple:
 
   # State Management & Core Utilities

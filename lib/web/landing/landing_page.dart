@@ -19,137 +19,164 @@ import 'sections/pricing_section.dart';
 import 'sections/footer_section.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
 
   @override
+  State<LandingPage> createState() => _LandingPageState();
+}
+
+class _LandingPageState extends State<LandingPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = context.read<AuthBloc>().state;
+      if (authState.status == AuthStatus.authenticated) {
+        context.read<NotificationProvider>().startListening();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      floatingActionButton: const WebChatBubble(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          try {
-            // Debug check for localization
-            if (AppLocalizations.of(context) == null) {
-              throw Exception("AppLocalizations is null!");
-            }
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          context.read<NotificationProvider>().startListening();
+        } else if (state.status == AuthStatus.unauthenticated) {
+          context.read<NotificationProvider>().stopListeningAndReset();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        floatingActionButton: const WebChatBubble(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            try {
+              // Debug check for localization
+              if (AppLocalizations.of(context) == null) {
+                throw Exception("AppLocalizations is null!");
+              }
 
-            final isTablet = constraints.maxWidth < Breakpoints.desktop &&
-                constraints.maxWidth >= Breakpoints.tablet;
-            final isMobile = constraints.maxWidth < Breakpoints.tablet;
-            final horizontalPadding = isMobile
-                ? 16.0
-                : isTablet
-                    ? 24.0
-                    : 32.0;
-            final double sectionSpacing = isMobile ? 60.0 : 100.0;
+              final isTablet = constraints.maxWidth < Breakpoints.desktop &&
+                  constraints.maxWidth >= Breakpoints.tablet;
+              final isMobile = constraints.maxWidth < Breakpoints.tablet;
+              final horizontalPadding = isMobile
+                  ? 16.0
+                  : isTablet
+                      ? 24.0
+                      : 32.0;
+              final double sectionSpacing = isMobile ? 60.0 : 100.0;
 
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: isMobile
-                    ? const TextScaler.linear(0.72)
-                    : const TextScaler.linear(1.0),
-              ),
-              child: Container(
-                color: AppColors.background,
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: horizontalPadding),
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1200),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const SizedBox(height: 12),
-                            LandingNavBar(),
-                            const HeroSection(),
-                            SizedBox(height: sectionSpacing),
-                            const HeroSubtitleSection(),
-                            SizedBox(height: sectionSpacing),
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                final bool isNarrow =
-                                    constraints.maxWidth < 900;
-                                if (isNarrow) {
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: isMobile
+                      ? const TextScaler.linear(0.72)
+                      : const TextScaler.linear(1.0),
+                ),
+                child: Container(
+                  color: AppColors.background,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: horizontalPadding),
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1200),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 12),
+                              const LandingNavBar(),
+                              const HeroSection(),
+                              SizedBox(height: sectionSpacing),
+                              const HeroSubtitleSection(),
+                              SizedBox(height: sectionSpacing),
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final bool isNarrow =
+                                      constraints.maxWidth < 900;
+                                  if (isNarrow) {
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: const [
+                                        LiveSignalsSection(),
+                                        SizedBox(height: 24),
+                                        HeroSignalsSection(),
+                                      ],
+                                    );
+                                  }
+                                  return Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: const [
-                                      LiveSignalsSection(),
-                                      SizedBox(height: 24),
-                                      HeroSignalsSection(),
+                                      Expanded(child: HeroSignalsSection()),
+                                      SizedBox(width: 16),
+                                      Expanded(child: LiveSignalsSection()),
                                     ],
                                   );
-                                }
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Expanded(child: HeroSignalsSection()),
-                                    SizedBox(width: 16),
-                                    Expanded(child: LiveSignalsSection()),
-                                  ],
-                                );
-                              },
-                            ),
-                            SizedBox(height: sectionSpacing),
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                final bool isNarrow =
-                                    constraints.maxWidth < 900;
-                                if (isNarrow) {
+                                },
+                              ),
+                              SizedBox(height: sectionSpacing),
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final bool isNarrow =
+                                      constraints.maxWidth < 900;
+                                  if (isNarrow) {
+                                    return Column(
+                                      children: [
+                                        const OrderEngineSection(),
+                                        SizedBox(height: sectionSpacing),
+                                        const _TransparentCardAnimated(),
+                                        const SizedBox(height: 8),
+                                        const _SignalsPerformanceCard(),
+                                      ],
+                                    );
+                                  }
                                   return Column(
-                                    children: [
-                                      const OrderEngineSection(),
-                                      SizedBox(height: sectionSpacing),
-                                      const _TransparentCardAnimated(),
-                                      const SizedBox(height: 8),
-                                      const _SignalsPerformanceCard(),
+                                    children: const [
+                                      OrderEngineSection(),
+                                      SizedBox(height: 72),
+                                      _SignalsPerformanceRow(),
                                     ],
                                   );
-                                }
-                                return Column(
-                                  children: const [
-                                    OrderEngineSection(),
-                                    SizedBox(height: 72),
-                                    _SignalsPerformanceRow(),
-                                  ],
-                                );
-                              },
-                            ),
-                            SizedBox(height: sectionSpacing),
-                            const CoreValueSection(),
-                            SizedBox(height: sectionSpacing),
-                            const PricingSection(),
-                            SizedBox(height: sectionSpacing),
-                            const FaqSection(),
-                            SizedBox(height: sectionSpacing),
-                            const CtaSection(),
-                            SizedBox(height: sectionSpacing),
-                            const FooterSection(),
-                          ],
+                                },
+                              ),
+                              SizedBox(height: sectionSpacing),
+                              const CoreValueSection(),
+                              SizedBox(height: sectionSpacing),
+                              const PricingSection(),
+                              SizedBox(height: sectionSpacing),
+                              const FaqSection(),
+                              SizedBox(height: sectionSpacing),
+                              const CtaSection(),
+                              SizedBox(height: sectionSpacing),
+                              const FooterSection(),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          } catch (e, stackTrace) {
-            print("CRASH in LandingPage: $e\n$stackTrace");
-            return Center(
-              child: SelectableText(
-                "Error rendering LandingPage:\n$e",
-                style: const TextStyle(color: Colors.red, fontSize: 20),
-              ),
-            );
-          }
-        },
+              );
+            } catch (e, stackTrace) {
+              print("CRASH in LandingPage: $e\n$stackTrace");
+              return Center(
+                child: SelectableText(
+                  "Error rendering LandingPage:\n$e",
+                  style: const TextStyle(color: Colors.red, fontSize: 20),
+                ),
+              );
+            }
+          },
+        ),
       ),
     );
   }

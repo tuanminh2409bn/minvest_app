@@ -58,6 +58,11 @@ class NotificationProvider with ChangeNotifier {
     await _notificationService.markAllAsRead();
   }
 
+  // Đánh dấu 1 thông báo là đã đọc
+  Future<void> markAsRead(String notificationId) async {
+    await _notificationService.markAsRead(notificationId);
+  }
+
   @override
   void dispose() {
     _notificationsSubscription?.cancel();

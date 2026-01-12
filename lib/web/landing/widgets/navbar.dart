@@ -10,6 +10,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/features/auth/screens/welcome/welcome_screen.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
+import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
+import 'package:minvest_forex_app/features/notifications/screens/notification_screen_web.dart';
 
 class LandingNavBar extends StatelessWidget {
   const LandingNavBar({super.key});
@@ -157,6 +159,8 @@ class LandingNavBar extends StatelessWidget {
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         const _LanguageSelector(),
+                        const SizedBox(width: AppSpacing.sm),
+                        const _NotificationBell(),
                       ],
                     ),
             );
@@ -618,6 +622,8 @@ class _MobileNavBarState extends State<_MobileNavBar> {
             const Spacer(),
             const _LanguageSelector(),
             const SizedBox(width: 8),
+            const _NotificationBell(),
+            const SizedBox(width: 8),
             IconButton(
               icon: Icon(_menuOpen ? Icons.close : Icons.menu, color: Colors.white),
               onPressed: () => setState(() => _menuOpen = !_menuOpen),
@@ -698,6 +704,58 @@ class _NavBarItemState extends State<_NavBarItem> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _NotificationBell extends StatelessWidget {
+  const _NotificationBell();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<NotificationProvider>(
+      builder: (context, provider, _) {
+        final count = provider.unreadCount;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                );
+              },
+              icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
+              tooltip: 'Notifications',
+            ),
+            if (count > 0)
+              Positioned(
+                right: 4,
+                top: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 14,
+                    minHeight: 14,
+                  ),
+                  child: Text(
+                    count > 99 ? '99+' : '$count',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
