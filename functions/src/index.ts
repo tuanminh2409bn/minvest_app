@@ -11,10 +11,8 @@ import axios from "axios";
 import { GoogleAuth } from "google-auth-library";
 import { Response } from "express";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { defineSecret } from "firebase-functions/params";
 import { getLocalizedPayload } from "./localization";
 import * as jose from "node-jose";
-import * as paypal from '@paypal/checkout-server-sdk';
 
 // =================================================================
 // === KHỞI TẠO CÁC DỊCH VỤ CƠ BẢN ===
@@ -82,7 +80,7 @@ export const processVerificationImage = onObjectFinalized(
       functions.logger.log("Văn bản đọc được:", fullText);
 
       const balanceRegex = /(\d{1,3}(?:[.,]\d{3})*[.,]\d{2})(?:\s*USD)?/;
-      const idRegex = /#\s*(\d{7,})/;
+      const idRegex = /#\s*(\d{7,})/; // Regex for Exness ID
 
       const balanceMatch = fullText.match(balanceRegex);
       const idMatch = fullText.match(idRegex);
@@ -498,6 +496,24 @@ export const verifyPurchase = onCall(
                         userId,
                         processedAt: admin.firestore.FieldValue.serverTimestamp()
                     });
+
+                    // ▼▼▼ THÊM THÔNG BÁO THÀNH CÔNG ▼▼▼
+                    const notifRef = userRef.collection("notifications").doc();
+                    const notifData = {
+                        type: "subscription_success",
+                        title_loc: {
+                            en: "Subscription Successful",
+                            vi: "Đăng ký thành công",
+                        },
+                        body_loc: {
+                            en: "You have successfully upgraded your account.",
+                            vi: "Bạn đã nâng cấp tài khoản thành công.",
+                        },
+                        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                        isRead: false,
+                    };
+                    transaction.set(notifRef, notifData);
+                    // ▲▲▲ KẾT THÚC THÊM ▼▼▼
                 });
                 functions.logger.log(`Giao dịch ${transactionId} đã được xử lý thành công.`);
                 return { success: true, message: "Tài khoản đã được nâng cấp thành công." };
@@ -1009,6 +1025,23 @@ export const updateUserSubscriptionTier = onCall({ region: "asia-southeast1" }, 
         // ▲▲▲ KẾT THÚC THAY ĐỔI ▲▲▲
         batch.update(userRef, updateData);
 
+        // ▼▼▼ THÊM THÔNG BÁO CẬP NHẬT GÓI (ADMIN) ▼▼▼
+        const notifRef = userRef.collection("notifications").doc();
+        batch.set(notifRef, {
+            type: "subscription_success",
+            title_loc: {
+                en: "Plan Updated",
+                vi: "Gói đã được cập nhật",
+            },
+            body_loc: {
+                en: `Your plan has been updated to ${tier.toUpperCase()}.`,
+                vi: `Gói của bạn đã được cập nhật thành ${tier.toUpperCase()}.`,
+            },
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            isRead: false,
+        });
+        // ▲▲▲ KẾT THÚC THÊM ▼▼▼
+
         const userDoc = await userRef.get();
         const userData = userDoc.data();
         const fcmToken = userData?.activeSession?.fcmToken;
@@ -1152,180 +1185,6 @@ export const submitContactMessage = onCall({ region: "asia-southeast1" }, async 
 });
 
 // =================================================================
-// === PAYPAL INTEGRATION ===
-// =================================================================
-
-const paypalClientId = defineSecret("PAYPAL_CLIENT_ID");
-const paypalClientSecret = defineSecret("PAYPAL_CLIENT_SECRET");
-
-function getPaypalClient() {
-    const clientId = paypalClientId.value();
-    const clientSecret = paypalClientSecret.value();
-    
-    // Sử dụng LiveEnvironment cho tài khoản Doanh nghiệp thực
-    const environment = new paypal.core.LiveEnvironment(clientId, clientSecret);
-    
-    return new paypal.core.PayPalHttpClient(environment);
-}
-
-export const createPaypalOrder = onCall({ 
-    region: "asia-southeast1",
-    secrets: [paypalClientId, paypalClientSecret]
-}, async (request) => {
-    const { packageId } = request.data;
-    const userId = request.auth?.uid;
-
-    if (!userId) throw new HttpsError("unauthenticated", "User must be logged in.");
-    if (!packageId || !PRODUCT_PRICES[packageId]) throw new HttpsError("invalid-argument", "Invalid package ID.");
-
-    const price = PRODUCT_PRICES[packageId];
-    const client = getPaypalClient();
-    const requestPaypal = new paypal.orders.OrdersCreateRequest();
-    
-    requestPaypal.prefer("return=representation");
-    requestPaypal.requestBody({
-        intent: "CAPTURE",
-        purchase_units: [{
-            amount: {
-                currency_code: "USD",
-                value: price.toFixed(2)
-            },
-            custom_id: `${userId}|${packageId}`,
-            description: `Payment for ${packageId.replace(/_/g, ' ').toUpperCase()}`
-        }],
-        application_context: {
-            brand_name: "Minvest AI",
-            landing_page: "BILLING",
-            user_action: "PAY_NOW",
-            return_url: "https://minvest-app.web.app/payment/success", 
-            cancel_url: "https://minvest-app.web.app/payment/cancel"
-        }
-    });
-
-    try {
-        const response = await client.execute(requestPaypal);
-        const orderID = response.result.id;
-        const approveLink = response.result.links.find((link: any) => link.rel === "approve")?.href;
-
-        return { orderID, approveLink };
-    } catch (error: any) {
-        functions.logger.error("Error creating PayPal order:", error);
-        // Trả về chi tiết lỗi từ PayPal (nếu có) để dễ debug
-        const errorDetails = error.message || "Unknown error";
-        throw new HttpsError("internal", `Unable to create PayPal order: ${errorDetails}`, error.result || error);
-    }
-});
-
-export const capturePaypalOrder = onCall({ 
-    region: "asia-southeast1",
-    secrets: [paypalClientId, paypalClientSecret]
-}, async (request) => {
-    const { orderID } = request.data;
-    const userId = request.auth?.uid;
-
-    if (!userId) throw new HttpsError("unauthenticated", "User must be logged in.");
-    if (!orderID) throw new HttpsError("invalid-argument", "Missing orderID.");
-
-    const client = getPaypalClient();
-
-    try {
-        // 1. Get Order details FIRST to retrieve custom_id (reliable way)
-        const requestGet = new paypal.orders.OrdersGetRequest(orderID);
-        const orderResponse = await client.execute(requestGet);
-        const orderData = orderResponse.result;
-        
-        const customId = orderData.purchase_units[0].custom_id;
-        if (!customId) throw new Error("Missing custom_id in order details.");
-
-        // 2. Capture Order
-        const requestCapture = new paypal.orders.OrdersCaptureRequest(orderID);
-        requestCapture.requestBody({} as any);
-        const captureResponse = await client.execute(requestCapture);
-        const captureData = captureResponse.result;
-
-        if (captureData.status === "COMPLETED") {
-            const purchaseUnit = captureData.purchase_units[0];
-            // const customId = purchaseUnit.custom_id; // Don't rely on this in capture response
-
-            const [, packageId] = customId.split("|");
-            
-            const amountPaid = parseFloat(purchaseUnit.payments.captures[0].amount.value);
-            
-            let expiryDate = new Date();
-            if (packageId.includes("1_month")) {
-                expiryDate.setMonth(expiryDate.getMonth() + 1);
-            } else if (packageId.includes("12_months")) {
-                expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-            }
-
-            const packageType = packageId.split("_")[0]; // gold, forex, crypto, elite
-            const startDate = new Date(); // Record start date
-
-            const userRef = firestore.collection("users").doc(userId);
-            const userTransactionRef = userRef.collection("transactions").doc(orderID);
-
-            await firestore.runTransaction(async (transaction) => {
-                const userDoc = await transaction.get(userRef);
-                const userData = userDoc.data() || {};
-                
-                let updatePayload: any = {
-                    totalPaidAmount: admin.firestore.FieldValue.increment(amountPaid),
-                };
-
-                if (packageType === 'elite') {
-                    updatePayload.subscriptionTier = 'elite';
-                    updatePayload.subscriptionStartDate = admin.firestore.Timestamp.fromDate(startDate);
-                    updatePayload.subscriptionExpiryDate = admin.firestore.Timestamp.fromDate(expiryDate);
-                } else {
-                    const currentSubs = new Set<string>(userData.activeSubscriptions || []);
-                    currentSubs.add(packageType);
-                    
-                    updatePayload.activeSubscriptions = Array.from(currentSubs);
-                    updatePayload[`subscriptionsStart.${packageType}`] = admin.firestore.Timestamp.fromDate(startDate);
-                    updatePayload[`subscriptionsExpiry.${packageType}`] = admin.firestore.Timestamp.fromDate(expiryDate);
-
-                    // Check for Elite Upgrade (Gold + Crypto + Forex)
-                    if (currentSubs.has('gold') && currentSubs.has('crypto') && currentSubs.has('forex')) {
-                        updatePayload.subscriptionTier = 'elite';
-                        
-                        const existingExpiryMap = userData.subscriptionsExpiry || {};
-                        
-                        const getTime = (pType: string) => {
-                            if (pType === packageType) return expiryDate.getTime();
-                            const ts = existingExpiryMap[pType];
-                            return ts ? ts.toDate().getTime() : 0;
-                        };
-
-                        const maxTime = Math.max(getTime('gold'), getTime('crypto'), getTime('forex'));
-                        updatePayload.subscriptionExpiryDate = admin.firestore.Timestamp.fromMillis(maxTime);
-                        functions.logger.log(`[Auto-Upgrade] User ${userId} collected all 3 packages. Upgraded to ELITE until ${new Date(maxTime).toISOString()}`);
-                    }
-                }
-
-                transaction.set(userRef, updatePayload, { merge: true });
-
-                transaction.set(userTransactionRef, {
-                    amount: amountPaid,
-                    productId: packageId,
-                    paymentMethod: "paypal",
-                    transactionDate: admin.firestore.FieldValue.serverTimestamp(),
-                    paypalOrderId: orderID,
-                    status: "COMPLETED"
-                });
-            });
-
-            return { status: "success", message: "Purchase successful!" };
-        } else {
-            throw new HttpsError("aborted", "PayPal capture failed or status not COMPLETED.");
-        }
-
-    } catch (error: any) {
-        functions.logger.error("Error capturing PayPal order:", error);
-        throw new HttpsError("internal", "Unable to capture PayPal order.", error.message);
-    }
-});
-
-// =================================================================
 // === FUNCTION CỘNG TOKEN HÀNG NGÀY CHO FREE USER ===
 // =================================================================
 export const grantDailyFreeTokens = onSchedule(
@@ -1411,6 +1270,21 @@ export const checkExpiredSubscriptions = onSchedule (
                 // Reset activeSubscriptions nếu cần, hoặc giữ nguyên nếu họ có mua gói lẻ
                 // Ở đây giả sử Elite bao trùm tất cả, khi hết Elite thì về Free và check các gói lẻ sau
             });
+
+            // ▼▼▼ THÊM THÔNG BÁO HẾT HẠN (ELITE) ▼▼▼
+            const notifRef = doc.ref.collection("notifications").doc();
+            batch.set(notifRef, {
+                type: "subscription_expired",
+                title_loc: { en: "Elite Plan Expired", vi: "Gói Elite đã hết hạn" },
+                body_loc: {
+                    en: "Your Elite subscription has expired. You are now on the Free plan.",
+                    vi: "Gói Elite của bạn đã hết hạn. Bạn đã trở về gói miễn phí.",
+                },
+                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                isRead: false,
+            });
+            // ▲▲▲ KẾT THÚC THÊM ▼▼▼
+
             operationCount++;
         });
 
@@ -1436,6 +1310,21 @@ export const checkExpiredSubscriptions = onSchedule (
                     [`subscriptionsExpiry.${pkg}`]: admin.firestore.FieldValue.delete(), // Xóa ngày hết hạn để sạch data
                     [`subscriptionsStart.${pkg}`]: admin.firestore.FieldValue.delete(), // Xóa ngày bắt đầu
                 });
+
+                // ▼▼▼ THÊM THÔNG BÁO HẾT HẠN (GÓI LẺ) ▼▼▼
+                const notifRef = doc.ref.collection("notifications").doc();
+                batch.set(notifRef, {
+                    type: "subscription_expired",
+                    title_loc: { en: `${pkg.toUpperCase()} Plan Expired`, vi: `Gói ${pkg.toUpperCase()} đã hết hạn` },
+                    body_loc: {
+                        en: `Your ${pkg.toUpperCase()} subscription has expired.`,
+                        vi: `Gói đăng ký ${pkg.toUpperCase()} của bạn đã hết hạn.`,
+                    },
+                    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                    isRead: false,
+                });
+                // ▲▲▲ KẾT THÚC THÊM ▼▼▼
+
                 operationCount++;
             });
         }
@@ -1558,10 +1447,10 @@ export const telegramStatsWebhook = functions.https.onRequest(
             // 2. Xử lý "Báo cáo tổng hợp toàn bộ lệnh" (End of Day Summary)
             // Mẫu: 📅 Báo cáo tổng hợp toàn bộ lệnh ngày 05/01/2026 ...
             if (text.includes("Báo cáo tổng hợp toàn bộ lệnh")) {
-                 const dateRegex = /ngày\s+(\d{1,2}\/\d{1,2}\/\d{4})/;
-                 const tpRegex = /Số lệnh TP:\s*(\d+)\s*\(Tổng\s*([+-]?[\d.]+)\s*pip\)/;
-                 const slRegex = /Số lệnh SL:\s*(\d+)\s*\(Tổng\s*([+-]?[\d.]+)\s*pip\)/;
-                 const exitRegex = /Số lệnh Exit:\s*(\d+)\s*\(Tổng\s*([+-]?[\d.]+)\s*pip\)/;
+                 const dateRegex = /ngày\s+(\d{1,2}\/\d{1,2}\/\d{4})/; // Regex for date
+                 const tpRegex = /Số lệnh TP:\s*(\d+)\s*\(Tổng\s*([+-]?[\d.]+)\s*pip\)/; // Regex for TP count and pips
+                 const slRegex = /Số lệnh SL:\s*(\d+)\s*\(Tổng\s*([+-]?[\d.]+)\s*pip\)/; // Regex for SL count and pips
+                 const exitRegex = /Số lệnh Exit:\s*(\d+)\s*\(Tổng\s*([+-]?[\d.]+)\s*pip\)/; // Regex for Exit count and pips
 
                  const dateMatch = text.match(dateRegex);
                  const tpMatch = text.match(tpRegex);
@@ -1614,5 +1503,3 @@ export const telegramStatsWebhook = functions.https.onRequest(
         }
     }
 );
-
-
