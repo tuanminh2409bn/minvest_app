@@ -1148,9 +1148,21 @@ class _SignalCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool isNarrow = constraints.maxWidth < 520;
+        // Các biến kích thước tùy chỉnh cho mobile/desktop
+        final double padding = isNarrow ? 12.0 : AppSpacing.md;
+        final double iconBoxSize = isNarrow ? 36.0 : 48.0;
+        final double iconSize = isNarrow ? 20.0 : 28.0;
+        final double pairFontSize = isNarrow ? 18.0 : 22.0;
+        final double dateFontSize = isNarrow ? 12.0 : 14.0;
+        final double badgeFontSize = isNarrow ? 12.0 : 14.0;
+        final double badgeVerticalPadding = isNarrow ? 6.0 : 10.0;
+        final double badgeHorizontalPadding = isNarrow ? 12.0 : 18.0;
+        final double lineFontSize = isNarrow ? 16.0 : 22.0;
+        final double gap = isNarrow ? 10.0 : AppSpacing.md;
+
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.black,
             borderRadius: BorderRadius.circular(10),
@@ -1163,32 +1175,33 @@ class _SignalCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: iconBoxSize,
+                    height: iconBoxSize,
                     decoration: BoxDecoration(
                       color: const Color(0xFF121212),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(icon, color: iconColor, size: 28),
+                    child: Icon(icon, color: iconColor, size: iconSize),
                   ),
-                  const SizedBox(width: AppSpacing.md),
+                  SizedBox(width: gap),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(pair,
                             style: AppTextStyles.h3
-                                .copyWith(fontSize: 22, color: Colors.white)),
+                                .copyWith(fontSize: pairFontSize, color: Colors.white)),
                         Text(date,
                             style: AppTextStyles.body.copyWith(
+                                fontSize: dateFontSize,
                                 color: Colors.white70,
                                 fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 10),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: badgeHorizontalPadding, vertical: badgeVerticalPadding),
                     decoration: BoxDecoration(
                       gradient: badgeGradient,
                       borderRadius: BorderRadius.circular(22),
@@ -1196,6 +1209,7 @@ class _SignalCard extends StatelessWidget {
                     child: Text(
                       badgeLabel,
                       style: AppTextStyles.body.copyWith(
+                        fontSize: badgeFontSize,
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1203,17 +1217,17 @@ class _SignalCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: gap),
               if (isNarrow)
                 Wrap(
-                  spacing: 24,
-                  runSpacing: 8,
+                  spacing: 16, // Giảm spacing của Wrap
+                  runSpacing: 4,
                   alignment: WrapAlignment.start,
                   children: [
-                    _line('Entry: $entry'),
-                    _line('SL : $sl'),
-                    _line('TP1: $tp1'),
-                    _line('TP2 : $tp2'),
+                    _line('Entry: $entry', lineFontSize),
+                    _line('SL : $sl', lineFontSize),
+                    _line('TP1: $tp1', lineFontSize),
+                    _line('TP2 : $tp2', lineFontSize),
                   ],
                 )
               else
@@ -1223,8 +1237,8 @@ class _SignalCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _line('Entry: $entry'),
-                          _line('SL : $sl'),
+                          _line('Entry: $entry', lineFontSize),
+                          _line('SL : $sl', lineFontSize),
                         ],
                       ),
                     ),
@@ -1233,8 +1247,8 @@ class _SignalCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _line('TP1: $tp1'),
-                          _line('TP2 : $tp2'),
+                          _line('TP1: $tp1', lineFontSize),
+                          _line('TP2 : $tp2', lineFontSize),
                         ],
                       ),
                     ),
@@ -1247,12 +1261,12 @@ class _SignalCard extends StatelessWidget {
     );
   }
 
-  Widget _line(String text) {
+  Widget _line(String text, double fontSize) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 2), // Giảm padding dọc
       child: Text(
         text,
-        style: AppTextStyles.h3.copyWith(fontSize: 22, color: Colors.white),
+        style: AppTextStyles.h3.copyWith(fontSize: fontSize, color: Colors.white),
       ),
     );
   }
@@ -1966,6 +1980,9 @@ class _KeyFindingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
     const colors = [
       Color(0xFF04B3E9),
       Color(0xFF2E60FF),
@@ -1974,7 +1991,7 @@ class _KeyFindingsCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 520),
+      constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
       padding: const EdgeInsets.all(1), // Độ dày viền 1px
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -1993,22 +2010,22 @@ class _KeyFindingsCard extends StatelessWidget {
         ],
       ),
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: EdgeInsets.all(isMobile ? 12 : AppSpacing.lg),
         decoration: BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: isMobile ? MainAxisAlignment.start : MainAxisAlignment.spaceBetween,
           children: [
             Text(AppLocalizations.of(context)!.keyFindings,
                 style: AppTextStyles.h3
-                    .copyWith(fontSize: 22, color: Colors.white)),
-            const SizedBox(height: AppSpacing.md),
+                    .copyWith(fontSize: isMobile ? 18 : 22, color: Colors.white)),
+            SizedBox(height: isMobile ? 12 : AppSpacing.md),
             // Trả về một widget StatefulWidget nhỏ chỉ để chạy animation biểu đồ
             _AnimatedChartContent(),
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: isMobile ? 12 : AppSpacing.lg),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -2373,7 +2390,7 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
     return _AnimatedBorderCard(
       child: Container(
         width: double.infinity,
-        height: isMobile ? 350 : 520, // Sử dụng height cố định thay vì minHeight
+        height: isMobile ? 380 : 520, // Sử dụng height cố định thay vì minHeight
         padding: const EdgeInsets.all(AppSpacing.lg), // Padding tổng thể
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2790,30 +2807,58 @@ class _CoreValueCard extends StatelessWidget {
     return Container(
       width: isMobile ? double.infinity : 550.0,
       constraints: BoxConstraints(minHeight: isMobile ? 0 : 200),
-      padding: EdgeInsets.all(isMobile ? 20 : AppSpacing.lg),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: const Color(0xFF020202), // Nền màu đen nguyên bản
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.hardEdge,
+      child: Stack(
         children: [
-          Text(
-            title,
-            textAlign: TextAlign.start,
-            style: AppTextStyles.h3.copyWith(
-              fontSize: isMobile ? 20 : 22,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.bottomCenter,
+                  radius: 2.0,
+                  colors: [
+                    const Color(0xFF2E60FF).withOpacity(0.25),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 1.0],
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            description,
-            textAlign: TextAlign.start,
-            style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontSize: isMobile ? 18 : 16,
+          Padding(
+            padding: EdgeInsets.only(
+              left: isMobile ? 32 : 48,
+              top: isMobile ? 32 : 48,
+              right: isMobile ? 20 : 32,
+              bottom: isMobile ? 20 : 32,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  textAlign: TextAlign.start,
+                  style: AppTextStyles.h3.copyWith(
+                    fontSize: isMobile ? 20 : 22,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  description,
+                  textAlign: TextAlign.start,
+                  style: AppTextStyles.body.copyWith(
+                    color: Colors.white,
+                    fontSize: isMobile ? 18 : 16,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
