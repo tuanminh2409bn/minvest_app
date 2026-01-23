@@ -257,6 +257,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
         return const Icon(Icons.flag_circle, color: Colors.white);
       case 'sl_hit':
         return const Icon(Icons.cancel, color: Colors.white);
+      case 'subscription_success':
+        return const Icon(Icons.verified, color: Colors.greenAccent);
+      case 'subscription_expired':
+        return const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent);
       default:
         return const Icon(Icons.notifications, color: Colors.white);
     }

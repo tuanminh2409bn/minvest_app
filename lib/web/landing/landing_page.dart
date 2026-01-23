@@ -823,78 +823,43 @@ class _AnimatedGlowCard extends StatefulWidget {
   State<_AnimatedGlowCard> createState() => _AnimatedGlowCardState();
 }
 
-class _AnimatedBorderCard extends StatefulWidget {
+class _AnimatedBorderCard extends StatelessWidget {
   final Widget child;
-  const _AnimatedBorderCard({required this.child});
-
-  @override
-  State<_AnimatedBorderCard> createState() => _AnimatedBorderCardState();
-}
-
-class _AnimatedBorderCardState extends State<_AnimatedBorderCard>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 4))
-          ..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  const _AnimatedBorderCard({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final t = _controller.value;
-        final colors = const [
-          Color(0xFF04B3E9),
-          Color(0xFF2E60FF),
-          Color(0xFFD500F9)
-        ];
-        final stops = [
-          (t + 0.0) % 1,
-          (t + 0.4) % 1,
-          (t + 0.8) % 1,
-        ]..sort();
+    const colors = [
+      Color(0xFF04B3E9),
+      Color(0xFF2E60FF),
+      Color(0xFFD500F9)
+    ];
 
-        return Container(
-          padding: const EdgeInsets.all(2),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: colors,
-              stops: stops,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: colors[1].withOpacity(0.25),
-                blurRadius: 22,
-                spreadRadius: 2,
-                offset: const Offset(0, 10),
-              ),
-            ],
+    return Container(
+      padding: const EdgeInsets.all(1),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: colors[1].withOpacity(0.25),
+            blurRadius: 22,
+            spreadRadius: 2,
+            offset: const Offset(0, 10),
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: child,
-          ),
-        );
-      },
-      child: widget.child,
+        ],
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: child,
+      ),
     );
   }
 }
@@ -930,20 +895,14 @@ class _AnimatedGlowCardState extends State<_AnimatedGlowCard>
           Color(0xFF2E60FF),
           Color(0xFFD500F9)
         ];
-        final stops = [
-          (t + 0.0) % 1,
-          (t + 0.4) % 1,
-          (t + 0.8) % 1,
-        ]..sort();
 
         return Container(
           width: widget.width,
-          padding: const EdgeInsets.all(2),
+          padding: const EdgeInsets.all(1),
           constraints: BoxConstraints(minHeight: isMobile ? 400 : 520),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: colors,
-              stops: stops,
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -1020,8 +979,9 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards>
   @override
   void initState() {
     super.initState();
+    // Tốc độ cuộn: 12 giây cho một vòng chu kỳ để người dùng kịp đọc
     _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 8))
+        AnimationController(vsync: this, duration: const Duration(seconds: 12))
           ..repeat();
   }
 
@@ -1035,97 +995,124 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards>
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
-    final double viewportHeight = isMobile ? 280 : 370;
-    return ClipRect(
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          final v = _controller.value;
-          final first = _slidingCard(
-            controllerValue: v,
-            phaseOffset: 0.0,
-            viewportHeight: viewportHeight,
-            child: const _SignalCard(
-              icon: Icons.currency_bitcoin,
-              iconColor: Color(0xFF00B6FF),
-              pair: 'BTC',
-              date: 'June 1, 2025',
-              entry: '93.000',
-              sl: '93.300',
-              tp1: '92.700',
-              tp2: '92.500',
-              badgeLabel: 'Sell Limit',
-              badgeGradient: LinearGradient(
-                colors: [Color(0xFFFF00FF), Color(0xFF9B00FF)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          );
-          final second = _slidingCard(
-            controllerValue: v,
-            phaseOffset: 0.5,
-            viewportHeight: viewportHeight,
-            child: const _SignalCard(
-              icon: Icons.auto_awesome,
-              iconColor: Color(0xFF00B6FF),
-              pair: 'XAU/USD',
-              date: 'June 1, 2025',
-              entry: '3020',
-              sl: '3310',
-              tp1: '3330',
-              tp2: '3350',
-              badgeLabel: 'Buy Limit',
-              badgeGradient: LinearGradient(
-                colors: [Color(0xFF3DA1FF), Color(0xFF2C6BFF)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          );
-          final items = [
-            (progress: (v + 0.0) % 1.0, widget: first),
-            (progress: (v + 0.5) % 1.0, widget: second),
-          ]..sort((a, b) => b.progress
-              .compareTo(a.progress)); // progress lớn hơn vẽ sau → nằm trên
+    // Tăng chiều cao khung nhìn để hiển thị rõ các thẻ đang trôi
+    final double viewportHeight = isMobile ? 320 : 420;
 
-          return SizedBox(
-            height: viewportHeight,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [for (final item in items) item.widget],
-            ),
-          );
-        },
+    // Định nghĩa 2 thẻ card mẫu
+    const card1 = _SignalCard(
+      icon: Icons.currency_bitcoin,
+      iconColor: Color(0xFF00B6FF),
+      pair: 'BTC',
+      date: 'June 1, 2025',
+      entry: '93.000',
+      sl: '93.300',
+      tp1: '92.700',
+      tp2: '92.500',
+      badgeLabel: 'Sell Limit',
+      badgeGradient: LinearGradient(
+        colors: [Color(0xFFFF00FF), Color(0xFF9B00FF)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
       ),
     );
-  }
 
-  Widget _slidingCard({
-    required double controllerValue,
-    required double phaseOffset,
-    required double viewportHeight,
-    required Widget child,
-  }) {
-    final v = (controllerValue + phaseOffset) % 1.0;
-    double opacity;
-    if (v < 0.15) {
-      opacity = Curves.easeIn.transform(v / 0.15);
-    } else if (v > 0.85) {
-      opacity = Curves.easeOut.transform((1 - v) / 0.15);
-    } else {
-      opacity = 1.0;
+    const card2 = _SignalCard(
+      icon: Icons.auto_awesome,
+      iconColor: Color(0xFF00B6FF),
+      pair: 'XAU/USD',
+      date: 'June 1, 2025',
+      entry: '3020',
+      sl: '3310',
+      tp1: '3330',
+      tp2: '3350',
+      badgeLabel: 'Buy Limit',
+      badgeGradient: LinearGradient(
+        colors: [Color(0xFF3DA1FF), Color(0xFF2C6BFF)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ),
+    );
+
+    // Khoảng cách giữa các thẻ
+    const gap = SizedBox(height: 16);
+
+    // Hàm tạo danh sách card cơ bản (A, Gap, B, Gap)
+    Widget _buildList() {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          card1,
+          gap,
+          card2,
+          gap,
+        ],
+      );
     }
-    final slideT = Curves.easeInOut.transform(v);
-    final travel = viewportHeight * 0.45;
-    final baseOffset =
-        viewportHeight * 0.12; // đẩy điểm xuất phát xuống dưới một chút
-    final offsetY = (lerpDouble(travel, -travel, slideT) ?? 0) + baseOffset;
-    return Opacity(
-      opacity: opacity,
-      child: Transform.translate(
-        offset: Offset(0, offsetY),
-        child: child,
+
+    return SizedBox(
+      height: viewportHeight,
+      child: ShaderMask(
+        shaderCallback: (Rect bounds) {
+          return const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              Colors.black,
+              Colors.black,
+              Colors.transparent
+            ],
+            stops: [0.0, 0.15, 0.85, 1.0],
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.dstIn,
+        child: ClipRect( // Giữ ClipRect để nội dung không tràn ra ngoài vùng container
+          child: Stack(
+            children: [
+              // Danh sách 1: Chạy từ 0% lên -100% (biến mất lên trên)
+              AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return FractionalTranslation(
+                    translation: Offset(0, -_controller.value),
+                    child: child,
+                  );
+                },
+                child: _buildList(),
+              ),
+              // Danh sách 2: Chạy từ 100% lên 0% (xuất hiện từ dưới nối đuôi)
+              AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return FractionalTranslation(
+                    translation: Offset(0, 1.0 - _controller.value),
+                    child: child,
+                  );
+                },
+                child: _buildList(),
+              ),
+              // Lớp Overlay phủ lên trên: Trong suốt ở trên, đậm dần về đáy
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.0),
+                          Colors.black.withOpacity(0.0),
+                          Colors.black.withOpacity(0.9), // Màu đen đậm ở đáy
+                        ],
+                        stops: const [0.0, 0.5, 1.0], // Bắt đầu đậm dần từ giữa khung hình xuống
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1338,7 +1325,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
     final isMobile = width < Breakpoints.tablet;
 
     return Padding(
-      padding: EdgeInsets.only(top: isMobile ? 0 : AppSpacing.xxl),
+      padding: EdgeInsets.only(top: isMobile ? 0 : 140),
       child: VisibilityDetector(
         key: const Key('live_signals_visibility'),
         onVisibilityChanged: (info) {
@@ -1360,7 +1347,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
 
   Widget _buildContent(bool isMobile) {
     return Container(
-      constraints: BoxConstraints(minHeight: isMobile ? 0 : 480),
+      constraints: BoxConstraints(minHeight: isMobile ? 0 : 350),
       padding: isMobile
           ? const EdgeInsets.only(bottom: 24)
           : const EdgeInsets.all(AppSpacing.lg),
@@ -1602,17 +1589,20 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                                minHeight: 520, maxWidth: 560),
-                            child: SizedBox(
-                              width: double.infinity,
-                              child: SlideTransition(
-                                position: _leftSlide,
-                                child: FadeTransition(
-                                  opacity: _leftFade,
-                                  child: const _OrderCard(),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 100),
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                  minHeight: 400, maxWidth: 560),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: SlideTransition(
+                                  position: _leftSlide,
+                                  child: FadeTransition(
+                                    opacity: _leftFade,
+                                    child: const _OrderCard(),
+                                  ),
                                 ),
                               ),
                             ),
@@ -1697,7 +1687,7 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
 
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
+      constraints: BoxConstraints(minHeight: isMobile ? 0 : 400),
       padding: isMobile
           ? const EdgeInsets.only(bottom: 24)
           : const EdgeInsets.all(AppSpacing.lg),
@@ -1971,14 +1961,84 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
   }
 }
 
-class _KeyFindingsCard extends StatefulWidget {
-  const _KeyFindingsCard();
+class _KeyFindingsCard extends StatelessWidget {
+  const _KeyFindingsCard({super.key});
 
   @override
-  State<_KeyFindingsCard> createState() => _KeyFindingsCardState();
+  Widget build(BuildContext context) {
+    const colors = [
+      Color(0xFF04B3E9),
+      Color(0xFF2E60FF),
+      Color(0xFFD500F9)
+    ];
+
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(minHeight: 520),
+      padding: const EdgeInsets.all(1), // Độ dày viền 1px
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: colors[1].withOpacity(0.25),
+            blurRadius: 22,
+            spreadRadius: 2,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(AppLocalizations.of(context)!.keyFindings,
+                style: AppTextStyles.h3
+                    .copyWith(fontSize: 22, color: Colors.white)),
+            const SizedBox(height: AppSpacing.md),
+            // Trả về một widget StatefulWidget nhỏ chỉ để chạy animation biểu đồ
+            _AnimatedChartContent(),
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _Metric(
+                    label: AppLocalizations.of(context)!.predictiveAccuracy,
+                    value: '+81%'),
+                _Metric(
+                    label: AppLocalizations.of(context)!
+                        .improvementInProfitability,
+                    value: '+37%'),
+                _Metric(
+                    label: AppLocalizations.of(context)!
+                        .improvedRiskManagement,
+                    value: '+63%'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _KeyFindingsCardState extends State<_KeyFindingsCard>
+// Tách phần animation biểu đồ ra riêng để giữ hiệu ứng vẽ dần
+class _AnimatedChartContent extends StatefulWidget {
+  @override
+  State<_AnimatedChartContent> createState() => _AnimatedChartContentState();
+}
+
+class _AnimatedChartContentState extends State<_AnimatedChartContent>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -1987,7 +2047,7 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard>
     super.initState();
     _controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 4))
-          ..repeat();
+          ..repeat(); // Lặp lại để tạo hiệu ứng vẽ liên tục
   }
 
   @override
@@ -2000,79 +2060,7 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) {
-        final width = MediaQuery.of(context).size.width;
-        final isMobile = width < Breakpoints.tablet;
-        final t = _controller.value;
-        final colors = const [
-          Color(0xFF04B3E9),
-          Color(0xFF2E60FF),
-          Color(0xFFD500F9)
-        ];
-        final stops = [
-          (t + 0.0) % 1,
-          (t + 0.4) % 1,
-          (t + 0.8) % 1,
-        ]..sort();
-
-        return Container(
-          width: double.infinity,
-          constraints: BoxConstraints(minHeight: isMobile ? 400 : 520),
-          padding: const EdgeInsets.all(2),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: colors,
-              stops: stops,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: colors[1].withOpacity(0.25),
-                blurRadius: 22,
-                spreadRadius: 2,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(AppLocalizations.of(context)!.keyFindings,
-                    style: AppTextStyles.h3
-                        .copyWith(fontSize: 22, color: Colors.white)),
-                const SizedBox(height: AppSpacing.md),
-                _chartPlaceholder(_controller.value),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _Metric(
-                        label: AppLocalizations.of(context)!.predictiveAccuracy,
-                        value: '+81%'),
-                    _Metric(
-                        label: AppLocalizations.of(context)!
-                            .improvementInProfitability,
-                        value: '+37%'),
-                    _Metric(
-                        label: AppLocalizations.of(context)!
-                            .improvedRiskManagement,
-                        value: '+63%'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      builder: (context, _) => _chartPlaceholder(_controller.value),
     );
   }
 
@@ -2081,13 +2069,8 @@ class _KeyFindingsCardState extends State<_KeyFindingsCard>
       aspectRatio: 16 / 10,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: Colors.black, // Nền đen tuyệt đối
           borderRadius: BorderRadius.circular(8),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF111111), Color(0xFF0A0A0A)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
         ),
         child: CustomPaint(
           painter: _ChartPainter(progress: progress),
@@ -2131,70 +2114,193 @@ class _ChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // 1. Vẽ Lưới (Grid) dạng vệt sáng xanh dương
     final gridPaint = Paint()
-      ..color = Colors.white.withOpacity(0.08)
-      ..strokeWidth = 1;
-    final linePaint = Paint()
-      ..color = const Color(0xFF00C6FF)
-      ..strokeWidth = 3.5
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 1.0;
 
+    // Shader cho vệt sáng NGANG: Trong suốt -> Xanh -> Trong suốt (theo trục X)
+    // Tăng độ rộng vùng sáng và độ đậm để lưới "tỏa" ra hơn
+    final horizontalShader = LinearGradient(
+      colors: [
+        Colors.transparent,
+        const Color(0xFF00C6FF).withOpacity(0.5), // Tăng độ đậm lên 0.5
+        Colors.transparent,
+      ],
+      stops: const [0.0, 0.5, 1.0], // Giữ nguyên hoặc chỉnh [0.1, 0.5, 0.9] nếu muốn rộng hơn
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+    ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    // Shader cho vệt sáng DỌC: Trong suốt -> Xanh -> Trong suốt (theo trục Y)
+    final verticalShader = LinearGradient(
+      colors: [
+        Colors.transparent,
+        const Color(0xFF00C6FF).withOpacity(0.5), // Tăng độ đậm
+        Colors.transparent,
+      ],
+      stops: const [0.0, 0.5, 1.0],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    // Vẽ 4 đường NGANG
+    gridPaint.shader = horizontalShader;
     for (int i = 1; i < 5; i++) {
-      final dx = size.width * i / 5;
-      canvas.drawLine(Offset(dx, 0), Offset(dx, size.height), gridPaint);
-    }
-    for (int i = 1; i < 4; i++) {
-      final dy = size.height * i / 4;
+      final dy = size.height * i / 5;
       canvas.drawLine(Offset(0, dy), Offset(size.width, dy), gridPaint);
     }
 
-    final basePoints = [
-      Offset(0, size.height * 0.55),
-      Offset(size.width * 0.15, size.height * 0.6),
-      Offset(size.width * 0.25, size.height * 0.45),
-      Offset(size.width * 0.35, size.height * 0.7),
-      Offset(size.width * 0.42, size.height * 0.9),
-      Offset(size.width * 0.48, size.height * 0.35),
-      Offset(size.width * 0.55, size.height * 0.15),
-      Offset(size.width * 0.63, size.height * 0.6),
-      Offset(size.width * 0.7, size.height * 0.8),
-      Offset(size.width * 0.78, size.height * 0.5),
+    // Danh sách tháng cho trục hoành
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    final textStyle = TextStyle(
+      color: Colors.white.withOpacity(0.6),
+      fontSize: 10,
+      fontWeight: FontWeight.w500,
+    );
+
+    // Vẽ đường DỌC và NHÃN THÁNG
+    gridPaint.shader = verticalShader;
+    // Chia không gian đều theo số lượng tháng
+    final stepX = size.width / (months.length + 1); // +1 để tạo padding 2 bên
+
+    for (int i = 0; i < months.length; i++) {
+      final dx = stepX * (i + 1);
+      
+      // Vẽ đường dọc
+      canvas.drawLine(Offset(dx, 0), Offset(dx, size.height - 20), gridPaint); // Chừa chỗ cho text
+
+      // Vẽ nhãn tháng
+      final textSpan = TextSpan(text: months[i], style: textStyle);
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      
+      // Căn giữa text so với đường dọc
+      final textOffset = Offset(dx - textPainter.width / 2, size.height - 15);
+      textPainter.paint(canvas, textOffset);
+    }
+
+    // 2. Định nghĩa các điểm dữ liệu (Points)
+    // Các điểm được chọn để tạo xu hướng tăng trưởng đẹp mắt
+    final points = [
+      Offset(0, size.height * 0.7),
+      Offset(size.width * 0.15, size.height * 0.65),
+      Offset(size.width * 0.3, size.height * 0.75), // Dip nhẹ
+      Offset(size.width * 0.45, size.height * 0.45),
+      Offset(size.width * 0.6, size.height * 0.55), // Pullback nhỏ
+      Offset(size.width * 0.75, size.height * 0.3),
       Offset(size.width * 0.9, size.height * 0.25),
+      Offset(size.width, size.height * 0.15), // Kết thúc cao
     ];
 
-    final wiggle = 0.0;
-    final points = <Offset>[];
-    for (int i = 0; i < basePoints.length; i++) {
-      // giữ nguyên hình dạng, chỉ dùng progress để vẽ dần
-      points.add(basePoints[i]);
+    if (points.isEmpty) return;
+
+    // 3. Tạo đường cong mềm mại (Smooth Bezier Path)
+    final path = Path();
+    path.moveTo(points[0].dx, points[0].dy);
+
+    for (int i = 0; i < points.length - 1; i++) {
+      final p0 = points[i];
+      final p1 = points[i + 1];
+      // Sử dụng trung điểm để làm điểm điều khiển cho đường cong mượt
+      final controlPoint = Offset((p0.dx + p1.dx) / 2, (p0.dy + p1.dy) / 2);
+      
+      // Kỹ thuật nối: Vẽ QuadBezier từ điểm giữa trước đến điểm giữa sau
+      // Ở đây dùng đơn giản: control point là trung điểm X, nhưng giữ Y của p0 (hoặc p1) để uốn?
+      // Cách mượt nhất đơn giản: Dùng quadraticBezierTo tới trung điểm của đoạn nối
+      
+      // Sửa lại logic smooth: Dùng Catmull-Rom hoặc đơn giản là chia nhỏ.
+      // Cách đơn giản hiệu quả: Vẽ curve từ p0 đến p1 dùng control point ở giữa nhưng lệch trục Y
+      
+      // Logic chuẩn cho smooth curve qua các điểm:
+      // Lấy trung điểm của đoạn nối (p0, p1)
+      if (i == 0) {
+        path.lineTo(p0.dx, p0.dy); 
+      }
+      // Dùng cubicTo hoặc quadraticBezierTo. 
+      // Để đơn giản và đẹp: dùng spline đi qua các điểm.
+      // Ở đây ta dùng cách xấp xỉ: control point là (p0.x + p1.x)/2
+      final xc = (p0.dx + p1.dx) / 2;
+      final yc = (p0.dy + p1.dy) / 2;
+      // Vẽ curve tới trung điểm, rồi từ trung điểm tới p1? Không.
+      // Cách vẽ: path.quadraticBezierTo(p0.dx, p0.dy, xc, yc); -> Sai.
+    }
+    
+    // Viết lại Path Logic cho thực sự mềm mại (Catmull-Rom simplified)
+    final smoothPath = Path();
+    smoothPath.moveTo(points[0].dx, points[0].dy);
+    for (int i = 0; i < points.length - 1; i++) {
+      final p0 = points[i];
+      final p1 = points[i + 1];
+      // Control point 1
+      final cp1 = Offset(p0.dx + (p1.dx - p0.dx) / 2, p0.dy);
+      // Control point 2
+      final cp2 = Offset(p0.dx + (p1.dx - p0.dx) / 2, p1.dy);
+      
+      smoothPath.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, p1.dx, p1.dy);
     }
 
-    final path = Path()..moveTo(points.first.dx, points.first.dy);
-    for (int i = 1; i < points.length; i++) {
-      path.lineTo(points[i].dx, points[i].dy);
-    }
 
-    // Vẽ dần từ trái sang phải theo progress
-    final metrics = path.computeMetrics().toList();
-    if (metrics.isNotEmpty) {
-      final metric = metrics.first;
-      final len = metric.length;
-      final currentLen = (len * progress).clamp(0.0, len);
-      if (currentLen > 0) {
-        final animatedPath = metric.extractPath(0, currentLen);
-        canvas.drawPath(animatedPath, linePaint);
-        final tangent = metric.getTangentForOffset(currentLen);
+    // 4. Vẽ hiệu ứng Glow (Bóng sáng) phía sau đường
+    // Lấy phần path theo progress
+    final pathMetrics = smoothPath.computeMetrics();
+    final glowPath = Path();
+    final linePath = Path(); // Path chính để vẽ
+    Offset? lastPoint;
+
+    for (final metric in pathMetrics) {
+      final length = metric.length;
+      final extractLength = length * progress;
+      if (extractLength > 0) {
+        final extracted = metric.extractPath(0, extractLength);
+        glowPath.addPath(extracted, Offset.zero);
+        linePath.addPath(extracted, Offset.zero);
+        
+        // Lấy điểm cuối để vẽ chấm tròn
+        final tangent = metric.getTangentForOffset(extractLength);
         if (tangent != null) {
-          canvas.drawCircle(
-            tangent.position,
-            4,
-            Paint()
-              ..color = const Color(0xFF00C6FF)
-              ..style = PaintingStyle.fill,
-          );
+          lastPoint = tangent.position;
         }
       }
+    }
+
+    // Paint cho Glow
+    final glowPaint = Paint()
+      ..color = const Color(0xFF00C6FF).withOpacity(0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8.0); // Làm mờ tạo glow
+
+    canvas.drawPath(glowPath, glowPaint);
+
+    // 5. Vẽ đường chính (Line)
+    final linePaint = Paint()
+      ..color = const Color(0xFF00C6FF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0
+      ..strokeCap = StrokeCap.round;
+      
+    canvas.drawPath(linePath, linePaint);
+
+    // 6. Vẽ chấm tròn ở đầu (Indicator Dot)
+    if (lastPoint != null) {
+      // Glow của chấm
+      canvas.drawCircle(
+        lastPoint,
+        8,
+        Paint()
+          ..color = const Color(0xFF00C6FF).withOpacity(0.4)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6.0),
+      );
+      // Chấm chính
+      canvas.drawCircle(
+        lastPoint,
+        4,
+        Paint()..color = Colors.white,
+      );
     }
   }
 
@@ -2242,34 +2348,20 @@ class _SignalsPerformanceCard extends StatefulWidget {
 
 class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
     with TickerProviderStateMixin {
-  late final AnimationController _entranceController;
-  late final AnimationController _itemsController;
-  late final Animation<Offset> _slideIn;
-  late final Animation<Offset> _slideUp;
-  late final Animation<double> _fadeIn;
-  bool _hasPlayed = false;
+  late final AnimationController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    _entranceController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900));
-    _slideIn = Tween(begin: const Offset(-0.16, 0), end: Offset.zero).animate(
-      CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
-    );
-    _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
-      CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
-    );
-    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _entranceController, curve: Curves.easeOut));
-    _itemsController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 5));
+    // Tốc độ cuộn chậm rãi để người dùng đọc được nội dung (16 giây/vòng)
+    _scrollController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 16))
+          ..repeat();
   }
 
   @override
   void dispose() {
-    _entranceController.dispose();
-    _itemsController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -2278,140 +2370,215 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    return VisibilityDetector(
-      key: const Key('signals_performance_visibility'),
-      onVisibilityChanged: (info) {
-        if (!_hasPlayed && info.visibleFraction > 0.2) {
-          _hasPlayed = true;
-          _entranceController.forward();
-          _itemsController.repeat();
-        }
-      },
-      child: SlideTransition(
-        position: isMobile ? _slideUp : _slideIn,
-        child: FadeTransition(
-          opacity: _fadeIn,
-          child: _AnimatedBorderCard(
-            child: Container(
+    return _AnimatedBorderCard(
+      child: Container(
+        width: double.infinity,
+        height: isMobile ? 350 : 520, // Sử dụng height cố định thay vì minHeight
+        padding: const EdgeInsets.all(AppSpacing.lg), // Padding tổng thể
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Tiêu đề tĩnh ở trên cùng - Kéo dài full chiều ngang với viền Gradient
+            Container(
               width: double.infinity,
-              constraints: BoxConstraints(minHeight: isMobile ? 280 : 520),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 20, vertical: isMobile ? 12 : 24),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF0D101A), Color(0xFF0A0B13)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Text(
-                        AppLocalizations.of(context)!.signalsPerformanceTitle,
-                        style: AppTextStyles.h3.copyWith(
-                            color: Colors.white, fontSize: isMobile ? 18 : 22)),
+              padding: const EdgeInsets.all(1), // Độ dày viền 1px
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFB59DFF), Color(0xFF4B53B5)], // Màu viền
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF0F2045), Color(0xFF040812)], // Xanh đậm, bớt tím
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  _staggerItem(
-                      0,
-                      Icons.balance,
-                      AppLocalizations.of(context)!.riskToRewardRatio,
-                      AppLocalizations.of(context)!.howRiskComparesToReward),
-                  _staggerItem(
-                      1,
-                      Icons.attach_money,
-                      AppLocalizations.of(context)!.profitLossOverview,
-                      AppLocalizations.of(context)!.netGainVsLoss),
-                  _staggerItem(
-                      2,
-                      Icons.emoji_events,
-                      AppLocalizations.of(context)!.winRate,
-                      AppLocalizations.of(context)!.percentageOfWinningTrades),
-                  _staggerItem(
-                      3,
-                      Icons.track_changes,
-                      AppLocalizations.of(context)!.accuracyRate,
-                      AppLocalizations.of(context)!.howPreciseOurSignalsAre),
-                ],
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)!.signalsPerformanceTitle,
+                  style: AppTextStyles.h3.copyWith(
+                    color: Colors.white,
+                    fontSize: isMobile ? 18 : 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: AppSpacing.lg),
+            
+            // Khu vực cuộn vô tận
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black,
+                          Colors.black,
+                          Colors.transparent
+                        ],
+                        stops: [0.0, 0.1, 0.9, 1.0], // Fade 10% ở 2 đầu
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: ClipRect(
+                      child: Stack(
+                        children: [
+                          // List 1: Chạy lên và biến mất
+                          AnimatedBuilder(
+                            animation: _scrollController,
+                            builder: (context, child) {
+                              return FractionalTranslation(
+                                translation: Offset(0, -_scrollController.value),
+                                child: child,
+                              );
+                            },
+                            child: _buildList(context, isMobile),
+                          ),
+                          // List 2: Chạy lên nối đuôi
+                          AnimatedBuilder(
+                            animation: _scrollController,
+                            builder: (context, child) {
+                              return FractionalTranslation(
+                                translation: Offset(0, 1.0 - _scrollController.value),
+                                child: child,
+                              );
+                            },
+                            child: _buildList(context, isMobile),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _staggerItem(int index, IconData icon, String title, String subtitle) {
-    return AnimatedBuilder(
-      animation: _itemsController,
-      builder: (context, child) {
-        final width = MediaQuery.of(context).size.width;
-        final isMobile = width < Breakpoints.tablet;
-        final phase = (_itemsController.value + index * 0.22) % 1.0;
-        double opacity;
-        if (phase < 0.2) {
-          opacity = Curves.easeIn.transform(phase / 0.2);
-        } else if (phase > 0.8) {
-          opacity = Curves.easeOut.transform((1 - phase) / 0.2);
-        } else {
-          opacity = 1.0;
-        }
-        final slideT = Curves.easeInOut.transform(phase);
-        final travel = 14.0;
-        final baseOffset = 4.0;
-        final offsetY = (lerpDouble(travel, -travel, slideT) ?? 0) + baseOffset;
+  Widget _buildList(BuildContext context, bool isMobile) {
+    // Định nghĩa các item
+    final items = [
+      _PerformanceItem(
+        icon: Icons.balance,
+        color: const Color(0xFF00C6FF),
+        title: AppLocalizations.of(context)!.riskToRewardRatio,
+        subtitle: AppLocalizations.of(context)!.howRiskComparesToReward,
+      ),
+      _PerformanceItem(
+        icon: Icons.attach_money,
+        color: const Color(0xFF00E676),
+        title: AppLocalizations.of(context)!.profitLossOverview,
+        subtitle: AppLocalizations.of(context)!.netGainVsLoss,
+      ),
+      _PerformanceItem(
+        icon: Icons.emoji_events,
+        color: const Color(0xFFFFD600),
+        title: AppLocalizations.of(context)!.winRate,
+        subtitle: AppLocalizations.of(context)!.percentageOfWinningTrades,
+      ),
+      _PerformanceItem(
+        icon: Icons.track_changes,
+        color: const Color(0xFFFF5252),
+        title: AppLocalizations.of(context)!.accuracyRate,
+        subtitle: AppLocalizations.of(context)!.howPreciseOurSignalsAre,
+      ),
+    ];
 
-        return FadeTransition(
-          opacity: AlwaysStoppedAnimation(opacity),
-          child: Transform.translate(offset: Offset(0, offsetY), child: child),
-        );
-      },
-      child: LayoutBuilder(builder: (context, constraints) {
-        final width = MediaQuery.of(context).size.width;
-        final isMobile = width < Breakpoints.tablet;
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 8, vertical: 8),
-          child: Container(
-            padding: EdgeInsets.all(isMobile ? 12 : 22),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0D101A), Color(0xFF0A0B13)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: Border.all(color: Colors.white12),
-            ),
-            child: Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var item in items) ...[
+          item,
+          const SizedBox(height: 10), // Giảm khoảng cách giữa các thẻ từ 16 xuống 10
+        ],
+      ],
+    );
+  }
+}
+
+class _PerformanceItem extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+
+  const _PerformanceItem({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < Breakpoints.tablet;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 10 : 14), // Giảm padding từ 12/18 xuống 10/14
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F2045), Color(0xFF040812)], // Xanh đậm, bớt tím
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.08)), // Viền mờ tinh tế
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Icon trực tiếp, không có nền tròn, kích thước lớn hơn
+          Icon(icon, color: Colors.white, size: isMobile ? 26 : 32),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon, color: Colors.white70, size: isMobile ? 20 : 28),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title,
-                          style: AppTextStyles.h3.copyWith(
-                              fontSize: isMobile ? 16 : 22,
-                              color: Colors.white)),
-                      const SizedBox(height: 4),
-                      Text(subtitle,
-                          style: AppTextStyles.caption.copyWith(
-                              color: Colors.white70,
-                              fontSize: isMobile ? 10 : 12)),
-                    ],
+                Text(
+                  title,
+                  style: AppTextStyles.h3.copyWith(
+                    fontSize: isMobile ? 16 : 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: AppTextStyles.body.copyWith(
+                    fontSize: isMobile ? 12 : 13,
+                    color: Colors.white60,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-        );
-      }),
+        ],
+      ),
     );
   }
 }
@@ -2439,12 +2606,15 @@ class _SignalsPerformanceRow extends StatelessWidget {
         const SizedBox(width: 25),
         Expanded(
           flex: 5,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
-              child: const SizedBox(
-                width: double.infinity,
-                child: _TransparentCardAnimated(),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 140), // Hạ thấp card bên phải thêm nữa
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
+                child: const SizedBox(
+                  width: double.infinity,
+                  child: _TransparentCardAnimated(),
+                ),
               ),
             ),
           ),
@@ -2623,7 +2793,7 @@ class _CoreValueCard extends StatelessWidget {
       padding: EdgeInsets.all(isMobile ? 20 : AppSpacing.lg),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: AppColors.background,
+        color: const Color(0xFF020202), // Nền màu đen nguyên bản
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -378,81 +378,7 @@ class _PricingCardContent extends StatefulWidget {
 }
 
 class _PricingCardContentState extends State<_PricingCardContent> {
-  bool _isLoading = false;
-
-  Future<void> _handlePurchase() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      Navigator.of(context).pushNamed('/signin');
-      return;
-    }
-
-    setState(() => _isLoading = true);
-    try {
-      final paypalService = PaypalServiceWeb();
-      final orderID = await paypalService.createOrder(widget.plan.id);
-
-      if (orderID != null && mounted) {
-        // Show dialog to wait for user confirmation
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFF1E1E1E),
-            title: const Text("Completing Payment", style: TextStyle(color: Colors.white)),
-            content: const Text(
-              "A PayPal window has been opened. Please complete the payment there.\n\nAfter you have paid, click 'I Have Paid' below.",
-              style: TextStyle(color: Colors.white70),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0070BA)), // PayPal Blue
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  _verifyPayment(orderID);
-                },
-                child: const Text("I Have Paid", style: TextStyle(color: Colors.white)),
-              ),
-            ],
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _verifyPayment(String orderID) async {
-    setState(() => _isLoading = true);
-    try {
-      final success = await PaypalServiceWeb().captureOrder(orderID);
-      if (mounted) {
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Payment Successful! Your account has been upgraded.')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Payment Verification Failed or Incomplete.')),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error verifying: $e')));
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
+  // Logic mua hàng đã bị loại bỏ theo yêu cầu
 
   @override
   Widget build(BuildContext context) {
@@ -534,10 +460,8 @@ class _PricingCardContentState extends State<_PricingCardContent> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: EdgeInsets.symmetric(vertical: isMobile ? 18 : 12),
                 ),
-                onPressed: _isLoading ? null : _handlePurchase,
-                child: _isLoading
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                    : Text(
+                onPressed: () {}, // Nút sáng và nhấn được nhưng không có tác vụ theo yêu cầu
+                child: Text(
                         appLocalizations.chooseThisPlan,
                         style: TextStyle(
                           fontSize: isMobile ? 22 : 14,
