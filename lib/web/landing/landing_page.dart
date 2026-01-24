@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:async' as java_async;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -242,15 +243,15 @@ class _HeroInteractiveState extends State<_HeroInteractive>
     _contentController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 900));
     
-    // Desktop Horizontal Slides
+    // Desktop Horizontal Slides -> Changed to Vertical Up
     _titleSlide =
-        Tween(begin: const Offset(-0.12, 0), end: Offset.zero).animate(
+        Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(
           parent: _contentController,
           curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic)),
     );
     _subtitleSlide =
-        Tween(begin: const Offset(-0.08, 0), end: Offset.zero).animate(
+        Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(
           parent: _contentController,
           curve: const Interval(0.15, 0.7, curve: Curves.easeOutCubic)),
@@ -591,175 +592,164 @@ class HeroSignalsSection extends StatefulWidget {
 }
 
 class _HeroSignalsSectionState extends State<HeroSignalsSection>
-
     with SingleTickerProviderStateMixin {
-
   late final AnimationController _entranceController;
-
   late final Animation<Offset> _slideIn;
-
   late final Animation<Offset> _slideUp;
-
   late final Animation<double> _fadeIn;
-
   bool _hasPlayed = false;
 
-
+  // State cho dots indicator
+  int _currentCardIndex = 0;
+  final int _totalCards = 3;
 
   @override
-
   void initState() {
-
     super.initState();
-
     _entranceController = AnimationController(
-
       vsync: this,
-
       duration: const Duration(milliseconds: 950),
-
     );
-
-    _slideIn = Tween(begin: const Offset(-0.2, 0), end: Offset.zero).animate(
-
+    _slideIn = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
-
     );
-
     _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
-
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
-
     );
-
     _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
-
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOut),
-
     );
-
   }
 
-
-
   @override
-
   void dispose() {
-
     _entranceController.dispose();
-
     super.dispose();
-
   }
 
-
-
   @override
-
   Widget build(BuildContext context) {
-
     final width = MediaQuery.of(context).size.width;
-
     final isMobile = width < Breakpoints.tablet;
 
-
-
     return LayoutBuilder(
-
       builder: (context, constraints) {
-
-        final maxWidth = constraints.maxWidth.clamp(320.0, 560.0);
-
+        final maxWidth = constraints.maxWidth.clamp(320.0, 500.0);
         return Center(
-
           child: VisibilityDetector(
-
             key: const Key('hero_signals_visibility'),
-
             onVisibilityChanged: (info) {
-
               if (!_hasPlayed && info.visibleFraction > 0.2) {
-
                 _hasPlayed = true;
-
                 _entranceController.forward();
-
               }
-
             },
-
             child: SlideTransition(
-
               position: isMobile ? _slideUp : _slideIn,
-
               child: FadeTransition(
-
                 opacity: _fadeIn,
-
-                child: _AnimatedGlowCard(
-
-                  width: maxWidth,
-
-                  child: Container(
-
-                    constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
-
-                    padding: EdgeInsets.all(isMobile ? 16 : AppSpacing.md),
-
-                    child: Column(
-
-                      mainAxisSize: MainAxisSize.min,
-
-                      mainAxisAlignment: isMobile
-
-                          ? MainAxisAlignment.start
-
-                          : MainAxisAlignment.spaceBetween,
-
-                      crossAxisAlignment: CrossAxisAlignment.start,
-
-                      children: [
-
-                        Column(
-
-                          crossAxisAlignment: CrossAxisAlignment.start,
-
-                          children: [
-
-                            _buildSearchBar(context),
-
-                            const SizedBox(height: AppSpacing.md),
-
-                            _buildTabs(context),
-
-                          ],
-
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  clipBehavior: Clip.none, // Cho phép nền xám tràn ra ngoài
+                  children: [
+                    // Nền xám mờ bao quanh (Tăng kích thước lên 30px, không blur)
+                    Positioned(
+                      top: -30,
+                      left: -30,
+                      right: -30,
+                      bottom: -30,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05), // Xám mờ nhẹ
+                          borderRadius: BorderRadius.circular(30),
                         ),
-
-                        if (isMobile) const SizedBox(height: 24),
-
-                        const _StaggeredSignalCards(),
-
-                      ],
-
+                      ),
                     ),
 
-                  ),
+                    // Nội dung chính
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      child: _AnimatedBorderCard(
+                        child: Container(
+                          constraints: BoxConstraints(minHeight: isMobile ? 0 : 486),
+                          padding: EdgeInsets.all(isMobile ? 16 : AppSpacing.md),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: isMobile
+                                ? MainAxisAlignment.start
+                                : MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildSearchBar(context),
+                                  const SizedBox(height: AppSpacing.md),
+                                  _buildTabs(context),
+                                ],
+                              ),
+                              if (isMobile) const SizedBox(height: 24),
+                              _CarouselSignalCards(
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    _currentCardIndex = index;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
 
+                    // Overlay mờ đen (Đè lên cả viền và nền xám)
+                    Positioned(
+                      left: -31,
+                      right: -31,
+                      bottom: -31, // Tràn xuống đáy của nền xám
+                      height: 180,
+                      child: IgnorePointer(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.0),
+                                Colors.black.withOpacity(0.9),
+                                Colors.black, // Đen hoàn toàn
+                              ],
+                              stops: const [0.0, 0.6, 1.0],
+                            ),
+                            // Bo góc dưới khớp với nền xám
+                            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Thanh tiến trình (Dots + Connecting Lines)
+                    Positioned(
+                      bottom: -10, // Đặt thấp hơn một chút
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildDot(isActive: true), // Chấm đầu luôn sáng
+                          _buildConnectingLine(isFilled: _currentCardIndex >= 1, delayOff: const Duration(milliseconds: 500)),
+                          _buildDot(isActive: _currentCardIndex >= 1),
+                          _buildConnectingLine(isFilled: _currentCardIndex >= 2),
+                          _buildDot(isActive: _currentCardIndex >= 2),
+                        ],
+                      ),
+                    )
+                  ],
                 ),
-
               ),
-
             ),
-
           ),
-
         );
-
       },
-
     );
-
   }
 
   Widget _buildSearchBar(BuildContext context) {
@@ -809,20 +799,94 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection>
       ],
     );
   }
+
+  Widget _buildDot({required bool isActive}) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: isActive ? Colors.white : const Color(0xFF444444),
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+
+  Widget _buildConnectingLine({required bool isFilled, Duration delayOff = Duration.zero}) {
+    return _ConnectingLine(isFilled: isFilled, delayOff: delayOff);
+  }
 }
 
-class _AnimatedGlowCard extends StatefulWidget {
-  final double width;
-  final Widget child;
-  const _AnimatedGlowCard({
-    required this.width,
-    required this.child,
-  });
+class _ConnectingLine extends StatefulWidget {
+  final bool isFilled;
+  final Duration delayOff;
+
+  const _ConnectingLine({required this.isFilled, this.delayOff = Duration.zero});
 
   @override
-  State<_AnimatedGlowCard> createState() => _AnimatedGlowCardState();
+  State<_ConnectingLine> createState() => _ConnectingLineState();
 }
 
+class _ConnectingLineState extends State<_ConnectingLine> {
+  bool _localIsFilled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _localIsFilled = widget.isFilled;
+  }
+
+  @override
+  void didUpdateWidget(covariant _ConnectingLine oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isFilled != oldWidget.isFilled) {
+      if (widget.isFilled) {
+        // Turn ON: Immediate
+        setState(() => _localIsFilled = true);
+      } else {
+        // Turn OFF: Delay if needed
+        if (widget.delayOff != Duration.zero) {
+           java_async.Future.delayed(widget.delayOff, () {
+             if (mounted && !widget.isFilled) {
+               setState(() => _localIsFilled = false);
+             }
+           });
+        } else {
+           setState(() => _localIsFilled = false);
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 150, // 150px theo yêu cầu
+      height: 2,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF333333),
+        borderRadius: BorderRadius.circular(1),
+      ),
+      child: Stack(
+        children: [
+          AnimatedFractionallySizedBox(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOutCubic,
+            widthFactor: _localIsFilled ? 1.0 : 0.0,
+            alignment: Alignment.centerLeft, // Rút về bên trái (về điểm 1)
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(1),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 class _AnimatedBorderCard extends StatelessWidget {
   final Widget child;
   const _AnimatedBorderCard({super.key, required this.child});
@@ -844,14 +908,6 @@ class _AnimatedBorderCard extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: colors[1].withOpacity(0.25),
-            blurRadius: 22,
-            spreadRadius: 2,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -864,145 +920,26 @@ class _AnimatedBorderCard extends StatelessWidget {
   }
 }
 
-class _AnimatedGlowCardState extends State<_AnimatedGlowCard>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+class _CarouselSignalCards extends StatefulWidget {
+  final ValueChanged<int>? onPageChanged;
+  const _CarouselSignalCards({this.onPageChanged});
 
   @override
-  void initState() {
-    super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 4))
-          ..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final width = MediaQuery.of(context).size.width;
-        final isMobile = width < Breakpoints.tablet;
-        final t = _controller.value;
-        final colors = const [
-          Color(0xFF04B3E9),
-          Color(0xFF2E60FF),
-          Color(0xFFD500F9)
-        ];
-
-        return Container(
-          width: widget.width,
-          padding: const EdgeInsets.all(1),
-          constraints: BoxConstraints(minHeight: isMobile ? 400 : 520),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: colors,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: colors[1].withOpacity(0.28),
-                blurRadius: 24,
-                spreadRadius: 2,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: CustomPaint(
-                      painter: _GlowPainter(progress: t),
-                    ),
-                  ),
-                ),
-                child!,
-              ],
-            ),
-          ),
-        );
-      },
-      child: widget.child,
-    );
-  }
+  State<_CarouselSignalCards> createState() => _CarouselSignalCardsState();
 }
 
-class _GlowPainter extends CustomPainter {
-  final double progress;
-  _GlowPainter({required this.progress});
+class _CarouselSignalCardsState extends State<_CarouselSignalCards> {
+  late final PageController _pageController;
+  int _currentPage = 0;
+  // ignore: unused_field
+  late final java_async.Timer _timer;
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * (0.3 + 0.4 * progress),
-        size.height * (0.7 - 0.4 * progress));
-    final radius = size.width * 0.9;
-    final paint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0xFF2E60FF).withOpacity(0.18),
-          Colors.transparent,
-        ],
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
-    canvas.drawRect(Offset.zero & size, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _GlowPainter oldDelegate) =>
-      oldDelegate.progress != progress;
-}
-
-class _StaggeredSignalCards extends StatefulWidget {
-  const _StaggeredSignalCards();
-
-  @override
-  State<_StaggeredSignalCards> createState() => _StaggeredSignalCardsState();
-}
-
-class _StaggeredSignalCardsState extends State<_StaggeredSignalCards>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    // Tốc độ cuộn: 12 giây cho một vòng chu kỳ để người dùng kịp đọc
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 12))
-          ..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final isMobile = width < Breakpoints.tablet;
-    // Tăng chiều cao khung nhìn để hiển thị rõ các thẻ đang trôi
-    final double viewportHeight = isMobile ? 320 : 420;
-
-    // Định nghĩa 2 thẻ card mẫu
-    const card1 = _SignalCard(
+  // Define 3 cards
+  final List<Widget> _cards = const [
+    _SignalCard(
       icon: Icons.currency_bitcoin,
       iconColor: Color(0xFF00B6FF),
-      pair: 'BTC',
+      pair: 'BTC/USD',
       date: 'June 1, 2025',
       entry: '93.000',
       sl: '93.300',
@@ -1014,11 +951,10 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards>
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ),
-    );
-
-    const card2 = _SignalCard(
+    ),
+    _SignalCard(
       icon: Icons.auto_awesome,
-      iconColor: Color(0xFF00B6FF),
+      iconColor: Color(0xFFFFA000),
       pair: 'XAU/USD',
       date: 'June 1, 2025',
       entry: '3020',
@@ -1031,88 +967,68 @@ class _StaggeredSignalCardsState extends State<_StaggeredSignalCards>
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ),
-    );
+    ),
+    _SignalCard(
+      icon: Icons.token,
+      iconColor: Color(0xFF627EEA),
+      pair: 'ETH/USD',
+      date: 'June 1, 2025',
+      entry: '4.200',
+      sl: '4.100',
+      tp1: '4.350',
+      tp2: '4.500',
+      badgeLabel: 'Buy Limit',
+      badgeGradient: LinearGradient(
+        colors: [Color(0xFF00C853), Color(0xFF64DD17)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ),
+    ),
+  ];
 
-    // Khoảng cách giữa các thẻ
-    const gap = SizedBox(height: 16);
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 1000 * _cards.length, viewportFraction: 0.5);
+    // Timer trượt mỗi 3 giây
+    _timer = java_async.Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_pageController.hasClients) {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOutCubic,
+        );
+      }
+    });
+  }
 
-    // Hàm tạo danh sách card cơ bản (A, Gap, B, Gap)
-    Widget _buildList() {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          card1,
-          gap,
-          card2,
-          gap,
-        ],
-      );
-    }
+  @override
+  void dispose() {
+    _timer.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
-      height: viewportHeight,
-      child: ShaderMask(
-        shaderCallback: (Rect bounds) {
-          return const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.transparent,
-              Colors.black,
-              Colors.black,
-              Colors.transparent
-            ],
-            stops: [0.0, 0.15, 0.85, 1.0],
-          ).createShader(bounds);
+      height: 306,
+      child: PageView.builder(
+        controller: _pageController,
+        scrollDirection: Axis.vertical,
+        physics: const NeverScrollableScrollPhysics(),
+        onPageChanged: (index) {
+          if (widget.onPageChanged != null) {
+            widget.onPageChanged!(index % _cards.length);
+          }
         },
-        blendMode: BlendMode.dstIn,
-        child: ClipRect( // Giữ ClipRect để nội dung không tràn ra ngoài vùng container
-          child: Stack(
-            children: [
-              // Danh sách 1: Chạy từ 0% lên -100% (biến mất lên trên)
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return FractionalTranslation(
-                    translation: Offset(0, -_controller.value),
-                    child: child,
-                  );
-                },
-                child: _buildList(),
-              ),
-              // Danh sách 2: Chạy từ 100% lên 0% (xuất hiện từ dưới nối đuôi)
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return FractionalTranslation(
-                    translation: Offset(0, 1.0 - _controller.value),
-                    child: child,
-                  );
-                },
-                child: _buildList(),
-              ),
-              // Lớp Overlay phủ lên trên: Trong suốt ở trên, đậm dần về đáy
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.0),
-                          Colors.black.withOpacity(0.0),
-                          Colors.black.withOpacity(0.9), // Màu đen đậm ở đáy
-                        ],
-                        stops: const [0.0, 0.5, 1.0], // Bắt đầu đậm dần từ giữa khung hình xuống
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        itemBuilder: (context, index) {
+          final cardIndex = index % _cards.length;
+          // Thêm Padding để tạo khoảng cách giữa các thẻ
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: _cards[cardIndex],
+          );
+        },
       ),
     );
   }
@@ -1149,16 +1065,16 @@ class _SignalCard extends StatelessWidget {
       builder: (context, constraints) {
         final bool isNarrow = constraints.maxWidth < 520;
         // Các biến kích thước tùy chỉnh cho mobile/desktop
-        final double padding = isNarrow ? 12.0 : AppSpacing.md;
-        final double iconBoxSize = isNarrow ? 36.0 : 48.0;
-        final double iconSize = isNarrow ? 20.0 : 28.0;
-        final double pairFontSize = isNarrow ? 18.0 : 22.0;
-        final double dateFontSize = isNarrow ? 12.0 : 14.0;
-        final double badgeFontSize = isNarrow ? 12.0 : 14.0;
-        final double badgeVerticalPadding = isNarrow ? 6.0 : 10.0;
-        final double badgeHorizontalPadding = isNarrow ? 12.0 : 18.0;
-        final double lineFontSize = isNarrow ? 16.0 : 22.0;
-        final double gap = isNarrow ? 10.0 : AppSpacing.md;
+        final double padding = isNarrow ? 10.0 : 14.0;
+        final double iconBoxSize = isNarrow ? 36.0 : 44.0;
+        final double iconSize = isNarrow ? 20.0 : 24.0;
+        final double pairFontSize = isNarrow ? 16.0 : 18.0;
+        final double dateFontSize = isNarrow ? 11.0 : 13.0;
+        final double badgeFontSize = isNarrow ? 11.0 : 13.0;
+        final double badgeVerticalPadding = isNarrow ? 6.0 : 8.0;
+        final double badgeHorizontalPadding = isNarrow ? 10.0 : 14.0;
+        final double lineFontSize = isNarrow ? 13.0 : 15.0; // Giảm đáng kể kích thước chữ Entry/SL/TP
+        final double gap = isNarrow ? 8.0 : 12.0;
 
         return Container(
           width: double.infinity,
@@ -1218,42 +1134,29 @@ class _SignalCard extends StatelessWidget {
                 ],
               ),
               SizedBox(height: gap),
-              if (isNarrow)
-                Wrap(
-                  spacing: 16, // Giảm spacing của Wrap
-                  runSpacing: 4,
-                  alignment: WrapAlignment.start,
-                  children: [
-                    _line('Entry: $entry', lineFontSize),
-                    _line('SL : $sl', lineFontSize),
-                    _line('TP1: $tp1', lineFontSize),
-                    _line('TP2 : $tp2', lineFontSize),
-                  ],
-                )
-              else
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _line('Entry: $entry', lineFontSize),
-                          _line('SL : $sl', lineFontSize),
-                        ],
-                      ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _line('Entry: $entry', lineFontSize),
+                        _line('SL : $sl', lineFontSize),
+                      ],
                     ),
-                    const SizedBox(width: AppSpacing.lg),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _line('TP1: $tp1', lineFontSize),
-                          _line('TP2 : $tp2', lineFontSize),
-                        ],
-                      ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _line('TP1: $tp1', lineFontSize),
+                        _line('TP2 : $tp2', lineFontSize),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
             ],
           ),
         );
@@ -1301,7 +1204,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
     super.initState();
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 700));
-    _slideIn = Tween(begin: const Offset(0.18, 0), end: Offset.zero).animate(
+    _slideIn = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
@@ -1513,10 +1416,10 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
         vsync: this, duration: const Duration(milliseconds: 1100)); // Tăng duration một chút để thấy rõ hiệu ứng
 
     // Desktop Animations
-    _leftSlide = Tween(begin: const Offset(-0.18, 0), end: Offset.zero).animate(
+    _leftSlide = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
-    _rightSlide = Tween(begin: const Offset(0.18, 0), end: Offset.zero).animate(
+    _rightSlide = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _leftFade = Tween(begin: 0.0, end: 1.0)
@@ -1608,7 +1511,7 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
                           child: Center(
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(
-                                  minHeight: 400, maxWidth: 560),
+                                  minHeight: 400, maxWidth: 500),
                               child: SizedBox(
                                 width: double.infinity,
                                 child: SlideTransition(
@@ -1626,11 +1529,10 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
                       const SizedBox(width: 16),
                       Expanded(
                         child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                                minHeight: 520, maxWidth: 560),
-                            child: SizedBox(
-                              width: double.infinity,
+                                                      child: ConstrainedBox(
+                                                        constraints: const BoxConstraints(
+                                                            minHeight: 520, maxWidth: 500),
+                                                        child: SizedBox(                              width: double.infinity,
                               child: SlideTransition(
                                 position: _rightSlide,
                                 child: FadeTransition(
@@ -1854,7 +1756,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
     super.initState();
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 900));
-    _slideIn = Tween(begin: const Offset(0.16, 0), end: Offset.zero).animate(
+    _slideIn = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
@@ -1983,68 +1885,88 @@ class _KeyFindingsCard extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    const colors = [
-      Color(0xFF04B3E9),
-      Color(0xFF2E60FF),
-      Color(0xFFD500F9)
-    ];
-
-    return Container(
-      width: double.infinity,
-      constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
-      padding: const EdgeInsets.all(1), // Độ dày viền 1px
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: colors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: colors[1].withOpacity(0.25),
-            blurRadius: 22,
-            spreadRadius: 2,
-            offset: const Offset(0, 10),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // 1. Nền xám mở rộng
+        Positioned(
+          top: -30,
+          left: -30,
+          right: -30,
+          bottom: -30,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(30),
+            ),
           ),
-        ],
-      ),
-      child: Container(
-        padding: EdgeInsets.all(isMobile ? 12 : AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: isMobile ? MainAxisAlignment.start : MainAxisAlignment.spaceBetween,
-          children: [
-            Text(AppLocalizations.of(context)!.keyFindings,
-                style: AppTextStyles.h3
-                    .copyWith(fontSize: isMobile ? 18 : 22, color: Colors.white)),
-            SizedBox(height: isMobile ? 12 : AppSpacing.md),
-            // Trả về một widget StatefulWidget nhỏ chỉ để chạy animation biểu đồ
-            _AnimatedChartContent(),
-            SizedBox(height: isMobile ? 12 : AppSpacing.lg),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+        // 2. Nội dung chính
+        _AnimatedBorderCard(
+          child: Container(
+            constraints: BoxConstraints(minHeight: isMobile ? 0 : 520),
+            padding: EdgeInsets.all(isMobile ? 12 : AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: isMobile
+                  ? MainAxisAlignment.start
+                  : MainAxisAlignment.spaceBetween,
               children: [
-                _Metric(
-                    label: AppLocalizations.of(context)!.predictiveAccuracy,
-                    value: '+81%'),
-                _Metric(
-                    label: AppLocalizations.of(context)!
-                        .improvementInProfitability,
-                    value: '+37%'),
-                _Metric(
-                    label: AppLocalizations.of(context)!
-                        .improvedRiskManagement,
-                    value: '+63%'),
+                Text(AppLocalizations.of(context)!.keyFindings,
+                    style: AppTextStyles.h3.copyWith(
+                        fontSize: isMobile ? 18 : 22, color: Colors.white)),
+                SizedBox(height: isMobile ? 12 : AppSpacing.md),
+                // Trả về một widget StatefulWidget nhỏ chỉ để chạy animation biểu đồ
+                _AnimatedChartContent(),
+                SizedBox(height: isMobile ? 12 : AppSpacing.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _Metric(
+                        label: AppLocalizations.of(context)!.predictiveAccuracy,
+                        value: '+81%'),
+                    _Metric(
+                        label: AppLocalizations.of(context)!
+                            .improvementInProfitability,
+                        value: '+37%'),
+                    _Metric(
+                        label: AppLocalizations.of(context)!
+                            .improvedRiskManagement,
+                        value: '+63%'),
+                  ],
+                ),
+                const SizedBox(height: 40), // Thêm khoảng trống ở đáy để đẩy chữ lên cao
               ],
             ),
-          ],
+          ),
         ),
-      ),
+
+        // 3. Lớp phủ đen mờ mở rộng ở đáy
+        Positioned(
+          left: -31,
+          right: -31,
+          bottom: -31,
+          height: 120, // Giảm từ 180 xuống 120 để bớt che nội dung
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.0),
+                    Colors.black.withOpacity(0.9),
+                    Colors.black,
+                  ],
+                  stops: const [0.0, 0.6, 1.0],
+                ),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -2387,102 +2309,143 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    return _AnimatedBorderCard(
-      child: Container(
-        width: double.infinity,
-        height: isMobile ? 380 : 520, // Sử dụng height cố định thay vì minHeight
-        padding: const EdgeInsets.all(AppSpacing.lg), // Padding tổng thể
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Tiêu đề tĩnh ở trên cùng - Kéo dài full chiều ngang với viền Gradient
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(1), // Độ dày viền 1px
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFB59DFF), Color(0xFF4B53B5)], // Màu viền
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF0F2045), Color(0xFF040812)], // Xanh đậm, bớt tím
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                child: Text(
-                  AppLocalizations.of(context)!.signalsPerformanceTitle,
-                  style: AppTextStyles.h3.copyWith(
-                    color: Colors.white,
-                    fontSize: isMobile ? 18 : 20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // 1. Nền xám mở rộng
+        Positioned(
+          top: -30,
+          left: -30,
+          right: -30,
+          bottom: -30,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(30),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            
-            // Khu vực cuộn vô tận
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return ShaderMask(
-                    shaderCallback: (Rect bounds) {
-                      return const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black,
-                          Colors.black,
-                          Colors.transparent
-                        ],
-                        stops: [0.0, 0.1, 0.9, 1.0], // Fade 10% ở 2 đầu
-                      ).createShader(bounds);
-                    },
-                    blendMode: BlendMode.dstIn,
-                    child: ClipRect(
-                      child: Stack(
-                        children: [
-                          // List 1: Chạy lên và biến mất
-                          AnimatedBuilder(
-                            animation: _scrollController,
-                            builder: (context, child) {
-                              return FractionalTranslation(
-                                translation: Offset(0, -_scrollController.value),
-                                child: child,
-                              );
-                            },
-                            child: _buildList(context, isMobile),
-                          ),
-                          // List 2: Chạy lên nối đuôi
-                          AnimatedBuilder(
-                            animation: _scrollController,
-                            builder: (context, child) {
-                              return FractionalTranslation(
-                                translation: Offset(0, 1.0 - _scrollController.value),
-                                child: child,
-                              );
-                            },
-                            child: _buildList(context, isMobile),
-                          ),
-                        ],
+          ),
+        ),
+
+        // 2. Nội dung chính
+        _AnimatedBorderCard(
+          child: Container(
+            width: double.infinity,
+            height: isMobile ? 380 : 520,
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(1),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFB59DFF), Color(0xFF4B53B5)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0F2045), Color(0xFF040812)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.signalsPerformanceTitle,
+                      style: AppTextStyles.h3.copyWith(
+                        color: Colors.white,
+                        fontSize: isMobile ? 18 : 20,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  );
-                },
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black,
+                              Colors.black,
+                              Colors.transparent
+                            ],
+                            stops: [0.0, 0.1, 0.9, 1.0],
+                          ).createShader(bounds);
+                        },
+                        blendMode: BlendMode.dstIn,
+                        child: ClipRect(
+                          child: Stack(
+                            children: [
+                              AnimatedBuilder(
+                                animation: _scrollController,
+                                builder: (context, child) {
+                                  return FractionalTranslation(
+                                    translation: Offset(0, -_scrollController.value),
+                                    child: child,
+                                  );
+                                },
+                                child: _buildList(context, isMobile),
+                              ),
+                              AnimatedBuilder(
+                                animation: _scrollController,
+                                builder: (context, child) {
+                                  return FractionalTranslation(
+                                    translation: Offset(0, 1.0 - _scrollController.value),
+                                    child: child,
+                                  );
+                                },
+                                child: _buildList(context, isMobile),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // 3. Lớp phủ đen mờ mở rộng ở đáy
+        Positioned(
+          left: -31,
+          right: -31,
+          bottom: -31,
+          height: 120,
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.0),
+                    Colors.black.withOpacity(0.9),
+                    Colors.black,
+                  ],
+                  stops: const [0.0, 0.6, 1.0],
+                ),
+                borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(30)),
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -2608,34 +2571,33 @@ class _SignalsPerformanceRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 5,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
-              child: const SizedBox(
-                width: double.infinity,
-                child: _SignalsPerformanceCard(),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 25),
-        Expanded(
-          flex: 5,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 140), // Hạ thấp card bên phải thêm nữa
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
-                child: const SizedBox(
-                  width: double.infinity,
-                  child: _TransparentCardAnimated(),
+                        Expanded(
+                          flex: 5,
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 520, maxWidth: 500),
+                              child: const SizedBox(
+                                width: double.infinity,
+                                child: _SignalsPerformanceCard(),
+                              ),
+                            ),
+                          ),
+                        ),        const SizedBox(width: 25),
+                Expanded(
+                  flex: 5,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 140), // Hạ thấp card bên phải thêm nữa
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
+                                    child: const SizedBox(
+                                      width: double.infinity,
+                                      child: _TransparentCardAnimated(),
+                                    ),
+                                  ),
+                                ),                  ),
                 ),
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -2889,15 +2851,15 @@ class _AnimatedCoreValueCardState extends State<_AnimatedCoreValueCard>
   late final Animation<Offset> _slideUp;
   late final Animation<double> _fade;
   bool _hasPlayed = false;
+  bool _isHovered = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 900));
-    final beginOffset =
-        widget.slideFromLeft ? const Offset(-0.16, 0) : const Offset(0.16, 0);
-    _slide = Tween(begin: beginOffset, end: Offset.zero).animate(
+    // Thay đổi logic cũ (trái/phải) thành trượt lên
+    _slide = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     _slideUp = Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(
@@ -2931,10 +2893,32 @@ class _AnimatedCoreValueCardState extends State<_AnimatedCoreValueCard>
         position: isMobile ? _slideUp : _slide,
         child: FadeTransition(
           opacity: _fade,
-          child: _AnimatedBorderCard(
-            child: _CoreValueCard(
-              title: widget.title,
-              description: widget.description,
+          child: MouseRegion(
+            onEnter: (_) => setState(() => _isHovered = true),
+            onExit: (_) => setState(() => _isHovered = false),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              transform: Matrix4.identity()..scale(_isHovered ? 1.05 : 1.0),
+              transformAlignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: _isHovered
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF2E60FF).withOpacity(0.6),
+                          blurRadius: 24,
+                          spreadRadius: 4,
+                          offset: const Offset(0, 8),
+                        )
+                      ]
+                    : [],
+              ),
+              child: _AnimatedBorderCard(
+                child: _CoreValueCard(
+                  title: widget.title,
+                  description: widget.description,
+                ),
+              ),
             ),
           ),
         ),
@@ -3022,6 +3006,8 @@ class _FaqItem extends StatelessWidget {
           border: Border.all(color: AppColors.cardBorder),
         ),
         child: ExpansionTile(
+          shape: const Border(), // Loại bỏ viền khi mở rộng
+          collapsedShape: const Border(), // Loại bỏ viền khi thu gọn
           tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           title: Text(question,
               style: AppTextStyles.body.copyWith(
