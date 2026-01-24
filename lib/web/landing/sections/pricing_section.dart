@@ -257,11 +257,7 @@ class _AnimatedPricingCardState extends State<_AnimatedPricingCard> with SingleT
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
-    final beginOffset = switch (widget.slideDirection) {
-      _SlideDirection.fromLeft => const Offset(-0.18, 0),
-      _SlideDirection.fromRight => const Offset(0.18, 0),
-      _ => const Offset(0, 0.18),
-    };
+    const beginOffset = Offset(0, 0.18); // Tất cả đều trượt lên
     _slide = Tween(begin: beginOffset, end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
@@ -489,7 +485,7 @@ class _PricingCardContentState extends State<_PricingCardContent> {
 
   Widget _feature(String text, bool isMobile) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         children: [
           Icon(Icons.check_box, color: Colors.white70, size: isMobile ? 20 : 18),

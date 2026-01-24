@@ -29,7 +29,7 @@ class AppTextStyles {
       );
 
   static TextStyle get caption => GoogleFonts.beVietnamPro(
-        fontSize: 14,
+        fontSize: 10,
         fontWeight: FontWeight.w300,
         color: AppColors.textSecondary,
       );
