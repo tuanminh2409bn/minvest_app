@@ -285,13 +285,19 @@ class _InteractiveSignalCardState extends State<_InteractiveSignalCard> with Sin
   bool _isHovered = false;
   late final AnimationController _controller;
   late final Animation<double> _scaleAnimation;
+  late final Animation<double> _rotateAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600)); // Tăng duration cho elastic
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    
+    // Tạo hiệu ứng xoay bập bênh (từ 0 đến 10 độ cộng thêm)
+    _rotateAnimation = Tween<double>(begin: 0.0, end: 10.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
     );
   }
 
@@ -303,9 +309,6 @@ class _InteractiveSignalCardState extends State<_InteractiveSignalCard> with Sin
 
   @override
   Widget build(BuildContext context) {
-    // Determine rotation: if hovered, slightly adjust rotation for effect
-    final currentRotation = _isHovered ? widget.rotation + 2.0 : widget.rotation;
-
     return MouseRegion(
       onEnter: (_) {
         Future.delayed(Duration.zero, () {
@@ -329,6 +332,9 @@ class _InteractiveSignalCardState extends State<_InteractiveSignalCard> with Sin
         child: AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
+            // Góc xoay = góc mặc định + góc bập bênh từ animation
+            final currentRotation = widget.rotation + _rotateAnimation.value;
+
             return Transform(
               transform: Matrix4.identity()
                 ..rotateZ(currentRotation * math.pi / 180)
@@ -434,24 +440,73 @@ class _PhoneMockup extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxW = constraints.maxWidth;
-        // Giữ tỷ lệ 1:2 nhưng co lại trên mobile để vừa khung
-        final width = maxW < 360 ? maxW * 0.82 : maxW < 540 ? maxW * 0.66 : 320.0;
-        final height = width * 2;
+        // Kích thước điện thoại tự vẽ
+        final width = maxW < 360 ? maxW * 0.9 : 320.0;
+        final height = width * 2.05; // Tỉ lệ màn hình hiện đại
 
-        return SizedBox(
+        return Container(
           width: width,
           height: height,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              _PhoneFrame(),
-              _PhoneScreenHolder(
-                width: width,
-                height: height,
-                onHoverStart: onHoverStart,
-                onHoverEnd: onHoverEnd,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(48),
+            // Gradient viền kim loại (Titanium)
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF666666), // Xám sáng
+                Color(0xFF2a2a2a), // Xám tối
+                Color(0xFF888888), // Điểm sáng
+                Color(0xFF1a1a1a), // Tối
+              ],
+              stops: [0.1, 0.4, 0.6, 0.9],
+            ),
+            boxShadow: [
+               BoxShadow(
+                color: Colors.black.withOpacity(0.7),
+                blurRadius: 50,
+                offset: const Offset(0, 30),
+                spreadRadius: -10,
               ),
             ],
+          ),
+          // Padding tạo độ dày viền kim loại
+          child: Padding(
+            padding: const EdgeInsets.all(3.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black, // Viền đen (Bezel)
+                borderRadius: BorderRadius.circular(45),
+              ),
+              padding: const EdgeInsets.all(10.0), // Độ dày Bezel
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(35),
+                child: Stack(
+                  children: [
+                    // Nội dung màn hình
+                    Positioned.fill(
+                      child: _PhoneScreen(
+                        onHoverStart: onHoverStart,
+                        onHoverEnd: onHoverEnd,
+                      ),
+                    ),
+                    // Dynamic Island
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 10),
+                        width: 96,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(13),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         );
       },
@@ -459,52 +514,8 @@ class _PhoneMockup extends StatelessWidget {
   }
 }
 
-class _PhoneFrame extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Image.asset('assets/mockups/iPhone16.png', fit: BoxFit.contain);
-  }
-}
+// _PhoneFrame và _PhoneScreenHolder đã được loại bỏ để dùng khung tự vẽ.
 
-class _PhoneScreenHolder extends StatelessWidget {
-  final double width;
-  final double height;
-  final void Function(int index) onHoverStart;
-  final void Function(int index) onHoverEnd;
-  const _PhoneScreenHolder({
-    required this.width,
-    required this.height,
-    required this.onHoverStart,
-    required this.onHoverEnd,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // Tăng inset để màn hình trong nhỏ hơn khung một chút
-    final horizontalInset = width * 0.06;
-    final topInset = height * 0.06;
-    final bottomInset = height * 0.05;
-
-    return Positioned.fill(
-      left: horizontalInset,
-      right: horizontalInset,
-      top: topInset,
-      bottom: bottomInset,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(18),
-          topRight: Radius.circular(18),
-          bottomLeft: Radius.circular(26),
-          bottomRight: Radius.circular(26),
-        ),
-        child: _PhoneScreen(
-          onHoverStart: onHoverStart,
-          onHoverEnd: onHoverEnd,
-        ),
-      ),
-    );
-  }
-}
 
 class _PhoneScreen extends StatelessWidget {
   final void Function(int index) onHoverStart;
@@ -514,99 +525,84 @@ class _PhoneScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<_SignalRowData> rows = [
-      _SignalRowData(icon: Icons.water_drop, pair: 'WTI', side: 'Buy Limit'),
-      _SignalRowData(icon: Icons.currency_bitcoin, pair: 'XAU/USD', side: 'Sell Limit'),
-      _SignalRowData(icon: Icons.currency_exchange, pair: 'DXY/USDT', side: 'Buy Limit'),
-      _SignalRowData(icon: Icons.account_balance, pair: 'XAU/USD', side: 'Sell Limit'),
-      _SignalRowData(icon: Icons.euro, pair: 'EUR/USD', side: 'Buy Limit'),
-      _SignalRowData(icon: Icons.currency_bitcoin, pair: 'BTC/USDT', side: 'Sell Limit'),
-    ];
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalPad = constraints.maxWidth * 0.035; // co giãn theo khung
-        final verticalPad = constraints.maxHeight * 0.025;
+        final horizontalPad = constraints.maxWidth * 0.05; 
+        // Đẩy lên cao để ngang hàng với Dynamic Island (height 26 + margin 10 = 36)
+        // Dùng topPad khoảng 15px là vừa tầm mắt
+        final topPad = 15.0;
+        final bottomPad = 20.0;
 
         return Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF0F0F0F),
-            borderRadius: BorderRadius.circular(16),
+          decoration: const BoxDecoration(
+            color: Color(0xFF0F0F0F),
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: horizontalPad.clamp(10, 16), vertical: verticalPad.clamp(10, 16)),
+            padding: EdgeInsets.fromLTRB(
+              horizontalPad.clamp(12, 20), 
+              topPad, 
+              horizontalPad.clamp(12, 20), 
+              bottomPad
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Status Bar - Ngang hàng Dynamic Island
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('9:41', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 12)),
-                    const Spacer(),
-                    const Icon(Icons.wifi, size: 14, color: Colors.white),
-                    const SizedBox(width: 6),
-                    const Icon(Icons.battery_full, size: 14, color: Colors.white),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Text('9:41', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.signal_cellular_alt, size: 14, color: Colors.white),
+                          SizedBox(width: 4),
+                          Icon(Icons.wifi, size: 14, color: Colors.white),
+                          SizedBox(width: 4),
+                          Icon(Icons.battery_full, size: 14, color: Colors.white),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                const Icon(Icons.arrow_back, color: Colors.white, size: 16),
-                const SizedBox(height: 10),
-                Text('AI Signals', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 8),
+                const SizedBox(height: 32), // Tăng khoảng cách sau status bar
+                const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                const SizedBox(height: 16),
+                Text('AI Signals', style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
                       _chip('Gold', true),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       _chip('Forex', false),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       _chip('Crypto', false),
                     ],
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 Expanded(
                   child: ListView.builder(
                     padding: EdgeInsets.zero,
-                    itemCount: rows.length,
+                    itemCount: 6,
                     itemBuilder: (context, index) {
-                      final r = rows[index];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1A1A1A),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF242424)),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                          child: Row(
-                            children: [
-                              Icon(r.icon, color: const Color(0xFF00A7FF), size: 18),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(r.pair, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
-                                    Text('Update: dd/mm/yyyy', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 10)),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              MouseRegion(
-                                onEnter: (_) => onHoverStart(index),
-                                onExit: (_) => onHoverEnd(index),
-                                child: Text(
-                                  r.side,
-                                  style: AppTextStyles.body.copyWith(
-                                    color: r.side.toLowerCase().contains('buy') ? Colors.greenAccent : Colors.redAccent,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        child: _InteractivePhoneRow(
+                          initialIndex: index,
+                          onHoverChange: (isHovering) {
+                            if (isHovering) {
+                              onHoverStart(index);
+                            } else {
+                              onHoverEnd(index);
+                            }
+                          },
                         ),
                       );
                     },
@@ -622,11 +618,11 @@ class _PhoneScreen extends StatelessWidget {
 
   Widget _chip(String text, bool active) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
-        color: active ? const Color(0xFF2D2D2D) : const Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFF2D2D2D)),
+        color: const Color(0xFF0F0F0F), // Màu nền trùng màn hình
+        borderRadius: BorderRadius.circular(3),
+        border: Border.all(color: Colors.white24, width: 1), // Viền mỏng
       ),
       child: Text(
         text,
@@ -647,7 +643,217 @@ class _SignalRowData {
   const _SignalRowData({required this.icon, required this.pair, required this.side});
 }
 
+const List<_SignalRowData> _phoneDataPool = [
+  _SignalRowData(icon: Icons.water_drop, pair: 'WTI', side: 'Buy Limit'),
+  _SignalRowData(icon: Icons.currency_bitcoin, pair: 'XAU/USD', side: 'Sell Limit'),
+  _SignalRowData(icon: Icons.currency_exchange, pair: 'DXY/USDT', side: 'Buy Limit'),
+  _SignalRowData(icon: Icons.account_balance, pair: 'US30', side: 'Sell Limit'),
+  _SignalRowData(icon: Icons.euro, pair: 'EUR/USD', side: 'Buy Limit'),
+  _SignalRowData(icon: Icons.currency_bitcoin, pair: 'BTC/USDT', side: 'Sell Limit'),
+  _SignalRowData(icon: Icons.currency_pound, pair: 'GBP/JPY', side: 'Buy Limit'),
+  _SignalRowData(icon: Icons.show_chart, pair: 'NAS100', side: 'Sell Limit'),
+  _SignalRowData(icon: Icons.token, pair: 'ETH/USD', side: 'Buy Limit'),
+  _SignalRowData(icon: Icons.candlestick_chart, pair: 'AUD/CAD', side: 'Sell Limit'),
+];
 
+class _InteractivePhoneRow extends StatefulWidget {
+  final int initialIndex;
+  final Function(bool) onHoverChange;
+
+  const _InteractivePhoneRow({
+    required this.initialIndex,
+    required this.onHoverChange,
+  });
+
+  @override
+  State<_InteractivePhoneRow> createState() => _InteractivePhoneRowState();
+}
+
+class _InteractivePhoneRowState extends State<_InteractivePhoneRow> with SingleTickerProviderStateMixin {
+  bool _isHovered = false;
+  late int _currentIndex;
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex % _phoneDataPool.length;
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _cycleData() {
+    setState(() {
+      _currentIndex = (_currentIndex + 1) % _phoneDataPool.length;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = _phoneDataPool[_currentIndex];
+    
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() => _isHovered = true);
+        widget.onHoverChange(true);
+        _controller.forward();
+      },
+      onExit: (_) {
+        setState(() => _isHovered = false);
+        widget.onHoverChange(false);
+        _controller.reverse();
+      },
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: _cycleData,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1A1A),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _isHovered ? const Color(0xFF289EFF) : const Color(0xFF242424),
+                    width: _isHovered ? 1.5 : 1.0,
+                  ),
+                  boxShadow: _isHovered ? [
+                    BoxShadow(
+                      color: const Color(0xFF289EFF).withOpacity(0.2),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    )
+                  ] : [],
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                child: Row(
+                  children: [
+                    Icon(data.icon, color: const Color(0xFF00A7FF), size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            data.pair, 
+                            style: AppTextStyles.body.copyWith(
+                              color: Colors.white, 
+                              fontSize: 13, 
+                              fontWeight: FontWeight.w700
+                            )
+                          ),
+                          Text(
+                            'Update: dd/mm/yyyy', 
+                            style: AppTextStyles.caption.copyWith(
+                              color: Colors.white70, 
+                              fontSize: 10
+                            )
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      data.side,
+                      style: AppTextStyles.body.copyWith(
+                        color: data.side.toLowerCase().contains('buy') ? Colors.greenAccent : Colors.redAccent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _ToolbarShimmer extends StatefulWidget {
+  final Widget child;
+  final double borderRadius;
+  const _ToolbarShimmer({required this.child, this.borderRadius = 12});
+
+  @override
+  State<_ToolbarShimmer> createState() => _ToolbarShimmerState();
+}
+
+class _ToolbarShimmerState extends State<_ToolbarShimmer> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  bool _isHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() => _isHovered = true);
+        _controller.repeat(reverse: true);
+      },
+      onExit: (_) {
+        setState(() => _isHovered = false);
+        _controller.stop();
+        _controller.reset();
+      },
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Container(
+            foregroundDecoration: _isHovered
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(widget.borderRadius),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Colors.blue.withOpacity(0.2), // Xanh dương nhẹ
+                        Colors.transparent,
+                      ],
+                      stops: [
+                        _controller.value - 0.3,
+                        _controller.value,
+                        _controller.value + 0.3,
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                  )
+                : null,
+            child: widget.child,
+          );
+        },
+        child: widget.child,
+      ),
+    );
+  }
+}
 
 class SmartToolsSection extends StatefulWidget {
   const SmartToolsSection({super.key});
@@ -658,6 +864,8 @@ class SmartToolsSection extends StatefulWidget {
 
 class _SmartToolsSectionState extends State<SmartToolsSection> with SingleTickerProviderStateMixin {
   bool _isFlipped = false;
+  bool _isOuterToolbarHovered = false;
+  bool _isInnerToolbarHovered = false; // Add inner toolbar hover state
   int _pageIndex = 0;
   late AnimationController _flipController;
   late Animation<double> _frontAnimation;
@@ -809,33 +1017,60 @@ class _SmartToolsSectionState extends State<SmartToolsSection> with SingleTicker
   }
 
   Widget _buildFrontSide(BuildContext context) {
+    // Dịch chuyển nội dung khi hover thanh trên
+    final double translationY = _isOuterToolbarHovered ? 12.0 : 0.0;
+
     return Column(
       children: [
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24),
-          height: 60,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0C132A), Color(0xFF0A0E1F)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 120),
+          child: MouseRegion(
+            onEnter: (_) => setState(() => _isOuterToolbarHovered = true),
+            onExit: (_) => setState(() => _isOuterToolbarHovered = false),
+            cursor: SystemMouseCursors.click,
+            child: _ToolbarShimmer(
+              borderRadius: 12,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: _isOuterToolbarHovered
+                      ? const LinearGradient(
+                          colors: [Color(0xFF0C132A), Color(0xFF0A0E1F)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        )
+                      : null,
+                  color: _isOuterToolbarHovered ? null : Colors.transparent,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                  border: Border.all(color: Colors.white12), // Thêm viền mỏng
+                  boxShadow: _isOuterToolbarHovered
+                      ? [BoxShadow(color: Colors.blue.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 4))]
+                      : [],
+                ),
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: Row(
+                  children: const [
+                    Icon(Icons.circle, size: 8, color: Colors.white24),
+                    SizedBox(width: 6),
+                    Icon(Icons.circle, size: 8, color: Colors.white24),
+                    SizedBox(width: 6),
+                    Icon(Icons.circle, size: 8, color: Colors.white24),
+                  ],
+                ),
+              ),
             ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Row(
-            children: const [
-              Icon(Icons.circle, size: 10, color: Colors.white24),
-              SizedBox(width: 8),
-              Icon(Icons.circle, size: 10, color: Colors.white24),
-              SizedBox(width: 8),
-              Icon(Icons.circle, size: 10, color: Colors.white24),
-            ],
           ),
         ),
-        const SizedBox(height: 16),
-        Container(
+        const SizedBox(height: 12),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          transform: Matrix4.translationValues(0, translationY, 0),
           margin: const EdgeInsets.symmetric(horizontal: 24),
           decoration: BoxDecoration(
             color: Colors.black,
@@ -845,16 +1080,39 @@ class _SmartToolsSectionState extends State<SmartToolsSection> with SingleTicker
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                child: Row(
-                  children: const [
-                    Icon(Icons.circle, size: 10, color: Colors.white30),
-                    SizedBox(width: 6),
-                    Icon(Icons.circle, size: 10, color: Colors.white30),
-                    SizedBox(width: 6),
-                    Icon(Icons.circle, size: 10, color: Colors.white30),
-                  ],
+              MouseRegion(
+                onEnter: (_) => setState(() => _isInnerToolbarHovered = true),
+                onExit: (_) => setState(() => _isInnerToolbarHovered = false),
+                child: _ToolbarShimmer(
+                  borderRadius: 10,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    height: 60,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    decoration: BoxDecoration(
+                      gradient: _isInnerToolbarHovered
+                          ? const LinearGradient(
+                              colors: [Color(0xFF0C132A), Color(0xFF0A0E1F)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            )
+                          : null,
+                      color: _isInnerToolbarHovered ? null : Colors.transparent,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10),
+                      ),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.circle, size: 10, color: Colors.white30),
+                        SizedBox(width: 8),
+                        Icon(Icons.circle, size: 10, color: Colors.white30),
+                        SizedBox(width: 8),
+                        Icon(Icons.circle, size: 10, color: Colors.white30),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               const Divider(height: 1, color: Colors.white12),
@@ -948,32 +1206,35 @@ class _SmartToolsSectionState extends State<SmartToolsSection> with SingleTicker
     // Reusing the same container style but showing history table
     return Column(
       children: [
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24),
-          height: 60,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0C132A), Color(0xFF0A0E1F)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Row(
-            children: [
-              const Icon(Icons.circle, size: 10, color: Colors.white24),
-              const SizedBox(width: 8),
-              const Icon(Icons.circle, size: 10, color: Colors.white24),
-              const SizedBox(width: 8),
-              const Icon(Icons.circle, size: 10, color: Colors.white24),
-              const Spacer(),
-              Text(
-                'Signal History',
-                style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+        _ToolbarShimmer(
+          borderRadius: 12,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0C132A), Color(0xFF0A0E1F)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
               ),
-            ],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Row(
+              children: [
+                const Icon(Icons.circle, size: 10, color: Colors.white24),
+                const SizedBox(width: 8),
+                const Icon(Icons.circle, size: 10, color: Colors.white24),
+                const SizedBox(width: 8),
+                const Icon(Icons.circle, size: 10, color: Colors.white24),
+                const Spacer(),
+                Text(
+                  'Signal History',
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -1058,84 +1319,217 @@ class _SmartToolsSectionState extends State<SmartToolsSection> with SingleTicker
 }
 
 class _AnimatedStatCard extends StatefulWidget {
+
   final String title;
+
   final String value;
+
   const _AnimatedStatCard({required this.title, required this.value});
 
+
+
   @override
+
   State<_AnimatedStatCard> createState() => _AnimatedStatCardState();
+
 }
 
+
+
 class _AnimatedStatCardState extends State<_AnimatedStatCard> with SingleTickerProviderStateMixin {
-  late final AnimationController _borderController;
+
+  bool _isHovered = false;
+
+  late AnimationController _shimmerController;
+
+
 
   @override
+
   void initState() {
+
     super.initState();
-    _borderController = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat();
-  }
 
-  @override
-  void dispose() {
-    _borderController.dispose();
-    super.dispose();
-  }
+    _shimmerController = AnimationController(
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _borderController,
-      builder: (context, child) {
-        final t = _borderController.value;
-        final colors = const [Color(0xFF00BFFF), Color(0xFF7B61FF), Color(0xFFD500F9)];
-        // Create a shifting gradient
-        final stops = [
-          (t + 0.0) % 1,
-          (t + 0.33) % 1,
-          (t + 0.66) % 1,
-        ]..sort();
-        
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(1.5),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: LinearGradient(
-              colors: colors,
-              stops: stops,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF00BFFF).withOpacity(0.15),
-                blurRadius: 10,
-                spreadRadius: 0,
-              ),
-            ],
-          ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.title, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                Text(
-                  widget.value,
-                  style: AppTextStyles.h1.copyWith(fontSize: 26, fontWeight: FontWeight.w700, color: const Color(0xFF00BFFF)),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      vsync: this,
+
+      duration: const Duration(milliseconds: 600),
+
     );
+
   }
+
+
+
+  @override
+
+  void dispose() {
+
+    _shimmerController.dispose();
+
+    super.dispose();
+
+  }
+
+
+
+  @override
+
+  Widget build(BuildContext context) {
+
+    return MouseRegion(
+
+      onEnter: (_) {
+
+        setState(() => _isHovered = true);
+
+        _shimmerController.forward();
+
+      },
+
+      onExit: (_) {
+
+        setState(() => _isHovered = false);
+
+        _shimmerController.reverse();
+
+      },
+
+      child: AnimatedBuilder(
+
+        animation: _shimmerController,
+
+        builder: (context, child) {
+
+          return AnimatedScale(
+
+            scale: _isHovered ? 1.05 : 1.0,
+
+            duration: const Duration(milliseconds: 200),
+
+            curve: Curves.easeOut,
+
+            child: Container(
+
+              width: double.infinity,
+
+              padding: const EdgeInsets.all(1.5),
+
+              decoration: BoxDecoration(
+
+                borderRadius: BorderRadius.circular(10),
+
+                gradient: const LinearGradient(
+
+                  colors: [Color(0xFF00BFFF), Color(0xFF7B61FF), Color(0xFFD500F9)],
+
+                  begin: Alignment.topLeft,
+
+                  end: Alignment.bottomRight,
+
+                ),
+
+                boxShadow: [
+
+                  BoxShadow(
+
+                    color: const Color(0xFF00BFFF).withOpacity(_isHovered ? 0.5 : 0.15),
+
+                    blurRadius: _isHovered ? 20 : 10,
+
+                    spreadRadius: _isHovered ? 2 : 0,
+
+                  ),
+
+                ],
+
+              ),
+
+              child: Container(
+
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+
+                decoration: BoxDecoration(
+
+                  color: Colors.black,
+
+                  borderRadius: BorderRadius.circular(8),
+
+                ),
+
+                                foregroundDecoration: BoxDecoration(
+
+                                  borderRadius: BorderRadius.circular(8),
+
+                                  gradient: LinearGradient(
+
+                                    colors: [
+
+                                      Colors.transparent,
+
+                                      const Color(0xFF00BFFF).withOpacity(0.3), // Ánh sáng xanh lướt qua
+
+                                      Colors.transparent,
+
+                                    ],
+
+                                    // Mở rộng stops để vệt sáng lan tỏa rộng hơn
+
+                                    stops: [
+
+                                      (_shimmerController.value * 3.0) - 1.5,
+
+                                      (_shimmerController.value * 3.0) - 1.0,
+
+                                      (_shimmerController.value * 3.0) - 0.5,
+
+                                    ],
+
+                                    begin: const Alignment(-1.0, -0.3),
+
+                                    end: const Alignment(1.0, 0.3),
+
+                                  ),
+
+                                ),
+
+                child: Column(
+
+                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                  children: [
+
+                    Text(widget.title, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+
+                    const SizedBox(height: 10),
+
+                    Text(
+
+                      widget.value,
+
+                      style: AppTextStyles.h1.copyWith(fontSize: 26, fontWeight: FontWeight.w700, color: const Color(0xFF00BFFF)),
+
+                    ),
+
+                  ],
+
+                ),
+
+              ),
+
+            ),
+
+          );
+
+        },
+
+      ),
+
+    );
+
+  }
+
 }
 
 class YourOnDemandSection extends StatelessWidget {

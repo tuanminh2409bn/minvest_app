@@ -23,14 +23,14 @@ class AppTextStyles {
 
   static TextStyle get body => GoogleFonts.beVietnamPro(
         fontSize: 16,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w300,
         color: AppColors.textSecondary,
         letterSpacing: 0.5,
       );
 
   static TextStyle get caption => GoogleFonts.beVietnamPro(
-        fontSize: 8,
-        fontWeight: FontWeight.w400,
+        fontSize: 10,
+        fontWeight: FontWeight.w300,
         color: AppColors.textSecondary,
       );
 }
