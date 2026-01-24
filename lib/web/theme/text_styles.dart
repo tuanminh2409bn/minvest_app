@@ -22,7 +22,7 @@ class AppTextStyles {
       );
 
   static TextStyle get body => GoogleFonts.beVietnamPro(
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: FontWeight.w400,
         color: AppColors.textSecondary,
         letterSpacing: 0.5,

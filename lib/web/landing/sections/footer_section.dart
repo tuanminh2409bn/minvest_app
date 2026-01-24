@@ -28,7 +28,7 @@ class FooterSection extends StatelessWidget {
           children: [
             InkWell(
               onTap: () => Navigator.of(context).pushNamed('/'),
-              child: Image.asset('assets/mockups/logo.png', height: 60, fit: BoxFit.contain),
+              child: Image.asset('assets/mockups/logo.png', height: 85, fit: BoxFit.contain),
             ),
             const SizedBox(height: AppSpacing.md),
             // Company info always left-aligned

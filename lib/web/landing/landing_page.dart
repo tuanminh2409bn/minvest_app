@@ -3012,34 +3012,109 @@ class _FaqItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1C),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.cardBorder),
+    return _AnswerShimmer(
+      borderRadius: 10,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1C1C1C),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.cardBorder),
+        ),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          title: Text(question,
+              style: AppTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700)),
+          children: [
+            Divider(
+              color: Colors.white.withOpacity(0.08),
+              height: 1,
+              indent: 16,
+              endIndent: 16,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  answer.isEmpty ? 'Content updating...' : answer,
+                  style: AppTextStyles.caption
+                      .copyWith(color: Colors.white, fontSize: 16),
+                  textAlign: TextAlign.start,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        title: Text(question,
-            style: AppTextStyles.body.copyWith(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w700)),
-        childrenPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              answer.isEmpty ? 'Content updating...' : answer,
-              style: AppTextStyles.caption
-                  .copyWith(color: Colors.white, fontSize: 14),
-              textAlign: TextAlign.start,
+    );
+  }
+}
+
+class _AnswerShimmer extends StatefulWidget {
+  final Widget child;
+  final double borderRadius;
+  const _AnswerShimmer({required this.child, this.borderRadius = 0});
+
+  @override
+  State<_AnswerShimmer> createState() => _AnswerShimmerState();
+}
+
+class _AnswerShimmerState extends State<_AnswerShimmer> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5), // Chậm hơn để vệt sáng lớn trôi mượt mà
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final curvedValue = Curves.easeInOutSine.transform(_controller.value);
+        // Mở rộng range để vệt sáng cực rộng có thể di chuyển hết qua thẻ
+        final center = -1.5 + (curvedValue * 4.0);
+
+        return Container(
+          width: double.infinity,
+          foregroundDecoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            gradient: LinearGradient(
+              colors: [
+                Colors.transparent,
+                // Màu xanh đậm hơn (opacity 0.4) để tạo chiều sâu
+                const Color(0xFF2E60FF).withOpacity(0.4), 
+                Colors.transparent,
+              ],
+              // Độ lan tỏa cực rộng (+/- 0.9) tạo cảm giác ánh sáng bao phủ
+              stops: [
+                center - 0.9, 
+                center,
+                center + 0.9,
+              ],
+              begin: const Alignment(-1.5, -1.0), 
+              end: const Alignment(1.5, 2.5), 
             ),
           ),
-        ],
-      ),
+          child: widget.child,
+        );
+      },
+      child: widget.child,
     );
   }
 }

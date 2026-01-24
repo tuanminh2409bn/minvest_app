@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/core/services/paypal_service_web.dart';
@@ -33,6 +34,9 @@ class _PricingSectionState extends State<PricingSection> {
     final oldPrice = _isAnnual ? '\$920' : null;
     final badge = appLocalizations.save50Percent;
     final suffix = _isAnnual ? '_12_months' : '_1_month';
+    // Sử dụng màu xanh dương sáng chung cho hiệu ứng glow
+    const commonGlowColor = Color(0xFF00BFFF); 
+
     return [
       _PlanData(
         id: 'gold$suffix',
@@ -40,11 +44,7 @@ class _PricingSectionState extends State<PricingSection> {
         price: price,
         oldPrice: oldPrice,
         badge: badge,
-        gradient: const LinearGradient(
-          colors: [Color(0xFF00BFFF), Color(0xFF7B61FF)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        glowColor: commonGlowColor,
       ),
       _PlanData(
         id: 'forex$suffix',
@@ -52,11 +52,7 @@ class _PricingSectionState extends State<PricingSection> {
         price: price,
         oldPrice: oldPrice,
         badge: badge,
-        gradient: const LinearGradient(
-          colors: [Color(0xFF00BFFF), Color(0xFF7B61FF)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        glowColor: commonGlowColor,
       ),
       _PlanData(
         id: 'crypto$suffix',
@@ -64,11 +60,7 @@ class _PricingSectionState extends State<PricingSection> {
         price: price,
         oldPrice: oldPrice,
         badge: badge,
-        gradient: const LinearGradient(
-          colors: [Color(0xFFB81EE3), Color(0xFF0ED4FF)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        glowColor: commonGlowColor,
       ),
     ];
   }
@@ -226,7 +218,7 @@ class _PlanData {
   final String price;
   final String? oldPrice;
   final String badge;
-  final LinearGradient gradient;
+  final Color glowColor;
 
   const _PlanData({
     required this.id,
@@ -234,7 +226,7 @@ class _PlanData {
     required this.price,
     required this.oldPrice,
     required this.badge,
-    required this.gradient,
+    required this.glowColor,
   });
 }
 
@@ -306,64 +298,32 @@ class _AnimatedPricingCardState extends State<_AnimatedPricingCard> with SingleT
   }
 }
 
-class _AnimatedBorderCard extends StatefulWidget {
+class _StaticBorderCard extends StatelessWidget {
   final Widget child;
-  const _AnimatedBorderCard({required this.child});
-
-  @override
-  State<_AnimatedBorderCard> createState() => _AnimatedBorderCardState();
-}
-
-class _AnimatedBorderCardState extends State<_AnimatedBorderCard> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  const _StaticBorderCard({required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final t = _controller.value;
-        final colors = const [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)];
-        final stops = [
-          (t + 0.0) % 1,
-          (t + 0.4) % 1,
-          (t + 0.8) % 1,
-        ]..sort();
-        return Container(
-          padding: const EdgeInsets.all(2),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: colors,
-              stops: stops,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: [
-              BoxShadow(
-                color: colors[1].withOpacity(0.25),
-                blurRadius: 22,
-                spreadRadius: 2,
-                offset: const Offset(0, 10),
-              ),
-            ],
+    const colors = [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)];
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: colors[1].withOpacity(0.25),
+            blurRadius: 22,
+            spreadRadius: 2,
+            offset: const Offset(0, 10),
           ),
-          child: child,
-        );
-      },
-      child: widget.child,
+        ],
+      ),
+      child: child,
     );
   }
 }
@@ -385,89 +345,126 @@ class _PricingCardContentState extends State<_PricingCardContent> {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
     final appLocalizations = AppLocalizations.of(context)!;
-    final double cardHeight = isMobile ? 500 : 450;
+    // Tăng chiều cao tối thiểu để thẻ dài hơn
+    final double minCardHeight = isMobile ? 600 : 580;
+    final double verticalPadding = isMobile ? 48 : 64; // 24*2 hoặc 32*2
 
-    return _AnimatedBorderCard(
+    return _StaticBorderCard(
       child: Container(
-        width: double.infinity,
-        height: isMobile ? cardHeight : null,
-        constraints: BoxConstraints(minHeight: cardHeight),
-        padding: EdgeInsets.all(isMobile ? 24 : AppSpacing.lg),
+        constraints: BoxConstraints(minHeight: minCardHeight),
         decoration: BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        clipBehavior: Clip.hardEdge,
+        child: Stack(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.bottomCenter,
+                    radius: 1.5,
+                    colors: [
+                      widget.plan.glowColor.withOpacity(0.15), // Opacity mờ
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 1.0],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(isMobile ? 24 : AppSpacing.lg),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: minCardHeight - verticalPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Dàn trải nội dung
                   children: [
-                    Icon(Icons.workspace_premium, color: Colors.white, size: isMobile ? 28 : 22),
-                    const SizedBox(width: 8),
-                    Text(
-                      widget.plan.title, 
-                      style: AppTextStyles.h3.copyWith(
-                        color: Colors.white, 
-                        fontSize: isMobile ? 36 : 22,
-                        fontWeight: FontWeight.w800,
+                    // Phần 1: Header và Giá
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            FaIcon(FontAwesomeIcons.crown, color: Colors.white, size: isMobile ? 36 : 26),
+                            const SizedBox(width: 8),
+                            Text(
+                              widget.plan.title, 
+                              style: AppTextStyles.h3.copyWith(
+                                color: Colors.white, 
+                                fontSize: isMobile ? 34 : 24,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 2.0,
+                              ),
+                            ),
+                            const Spacer(),
+                            _saveBadge(widget.plan.badge),
+                          ],
+                        ),
+                        SizedBox(height: isMobile ? 42 : 32),
+                        Text(
+                          widget.plan.price, 
+                          style: AppTextStyles.h1.copyWith(
+                            fontSize: isMobile ? 68 : 48, 
+                            color: const Color(0xFF00B2FF),
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1.0,
+                          ),
+                        ),
+                        if (widget.plan.oldPrice != null && widget.plan.oldPrice!.isNotEmpty)
+                          Text(
+                            widget.plan.oldPrice!,
+                            style: AppTextStyles.body.copyWith(
+                              color: Colors.white54,
+                              decoration: TextDecoration.lineThrough,
+                              fontSize: isMobile ? 38 : 28,
+                            ),
+                          ),
+                      ],
+                    ),
+
+                    // Phần 2: Danh sách tính năng
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          appLocalizations.whatsIncluded, 
+                          style: AppTextStyles.body.copyWith(
+                            color: Colors.white70,
+                            fontSize: isMobile ? 18 : 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ...widget.features.map((f) => _feature(f, isMobile)).toList(),
+                      ],
+                    ),
+
+                    // Phần 3: Nút đăng ký
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.black,
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: EdgeInsets.symmetric(vertical: isMobile ? 24 : 18),
+                        ),
+                        onPressed: () {}, // Nút sáng và nhấn được nhưng không có tác vụ theo yêu cầu
+                        child: Text(
+                                appLocalizations.chooseThisPlan,
+                                style: TextStyle(
+                                  fontSize: isMobile ? 22 : 14,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
                       ),
                     ),
-                    const Spacer(),
-                    _saveBadge(widget.plan.badge),
                   ],
                 ),
-                SizedBox(height: isMobile ? 24 : AppSpacing.md),
-                Text(
-                  widget.plan.price, 
-                  style: AppTextStyles.h1.copyWith(
-                    fontSize: isMobile ? 72 : 34, 
-                    color: const Color(0xFF00B2FF),
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                if (widget.plan.oldPrice != null && widget.plan.oldPrice!.isNotEmpty)
-                  Text(
-                    widget.plan.oldPrice!,
-                    style: AppTextStyles.body.copyWith(
-                      color: Colors.white54,
-                      decoration: TextDecoration.lineThrough,
-                      fontSize: isMobile ? 22 : 14,
-                    ),
-                  ),
-                SizedBox(height: isMobile ? 28 : AppSpacing.md),
-                Text(
-                  appLocalizations.whatsIncluded, 
-                  style: AppTextStyles.body.copyWith(
-                    color: Colors.white70,
-                    fontSize: isMobile ? 22 : 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ...widget.features.map((f) => _feature(f, isMobile)).toList(),
-              ],
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: EdgeInsets.symmetric(vertical: isMobile ? 18 : 12),
-                ),
-                onPressed: () {}, // Nút sáng và nhấn được nhưng không có tác vụ theo yêu cầu
-                child: Text(
-                        appLocalizations.chooseThisPlan,
-                        style: TextStyle(
-                          fontSize: isMobile ? 22 : 14,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
               ),
             ),
           ],
@@ -478,10 +475,10 @@ class _PricingCardContentState extends State<_PricingCardContent> {
 
   Widget _saveBadge(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E2A3E),
-        borderRadius: BorderRadius.circular(8),
+        color: const Color(0xFF289EFF),
+        borderRadius: BorderRadius.circular(5),
       ),
       child: Text(
         text,
@@ -492,7 +489,7 @@ class _PricingCardContentState extends State<_PricingCardContent> {
 
   Widget _feature(String text, bool isMobile) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Icon(Icons.check_box, color: Colors.white70, size: isMobile ? 20 : 18),
@@ -502,7 +499,7 @@ class _PricingCardContentState extends State<_PricingCardContent> {
               text,
               style: AppTextStyles.body.copyWith(
                 color: Colors.white,
-                fontSize: isMobile ? 20 : 14,
+                fontSize: isMobile ? 16 : 13,
               ),
             ),
           ),
