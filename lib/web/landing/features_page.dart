@@ -202,7 +202,7 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
               );
             },
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: 120), // Tăng khoảng cách đẩy text/button xuống
           _ContentWrapper(
             child: Text(
               AppLocalizations.of(context)!.winMoreWithAiSignalsDesc,
@@ -1558,7 +1558,7 @@ class YourOnDemandSection extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: isMobile ? 40 : 150),
+        SizedBox(height: isMobile ? 60 : 250), // Tăng khoảng cách lên 250
         const _LaptopShowcase(),
       ],
     );
@@ -1574,8 +1574,9 @@ class _LaptopShowcase extends StatelessWidget {
       builder: (context, constraints) {
         final double maxW = constraints.maxWidth;
         final bool isNarrow = maxW < 900;
-        final double laptopWidth = isNarrow ? maxW * 1.25 : (maxW < 1200 ? maxW * 0.9 : 1100);
-        final double height = isNarrow ? maxW : 640;
+        // Desktop: Tăng lên 1350. Mobile: Giảm xuống 0.85 lần chiều rộng màn hình
+        final double laptopWidth = isNarrow ? maxW * 0.85 : 1350;
+        final double height = isNarrow ? maxW * 0.6 : 780;
         final double offsetY = isNarrow ? 0 : -30;
 
         if (isNarrow) {
@@ -1624,19 +1625,77 @@ class _LaptopGlow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned.fill(
-      child: IgnorePointer(
-        child: Center(
-          child: FractionallySizedBox(
-            widthFactor: 1.3,
-            heightFactor: 1.0,
-            child: Opacity(
-              opacity: 0.5,
-              child: Image.asset(
-                'assets/mockups/light.png',
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
+      // Đẩy toàn bộ vùng sáng lên trên
+      top: -400,
+      bottom: 100,
+      child: Center(
+        child: SizedBox(
+          width: 1000, // Rộng hơn để quầng sáng bao phủ hết laptop to
+          child: Stack(
+            children: [
+              // Nguồn sáng Xanh (Bên Trái)
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: 600,
+                child: Center(
+                  child: Container(
+                    width: 500,
+                    height: 500,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          const Color(0xFF2E60FF).withOpacity(0.5), // Tăng độ đậm
+                          const Color(0xFF2E60FF).withOpacity(0.2),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF2E60FF).withOpacity(0.4),
+                          blurRadius: 800, // Giảm xuống 800
+                          spreadRadius: 50,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
+              // Nguồn sáng Hồng/Tím (Bên Phải)
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: 600,
+                child: Center(
+                  child: Container(
+                    width: 500,
+                    height: 500,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          const Color(0xFFBF4ED2).withOpacity(0.5), // Tăng độ đậm
+                          const Color(0xFFBF4ED2).withOpacity(0.2),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFBF4ED2).withOpacity(0.4),
+                          blurRadius: 800, // Giảm xuống 800
+                          spreadRadius: 50,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1679,17 +1738,17 @@ class _LaptopCards extends StatelessWidget {
         builder: (context, constraints) {
           final bool isNarrow = constraints.maxWidth < 900;
           final double baseW = constraints.maxWidth;
-          final double cardWidth = isNarrow ? baseW * 0.6 : 440;
-          final double cardHeight = isNarrow ? 72 : 108;
+          // Tăng kích thước thẻ trên Desktop
+          final double cardWidth = isNarrow ? baseW * 0.6 : 500;
+          final double cardHeight = isNarrow ? 72 : 130;
 
           if (isNarrow) {
             return Column(
               children: [
                 SizedBox(
                   width: cardWidth,
-                  child: _AnimatedInfoCard(
+                  child: _InteractiveInfoCard(
                     text: AppLocalizations.of(context)!.aiPoweredSignalPlatform,
-                    slideFromLeft: true,
                     width: cardWidth,
                     height: cardHeight,
                   ),
@@ -1697,9 +1756,8 @@ class _LaptopCards extends StatelessWidget {
                 const SizedBox(height: 12),
                 SizedBox(
                   width: cardWidth,
-                  child: _AnimatedInfoCard(
+                  child: _InteractiveInfoCard(
                     text: AppLocalizations.of(context)!.selfLearningSystems,
-                    slideFromLeft: false,
                     width: cardWidth,
                     height: cardHeight,
                   ),
@@ -1707,9 +1765,8 @@ class _LaptopCards extends StatelessWidget {
                 const SizedBox(height: 12),
                 SizedBox(
                   width: cardWidth,
-                  child: _AnimatedInfoCard(
+                  child: _InteractiveInfoCard(
                     text: AppLocalizations.of(context)!.emotionlessExecution,
-                    slideFromLeft: true,
                     width: cardWidth,
                     height: cardHeight,
                   ),
@@ -1717,9 +1774,8 @@ class _LaptopCards extends StatelessWidget {
                 const SizedBox(height: 12),
                 SizedBox(
                   width: cardWidth,
-                  child: _AnimatedInfoCard(
+                  child: _InteractiveInfoCard(
                     text: AppLocalizations.of(context)!.analysingMarket247,
-                    slideFromLeft: false,
                     width: cardWidth,
                     height: cardHeight,
                   ),
@@ -1732,17 +1788,17 @@ class _LaptopCards extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  _AnimatedInfoCard(text: AppLocalizations.of(context)!.aiPoweredSignalPlatform, slideFromLeft: true, width: cardWidth, height: cardHeight),
+                  _InteractiveInfoCard(text: AppLocalizations.of(context)!.aiPoweredSignalPlatform, width: cardWidth, height: cardHeight),
                   SizedBox(width: 16),
-                  _AnimatedInfoCard(text: AppLocalizations.of(context)!.selfLearningSystems, slideFromLeft: false, width: cardWidth, height: cardHeight),
+                  _InteractiveInfoCard(text: AppLocalizations.of(context)!.selfLearningSystems, width: cardWidth, height: cardHeight),
                 ],
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _AnimatedInfoCard(text: AppLocalizations.of(context)!.emotionlessExecution, slideFromLeft: true, width: cardWidth, height: cardHeight),
+                  _InteractiveInfoCard(text: AppLocalizations.of(context)!.emotionlessExecution, width: cardWidth, height: cardHeight),
                   SizedBox(width: 16),
-                  _AnimatedInfoCard(text: AppLocalizations.of(context)!.analysingMarket247, slideFromLeft: false, width: cardWidth, height: cardHeight),
+                  _InteractiveInfoCard(text: AppLocalizations.of(context)!.analysingMarket247, width: cardWidth, height: cardHeight),
                 ],
               ),
             ],
@@ -1760,14 +1816,13 @@ class _LaptopCardsInline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double cardWidth = maxWidth * 0.8;
-    const double cardHeight = 76;
+    const double cardHeight = 90; // Tăng chiều cao lên 90
     return Column(
       children: [
         SizedBox(
           width: cardWidth,
-          child: _AnimatedInfoCard(
+          child: _InteractiveInfoCard(
             text: AppLocalizations.of(context)!.aiPoweredSignalPlatform,
-            slideFromLeft: true,
             width: cardWidth,
             height: cardHeight,
           ),
@@ -1775,9 +1830,8 @@ class _LaptopCardsInline extends StatelessWidget {
         const SizedBox(height: 10),
         SizedBox(
           width: cardWidth,
-          child: _AnimatedInfoCard(
+          child: _InteractiveInfoCard(
             text: AppLocalizations.of(context)!.selfLearningSystems,
-            slideFromLeft: false,
             width: cardWidth,
             height: cardHeight,
           ),
@@ -1785,9 +1839,8 @@ class _LaptopCardsInline extends StatelessWidget {
         const SizedBox(height: 10),
         SizedBox(
           width: cardWidth,
-          child: _AnimatedInfoCard(
+          child: _InteractiveInfoCard(
             text: AppLocalizations.of(context)!.emotionlessExecution,
-            slideFromLeft: true,
             width: cardWidth,
             height: cardHeight,
           ),
@@ -1795,9 +1848,8 @@ class _LaptopCardsInline extends StatelessWidget {
         const SizedBox(height: 10),
         SizedBox(
           width: cardWidth,
-          child: _AnimatedInfoCard(
+          child: _InteractiveInfoCard(
             text: AppLocalizations.of(context)!.analysingMarket247,
-            slideFromLeft: false,
             width: cardWidth,
             height: cardHeight,
           ),
@@ -1807,117 +1859,96 @@ class _LaptopCardsInline extends StatelessWidget {
   }
 }
 
-class _AnimatedInfoCard extends StatefulWidget {
+class _InteractiveInfoCard extends StatefulWidget {
   final String text;
-  final bool slideFromLeft;
   final double width;
   final double height;
-  const _AnimatedInfoCard({
+  const _InteractiveInfoCard({
     required this.text,
-    required this.slideFromLeft,
     this.width = 440,
     this.height = 108,
   });
 
   @override
-  State<_AnimatedInfoCard> createState() => _AnimatedInfoCardState();
+  State<_InteractiveInfoCard> createState() => _InteractiveInfoCardState();
 }
 
-class _AnimatedInfoCardState extends State<_AnimatedInfoCard> with TickerProviderStateMixin {
-  late final AnimationController _entryController;
-  late final AnimationController _borderController;
-  late final Animation<Offset> _slide;
-  late final Animation<double> _fade;
-  bool _hasPlayed = false;
+class _InteractiveInfoCardState extends State<_InteractiveInfoCard> with SingleTickerProviderStateMixin {
+  late AnimationController _shakeController;
 
   @override
   void initState() {
     super.initState();
-    _entryController = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
-    _borderController = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
-    _slide = Tween(
-      begin: Offset(widget.slideFromLeft ? -0.18 : 0.18, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _entryController, curve: Curves.easeOutCubic));
-    _fade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _entryController, curve: Curves.easeOut));
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
   }
 
   @override
   void dispose() {
-    _entryController.dispose();
-    _borderController.dispose();
+    _shakeController.dispose();
     super.dispose();
+  }
+
+  void _shake() {
+    _shakeController.forward(from: 0);
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isNarrow = MediaQuery.of(context).size.width < 900;
-    return VisibilityDetector(
-      key: ValueKey('info_card_${widget.text}'),
-      onVisibilityChanged: (info) {
-        if (!_hasPlayed && info.visibleFraction > 0.2) {
-          _hasPlayed = true;
-          _entryController.forward(from: 0);
-        }
-      },
-      child: SlideTransition(
-        position: _slide,
-        child: FadeTransition(
-          opacity: _fade,
-          child: AnimatedBuilder(
-            animation: _borderController,
-            builder: (context, child) {
-              final t = _borderController.value;
-              final colors = const [Color(0xFF00BFFF), Color(0xFF7B61FF), Color(0xFFD500F9)];
-              final stops = [
-                (t + 0.0) % 1,
-                (t + 0.4) % 1,
-                (t + 0.8) % 1,
-              ]..sort();
-              return Container(
-                width: widget.width,
-                height: widget.height,
-                padding: const EdgeInsets.all(1.2),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  gradient: LinearGradient(
-                    colors: colors,
-                    stops: stops,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colors[1].withOpacity(0.25),
-                      blurRadius: 18,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: child,
-              );
-            },
+    return GestureDetector(
+      onTap: _shake,
+      child: AnimatedBuilder(
+        animation: _shakeController,
+        builder: (context, child) {
+          final t = _shakeController.value;
+          // Hiệu ứng lắc tắt dần: sin(t * pi * 4) * biên_độ * (1 - t)
+          final dx = math.sin(t * math.pi * 4) * 8 * (1 - t);
+          
+          return Transform.translate(
+            offset: Offset(dx, 0),
             child: Container(
+              width: widget.width,
+              height: widget.height,
+              padding: const EdgeInsets.all(1.5),
               decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(9),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-              child: Center(
-                child: Text(
-                  widget.text,
-                  style: AppTextStyles.body.copyWith(
-                    color: Colors.white,
-                    fontSize: isNarrow ? 14 : 15,
-                    fontWeight: FontWeight.w700,
+                borderRadius: BorderRadius.circular(10),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF00BFFF), Color(0xFF7B61FF), Color(0xFFD500F9)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00BFFF).withOpacity(0.15),
+                    blurRadius: 18,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 6),
                   ),
-                  textAlign: TextAlign.center,
+                ],
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                child: Center(
+                  child: Text(
+                    widget.text,
+                    style: AppTextStyles.body.copyWith(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
