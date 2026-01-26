@@ -100,7 +100,6 @@ class _ContactPageState extends State<ContactPage> {
                     const SizedBox(height: 24),
                     _contactForm(context),
                     const SizedBox(height: 64),
-                    const FooterSection(),
                   ],
                 ),
               ),

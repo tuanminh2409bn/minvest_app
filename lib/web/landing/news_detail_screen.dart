@@ -283,7 +283,6 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                         newsService: _newsService,
                       ),
                       const SizedBox(height: 40),
-                      const FooterSection(),
                     ],
                   ),
                 ),

@@ -491,25 +491,33 @@
     "close": "Fechar",
     "validUntil": "Válido até {date}",
     "@validUntil": {
-      "placeholders": {
-        "date": {
-          "type": "String"
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
         }
-      }
     },
     "wins": "Vitórias",
     "losses": "Derrotas",
     "totalOrdersCount": "Total: {count} ordens",
     "@totalOrdersCount": {
-      "placeholders": {
-        "count": {
-          "type": "int"
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
         }
-      }
     },
-    "passwordResetEmailSent": "E-mail de redefinição de senha enviado! Por favor, verifique sua caixa de entrada."
-,
-    "pageOf": "de"
-,
-    "keyFindings": "Key Findings"
+    "passwordResetEmailSent": "E-mail de redefinição de senha enviado! Por favor, verifique sua caixa de entrada.",
+    "pageOf": "de",
+    "keyFindings": "Key Findings",
+    "filterStatusLabel": "Status",
+    "filterStatusAll": "All Status",
+    "filterStatusTp1": "TP1 HIT",
+    "filterStatusTp2": "TP2 HIT",
+    "filterStatusTp3": "TP3 HIT",
+    "filterStatusSl": "SL HIT",
+    "filterStatusCancelled": "CANCELLED",
+    "filterStatusExitByAdmin": "EXIT BY ADMIN",
+    "popupMasterMarket": "Do you want to master the market?",
+    "popupLoginExplore": "Log in to explore this trading bulletin!"
 }

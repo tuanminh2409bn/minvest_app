@@ -32,7 +32,6 @@ class PricingPage extends StatelessWidget {
                     subheading: AppLocalizations.of(context)!.choosePlanSubtitle,
                     headingFontSize: 36,
                   ),
-                  FooterSection(),
                 ],
               ),
             ),

@@ -491,25 +491,33 @@
     "close": "បិទ",
     "validUntil": "សុពលភាពរហូតដល់ {date}",
     "@validUntil": {
-      "placeholders": {
-        "date": {
-          "type": "String"
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
         }
-      }
     },
     "wins": "ឈ្នះ",
     "losses": "ចាញ់",
     "totalOrdersCount": "សរុប: {count} ការបញ្ជាទិញ",
     "@totalOrdersCount": {
-      "placeholders": {
-        "count": {
-          "type": "int"
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
         }
-      }
     },
-    "passwordResetEmailSent": "អ៊ីមែលសម្រាប់កំណត់ពាក្យសម្ងាត់ឡើងវិញត្រូវបានផ្ញើហើយ! សូមពិនិត្យមើលប្រអប់សំបុត្ររបស់អ្នក។"
-,
-    "pageOf": "/"
-,
-    "keyFindings": "Key Findings"
+    "passwordResetEmailSent": "អ៊ីមែលសម្រាប់កំណត់ពាក្យសម្ងាត់ឡើងវិញត្រូវបានផ្ញើហើយ! សូមពិនិត្យមើលប្រអប់សំបុត្ររបស់អ្នក។",
+    "pageOf": "/",
+    "keyFindings": "Key Findings",
+    "filterStatusLabel": "Status",
+    "filterStatusAll": "All Status",
+    "filterStatusTp1": "TP1 HIT",
+    "filterStatusTp2": "TP2 HIT",
+    "filterStatusTp3": "TP3 HIT",
+    "filterStatusSl": "SL HIT",
+    "filterStatusCancelled": "CANCELLED",
+    "filterStatusExitByAdmin": "EXIT BY ADMIN",
+    "popupMasterMarket": "Do you want to master the market?",
+    "popupLoginExplore": "Log in to explore this trading bulletin!"
 }

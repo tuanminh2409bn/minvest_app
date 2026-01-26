@@ -1418,4 +1418,34 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get keyFindings => 'Key Findings';
+
+  @override
+  String get filterStatusLabel => 'Status';
+
+  @override
+  String get filterStatusAll => 'All Status';
+
+  @override
+  String get filterStatusTp1 => 'TP1 HIT';
+
+  @override
+  String get filterStatusTp2 => 'TP2 HIT';
+
+  @override
+  String get filterStatusTp3 => 'TP3 HIT';
+
+  @override
+  String get filterStatusSl => 'SL HIT';
+
+  @override
+  String get filterStatusCancelled => 'CANCELLED';
+
+  @override
+  String get filterStatusExitByAdmin => 'EXIT BY ADMIN';
+
+  @override
+  String get popupMasterMarket => 'Do you want to master the market?';
+
+  @override
+  String get popupLoginExplore => 'Log in to explore this trading bulletin!';
 }

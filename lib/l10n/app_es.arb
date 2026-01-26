@@ -472,8 +472,7 @@
     "winrateOfAllSignals": "Tasa de ganancia de todas las señales",
     "daily": "Diario",
     "weekly": "Semanal",
-    "lossRate": "Tasa de pérdida"
-,
+    "lossRate": "Tasa de pérdida",
     "signalProgress": "Signal Progress",
     "statusHistory": "Status History",
     "signalCreated": "Signal Created",
@@ -490,27 +489,35 @@
         }
     },
     "close": "Cerrar",
-        "validUntil": "Válido hasta {date}",
-        "@validUntil": {
-          "placeholders": {
+    "validUntil": "Válido hasta {date}",
+    "@validUntil": {
+        "placeholders": {
             "date": {
-              "type": "String"
+                "type": "String"
             }
-          }
-        },
-        "wins": "Ganadas",
-        "losses": "Perdidas",
-                "totalOrdersCount": "Total: {count} órdenes",
-                "@totalOrdersCount": {
-                  "placeholders": {
-                    "count": {
-                      "type": "int"
-                    }
-                  }
-                },
-                "passwordResetEmailSent": "¡Correo electrónico de restablecimiento de contraseña enviado! Por favor, revisa tu bandeja de entrada."
-            ,
-    "pageOf": "de"
-,
-    "keyFindings": "Key Findings"
+        }
+    },
+    "wins": "Ganadas",
+    "losses": "Perdidas",
+    "totalOrdersCount": "Total: {count} órdenes",
+    "@totalOrdersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "passwordResetEmailSent": "¡Correo electrónico de restablecimiento de contraseña enviado! Por favor, revisa tu bandeja de entrada.",
+    "pageOf": "de",
+    "keyFindings": "Key Findings",
+    "filterStatusLabel": "Status",
+    "filterStatusAll": "All Status",
+    "filterStatusTp1": "TP1 HIT",
+    "filterStatusTp2": "TP2 HIT",
+    "filterStatusTp3": "TP3 HIT",
+    "filterStatusSl": "SL HIT",
+    "filterStatusCancelled": "CANCELLED",
+    "filterStatusExitByAdmin": "EXIT BY ADMIN",
+    "popupMasterMarket": "Do you want to master the market?",
+    "popupLoginExplore": "Log in to explore this trading bulletin!"
 }

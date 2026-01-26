@@ -2803,6 +2803,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Key Findings'**
   String get keyFindings;
+
+  /// No description provided for @filterStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get filterStatusLabel;
+
+  /// No description provided for @filterStatusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All Status'**
+  String get filterStatusAll;
+
+  /// No description provided for @filterStatusTp1.
+  ///
+  /// In en, this message translates to:
+  /// **'TP1 HIT'**
+  String get filterStatusTp1;
+
+  /// No description provided for @filterStatusTp2.
+  ///
+  /// In en, this message translates to:
+  /// **'TP2 HIT'**
+  String get filterStatusTp2;
+
+  /// No description provided for @filterStatusTp3.
+  ///
+  /// In en, this message translates to:
+  /// **'TP3 HIT'**
+  String get filterStatusTp3;
+
+  /// No description provided for @filterStatusSl.
+  ///
+  /// In en, this message translates to:
+  /// **'SL HIT'**
+  String get filterStatusSl;
+
+  /// No description provided for @filterStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'CANCELLED'**
+  String get filterStatusCancelled;
+
+  /// No description provided for @filterStatusExitByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'EXIT BY ADMIN'**
+  String get filterStatusExitByAdmin;
+
+  /// No description provided for @popupMasterMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to master the market?'**
+  String get popupMasterMarket;
+
+  /// No description provided for @popupLoginExplore.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to explore this trading bulletin!'**
+  String get popupLoginExplore;
 }
 
 class _AppLocalizationsDelegate

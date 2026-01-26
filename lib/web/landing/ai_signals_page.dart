@@ -37,6 +37,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
   AssetFilter _assetFilter = AssetFilter.all;
   String _selectedCommodity = 'All Commodities';
   String _selectedTimezone = 'GMT+7'; // Default for Vietnam context
+  String _selectedStatus = 'ALL';
   DateTimeRange? _dateRange;
 
   final List<String> _allCommodities = [
@@ -44,6 +45,16 @@ class _AISignalsPageState extends State<AISignalsPage> {
     'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 
     'AUD/USD', 'USD/CAD', 'NZD/USD',
     'ETH/USDT', 'BTC/USDT'
+  ];
+
+  final List<String> _statusOptions = [
+    'ALL',
+    'TP1',
+    'TP2',
+    'TP3',
+    'SL',
+    'CANCELLED',
+    'EXIT',
   ];
 
   List<String> get _currentCommodities {
@@ -138,18 +149,23 @@ class _AISignalsPageState extends State<AISignalsPage> {
                                const _UserSubscriptionStatus(),
                           ],
                         ),
+                        const SizedBox(height: 16),
+                        const Divider(color: Colors.white24, thickness: 1.2),
                         const SizedBox(height: 24),
                         if (selectedTab == AISignalsTab.aiSignals || selectedTab == AISignalsTab.history) ...[
                           _FiltersRow(
                             assetFilter: _assetFilter,
                             selectedPair: _selectedCommodity,
                             selectedTimezone: _selectedTimezone,
+                            selectedStatus: _selectedStatus,
                             dateRange: _dateRange,
                             availablePairs: _currentCommodities,
                             availableTimezones: _timezones,
+                            availableStatuses: _statusOptions,
                             onAssetChanged: _onAssetFilterChanged,
                             onPairChanged: (value) => setState(() => _selectedCommodity = value),
                             onTimezoneChanged: (value) => setState(() => _selectedTimezone = value),
+                            onStatusChanged: (value) => setState(() => _selectedStatus = value),
                             onDateRangeChanged: (value) => setState(() => _dateRange = value),
                           ),
                           const SizedBox(height: 32),
@@ -159,6 +175,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
                             assetFilter: _assetFilter,
                             selectedPair: _selectedCommodity,
                             selectedTimezone: _selectedTimezone,
+                            selectedStatus: _selectedStatus,
                             dateRange: _dateRange,
                           ),
                         ] else if (selectedTab == AISignalsTab.performance) ...[
@@ -173,6 +190,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
                             assetFilter: _assetFilter,
                             selectedPair: _selectedCommodity,
                             selectedTimezone: _selectedTimezone,
+                            selectedStatus: _selectedStatus,
                             dateRange: _dateRange,
                           ),
                         ] else ...const [
@@ -182,10 +200,6 @@ class _AISignalsPageState extends State<AISignalsPage> {
                     ),
                   ),
                   const SizedBox(height: 64),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: FooterSection(),
-                  ),
                 ],
               ),
             ),
@@ -242,79 +256,33 @@ class _TabBar extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    if (isMobile) {
-      return Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _TabChip(
-                  label: AppLocalizations.of(context)!.aiSignal,
-                  isActive: selected == AISignalsTab.aiSignals,
-                  onTap: () => onSelect(AISignalsTab.aiSignals),
-                  isMobile: true,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _TabChip(
-                  label: AppLocalizations.of(context)!.performance,
-                  isActive: selected == AISignalsTab.performance,
-                  onTap: () => onSelect(AISignalsTab.performance),
-                  isMobile: true,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _TabChip(
-                  label: AppLocalizations.of(context)!.history,
-                  isActive: selected == AISignalsTab.history,
-                  onTap: () => onSelect(AISignalsTab.history),
-                  isMobile: true,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _TabChip(
-                  label: AppLocalizations.of(context)!.pricing,
-                  isActive: selected == AISignalsTab.pricing,
-                  onTap: () => onSelect(AISignalsTab.pricing),
-                  isMobile: true,
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-
     return Wrap(
-      spacing: AppSpacing.md,
-      runSpacing: AppSpacing.sm,
+      spacing: 8,
+      runSpacing: 8,
       children: [
         _TabChip(
           label: AppLocalizations.of(context)!.aiSignal,
           isActive: selected == AISignalsTab.aiSignals,
           onTap: () => onSelect(AISignalsTab.aiSignals),
+          isMobile: isMobile,
         ),
         _TabChip(
           label: AppLocalizations.of(context)!.performance,
           isActive: selected == AISignalsTab.performance,
           onTap: () => onSelect(AISignalsTab.performance),
+          isMobile: isMobile,
         ),
         _TabChip(
           label: AppLocalizations.of(context)!.history,
           isActive: selected == AISignalsTab.history,
           onTap: () => onSelect(AISignalsTab.history),
+          isMobile: isMobile,
         ),
         _TabChip(
           label: AppLocalizations.of(context)!.pricing,
           isActive: selected == AISignalsTab.pricing,
           onTap: () => onSelect(AISignalsTab.pricing),
+          isMobile: isMobile,
         ),
       ],
     );
@@ -338,26 +306,29 @@ class _TabChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(1.1),
+        width: 132,
+        height: 40,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
-          gradient: isActive ? AppGradients.cta : null,
-          border: isActive ? null : Border.all(color: Colors.white12),
+          borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
+          gradient: isActive 
+              ? const LinearGradient(
+                  colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isActive ? null : Colors.transparent,
+          boxShadow: isActive ? const [
+            BoxShadow(color: Colors.black54, blurRadius: 12, offset: Offset(0, 6)),
+          ] : null,
         ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          alignment: isMobile ? Alignment.center : null,
-          decoration: BoxDecoration(
-            color: isActive ? Colors.black : const Color(0xFF0C0C0C),
-            borderRadius: BorderRadius.circular(isMobile ? 0 : 7),
-          ),
-          child: Text(
-            label,
-            style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-            ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: AppTextStyles.body.copyWith(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -369,24 +340,30 @@ class _FiltersRow extends StatelessWidget {
   final AssetFilter assetFilter;
   final String selectedPair;
   final String selectedTimezone;
+  final String selectedStatus;
   final DateTimeRange? dateRange;
   final List<String> availablePairs;
   final List<String> availableTimezones;
+  final List<String> availableStatuses;
   final ValueChanged<AssetFilter> onAssetChanged;
   final ValueChanged<String> onPairChanged;
   final ValueChanged<String> onTimezoneChanged;
+  final ValueChanged<String> onStatusChanged;
   final ValueChanged<DateTimeRange?> onDateRangeChanged;
 
   const _FiltersRow({
     required this.assetFilter,
     required this.selectedPair,
     required this.selectedTimezone,
+    required this.selectedStatus,
     required this.dateRange,
     required this.availablePairs,
     required this.availableTimezones,
+    required this.availableStatuses,
     required this.onAssetChanged,
     required this.onPairChanged,
     required this.onTimezoneChanged,
+    required this.onStatusChanged,
     required this.onDateRangeChanged,
   });
 
@@ -442,40 +419,69 @@ class _FiltersRow extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          _StatusDropdown(
+            value: selectedStatus,
+            items: availableStatuses,
+            onChanged: onStatusChanged,
+            isMobile: true,
+          ),
         ],
       );
     }
 
-    return Wrap(
-      spacing: 16,
-      runSpacing: 12,
-      crossAxisAlignment: WrapCrossAlignment.center,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        _AssetDropdown(
-          value: assetFilter,
-          onChanged: onAssetChanged,
+        Expanded(
+          flex: 3,
+          child: _AssetDropdown(
+            value: assetFilter,
+            onChanged: onAssetChanged,
+          ),
         ),
-        _PairDropdown(
-          label: AppLocalizations.of(context)!.currencyPairs,
-          value: selectedPair,
-          items: availablePairs,
-          onChanged: onPairChanged,
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 3,
+          child: _PairDropdown(
+            label: AppLocalizations.of(context)!.currencyPairs,
+            value: selectedPair,
+            items: availablePairs,
+            onChanged: onPairChanged,
+          ),
         ),
-        _DateRangePicker(
-          dateRange: dateRange,
-          onChanged: onDateRangeChanged,
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 3,
+          child: _DateRangePicker(
+            dateRange: dateRange,
+            onChanged: onDateRangeChanged,
+          ),
         ),
-        _TimezoneDropdown(
-          value: selectedTimezone,
-          items: availableTimezones,
-          onChanged: onTimezoneChanged,
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 2,
+          child: _TimezoneDropdown(
+            value: selectedTimezone,
+            items: availableTimezones,
+            onChanged: onTimezoneChanged,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 2,
+          child: _StatusDropdown(
+            value: selectedStatus,
+            items: availableStatuses,
+            onChanged: onStatusChanged,
+          ),
         ),
       ],
     );
   }
 }
 
-class _PairDropdown extends StatelessWidget {
+class _PairDropdown extends StatefulWidget {
   final String label;
   final String value;
   final List<String> items;
@@ -491,51 +497,97 @@ class _PairDropdown extends StatelessWidget {
   });
 
   @override
+  State<_PairDropdown> createState() => _PairDropdownState();
+}
+
+class _PairDropdownState extends State<_PairDropdown> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!isMobile) ...[
+        if (!widget.isMobile) ...[
           Text(
-            label,
+            widget.label,
             style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
           ),
           const SizedBox(height: 8),
         ],
-        Container(
-          width: isMobile ? double.infinity : 260,
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D0D0D),
-            borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
-            border: Border.all(color: Colors.white12),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: items.contains(value) ? value : items.first,
-              dropdownColor: const Color(0xFF0D0D0D),
-              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
-              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
-              isExpanded: true,
-              items: items.map((pair) {
-                String display = pair;
-                if (pair == 'All Commodities') {
-                  display = AppLocalizations.of(context)!.allCommodities;
-                } else if (pair == 'All Currency Pairs') {
-                  display = AppLocalizations.of(context)!.allCurrencyPairs;
-                } else if (pair == 'All Crypto Pairs') {
-                  display = AppLocalizations.of(context)!.allCryptoPairs;
-                }
+        MouseRegion(
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() => _isHovered = false),
+          child: Container(
+            width: double.infinity,
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D0D0D),
+              borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
+              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : Colors.white12),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  hoverColor: const Color(0xFF289EFF),
+                ),
+                child: DropdownButton<String>(
+                  value: widget.items.contains(widget.value) ? widget.value : widget.items.first,
+                  dropdownColor: const Color(0xFF0D0D0D),
+                  focusColor: Colors.transparent,
+                  icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+                  isExpanded: true,
+                  menuMaxHeight: 300,
+                  itemHeight: 48,
+                  selectedItemBuilder: (context) {
+                    return widget.items.map((pair) {
+                      String display = pair;
+                      if (pair == 'All Commodities') display = AppLocalizations.of(context)!.allCommodities;
+                      else if (pair == 'All Currency Pairs') display = AppLocalizations.of(context)!.allCurrencyPairs;
+                      else if (pair == 'All Crypto Pairs') display = AppLocalizations.of(context)!.allCryptoPairs;
+                      return Align(alignment: Alignment.centerLeft, child: Text(display, overflow: TextOverflow.ellipsis));
+                    }).toList();
+                  },
+                  items: widget.items.map((pair) {
+                    final isSelected = widget.value == pair;
+                    String display = pair;
+                    if (pair == 'All Commodities') display = AppLocalizations.of(context)!.allCommodities;
+                    else if (pair == 'All Currency Pairs') display = AppLocalizations.of(context)!.allCurrencyPairs;
+                    else if (pair == 'All Crypto Pairs') display = AppLocalizations.of(context)!.allCryptoPairs;
 
-                return DropdownMenuItem<String>(
-                  value: pair,
-                  child: Text(display, overflow: TextOverflow.ellipsis),
-                );
-              }).toList(),
-              onChanged: (v) {
-                if (v != null) onChanged(v);
-              },
+                    return DropdownMenuItem<String>(
+                      value: pair,
+                      alignment: Alignment.centerLeft,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                                                  if (isSelected)
+                                                    Positioned.fill(
+                                                      left: -16,
+                                                      right: -16,
+                                                      child: Container(color: const Color(0xFF289EFF)),
+                                                    ),                          Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              display,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (v) {
+                    if (v != null) widget.onChanged(v);
+                  },
+                ),
+              ),
             ),
           ),
         ),
@@ -544,7 +596,7 @@ class _PairDropdown extends StatelessWidget {
   }
 }
 
-class _TimezoneDropdown extends StatelessWidget {
+class _TimezoneDropdown extends StatefulWidget {
   final String value;
   final List<String> items;
   final ValueChanged<String> onChanged;
@@ -558,43 +610,85 @@ class _TimezoneDropdown extends StatelessWidget {
   });
 
   @override
+  State<_TimezoneDropdown> createState() => _TimezoneDropdownState();
+}
+
+class _TimezoneDropdownState extends State<_TimezoneDropdown> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!isMobile) ...[
+        if (!widget.isMobile) ...[
           Text(
             AppLocalizations.of(context)!.timeGmt7, // Reusing key or create 'Timezone'
             style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
           ),
           const SizedBox(height: 8),
         ],
-        Container(
-          width: isMobile ? double.infinity : 110,
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D0D0D),
-            borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
-            border: Border.all(color: Colors.white12),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: items.contains(value) ? value : items.first,
-              dropdownColor: const Color(0xFF0D0D0D),
-              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
-              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
-              isExpanded: true,
-              menuMaxHeight: 300,
-              items: items.map((tz) {
-                return DropdownMenuItem<String>(
-                  value: tz,
-                  child: Text(tz),
-                );
-              }).toList(),
-              onChanged: (v) {
-                if (v != null) onChanged(v);
-              },
+        MouseRegion(
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() => _isHovered = false),
+          child: Container(
+            width: double.infinity,
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D0D0D),
+              borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
+              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : Colors.white12),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  hoverColor: const Color(0xFF289EFF),
+                ),
+                child: DropdownButton<String>(
+                  value: widget.items.contains(widget.value) ? widget.value : widget.items.first,
+                  dropdownColor: const Color(0xFF0D0D0D),
+                  focusColor: Colors.transparent,
+                  icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+                  isExpanded: true,
+                  menuMaxHeight: 300,
+                  itemHeight: 48,
+                  selectedItemBuilder: (context) {
+                    return widget.items.map((tz) => Align(alignment: Alignment.centerLeft, child: Text(tz))).toList();
+                  },
+                  items: widget.items.map((tz) {
+                    final isSelected = widget.value == tz;
+                    return DropdownMenuItem<String>(
+                      value: tz,
+                      alignment: Alignment.centerLeft,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                                                  if (isSelected)
+                                                    Positioned.fill(
+                                                      left: -16,
+                                                      right: -16,
+                                                      child: Container(color: const Color(0xFF289EFF)),
+                                                    ),                          Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              tz,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (v) {
+                    if (v != null) widget.onChanged(v);
+                  },
+                ),
+              ),
             ),
           ),
         ),
@@ -603,7 +697,124 @@ class _TimezoneDropdown extends StatelessWidget {
   }
 }
 
-class _AssetDropdown extends StatelessWidget {
+class _StatusDropdown extends StatefulWidget {
+  final String value;
+  final List<String> items;
+  final ValueChanged<String> onChanged;
+  final bool isMobile;
+
+  const _StatusDropdown({
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    this.isMobile = false,
+  });
+
+  @override
+  State<_StatusDropdown> createState() => _StatusDropdownState();
+}
+
+class _StatusDropdownState extends State<_StatusDropdown> {
+  bool _isHovered = false;
+
+  String _getLocalizedStatus(BuildContext context, String code) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (code) {
+      case 'ALL': return l10n.filterStatusAll;
+      case 'TP1': return l10n.filterStatusTp1;
+      case 'TP2': return l10n.filterStatusTp2;
+      case 'TP3': return l10n.filterStatusTp3;
+      case 'SL': return l10n.filterStatusSl;
+      case 'CANCELLED': return l10n.filterStatusCancelled;
+      case 'EXIT': return l10n.filterStatusExitByAdmin;
+      default: return code;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!widget.isMobile) ...[
+          Text(
+            AppLocalizations.of(context)!.filterStatusLabel,
+            style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+        ],
+        MouseRegion(
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() => _isHovered = false),
+          child: Container(
+            width: double.infinity,
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D0D0D),
+              borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
+              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : Colors.white12),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  hoverColor: const Color(0xFF289EFF),
+                ),
+                child: DropdownButton<String>(
+                  value: widget.items.contains(widget.value) ? widget.value : widget.items.first,
+                  dropdownColor: const Color(0xFF0D0D0D),
+                  focusColor: Colors.transparent,
+                  icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+                  isExpanded: true,
+                  menuMaxHeight: 300,
+                  itemHeight: 48,
+                  selectedItemBuilder: (context) {
+                    return widget.items.map((code) => Align(alignment: Alignment.centerLeft, child: Text(_getLocalizedStatus(context, code), overflow: TextOverflow.ellipsis))).toList();
+                  },
+                  items: widget.items.map((code) {
+                    final isSelected = widget.value == code;
+                    final display = _getLocalizedStatus(context, code);
+                    return DropdownMenuItem<String>(
+                      value: code,
+                      alignment: Alignment.centerLeft,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                                                  if (isSelected)
+                                                    Positioned.fill(
+                                                      left: -16,
+                                                      right: -16,
+                                                      child: Container(color: const Color(0xFF289EFF)),
+                                                    ),                          Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              display,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (v) {
+                    if (v != null) widget.onChanged(v);
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AssetDropdown extends StatefulWidget {
   final AssetFilter value;
   final ValueChanged<AssetFilter> onChanged;
   final bool isMobile;
@@ -615,41 +826,102 @@ class _AssetDropdown extends StatelessWidget {
   });
 
   @override
+  State<_AssetDropdown> createState() => _AssetDropdownState();
+}
+
+class _AssetDropdownState extends State<_AssetDropdown> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!isMobile) ...[
+        if (!widget.isMobile) ...[
           Text(
             AppLocalizations.of(context)!.asset,
             style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
           ),
           const SizedBox(height: 8),
         ],
-        Container(
-          width: isMobile ? double.infinity : 200,
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D0D0D),
-            borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
-            border: Border.all(color: Colors.white12),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<AssetFilter>(
-              value: value,
-              dropdownColor: const Color(0xFF0D0D0D),
-              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
-              style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
-              items: [
-                DropdownMenuItem(value: AssetFilter.all, child: Text(AppLocalizations.of(context)!.allAssets)),
-                const DropdownMenuItem(value: AssetFilter.gold, child: Text('Gold')),
-                const DropdownMenuItem(value: AssetFilter.crypto, child: Text('Crypto')),
-                const DropdownMenuItem(value: AssetFilter.forex, child: Text('Forex')),
-              ],
-              onChanged: (v) {
-                if (v != null) onChanged(v);
-              },
+        MouseRegion(
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() => _isHovered = false),
+          child: Container(
+            width: double.infinity,
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D0D0D),
+              borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
+              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : Colors.white12),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  hoverColor: const Color(0xFF289EFF),
+                ),
+                child: DropdownButton<AssetFilter>(
+                  value: widget.value,
+                  dropdownColor: const Color(0xFF0D0D0D),
+                  focusColor: Colors.transparent,
+                  icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
+                  style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+                  menuMaxHeight: 300,
+                  itemHeight: 48,
+                  selectedItemBuilder: (context) {
+                    return [AssetFilter.all, AssetFilter.gold, AssetFilter.crypto, AssetFilter.forex].map((val) {
+                      String label = '';
+                      if (val == AssetFilter.all) label = AppLocalizations.of(context)!.allAssets;
+                      else if (val == AssetFilter.gold) label = 'Gold';
+                      else if (val == AssetFilter.crypto) label = 'Crypto';
+                      else if (val == AssetFilter.forex) label = 'Forex';
+                      return Align(alignment: Alignment.centerLeft, child: Text(label));
+                    }).toList();
+                  },
+                  items: [
+                    AssetFilter.all,
+                    AssetFilter.gold,
+                    AssetFilter.crypto,
+                    AssetFilter.forex,
+                  ].map((val) {
+                    final isSelected = widget.value == val;
+                    String label = '';
+                    if (val == AssetFilter.all) label = AppLocalizations.of(context)!.allAssets;
+                    else if (val == AssetFilter.gold) label = 'Gold';
+                    else if (val == AssetFilter.crypto) label = 'Crypto';
+                    else if (val == AssetFilter.forex) label = 'Forex';
+
+                    return DropdownMenuItem<AssetFilter>(
+                      value: val,
+                      alignment: Alignment.centerLeft,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                                                  if (isSelected)
+                                                    Positioned.fill(
+                                                      left: -16,
+                                                      right: -16,
+                                                      child: Container(color: const Color(0xFF289EFF)),
+                                                    ),                          Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              label,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (v) {
+                    if (v != null) widget.onChanged(v);
+                  },
+                ),
+              ),
             ),
           ),
         ),
@@ -677,6 +949,7 @@ class _DateRangePickerState extends State<_DateRangePicker> {
   final GlobalKey _key = GlobalKey();
   OverlayEntry? _overlayEntry;
   bool _isOpen = false;
+  bool _isHovered = false;
 
   void _toggleDropdown() {
     if (_isOpen) {
@@ -754,6 +1027,8 @@ class _DateRangePickerState extends State<_DateRangePicker> {
           '${DateFormat('dd/MM/yyyy').format(widget.dateRange!.start)} - ${DateFormat('dd/MM/yyyy').format(widget.dateRange!.end)}';
     }
     
+    final bool isActive = _isOpen || _isHovered;
+
     return Column(
       key: _key,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -765,42 +1040,46 @@ class _DateRangePickerState extends State<_DateRangePicker> {
           ),
           const SizedBox(height: 8),
         ],
-        InkWell(
-          onTap: _toggleDropdown,
-          child: Container(
-            width: widget.isMobile ? double.infinity : 260,
-            height: 44,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0D0D0D),
-              borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
-              border: Border.all(color: _isOpen ? const Color(0xFF00BFFF) : Colors.white12),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (widget.dateRange != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: InkWell(
-                      onTap: () {
-                        widget.onChanged(null);
-                        },
-                      child: const Icon(Icons.close, color: Colors.white70, size: 16),
+        MouseRegion(
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() => _isHovered = false),
+          child: InkWell(
+            onTap: _toggleDropdown,
+            child: Container(
+              width: double.infinity,
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0D0D0D),
+                borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
+                border: Border.all(color: isActive ? const Color(0xFF289EFF) : Colors.white12),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                Icon(
-                    Icons.calendar_today,
-                    color: _isOpen ? const Color(0xFF00BFFF) : Colors.white70,
-                    size: 16
-                ),
-              ],
+                  if (widget.dateRange != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: InkWell(
+                        onTap: () {
+                          widget.onChanged(null);
+                          },
+                        child: const Icon(Icons.close, color: Colors.white70, size: 16),
+                      ),
+                    ),
+                  Icon(
+                      Icons.calendar_today,
+                      color: isActive ? const Color(0xFF289EFF) : Colors.white70,
+                      size: 16
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -864,7 +1143,7 @@ class _DateRangeDropdownContentState extends State<_DateRangeDropdownContent> {
         child: Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF00BFFF),
+              primary: Color(0xFF289EFF),
               onPrimary: Colors.white,
               surface: Color(0xFF1A1A1A),
               onSurface: Colors.white,
@@ -900,11 +1179,13 @@ class _SignalGridLive extends StatefulWidget {
   final AssetFilter assetFilter;
   final String selectedPair;
   final String selectedTimezone;
+  final String selectedStatus;
   final DateTimeRange? dateRange;
   const _SignalGridLive({
     required this.assetFilter,
     required this.selectedPair,
     required this.selectedTimezone,
+    required this.selectedStatus,
     required this.dateRange,
   });
 
@@ -928,6 +1209,7 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
     if (oldWidget.assetFilter != widget.assetFilter || 
         oldWidget.dateRange != widget.dateRange ||
         oldWidget.selectedPair != widget.selectedPair ||
+        oldWidget.selectedStatus != widget.selectedStatus ||
         oldWidget.selectedTimezone != widget.selectedTimezone) {
       _goldPage = 0;
       _cryptoPage = 0;
@@ -1243,6 +1525,28 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       filtered = filtered.where((s) => s.symbol == widget.selectedPair);
     }
 
+    // Status Filter Logic
+    if (widget.selectedStatus != 'ALL') {
+      if (widget.selectedStatus == 'CANCELLED') {
+        filtered = filtered.where((s) => s.status.toLowerCase() == 'cancelled');
+      } else {
+        // Specific Statuses
+        final matchTarget = widget.selectedStatus;
+        filtered = filtered.where((s) {
+          final ms = (s.matchStatus ?? '').toUpperCase();
+          if (matchTarget == 'TP1') return ms == 'TP1';
+          if (matchTarget == 'TP2') return ms == 'TP2';
+          if (matchTarget == 'TP3') return ms == 'TP3';
+          if (matchTarget == 'SL') return ms == 'SL';
+          if (matchTarget == 'EXIT') return ms == 'EXIT' || ms == 'MANUAL_EXIT';
+          return false;
+        });
+      }
+    } else {
+      // Default: Show all except CANCELLED
+      filtered = filtered.where((s) => s.status.toLowerCase() != 'cancelled');
+    }
+
     if (widget.dateRange != null) {
       final start = widget.dateRange!.start;
       final end = widget.dateRange!.end.add(const Duration(days: 1));
@@ -1384,31 +1688,110 @@ class _SampleSignalWebCard extends StatelessWidget {
       onTap: () {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: const Color(0xFF1E1E1E),
-            title: Text(AppLocalizations.of(context)!.signInRequired, style: const TextStyle(color: Colors.white)),
-            content: Text(
-              AppLocalizations.of(context)!.signInToExploreSignal,
-              style: const TextStyle(color: Colors.white70),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.white54)),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.of(context).pushNamed('/signin');
+          builder: (context) {
+            bool isPopupHovered = false;
+            return Dialog(
+              backgroundColor: Colors.transparent, // Background handled by inner container
+              elevation: 0,
+              child: StatefulBuilder(
+                builder: (context, setPopupState) {
+                  return MouseRegion(
+                    onEnter: (_) => setPopupState(() => isPopupHovered = true),
+                    onExit: (_) => setPopupState(() => isPopupHovered = false),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 444,
+                      height: 313,
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isPopupHovered ? const Color(0xFF289EFF) : Colors.white12,
+                          width: 1.2,
+                        ),
+                        boxShadow: isPopupHovered ? [
+                          BoxShadow(
+                            color: const Color(0xFF289EFF).withOpacity(0.4),
+                            blurRadius: 30,
+                            spreadRadius: 2,
+                          )
+                        ] : [],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 64,
+                            height: 64,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF289EFF),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.lock, color: Colors.black, size: 32),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            AppLocalizations.of(context)!.popupMasterMarket,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            AppLocalizations.of(context)!.popupLoginExplore,
+                            style: const TextStyle(
+                              color: Color(0xFF9A9A9A),
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 32),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.of(context).pushNamed('/signin');
+                            },
+                            child: Container(
+                              width: 100,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              padding: const EdgeInsets.all(1.5), // Border width
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(1.5),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  AppLocalizations.of(context)!.signIn,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E97FF),
-                  foregroundColor: Colors.white,
-                ),
-                child: Text(AppLocalizations.of(context)!.signIn),
               ),
-            ],
-          ),
+            );
+          },
         );
       },
       child: Container(
@@ -1447,35 +1830,32 @@ class _SampleSignalWebCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            Text('${AppLocalizations.of(context)!.created}:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isBuy ? Icons.north_east : Icons.south_east,
+                  size: 14,
+                  color: actionColor,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  typeText,
+                  style: AppTextStyles.body.copyWith(
+                    color: actionColor,
+                    fontSize: 12, // Smaller font size
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 4),
             Text(
               DateFormat('dd/MM/yyyy HH:mm').format(date),
               style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
             ),
             const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isBuy ? Icons.north_east : Icons.south_east,
-                    size: 16,
-                    color: actionColor,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    typeText,
-                    style: AppTextStyles.body.copyWith(
-                      color: actionColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Replaced Created line with Buy/Sell type, original button remains below
             const SizedBox(height: 12),
             Row(
               children: [
@@ -1659,31 +2039,110 @@ class _SignalWebCard extends StatelessWidget {
     if (user == null) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
-          title: Text(AppLocalizations.of(context)!.signInRequired, style: const TextStyle(color: Colors.white)),
-          content: Text(
-            AppLocalizations.of(context)!.signInToExploreSignal,
-            style: const TextStyle(color: Colors.white70),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.white54)),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.of(context).pushNamed('/signin');
+        builder: (context) {
+          bool isPopupHovered = false;
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: StatefulBuilder(
+              builder: (context, setPopupState) {
+                return MouseRegion(
+                  onEnter: (_) => setPopupState(() => isPopupHovered = true),
+                  onExit: (_) => setPopupState(() => isPopupHovered = false),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 444,
+                    height: 313,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isPopupHovered ? const Color(0xFF289EFF) : Colors.white12,
+                        width: 1.2,
+                      ),
+                      boxShadow: isPopupHovered ? [
+                        BoxShadow(
+                          color: const Color(0xFF289EFF).withOpacity(0.4),
+                          blurRadius: 30,
+                          spreadRadius: 2,
+                        )
+                      ] : [],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF289EFF),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.lock, color: Colors.black, size: 32),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          AppLocalizations.of(context)!.popupMasterMarket,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          AppLocalizations.of(context)!.popupLoginExplore,
+                          style: const TextStyle(
+                            color: Color(0xFF9A9A9A),
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 32),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).pushNamed('/signin');
+                          },
+                          child: Container(
+                            width: 100,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            padding: const EdgeInsets.all(1.5), // Border width
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(1.5),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                AppLocalizations.of(context)!.signIn,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2E97FF),
-                foregroundColor: Colors.white,
-              ),
-              child: Text(AppLocalizations.of(context)!.signIn),
             ),
-          ],
-        ),
+          );
+        },
       );
       return;
     }
@@ -1791,16 +2250,28 @@ class _SignalWebCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            Text('${AppLocalizations.of(context)!.created}:', style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12)),
-            const SizedBox(height: 4),
-            Text(
-              DateFormat('dd/MM/yyyy HH:mm').format(date),
-              style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
-            ),
-            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isBuy ? Icons.north_east : Icons.south_east,
+                      size: 14,
+                      color: actionColor,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      typeText,
+                      style: AppTextStyles.body.copyWith(
+                        color: actionColor,
+                        fontSize: 12, // Smaller font size
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
                 if (canViewEntry)
                   Row(
                     children: [
@@ -1814,29 +2285,13 @@ class _SignalWebCard extends StatelessWidget {
                         style: AppTextStyles.body.copyWith(color: const Color(0xFF289EFF), fontSize: 14, fontWeight: FontWeight.w700),
                       ),
                     ],
-                  )
-                else
-                  const SizedBox(),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isBuy ? Icons.north_east : Icons.south_east,
-                      size: 16,
-                      color: actionColor,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      typeText,
-                      style: AppTextStyles.body.copyWith(
-                        color: actionColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
               ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              DateFormat('dd/MM/yyyy HH:mm').format(date),
+              style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 12),
             ),
             const SizedBox(height: 12),
             Row(
@@ -2339,20 +2794,52 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
         border: Border.all(color: Colors.white12),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedFilterIndex,
-          dropdownColor: const Color(0xFF0D0D0D),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 16),
-          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 13),
-          items: List.generate(filters.length, (index) {
-            return DropdownMenuItem<int>(
-              value: index,
-              child: Text(filters[index]),
-            );
-          }),
-          onChanged: (v) {
-            if (v != null) setState(() => _selectedFilterIndex = v);
-          },
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            hoverColor: const Color(0xFF289EFF),
+          ),
+          child: DropdownButton<int>(
+            value: _selectedFilterIndex,
+            dropdownColor: const Color(0xFF0D0D0D),
+            focusColor: Colors.transparent,
+            icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 16),
+            style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 13),
+            menuMaxHeight: 300,
+            itemHeight: 48,
+            selectedItemBuilder: (context) {
+              return filters.map((f) => Align(alignment: Alignment.centerLeft, child: Text(f))).toList();
+            },
+            items: List.generate(filters.length, (index) {
+              final isSelected = _selectedFilterIndex == index;
+              return DropdownMenuItem<int>(
+                value: index,
+                alignment: Alignment.centerLeft,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                                            if (isSelected)
+                                              Positioned.fill(
+                                                left: -16,
+                                                right: -16,
+                                                child: Container(color: const Color(0xFF289EFF)),
+                                              ),                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        filters[index],
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            onChanged: (v) {
+              if (v != null) setState(() => _selectedFilterIndex = v);
+            },
+          ),
         ),
       ),
     );
@@ -3181,12 +3668,14 @@ class _HistorySection extends StatefulWidget {
   final AssetFilter assetFilter;
   final String selectedPair;
   final String selectedTimezone;
+  final String selectedStatus;
   final DateTimeRange? dateRange;
 
   const _HistorySection({
     required this.assetFilter,
     required this.selectedPair,
     required this.selectedTimezone,
+    required this.selectedStatus,
     required this.dateRange,
   });
 
@@ -3217,6 +3706,7 @@ class _HistorySectionState extends State<_HistorySection> {
     if (oldWidget.assetFilter != widget.assetFilter || 
         oldWidget.selectedPair != widget.selectedPair ||
         oldWidget.dateRange != widget.dateRange ||
+        oldWidget.selectedStatus != widget.selectedStatus ||
         oldWidget.selectedTimezone != widget.selectedTimezone) {
       _page = 0;
     }
@@ -3283,6 +3773,28 @@ class _HistorySectionState extends State<_HistorySection> {
         widget.selectedPair != 'All Currency Pairs' &&
         widget.selectedPair != 'All Crypto Pairs') {
       filtered = filtered.where((s) => s.symbol == widget.selectedPair);
+    }
+
+    // Status Filter Logic
+    if (widget.selectedStatus != 'ALL') {
+      if (widget.selectedStatus == 'CANCELLED') {
+        filtered = filtered.where((s) => s.status.toLowerCase() == 'cancelled');
+      } else {
+        // Specific Statuses
+        final matchTarget = widget.selectedStatus;
+        filtered = filtered.where((s) {
+          final ms = (s.matchStatus ?? '').toUpperCase();
+          if (matchTarget == 'TP1') return ms == 'TP1';
+          if (matchTarget == 'TP2') return ms == 'TP2';
+          if (matchTarget == 'TP3') return ms == 'TP3';
+          if (matchTarget == 'SL') return ms == 'SL';
+          if (matchTarget == 'EXIT') return ms == 'EXIT' || ms == 'MANUAL_EXIT';
+          return false;
+        });
+      }
+    } else {
+      // Default: Show all except CANCELLED
+      filtered = filtered.where((s) => s.status.toLowerCase() != 'cancelled');
     }
 
     if (widget.dateRange != null) {
