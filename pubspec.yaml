@@ -48,6 +48,7 @@ dependencies:
   visibility_detector:
   flutter_quill:
   font_awesome_flutter: ^10.9.1
+  flutter_svg: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -62,3 +63,4 @@ flutter:
   assets:
     - assets/images/
     - assets/mockups/
+    - assets/icons/

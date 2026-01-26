@@ -342,7 +342,7 @@ class _PricingCardContentState extends State<_PricingCardContent> {
     final isMobile = width < Breakpoints.tablet;
     final appLocalizations = AppLocalizations.of(context)!;
     // Tăng chiều cao tối thiểu để thẻ dài hơn
-    final double minCardHeight = isMobile ? 600 : 580;
+    final double minCardHeight = isMobile ? 650 : 630;
     final double verticalPadding = isMobile ? 48 : 64; // 24*2 hoặc 32*2
 
     return _StaticBorderCard(
@@ -396,7 +396,7 @@ class _PricingCardContentState extends State<_PricingCardContent> {
                               ),
                             ),
                             const Spacer(),
-                            _saveBadge(widget.plan.badge),
+                            _saveBadge(widget.plan.badge, isMobile),
                           ],
                         ),
                         SizedBox(height: isMobile ? 42 : 32),
@@ -469,16 +469,23 @@ class _PricingCardContentState extends State<_PricingCardContent> {
     );
   }
 
-  Widget _saveBadge(String text) {
+  Widget _saveBadge(String text, bool isMobile) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 24 : 16, 
+        vertical: isMobile ? 12 : 8
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFF289EFF),
         borderRadius: BorderRadius.circular(5),
       ),
       child: Text(
         text,
-        style: AppTextStyles.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+        style: AppTextStyles.caption.copyWith(
+          color: Colors.white, 
+          fontWeight: FontWeight.w700,
+          fontSize: isMobile ? 18 : 14, // Tăng kích thước chữ
+        ),
       ),
     );
   }
@@ -487,15 +494,31 @@ class _PricingCardContentState extends State<_PricingCardContent> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start, // Căn lên trên cùng
         children: [
-          Icon(Icons.check_box, color: Colors.white70, size: isMobile ? 20 : 18),
-          const SizedBox(width: 8),
+          // Ô tích màu trắng với dấu tích màu xanh dương
+          Container(
+            margin: const EdgeInsets.only(top: 3), // Căn chỉnh nhỏ để khớp với dòng chữ đầu tiên
+            width: isMobile ? 18 : 16,
+            height: isMobile ? 18 : 16,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: Icon(
+              Icons.check,
+              color: const Color(0xFF289EFF),
+              size: isMobile ? 16 : 14,
+            ),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
               style: AppTextStyles.body.copyWith(
                 color: Colors.white,
-                fontSize: isMobile ? 16 : 13,
+                fontSize: isMobile ? 18 : 15, // Tăng kích thước chữ
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

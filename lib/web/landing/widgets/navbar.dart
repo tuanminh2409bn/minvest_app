@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
@@ -725,7 +726,7 @@ class _NotificationBell extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => const NotificationScreen()),
                 );
               },
-              icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
+              icon: const FaIcon(FontAwesomeIcons.bell, color: Colors.white, size: 24),
               tooltip: 'Notifications',
             ),
             if (count > 0)
