@@ -509,5 +509,15 @@
     },
     "passwordResetEmailSent": "Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn.",
     "pageOf": "của",
-    "keyFindings": "Kết quả chính"
+    "keyFindings": "Kết quả chính",
+    "filterStatusLabel": "Trạng thái",
+    "filterStatusAll": "Tất cả",
+    "filterStatusTp1": "TRÚNG TP1",
+    "filterStatusTp2": "TRÚNG TP2",
+    "filterStatusTp3": "TRÚNG TP3",
+    "filterStatusSl": "TRÚNG SL",
+    "filterStatusCancelled": "ĐÃ HỦY",
+    "filterStatusExitByAdmin": "ADMIN ĐÓNG",
+    "popupMasterMarket": "Bạn có muốn làm chủ thị trường?",
+    "popupLoginExplore": "Đăng nhập để khám phá bản tin giao dịch này!"
 }

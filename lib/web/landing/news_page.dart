@@ -95,10 +95,6 @@ class _NewsPageState extends State<NewsPage> {
                     ),
                   ),
                   const SizedBox(height: 64),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: FooterSection(),
-                  ),
                 ],
               ),
             ),

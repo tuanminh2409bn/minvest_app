@@ -489,27 +489,35 @@
         }
     },
     "close": "Schließen",
-        "validUntil": "Gültig bis {date}",
-        "@validUntil": {
-          "placeholders": {
+    "validUntil": "Gültig bis {date}",
+    "@validUntil": {
+        "placeholders": {
             "date": {
-              "type": "String"
+                "type": "String"
             }
-          }
-        },
-        "wins": "Gewinne",
-        "losses": "Verluste",
-                "totalOrdersCount": "Gesamt: {count} Aufträge",
-                "@totalOrdersCount": {
-                  "placeholders": {
-                    "count": {
-                      "type": "int"
-                    }
-                  }
-                },
-                "passwordResetEmailSent": "E-Mail zum Zurücksetzen của Passwords gesendet! Bitte kiểm tra Sie Ihren Posteingang."
-            ,
-    "pageOf": "/"
-,
-    "keyFindings": "Key Findings"
+        }
+    },
+    "wins": "Gewinne",
+    "losses": "Verluste",
+    "totalOrdersCount": "Gesamt: {count} Aufträge",
+    "@totalOrdersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "passwordResetEmailSent": "E-Mail zum Zurücksetzen của Passwords gesendet! Bitte kiểm tra Sie Ihren Posteingang.",
+    "pageOf": "/",
+    "keyFindings": "Key Findings",
+    "filterStatusLabel": "Status",
+    "filterStatusAll": "All Status",
+    "filterStatusTp1": "TP1 HIT",
+    "filterStatusTp2": "TP2 HIT",
+    "filterStatusTp3": "TP3 HIT",
+    "filterStatusSl": "SL HIT",
+    "filterStatusCancelled": "CANCELLED",
+    "filterStatusExitByAdmin": "EXIT BY ADMIN",
+    "popupMasterMarket": "Do you want to master the market?",
+    "popupLoginExplore": "Log in to explore this trading bulletin!"
 }

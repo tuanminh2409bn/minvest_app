@@ -491,25 +491,33 @@
     "close": "Închide",
     "validUntil": "Valabil până la {date}",
     "@validUntil": {
-      "placeholders": {
-        "date": {
-          "type": "String"
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
         }
-      }
     },
     "wins": "Câștiguri",
     "losses": "Pierderi",
     "totalOrdersCount": "Total: {count} comenzi",
     "@totalOrdersCount": {
-      "placeholders": {
-        "count": {
-          "type": "int"
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
         }
-      }
     },
-    "passwordResetEmailSent": "E-mailul de resetare a parolei a fost trimis! Vă rugăm să vă verificați căsuța poștală."
-,
-    "pageOf": "/"
-,
-    "keyFindings": "Key Findings"
+    "passwordResetEmailSent": "E-mailul de resetare a parolei a fost trimis! Vă rugăm să vă verificați căsuța poștală.",
+    "pageOf": "/",
+    "keyFindings": "Key Findings",
+    "filterStatusLabel": "Status",
+    "filterStatusAll": "All Status",
+    "filterStatusTp1": "TP1 HIT",
+    "filterStatusTp2": "TP2 HIT",
+    "filterStatusTp3": "TP3 HIT",
+    "filterStatusSl": "SL HIT",
+    "filterStatusCancelled": "CANCELLED",
+    "filterStatusExitByAdmin": "EXIT BY ADMIN",
+    "popupMasterMarket": "Do you want to master the market?",
+    "popupLoginExplore": "Log in to explore this trading bulletin!"
 }

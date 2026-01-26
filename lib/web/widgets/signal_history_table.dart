@@ -57,36 +57,39 @@ class SignalHistoryTable extends StatelessWidget {
     final Map<int, TableColumnWidth> columnWidths;
     final List<String> headers;
 
+    headers = [
+      AppLocalizations.of(context)!.date,
+      AppLocalizations.of(context)!.timeGmt7,
+      AppLocalizations.of(context)!.asset,
+      AppLocalizations.of(context)!.orders,
+      AppLocalizations.of(context)!.status,
+      AppLocalizations.of(context)!.pips,
+      AppLocalizations.of(context)!.entry,
+      'Closed Price',
+      'SL',
+      'TP1',
+      'TP2',
+      'TP3',
+    ];
+
     if (isMobile) {
-      headers = [
-        AppLocalizations.of(context)!.date,
-        AppLocalizations.of(context)!.timeGmt7,
-        AppLocalizations.of(context)!.asset,
-        AppLocalizations.of(context)!.orders,
-        AppLocalizations.of(context)!.pips,
-      ];
+      // Mobile: Use FixedColumnWidth to ensure readability and enable scrolling
       columnWidths = {
-        0: const FlexColumnWidth(1.2), // Date
-        1: const FlexColumnWidth(1.0), // Time
-        2: const FlexColumnWidth(1.2), // Asset
-        3: const FlexColumnWidth(1.2), // Order
-        4: const FlexColumnWidth(1.0), // Pips
+        0: const FixedColumnWidth(100), // Date
+        1: const FixedColumnWidth(80),  // Time
+        2: const FixedColumnWidth(100), // Asset
+        3: const FixedColumnWidth(80),  // Order
+        4: const FixedColumnWidth(100), // Status
+        5: const FixedColumnWidth(80),  // Pips
+        6: const FixedColumnWidth(100), // Entry
+        7: const FixedColumnWidth(100), // Closed Price
+        8: const FixedColumnWidth(100), // SL
+        9: const FixedColumnWidth(100), // TP1
+        10: const FixedColumnWidth(100), // TP2
+        11: const FixedColumnWidth(100), // TP3
       };
     } else {
-      headers = [
-        AppLocalizations.of(context)!.date,
-        AppLocalizations.of(context)!.timeGmt7,
-        AppLocalizations.of(context)!.asset,
-        AppLocalizations.of(context)!.orders,
-        AppLocalizations.of(context)!.status,
-        AppLocalizations.of(context)!.pips,
-        AppLocalizations.of(context)!.entry,
-        'Closed Price',
-        'SL',
-        'TP1',
-        'TP2',
-        'TP3',
-      ];
+      // Desktop: Use FlexColumnWidth for responsive layout
       columnWidths = {
         0: const FlexColumnWidth(1.1), // Date
         1: const FlexColumnWidth(0.9), // Time
@@ -103,73 +106,71 @@ class SignalHistoryTable extends StatelessWidget {
       };
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: Table(
-        columnWidths: columnWidths,
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        border: const TableBorder(
-          horizontalInside: BorderSide(color: Colors.white12),
-          bottom: BorderSide(color: Colors.white12),
+    return SingleChildScrollView(
+      scrollDirection: isMobile ? Axis.horizontal : Axis.vertical,
+      child: Container(
+        // Ensure container takes full width on desktop, or specific width on mobile if needed
+        width: isMobile ? null : double.infinity, 
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white12),
         ),
-        children: [
-          // Header Row
-          TableRow(
-            decoration: const BoxDecoration(color: Color(0xFF0D0D0D)),
-            children: headers.map((h) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-                child: Text(
-                  h,
-                  style: AppTextStyles.caption.copyWith(
-                      color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              );
-            }).toList(),
+        child: Table(
+          columnWidths: columnWidths,
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          border: const TableBorder(
+            horizontalInside: BorderSide(color: Colors.white12),
+            bottom: BorderSide(color: Colors.white12),
           ),
-          // Data Rows
-          ...rows.map((row) {
-            final cells = isMobile
-                ? [
-                    _cellText(row.date),
-                    _cellText(row.time),
-                    _cellText(row.asset),
-                    _orderTag(row.order, context),
-                    _pipsText(row.pips),
-                  ]
-                : [
-                    _cellText(row.date),
-                    _cellText(row.time),
-                    _cellText(row.asset),
-                    _orderTag(row.order, context),
-                    _statusText(row.status),
-                    _pipsText(row.pips),
-                    _cellText(row.entry),
-                    _closedPriceText(row),
-                    _cellText(row.sl),
-                    _cellText(row.tp1),
-                    _cellText(row.tp2),
-                    _cellText(row.tp3),
-                  ];
-
-            return TableRow(
-              decoration: const BoxDecoration(),
-              children: cells.map((cell) {
-                return InkWell(
-                  onTap: () => _showSignalProgress(context, row.originalSignal),
-                  child: cell,
+          children: [
+            // Header Row
+            TableRow(
+              decoration: const BoxDecoration(color: Color(0xFF0D0D0D)),
+              children: headers.map((h) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                  child: Text(
+                    h,
+                    style: AppTextStyles.caption.copyWith(
+                        color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 );
               }).toList(),
-            );
-          }),
-        ],
+            ),
+            // Data Rows
+            ...rows.map((row) {
+              // Same cells for both Mobile and Desktop now
+              final cells = [
+                _cellText(row.date),
+                _cellText(row.time),
+                _cellText(row.asset),
+                _orderTag(row.order, context),
+                _statusText(row.status),
+                _pipsText(row.pips),
+                _cellText(row.entry),
+                _closedPriceText(row),
+                _cellText(row.sl),
+                _cellText(row.tp1),
+                _cellText(row.tp2),
+                _cellText(row.tp3),
+              ];
+
+              return TableRow(
+                decoration: const BoxDecoration(),
+                children: cells.map((cell) {
+                  return InkWell(
+                    onTap: () => _showSignalProgress(context, row.originalSignal),
+                    child: cell,
+                  );
+                }).toList(),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }

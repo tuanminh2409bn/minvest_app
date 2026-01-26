@@ -1456,4 +1456,35 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get keyFindings => 'Kết quả chính';
+
+  @override
+  String get filterStatusLabel => 'Trạng thái';
+
+  @override
+  String get filterStatusAll => 'Tất cả';
+
+  @override
+  String get filterStatusTp1 => 'TRÚNG TP1';
+
+  @override
+  String get filterStatusTp2 => 'TRÚNG TP2';
+
+  @override
+  String get filterStatusTp3 => 'TRÚNG TP3';
+
+  @override
+  String get filterStatusSl => 'TRÚNG SL';
+
+  @override
+  String get filterStatusCancelled => 'ĐÃ HỦY';
+
+  @override
+  String get filterStatusExitByAdmin => 'ADMIN ĐÓNG';
+
+  @override
+  String get popupMasterMarket => 'Bạn có muốn làm chủ thị trường?';
+
+  @override
+  String get popupLoginExplore =>
+      'Đăng nhập để khám phá bản tin giao dịch này!';
 }
