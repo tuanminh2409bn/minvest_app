@@ -24,6 +24,9 @@ class NewsDetailScreen extends StatefulWidget {
 class _NewsDetailScreenState extends State<NewsDetailScreen> {
   final NewsService _newsService = NewsService();
   late QuillController _quillController;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _leftColKey = GlobalKey();
+  final GlobalKey _rightColKey = GlobalKey();
 
   @override
   void initState() {
@@ -35,6 +38,8 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     );
   }
 
+  // ... (Keep _parseContent and _splitTextAndImages methods as is) ...
+
   Document _parseContent(String content) {
     try {
       dynamic json = jsonDecode(content);
@@ -45,7 +50,6 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
       } else if (json is Map && json.containsKey('ops')) {
         ops = json['ops'];
       } else {
-        // Unknown format, treat as plain text
         return Document()..insert(0, content);
       }
 
@@ -62,7 +66,6 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
         }
       }
       
-      // Ensure the document ends with a newline
       if (newOps.isEmpty) {
         newOps.add({'insert': '\n'});
       } else {
@@ -74,7 +77,6 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
               lastOp['insert'] = '$insert\n';
             }
           } else {
-            // Last op is an embed (e.g. image), so we need a newline after it
             newOps.add({'insert': '\n'});
           }
         }
@@ -83,9 +85,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
       return Document.fromJson(newOps);
 
     } catch (e) {
-      // Fallback for plain text content
       final ops = _splitTextAndImages(content, null);
-      // Ensure fallback also ends with newline
       if (ops.isEmpty) {
         ops.add({'insert': '\n'});
       } else {
@@ -107,31 +107,21 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
 
   List<dynamic> _splitTextAndImages(String text, Map<String, dynamic>? attributes) {
     final List<dynamic> ops = [];
-    // Regex to find image URLs. 
-    // Captures http/https urls ending with standard image extensions, AND optionally query parameters (e.g. ?token=...)
     final RegExp exp = RegExp(r'(https?://\S+\.(?:png|jpg|jpeg|gif|webp|bmp)(?:\?\S*)?)', caseSensitive: false);
     
     int start = 0;
     for (final Match match in exp.allMatches(text)) {
-      // Text before match
       if (match.start > start) {
         ops.add({
           'insert': text.substring(start, match.start),
           if (attributes != null) 'attributes': attributes,
         });
       }
-      
-      // The image
-      // Note: Quill renders block embeds on their own line usually.
-      // We insert a newline before if needed? No, let Quill handle it.
-      // But typically image embeds are standalone blocks.
       final String url = match.group(0)!;
       ops.add({'insert': {'image': url}});
-      
       start = match.end;
     }
     
-    // Remaining text
     if (start < text.length) {
       ops.add({
         'insert': text.substring(start),
@@ -139,24 +129,19 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
       });
     }
     
-    if (ops.isEmpty) {
-      // If regex failed (no matches) but we called this, it means the whole text was analyzed.
-      // Logic above handles matches. If no matches, start remains 0.
-      // So this block is likely not reached unless text is empty.
-      if (text.isNotEmpty) {
-         ops.add({
-          'insert': text,
-          if (attributes != null) 'attributes': attributes,
-        });
-      }
+    if (ops.isEmpty && text.isNotEmpty) {
+       ops.add({
+        'insert': text,
+        if (attributes != null) 'attributes': attributes,
+      });
     }
-    
     return ops;
   }
 
   @override
   void dispose() {
     _quillController.dispose();
+    _scrollController.dispose(); // Dispose scroll controller
     super.dispose();
   }
 
@@ -177,6 +162,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SafeArea(
           child: SingleChildScrollView(
+            controller: _scrollController, // Attach controller
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1200),
@@ -192,9 +178,9 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.arrow_back_ios_new, color: Colors.white70, size: 14),
-                            const SizedBox(width: 6),
-                            Text(AppLocalizations.of(context)!.returnToHomePage, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                            const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18), // Increased size
+                            const SizedBox(width: 8),
+                            Text(AppLocalizations.of(context)!.returnToHomePage, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)), // Increased size/weight
                           ],
                         ),
                       ),
@@ -249,6 +235,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                               Expanded(
                                 flex: 3,
                                 child: Column(
+                                  key: _leftColKey, // Attach Left Key
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     _heroImage(widget.article.thumbnailUrl),
@@ -266,11 +253,39 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                                 ),
                               ),
                               const SizedBox(width: 18),
-                              SizedBox(
-                                width: 260,
-                                child: _MostPopularList(
-                                  currentId: widget.article.id,
-                                  newsService: _newsService,
+                              // Sticky Sidebar Logic
+                              AnimatedBuilder(
+                                animation: _scrollController,
+                                builder: (context, child) {
+                                  double offset = 0;
+                                  double maxOffset = double.infinity;
+
+                                  if (_leftColKey.currentContext != null && _rightColKey.currentContext != null) {
+                                    final leftBox = _leftColKey.currentContext!.findRenderObject() as RenderBox?;
+                                    final rightBox = _rightColKey.currentContext!.findRenderObject() as RenderBox?;
+                                    if (leftBox != null && rightBox != null) {
+                                      // Điểm dừng là khi đáy cột phải chạm đáy cột trái
+                                      maxOffset = (leftBox.size.height - rightBox.size.height).clamp(0, double.infinity);
+                                    }
+                                  }
+
+                                  if (_scrollController.hasClients) {
+                                    // 100 là ngưỡng bắt đầu sticky (tương đối so với header)
+                                    offset = (_scrollController.offset - 100).clamp(0, maxOffset);
+                                  }
+                                  
+                                  return Padding(
+                                    padding: EdgeInsets.only(top: offset),
+                                    child: child,
+                                  );
+                                },
+                                child: SizedBox(
+                                  key: _rightColKey, // Attach Right Key
+                                  width: 260,
+                                  child: _MostPopularList(
+                                    currentId: widget.article.id,
+                                    newsService: _newsService,
+                                  ),
                                 ),
                               ),
                             ],
@@ -375,7 +390,8 @@ class _MostPopularList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.mostPopular, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),), const SizedBox(height: 12),
+        Text(AppLocalizations.of(context)!.mostPopular, style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),), 
+        const SizedBox(height: 16), // Increased spacing
         StreamBuilder<List<NewsArticle>>(
           stream: newsService.streamNews(limit: 5),
           builder: (context, snapshot) {
@@ -387,7 +403,17 @@ class _MostPopularList extends StatelessWidget {
               return Text(AppLocalizations.of(context)!.noPosts, style: AppTextStyles.caption.copyWith(color: Colors.white54));
             }
             return Column(
-              children: articles.map((a) => _PopularItem(article: a)).toList(),
+              children: articles.asMap().entries.map((entry) {
+                final index = entry.key;
+                final a = entry.value;
+                return Column(
+                  children: [
+                    _PopularItem(article: a),
+                    if (index < articles.length - 1) // Add divider except for last item
+                      const Divider(color: Colors.white24, height: 24),
+                  ],
+                );
+              }).toList(),
             );
           },
         ),
@@ -409,47 +435,44 @@ class _PopularItem extends StatelessWidget {
         context,
         MaterialPageRoute(builder: (_) => NewsDetailScreen(article: article)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Row(
-          children: [
-            Container(
-              width: 88,
-              height: 70,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A1A1A),
-                borderRadius: BorderRadius.circular(6),
-                image: article.thumbnailUrl.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(article.thumbnailUrl),
-                        fit: BoxFit.cover,
-                        onError: (_, __) {},
-                      )
-                    : null,
-              ),
+      child: Row( // Removed Padding wrapper
+        children: [
+          Container(
+            width: 88,
+            height: 70,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A1A1A),
+              borderRadius: BorderRadius.circular(6),
+              image: article.thumbnailUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(article.thumbnailUrl),
+                      fit: BoxFit.cover,
+                      onError: (_, __) {},
+                    )
+                  : null,
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          ),
+          const SizedBox(width: 12), // Increased spacing
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  article.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600, height: 1.3), // Slightly bigger font
+                ),
+                const SizedBox(height: 6),
+                if (dateText.isNotEmpty)
                   Text(
-                    article.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600, height: 1.3),
+                    dateText,
+                    style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 11),
                   ),
-                  const SizedBox(height: 4),
-                  if (dateText.isNotEmpty)
-                    Text(
-                      dateText,
-                      style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 11),
-                    ),
-                ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

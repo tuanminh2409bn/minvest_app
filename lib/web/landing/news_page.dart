@@ -280,12 +280,21 @@ class _FeaturedArticleCardState extends State<_FeaturedArticleCard> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.all(12), // Padding for border spacing
           decoration: BoxDecoration(
-            color: Colors.transparent,
+            color: Colors.black, // Set background to black
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _isHovered ? const Color(0xFF289EFF) : Colors.transparent,
+              color: Colors.transparent, // Always transparent
               width: 1.5,
             ),
+            boxShadow: _isHovered 
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF289EFF).withOpacity(0.3),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  )
+                ] 
+              : [],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +460,7 @@ class _ArticleCardState extends State<_ArticleCard> {
                   const SizedBox(width: 6),
                   Text(
                     dateText,
-                    style: AppTextStyles.caption.copyWith(color: Colors.white54),
+                    style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 13), // Increased size
                   ),
                 ],
               ],
@@ -464,7 +473,7 @@ class _ArticleCardState extends State<_ArticleCard> {
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.h3.copyWith(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 20, // Increased to 20
                 fontWeight: FontWeight.w700,
                 height: 1.3,
               ),
@@ -479,18 +488,25 @@ class _ArticleCardState extends State<_ArticleCard> {
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.body.copyWith(
                 color: Colors.white70,
-                fontSize: 13,
+                fontSize: 14, // Increased to 14
                 height: 1.5,
               ),
             ),
             const SizedBox(height: 12),
-            // Read More
-            Text(
-              AppLocalizations.of(context)!.seeDetails,
-              style: AppTextStyles.caption.copyWith(
-                color: const Color(0xFF3FA9F5),
-                fontWeight: FontWeight.w600,
-              ),
+            // Read More with Arrow
+            Row(
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.seeDetails,
+                  style: AppTextStyles.caption.copyWith(
+                    color: const Color(0xFF3FA9F5),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13, // Slightly bigger
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Icon(Icons.arrow_forward, color: Color(0xFF3FA9F5), size: 16),
+              ],
             ),
           ],
         );
@@ -511,12 +527,21 @@ class _ArticleCardState extends State<_ArticleCard> {
           margin: const EdgeInsets.only(bottom: 0),
           padding: const EdgeInsets.all(12), // Padding for border
           decoration: BoxDecoration(
-            color: Colors.transparent,
+            color: Colors.black, // Set background to black
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _isHovered ? const Color(0xFF289EFF) : Colors.transparent,
+              color: Colors.transparent, // Always transparent
               width: 1.5,
             ),
+            boxShadow: _isHovered 
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF289EFF).withOpacity(0.3),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  )
+                ] 
+              : [],
           ),
           child: widget.isDesktop
               ? Row(
@@ -574,13 +599,14 @@ class _ArticleCardState extends State<_ArticleCard> {
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.body.copyWith(
                               color: Colors.white,
+                              fontSize: 16, // Mobile title size
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             dateText,
-                            style: AppTextStyles.caption.copyWith(color: Colors.white54),
+                            style: AppTextStyles.caption.copyWith(color: Colors.white54, fontSize: 12),
                           ),
                         ],
                       ),
