@@ -20,6 +20,8 @@ import 'sections/pricing_tab.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/core/utils/signal_access_helper.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:minvest_forex_app/web/widgets/signal_history_table.dart';
 
 enum AISignalsTab { aiSignals, performance, history, pricing }
@@ -150,7 +152,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        const Divider(color: Colors.white24, thickness: 1.2),
+                        const Divider(color: Colors.white, thickness: 1.2),
                         const SizedBox(height: 24),
                         if (selectedTab == AISignalsTab.aiSignals || selectedTab == AISignalsTab.history) ...[
                           _FiltersRow(
@@ -539,7 +541,7 @@ class _PairDropdownState extends State<_PairDropdown> {
                   icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
                   style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
                   isExpanded: true,
-                  menuMaxHeight: 300,
+                  menuMaxHeight: 500,
                   itemHeight: 48,
                   selectedItemBuilder: (context) {
                     return widget.items.map((pair) {
@@ -560,26 +562,33 @@ class _PairDropdownState extends State<_PairDropdown> {
                     return DropdownMenuItem<String>(
                       value: pair,
                       alignment: Alignment.centerLeft,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                                                  if (isSelected)
-                                                    Positioned.fill(
-                                                      left: -16,
-                                                      right: -16,
-                                                      child: Container(color: const Color(0xFF289EFF)),
-                                                    ),                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              display,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      child: Container(
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          border: Border(bottom: BorderSide(color: Colors.white, width: 0.5)),
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            if (isSelected)
+                              Positioned.fill(
+                                left: -16,
+                                right: -16,
+                                child: Container(color: const Color(0xFF289EFF)),
+                              ),
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                display,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }).toList(),
@@ -652,7 +661,7 @@ class _TimezoneDropdownState extends State<_TimezoneDropdown> {
                   icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
                   style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
                   isExpanded: true,
-                  menuMaxHeight: 300,
+                  menuMaxHeight: 500,
                   itemHeight: 48,
                   selectedItemBuilder: (context) {
                     return widget.items.map((tz) => Align(alignment: Alignment.centerLeft, child: Text(tz))).toList();
@@ -662,25 +671,32 @@ class _TimezoneDropdownState extends State<_TimezoneDropdown> {
                     return DropdownMenuItem<String>(
                       value: tz,
                       alignment: Alignment.centerLeft,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                                                  if (isSelected)
-                                                    Positioned.fill(
-                                                      left: -16,
-                                                      right: -16,
-                                                      child: Container(color: const Color(0xFF289EFF)),
-                                                    ),                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              tz,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      child: Container(
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          border: Border(bottom: BorderSide(color: Colors.white, width: 0.5)),
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            if (isSelected)
+                              Positioned.fill(
+                                left: -16,
+                                right: -16,
+                                child: Container(color: const Color(0xFF289EFF)),
+                              ),
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                tz,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }).toList(),
@@ -767,7 +783,7 @@ class _StatusDropdownState extends State<_StatusDropdown> {
                   icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
                   style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
                   isExpanded: true,
-                  menuMaxHeight: 300,
+                  menuMaxHeight: 500,
                   itemHeight: 48,
                   selectedItemBuilder: (context) {
                     return widget.items.map((code) => Align(alignment: Alignment.centerLeft, child: Text(_getLocalizedStatus(context, code), overflow: TextOverflow.ellipsis))).toList();
@@ -778,26 +794,33 @@ class _StatusDropdownState extends State<_StatusDropdown> {
                     return DropdownMenuItem<String>(
                       value: code,
                       alignment: Alignment.centerLeft,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                                                  if (isSelected)
-                                                    Positioned.fill(
-                                                      left: -16,
-                                                      right: -16,
-                                                      child: Container(color: const Color(0xFF289EFF)),
-                                                    ),                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              display,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      child: Container(
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          border: Border(bottom: BorderSide(color: Colors.white, width: 0.5)),
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            if (isSelected)
+                              Positioned.fill(
+                                left: -16,
+                                right: -16,
+                                child: Container(color: const Color(0xFF289EFF)),
+                              ),
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                display,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }).toList(),
@@ -867,7 +890,7 @@ class _AssetDropdownState extends State<_AssetDropdown> {
                   focusColor: Colors.transparent,
                   icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
                   style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
-                  menuMaxHeight: 300,
+                  menuMaxHeight: 500,
                   itemHeight: 48,
                   selectedItemBuilder: (context) {
                     return [AssetFilter.all, AssetFilter.gold, AssetFilter.crypto, AssetFilter.forex].map((val) {
@@ -895,25 +918,32 @@ class _AssetDropdownState extends State<_AssetDropdown> {
                     return DropdownMenuItem<AssetFilter>(
                       value: val,
                       alignment: Alignment.centerLeft,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                                                  if (isSelected)
-                                                    Positioned.fill(
-                                                      left: -16,
-                                                      right: -16,
-                                                      child: Container(color: const Color(0xFF289EFF)),
-                                                    ),                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              label,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      child: Container(
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          border: Border(bottom: BorderSide(color: Colors.white, width: 0.5)),
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            if (isSelected)
+                              Positioned.fill(
+                                left: -16,
+                                right: -16,
+                                child: Container(color: const Color(0xFF289EFF)),
+                              ),
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                label,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }).toList(),
@@ -1527,24 +1557,30 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
 
     // Status Filter Logic
     if (widget.selectedStatus != 'ALL') {
-      if (widget.selectedStatus == 'CANCELLED') {
-        filtered = filtered.where((s) => s.status.toLowerCase() == 'cancelled');
-      } else {
-        // Specific Statuses
-        final matchTarget = widget.selectedStatus;
-        filtered = filtered.where((s) {
-          final ms = (s.matchStatus ?? '').toUpperCase();
-          if (matchTarget == 'TP1') return ms == 'TP1';
-          if (matchTarget == 'TP2') return ms == 'TP2';
-          if (matchTarget == 'TP3') return ms == 'TP3';
-          if (matchTarget == 'SL') return ms == 'SL';
-          if (matchTarget == 'EXIT') return ms == 'EXIT' || ms == 'MANUAL_EXIT';
-          return false;
-        });
-      }
+      final matchTarget = widget.selectedStatus;
+      
+      filtered = filtered.where((s) {
+         if (matchTarget == 'CANCELLED') {
+             final res = (s.result ?? '').toLowerCase();
+             return s.status.toLowerCase() == 'cancelled' || res.contains('cancelled');
+         }
+
+         if (matchTarget == 'TP3') return s.hitTps.contains(3);
+         if (matchTarget == 'TP2') return s.hitTps.contains(2) && !s.hitTps.contains(3);
+         if (matchTarget == 'TP1') return s.hitTps.contains(1) && !s.hitTps.contains(2);
+         
+         final res = (s.result ?? '').toUpperCase();
+         if (matchTarget == 'SL') return res.contains('SL HIT');
+         if (matchTarget == 'EXIT') return (res.contains('EXIT') || res.contains('MANUAL_EXIT') || res.contains('EXITED BY ADMIN')) && s.hitTps.isEmpty;
+         
+         return false;
+      });
     } else {
       // Default: Show all except CANCELLED
-      filtered = filtered.where((s) => s.status.toLowerCase() != 'cancelled');
+      filtered = filtered.where((s) {
+         final res = (s.result ?? '').toLowerCase();
+         return s.status.toLowerCase() != 'cancelled' && !res.contains('cancelled');
+      });
     }
 
     if (widget.dateRange != null) {
@@ -1725,13 +1761,19 @@ class _SampleSignalWebCard extends StatelessWidget {
                             width: 64,
                             height: 64,
                             decoration: const BoxDecoration(
-                              color: Color(0xFF289EFF),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.lock, color: Colors.black, size: 32),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
+                                                                          color: Color(0xFF289EFF),
+                                                                          shape: BoxShape.circle,
+                                                                        ),
+                                                                        child: Center(
+                                                                          child: SvgPicture.asset(
+                                                                            'assets/icons/lock.svg',
+                                                                            width: 28,
+                                                                            height: 28,
+                                                                            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      const SizedBox(height: 24),                          Text(
                             AppLocalizations.of(context)!.popupMasterMarket,
                             style: const TextStyle(
                               color: Colors.white,
@@ -2072,17 +2114,23 @@ class _SignalWebCard extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          width: 64,
-                          height: 64,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF289EFF),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.lock, color: Colors.black, size: 32),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
+                                                Container(
+                                                  width: 64,
+                                                  height: 64,
+                                                  decoration: const BoxDecoration(
+                                                    color: Color(0xFF289EFF),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Center(
+                                                    child: SvgPicture.asset(
+                                                      'assets/icons/lock.svg',
+                                                      width: 28,
+                                                      height: 28,
+                                                      colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 24),                        Text(
                           AppLocalizations.of(context)!.popupMasterMarket,
                           style: const TextStyle(
                             color: Colors.white,
@@ -3777,24 +3825,30 @@ class _HistorySectionState extends State<_HistorySection> {
 
     // Status Filter Logic
     if (widget.selectedStatus != 'ALL') {
-      if (widget.selectedStatus == 'CANCELLED') {
-        filtered = filtered.where((s) => s.status.toLowerCase() == 'cancelled');
-      } else {
-        // Specific Statuses
-        final matchTarget = widget.selectedStatus;
-        filtered = filtered.where((s) {
-          final ms = (s.matchStatus ?? '').toUpperCase();
-          if (matchTarget == 'TP1') return ms == 'TP1';
-          if (matchTarget == 'TP2') return ms == 'TP2';
-          if (matchTarget == 'TP3') return ms == 'TP3';
-          if (matchTarget == 'SL') return ms == 'SL';
-          if (matchTarget == 'EXIT') return ms == 'EXIT' || ms == 'MANUAL_EXIT';
-          return false;
-        });
-      }
+      final matchTarget = widget.selectedStatus;
+      
+      filtered = filtered.where((s) {
+         if (matchTarget == 'CANCELLED') {
+             final res = (s.result ?? '').toLowerCase();
+             return s.status.toLowerCase() == 'cancelled' || res.contains('cancelled');
+         }
+
+         if (matchTarget == 'TP3') return s.hitTps.contains(3);
+         if (matchTarget == 'TP2') return s.hitTps.contains(2) && !s.hitTps.contains(3);
+         if (matchTarget == 'TP1') return s.hitTps.contains(1) && !s.hitTps.contains(2);
+         
+         final res = (s.result ?? '').toUpperCase();
+         if (matchTarget == 'SL') return res.contains('SL HIT');
+         if (matchTarget == 'EXIT') return (res.contains('EXIT') || res.contains('MANUAL_EXIT') || res.contains('EXITED BY ADMIN')) && s.hitTps.isEmpty;
+         
+         return false;
+      });
     } else {
       // Default: Show all except CANCELLED
-      filtered = filtered.where((s) => s.status.toLowerCase() != 'cancelled');
+      filtered = filtered.where((s) {
+         final res = (s.result ?? '').toLowerCase();
+         return s.status.toLowerCase() != 'cancelled' && !res.contains('cancelled');
+      });
     }
 
     if (widget.dateRange != null) {

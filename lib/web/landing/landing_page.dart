@@ -2335,37 +2335,28 @@ class _SignalsPerformanceCardState extends State<_SignalsPerformanceCard>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(1),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFB59DFF), Color(0xFF4B53B5)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF0F2045), Color(0xFF040812)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(7),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context)!.signalsPerformanceTitle,
-                      style: AppTextStyles.h3.copyWith(
-                        color: Colors.white,
-                        fontSize: isMobile ? 18 : 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
+                                                Container(
+                                                  width: double.infinity,
+                                                  padding: const EdgeInsets.all(1),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(0xFF0A1020), // Viền xanh đen cực tối, không còn sắc trắng
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                                                    decoration: BoxDecoration(
+                                                      color: const Color(0xFF01040D), // Nền xanh đen đặc, tối sẫm
+                                                      borderRadius: BorderRadius.circular(7),
+                                                    ),
+                                                                                            child: Text(
+                                                                                              AppLocalizations.of(context)!.signalsPerformanceTitle,
+                                                                                              style: AppTextStyles.h3.copyWith(
+                                                                                                color: Colors.white,
+                                                                                                fontSize: isMobile ? 16 : 17, // Tăng thêm 3 đơn vị (13->16, 14->17)
+                                                                                                fontWeight: FontWeight.w400, // Chỉnh xuống w400 cho chữ thanh mảnh hơn
+                                                                                              ),
+                                                                                            ),                                                  ),
+                                                ),
                 const SizedBox(height: AppSpacing.lg),
                 Expanded(
                   child: LayoutBuilder(
@@ -2511,14 +2502,17 @@ class _PerformanceItem extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 10 : 14), // Giảm padding từ 12/18 xuống 10/14
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F2045), Color(0xFF040812)], // Xanh đậm, bớt tím
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.08)), // Viền mờ tinh tế
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFF020617).withOpacity(0.5), 
+                  const Color(0xFF0A0F1E).withOpacity(0.5)
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.05)), // Viền mờ hơn nữa
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.3),
@@ -2530,7 +2524,7 @@ class _PerformanceItem extends StatelessWidget {
       child: Row(
         children: [
           // Icon trực tiếp, không có nền tròn, kích thước lớn hơn
-          Icon(icon, color: Colors.white, size: isMobile ? 26 : 32),
+          Icon(icon, color: Colors.white.withOpacity(0.8), size: isMobile ? 26 : 32),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -2540,7 +2534,7 @@ class _PerformanceItem extends StatelessWidget {
                   title,
                   style: AppTextStyles.h3.copyWith(
                     fontSize: isMobile ? 16 : 18,
-                    color: Colors.white,
+                    color: Colors.white.withOpacity(0.8),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -2549,7 +2543,7 @@ class _PerformanceItem extends StatelessWidget {
                   subtitle,
                   style: AppTextStyles.body.copyWith(
                     fontSize: isMobile ? 12 : 13,
-                    color: Colors.white60,
+                    color: Colors.white54,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

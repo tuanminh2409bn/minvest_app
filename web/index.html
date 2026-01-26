@@ -14,6 +14,9 @@
   <meta name="apple-mobile-web-app-title" content="Signal GPT">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
+  <!-- Fallback Font for Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
@@ -96,8 +99,10 @@
         serviceWorkerVersion: serviceWorkerVersion,
       }
     }).then(function(engineInitializer) {
-      // Khởi tạo Flutter engine
-      return engineInitializer.initializeEngine();
+      // Khởi tạo Flutter engine với renderer là html để đảm bảo tương thích font tốt nhất
+      return engineInitializer.initializeEngine({
+        renderer: "html"
+      });
     }).then(function(appRunner) {
       // Ẩn chỉ báo tải khi Flutter sẵn sàng chạy
       var loadingIndicator = document.getElementById("loading_indicator");
