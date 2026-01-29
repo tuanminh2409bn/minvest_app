@@ -6,7 +6,6 @@ import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../theme/gradients.dart';
 import 'widgets/navbar.dart';
-import 'sections/footer_section.dart';
 import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
@@ -136,24 +135,18 @@ class _ContactPageState extends State<ContactPage> {
       builder: (context, constraints) {
         final bool stacked = constraints.maxWidth < 900;
         final cards = [
-          SizedBox(
-            width: 420,
-            child: _InfoCard(
-              title: 'Whatsapp',
-              subtitle: '+84 969.15.6969',
-              icon: Icons.chat_bubble_outline,
-              onTap: () => launchUrl(Uri.parse('https://wa.me/84969156969')),
-            ),
+          _InfoCard(
+            title: 'Whatsapp',
+            subtitle: '+84 969.15.6969',
+            icon: Icons.chat_bubble_outline,
+            onTap: () => launchUrl(Uri.parse('https://wa.me/84969156969')),
           ),
-          const SizedBox(width: 16, height: 16),
-          SizedBox(
-            width: 420,
-            child: _InfoCard(
-              title: AppLocalizations.of(context)!.phone,
-              subtitle: '+84 969.15.6969',
-              icon: Icons.phone_in_talk_outlined,
-              onTap: () => launchUrl(Uri.parse('tel:+84969156969')),
-            ),
+          SizedBox(width: 24, height: 24), // Figma Spacing
+          _InfoCard(
+            title: AppLocalizations.of(context)!.phone,
+            subtitle: '+84 969.15.6969',
+            icon: Icons.phone_in_talk_outlined,
+            onTap: () => launchUrl(Uri.parse('tel:+84969156969')),
           ),
         ];
 
@@ -166,6 +159,7 @@ class _ContactPageState extends State<ContactPage> {
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start, // Align to top
           children: cards,
         );
       },
@@ -175,161 +169,169 @@ class _ContactPageState extends State<ContactPage> {
   Widget _contactForm(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 860),
+        constraints: const BoxConstraints(maxWidth: 823), // Figma width
         child: Container(
-          padding: const EdgeInsets.all(1.5),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: AppGradients.cta,
+            borderRadius: BorderRadius.circular(12),
+            gradient: AppGradients.cta, // Gradient border
           ),
-          child: Form(
-            key: _formKey,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(9),
-              ),
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+          padding: const EdgeInsets.all(1), // Border width
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(11), // Inner radius
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 52, vertical: 40), // Approximate padding based on Figma positions
+            child: Form(
+              key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final bool stacked = constraints.maxWidth < 640;
-                      if (stacked) {
-                        return Column(
-                          children: [
-                            _textField(
-                              context: context,
-                              label: AppLocalizations.of(context)!.firstName,
-                              hint: AppLocalizations.of(context)!.enterFirstName,
-                              controller: _firstNameController,
-                              requiredField: true,
-                            ),
-                            const SizedBox(height: 12),
-                            _textField(
-                              context: context,
-                              label: AppLocalizations.of(context)!.lastName,
-                              hint: AppLocalizations.of(context)!.enterLastName,
-                              controller: _lastNameController,
-                              requiredField: true,
-                            ),
-                          ],
-                        );
-                      }
-                      return Row(
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final bool stacked = constraints.maxWidth < 640;
+                    if (stacked) {
+                      return Column(
                         children: [
-                          Expanded(
-                            child: _textField(
-                              context: context,
-                              label: AppLocalizations.of(context)!.firstName,
-                              hint: AppLocalizations.of(context)!.enterFirstName,
-                              controller: _firstNameController,
-                              requiredField: true,
-                            ),
+                          _textField(
+                            context: context,
+                            label: AppLocalizations.of(context)!.firstName,
+                            hint: AppLocalizations.of(context)!.enterFirstName,
+                            controller: _firstNameController,
+                            requiredField: true,
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _textField(
-                              context: context,
-                              label: AppLocalizations.of(context)!.lastName,
-                              hint: AppLocalizations.of(context)!.enterLastName,
-                              controller: _lastNameController,
-                              requiredField: true,
-                            ),
+                          const SizedBox(height: 24),
+                          _textField(
+                            context: context,
+                            label: AppLocalizations.of(context)!.lastName,
+                            hint: AppLocalizations.of(context)!.enterLastName,
+                            controller: _lastNameController,
+                            requiredField: true,
                           ),
                         ],
                       );
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final bool stacked = constraints.maxWidth < 640;
-                      if (stacked) {
-                        return Column(
-                          children: [
-                            _textField(
-                              context: context,
-                              label: AppLocalizations.of(context)!.yourEmail,
-                              hint: 'example123@gmail.com',
-                              controller: _emailController,
-                              requiredField: true,
-                              keyboardType: TextInputType.emailAddress,
-                            ),
-                            const SizedBox(height: 12),
-                            _textField(
-                              context: context,
-                              label: AppLocalizations.of(context)!.phone,
-                              hint: '+1 234 567 890',
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                            ),
-                          ],
-                        );
-                      }
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: _textField(
-                              context: context,
-                              label: AppLocalizations.of(context)!.yourEmail,
-                              hint: 'example123@gmail.com',
-                              controller: _emailController,
-                              requiredField: true,
-                              keyboardType: TextInputType.emailAddress,
-                            ),
+                    }
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: _textField(
+                            context: context,
+                            label: AppLocalizations.of(context)!.firstName,
+                            hint: AppLocalizations.of(context)!.enterFirstName,
+                            controller: _firstNameController,
+                            requiredField: true,
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _textField(
-                              context: context,
-                              label: AppLocalizations.of(context)!.phone,
-                              hint: '+1 234 567 890',
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                            ),
+                        ),
+                        const SizedBox(width: 24), // Spacing from Figma (approx)
+                        Expanded(
+                          child: _textField(
+                            context: context,
+                            label: AppLocalizations.of(context)!.lastName,
+                            hint: AppLocalizations.of(context)!.enterLastName,
+                            controller: _lastNameController,
+                            requiredField: true,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final bool stacked = constraints.maxWidth < 640;
+                    if (stacked) {
+                      return Column(
+                        children: [
+                          _textField(
+                            context: context,
+                            label: AppLocalizations.of(context)!.yourEmail,
+                            hint: 'example123@gmail.com',
+                            controller: _emailController,
+                            requiredField: true,
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                          const SizedBox(height: 24),
+                          _textField(
+                            context: context,
+                            label: AppLocalizations.of(context)!.phone,
+                            hint: '+1 234 567 890',
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
                           ),
                         ],
                       );
-                    },
-                  ),
-                  const SizedBox(height: 18),
-                  _textArea(
-                    context: context,
-                    label: AppLocalizations.of(context)!.whatAreYourConcerns,
-                    hint: AppLocalizations.of(context)!.writeConcernsHere,
-                    controller: _messageController,
-                    requiredField: true,
-                  ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
+                    }
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: _textField(
+                            context: context,
+                            label: AppLocalizations.of(context)!.yourEmail,
+                            hint: 'example123@gmail.com',
+                            controller: _emailController,
+                            requiredField: true,
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        Expanded(
+                          child: _textField(
+                            context: context,
+                            label: AppLocalizations.of(context)!.phone,
+                            hint: '+1 234 567 890',
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                _textArea(
+                  context: context,
+                  label: AppLocalizations.of(context)!.whatAreYourConcerns,
+                  hint: AppLocalizations.of(context)!.writeConcernsHere,
+                  controller: _messageController,
+                  requiredField: true,
+                ),
+                const SizedBox(height: 40),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    width: double.infinity, // Figma shows wide button at bottom? No, actually full width in container
+                    height: 55,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                        textStyle: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700),
+                        textStyle: AppTextStyles.body.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: -0.90,
+                          fontFamily: 'Be Vietnam Pro',
+                        ),
                       ),
                       onPressed: _isSubmitting ? null : _submitForm,
                       child: _isSubmitting
                           ? const SizedBox(
-                              width: 18,
-                              height: 18,
+                              width: 24,
+                              height: 24,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
                             )
                           : Text(AppLocalizations.of(context)!.send),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _textField({
@@ -340,40 +342,65 @@ class _ContactPageState extends State<ContactPage> {
     bool requiredField = false,
     TextInputType keyboardType = TextInputType.text,
   }) {
-    final bool isNarrow = MediaQuery.of(context).size.width < 640;
+    // Figma styles
+    const labelStyle = TextStyle(
+      color: Colors.white,
+      fontSize: 18,
+      fontFamily: 'Be Vietnam Pro',
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.90,
+    );
+    
+    const inputStyle = TextStyle(
+      color: Colors.white,
+      fontSize: 18,
+      fontFamily: 'Be Vietnam Pro',
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.90,
+    );
+
+    const hintStyle = TextStyle(
+      color: Color(0xFF9A9A9A),
+      fontSize: 18,
+      fontFamily: 'Be Vietnam Pro',
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.90,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
-        ),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          validator: (value) {
-            if (requiredField && (value == null || value.trim().isEmpty)) {
-              return AppLocalizations.of(context)!.pleaseEnter(label);
-            }
-            return null;
-          },
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: isNarrow ? 12 : 13),
-            filled: true,
-            fillColor: const Color(0xFF0F0F0F),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: const BorderSide(color: Colors.white12),
+        Text(label, style: labelStyle),
+        const SizedBox(height: 12), // Spacing from Figma
+        SizedBox(
+          height: 55, // Fixed height from Figma
+          child: TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            validator: (value) {
+              if (requiredField && (value == null || value.trim().isEmpty)) {
+                return AppLocalizations.of(context)!.pleaseEnter(label);
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: hintStyle,
+              filled: true,
+              fillColor: const Color(0xFF111111), // Figma Input Bg
+              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: const BorderSide(color: Color(0xFF424242), width: 1), // Figma Border
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: const BorderSide(color: Colors.white, width: 1),
+              ),
+              errorStyle: const TextStyle(height: 0), // Hide default error text layout shift if desired, or keep default
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: const BorderSide(color: Colors.white30),
-            ),
+            style: inputStyle,
           ),
-          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: isNarrow ? 13 : 14),
         ),
       ],
     );
@@ -386,14 +413,36 @@ class _ContactPageState extends State<ContactPage> {
     TextEditingController? controller,
     bool requiredField = false,
   }) {
+    // Figma styles
+    const labelStyle = TextStyle(
+      color: Colors.white,
+      fontSize: 18,
+      fontFamily: 'Be Vietnam Pro',
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.90,
+    );
+    
+    const inputStyle = TextStyle(
+      color: Colors.white,
+      fontSize: 18,
+      fontFamily: 'Be Vietnam Pro',
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.90,
+    );
+
+    const hintStyle = TextStyle(
+      color: Color(0xFF9A9A9A),
+      fontSize: 18,
+      fontFamily: 'Be Vietnam Pro',
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.90,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
-        ),
-        const SizedBox(height: 6),
+        Text(label, style: labelStyle),
+        const SizedBox(height: 12),
         TextFormField(
           controller: controller,
           maxLines: 6,
@@ -405,20 +454,20 @@ class _ContactPageState extends State<ContactPage> {
           },
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontSize: 13),
+            hintStyle: hintStyle,
             filled: true,
-            fillColor: const Color(0xFF0F0F0F),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            fillColor: const Color(0xFF111111),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(6),
-              borderSide: const BorderSide(color: Colors.white12),
+              borderSide: const BorderSide(color: Color(0xFF424242), width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(6),
-              borderSide: const BorderSide(color: Colors.white30),
+              borderSide: const BorderSide(color: Colors.white, width: 1),
             ),
           ),
-          style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 14),
+          style: inputStyle,
         ),
       ],
     );
@@ -447,6 +496,10 @@ class _InfoCardState extends State<_InfoCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive width: Use Figma's 399 unless screen is too small
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double cardWidth = screenWidth < 430 ? screenWidth - 32 : 399;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
@@ -455,58 +508,94 @@ class _InfoCardState extends State<_InfoCard> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          transform: _isHovering ? Matrix4.identity().scaled(1.02) : Matrix4.identity(),
-          padding: const EdgeInsets.all(1.5),
-          decoration: BoxDecoration(
-            gradient: AppGradients.cta,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: _isHovering
-                ? [
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.3),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                    )
-                  ]
-                : [],
-          ),
+          width: cardWidth,
+          height: 132, // Figma height
+          transform: _isHovering ? Matrix4.diagonal3Values(1.02, 1.02, 1.02) : Matrix4.identity(),
           child: Container(
-            height: 110,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(9),
-              gradient: const LinearGradient(
-                colors: [Color(0xFF111325), Color(0xFF070812)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+              gradient: AppGradients.cta, // Gradient border
+              borderRadius: BorderRadius.circular(13),
+              boxShadow: _isHovering
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFF4779D4).withValues(alpha: 0.3),
+                        blurRadius: 15,
+                        spreadRadius: 1,
+                      )
+                    ]
+                  : [],
             ),
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                Icon(widget.icon, color: Colors.white, size: 18),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.title,
-                        style: AppTextStyles.body.copyWith(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.subtitle,
-                        style: AppTextStyles.caption
-                            .copyWith(color: Colors.white, fontSize: 13),
-                      ),
-                    ],
+            padding: const EdgeInsets.all(1), // Border width
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12), // Inner radius
+              child: Stack(
+                children: [
+                  // 1. Black Background
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-              ],
+                  // 2. Radial Gradient (Figma exact coordinates)
+                  Positioned(
+                    left: -266.39,
+                    top: -60.60,
+                    child: Container(
+                      width: 932.25,
+                      height: 491.37,
+                      decoration: ShapeDecoration(
+                        gradient: RadialGradient(
+                          center: const Alignment(0.50, 0.50),
+                          radius: 0.50,
+                          colors: [
+                            const Color(0xFF3E42BD),
+                            Colors.black.withValues(alpha: 0),
+                          ],
+                        ),
+                        shape: const OvalBorder(),
+                      ),
+                    ),
+                  ),
+                  // 3. Content
+                  Padding(
+                    padding: const EdgeInsets.only(left: 32), // Dịch toàn bộ khối sang trái
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start, // Căn trái các dòng
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Icon(widget.icon, color: Colors.white, size: 24),
+                            const SizedBox(width: 12),
+                            Text(
+                              widget.title,
+                              style: AppTextStyles.body.copyWith(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Be Vietnam Pro',
+                                letterSpacing: -0.90,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.subtitle,
+                          style: AppTextStyles.body.copyWith(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Be Vietnam Pro',
+                            letterSpacing: -0.90,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
