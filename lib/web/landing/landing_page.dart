@@ -1327,24 +1327,29 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
           const SizedBox(height: AppSpacing.lg),
           _buildTypingTitle(isMobile),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            AppLocalizations.of(context)!.liveTradingSignalsDesc,
-            // Figma: 18px, w400, -0.9 spacing
-            style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontSize: isMobile ? 16 : 18,
-              letterSpacing: -0.9,
+          SizedBox(
+            width: double.infinity, // Allow full width expansion
+            child: Text(
+              AppLocalizations.of(context)!.liveTradingSignalsDesc,
+              // Figma: 18px, w400, -0.9 spacing
+              style: AppTextStyles.body.copyWith(
+                color: Colors.white,
+                fontSize: isMobile ? 16 : 18,
+                fontWeight: FontWeight.w400, // Explicitly w400
+                letterSpacing: -0.90,
+                height: 1.1, // Adjust line height if needed
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: 6,
+            spacing: 17, // Figma: 141 - 124 = 17
+            runSpacing: 12,
             children: [
-              _outlinedChip(AppLocalizations.of(context)!.aiSignal, isMobile),
+              _outlinedChip(AppLocalizations.of(context)!.aiSignal, isMobile, width: 124),
               _outlinedChip(
-                  AppLocalizations.of(context)!.trendFollowing, isMobile),
-              _outlinedChip(AppLocalizations.of(context)!.realtime, isMobile),
+                  AppLocalizations.of(context)!.trendFollowing, isMobile, width: 175),
+              _outlinedChip(AppLocalizations.of(context)!.realtime, isMobile, width: 124),
             ],
           ),
         ],
@@ -1364,9 +1369,11 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
       ),
       // Figma: 36px, w700, -1.8 spacing
       style: AppTextStyles.h2.copyWith(
+          color: Colors.white,
           fontSize: isMobile ? 28.0 : 36, 
-          fontWeight: FontWeight.w700,
-          letterSpacing: isMobile ? -1.2 : -1.8,
+          fontWeight: FontWeight.w700, // Figma: w700
+          letterSpacing: isMobile ? -1.2 : -1.8, // Figma: -1.8
+          height: 1.2,
       ),
       softWrap: true,
     );
@@ -1376,13 +1383,12 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed('/ai-signals'),
       child: Row(
-        // Added Row with mainAxisSize.min
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(1.0),
+            height: 35, // Figma: Fixed height 35
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(6), // Figma: Radius 6
               gradient: const LinearGradient(
                 colors: [
                   Color(0xFF04B3E9),
@@ -1393,8 +1399,10 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
                 end: Alignment.bottomRight,
               ),
             ),
+            padding: const EdgeInsets.all(1.0),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              // Figma: Inner content
+              padding: const EdgeInsets.symmetric(horizontal: 14), 
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: Colors.black,
@@ -1402,10 +1410,12 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
               alignment: Alignment.center,
               child: Text(
                 text,
-                // Figma: 18px, w600, -0.9 spacing
                 style: AppTextStyles.bodyBold.copyWith(
                   color: Colors.white,
-                  letterSpacing: -0.9,
+                  fontSize: 18, // Figma: 18
+                  fontWeight: FontWeight.w600, // Figma: w600
+                  letterSpacing: -0.90, // Figma: -0.90
+                  height: 1.1,
                 ),
               ),
             ),
@@ -1415,28 +1425,26 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
     );
   }
 
-  Widget _outlinedChip(String text, bool isMobile) {
+  Widget _outlinedChip(String text, bool isMobile, {double? width}) {
     return Container(
-      height: 35, // Tăng height
-      padding: const EdgeInsets.symmetric(horizontal: 16), // Tăng padding
+      width: isMobile ? null : width, // Figma: Fixed width on desktop
+      height: 35, // Figma: Fixed height 35
+      padding: isMobile ? const EdgeInsets.symmetric(horizontal: 16) : EdgeInsets.zero,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
+        borderRadius: BorderRadius.circular(6), // Figma: Radius 6
         border: Border.all(color: Colors.white, width: 1),
-        color: Colors.black,
+        color: Colors.transparent, // Figma: Transparent
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            text,
-            // Figma: 18px, w600, -0.9 spacing
-            style: AppTextStyles.bodyBold.copyWith(
-              color: Colors.white,
-              fontSize: isMobile ? 14 : 18,
-              letterSpacing: -0.9,
-            ),
-          ),
-        ],
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        style: AppTextStyles.bodyBold.copyWith(
+          color: Colors.white,
+          fontSize: isMobile ? 14 : 18, // Figma: 18
+          fontWeight: FontWeight.w600, // Figma: w600
+          letterSpacing: -0.90, // Figma: -0.90
+          height: 1.1,
+        ),
       ),
     );
   }
@@ -1563,7 +1571,7 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
                           child: Center(
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(
-                                  minHeight: 400, maxWidth: 500),
+                                  minHeight: 400, maxWidth: 600), // Increased to 600
                               child: SizedBox(
                                 width: double.infinity,
                                 child: SlideTransition(
@@ -1583,7 +1591,7 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
                         child: Center(
                                                       child: ConstrainedBox(
                                                         constraints: const BoxConstraints(
-                                                            minHeight: 520, maxWidth: 500),
+                                                            minHeight: 520, maxWidth: 800), // Increased from 700 to 800
                                                         child: SizedBox(                              width: double.infinity,
                               child: SlideTransition(
                                 position: _rightSlide,
@@ -1678,17 +1686,19 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
             style: AppTextStyles.body.copyWith(
               color: Colors.white,
               fontSize: isMobile ? 16 : 18,
-              letterSpacing: isMobile ? -0.8 : -1.44,
+              fontWeight: FontWeight.w400, // Figma: w400
+              letterSpacing: isMobile ? -0.8 : -1.44, // Figma: -1.44
+              height: 1.2,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Wrap(
-            spacing: 8,
-            runSpacing: 6,
+            spacing: 17, // Figma spacing pattern
+            runSpacing: 12,
             children: [
-              _pill(AppLocalizations.of(context)!.transparent, isMobile),
-              _pill(AppLocalizations.of(context)!.educational, isMobile),
-              _pill(AppLocalizations.of(context)!.logical, isMobile),
+              _pill(AppLocalizations.of(context)!.transparent, isMobile, width: 124),
+              _pill(AppLocalizations.of(context)!.educational, isMobile, width: 140),
+              _pill(AppLocalizations.of(context)!.logical, isMobile, width: 110),
             ],
           ),
         ],
@@ -1707,9 +1717,11 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
       ),
       // Figma: 36px, w700, -1.8 spacing
       style: AppTextStyles.h2.copyWith(
+          color: Colors.white,
           fontSize: isMobile ? 28.0 : 36, 
-          fontWeight: FontWeight.w700,
-          letterSpacing: isMobile ? -1.2 : -1.8,
+          fontWeight: FontWeight.w700, // Figma: w700
+          letterSpacing: isMobile ? -1.2 : -1.80, // Figma: -1.80
+          height: 1.2,
       ),
       softWrap: true,
     );
@@ -1722,7 +1734,7 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(1.0),
+            height: 35, // Figma: Fixed height 35
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
               gradient: const LinearGradient(
@@ -1735,8 +1747,9 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
                 end: Alignment.bottomRight,
               ),
             ),
+            padding: const EdgeInsets.all(1.0),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: Colors.black,
@@ -1744,10 +1757,12 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
               alignment: Alignment.center,
               child: Text(
                 AppLocalizations.of(context)!.aiSignal,
-                // Figma: 18px, w600, -0.9 spacing
                 style: AppTextStyles.bodyBold.copyWith(
                   color: Colors.white,
-                  letterSpacing: -0.9,
+                  fontSize: 18, // Figma: 18
+                  fontWeight: FontWeight.w600, // Figma: w600
+                  letterSpacing: -0.90, // Figma: -0.90
+                  height: 1.1,
                 ),
               ),
             ),
@@ -1757,28 +1772,26 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
     );
   }
 
-  Widget _pill(String text, bool isMobile) {
+  Widget _pill(String text, bool isMobile, {double? width}) {
     return Container(
-      height: 35, // Tăng height
-      padding: const EdgeInsets.symmetric(horizontal: 16), // Tăng padding
+      width: isMobile ? null : width, // Optional fixed width
+      height: 35, // Figma: Fixed height 35
+      padding: isMobile ? const EdgeInsets.symmetric(horizontal: 16) : EdgeInsets.zero,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.white, width: 1),
-        color: Colors.black,
+        color: Colors.transparent,
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            text,
-            // Figma: 18px, w600, -0.9 spacing
-            style: AppTextStyles.bodyBold.copyWith(
-              color: Colors.white,
-              fontSize: isMobile ? 14 : 18,
-              letterSpacing: -0.9,
-            ),
-          ),
-        ],
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        style: AppTextStyles.bodyBold.copyWith(
+          color: Colors.white,
+          fontSize: isMobile ? 14 : 18, // Figma: 18
+          fontWeight: FontWeight.w600, // Figma: w600
+          letterSpacing: -0.90, // Figma: -0.90
+          height: 1.1,
+        ),
       ),
     );
   }
@@ -1895,23 +1908,25 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
                       style: AppTextStyles.body.copyWith(
                         color: Colors.white,
                         fontSize: isMobile ? 16 : 18,
-                        letterSpacing: isMobile ? -0.5 : -0.9,
+                        fontWeight: FontWeight.w400, // Figma: w400
+                        letterSpacing: isMobile ? -0.5 : -0.90, // Figma: -0.90
+                        height: 1.2,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 32),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
+                  spacing: 17, // Figma spacing pattern
+                  runSpacing: 12,
                   children: [
                     _TransparentCard()
-                        ._pill(AppLocalizations.of(context)!.results, isMobile),
+                        ._pill(AppLocalizations.of(context)!.results, isMobile, width: 100),
                     _TransparentCard()._pill(
                         AppLocalizations.of(context)!.performanceTracking,
-                        isMobile),
+                        isMobile, width: 220),
                     _TransparentCard()._pill(
-                        AppLocalizations.of(context)!.accurate, isMobile),
+                        AppLocalizations.of(context)!.accurate, isMobile, width: 110),
                   ],
                 ),
               ],
@@ -1933,7 +1948,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
       ),
       // Figma: 36px, w700, -1.8 spacing
       style: AppTextStyles.h2.copyWith(
-          fontSize: isMobile ? 28.0 : 36, 
+          fontSize: isMobile ? 28.0 : 35, // Reduced from 36 to 35
           fontWeight: FontWeight.w700,
           letterSpacing: isMobile ? -1.2 : -1.8,
       ),
@@ -1994,15 +2009,18 @@ class _KeyFindingsCard extends StatelessWidget {
                   children: [
                     _Metric(
                         label: AppLocalizations.of(context)!.predictiveAccuracy,
-                        value: '+81%'),
+                        value: '+81%',
+                        flex: 3), // Increased flex
                     _Metric(
                         label: AppLocalizations.of(context)!
                             .improvementInProfitability,
-                        value: '+37%'),
+                        value: '+37%',
+                        flex: 4), // Kept flex
                     _Metric(
                         label: AppLocalizations.of(context)!
                             .improvedRiskManagement,
-                        value: '+63%'),
+                        value: '+63%',
+                        flex: 4), // Increased flex
                   ],
                 ),
                 const SizedBox(height: 40), // Thêm khoảng trống ở đáy để đẩy chữ lên cao
@@ -2044,8 +2062,9 @@ class _KeyFindingsCard extends StatelessWidget {
 class _Metric extends StatelessWidget {
   final String label;
   final String value;
+  final int flex;
 
-  const _Metric({required this.label, required this.value});
+  const _Metric({required this.label, required this.value, this.flex = 1});
 
   @override
   Widget build(BuildContext context) {
@@ -2053,27 +2072,32 @@ class _Metric extends StatelessWidget {
     final isMobile = width < 500; // Small breakpoint for metrics
 
     return Expanded(
+      flex: flex,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center, // Figma: Centered layout
         children: [
           Text(
             value,
-            // Figma: 18px, w600, -0.9 spacing
+            // Figma: 18px, w600, -0.9 spacing, White
             style: AppTextStyles.bodyBold.copyWith(
               fontSize: isMobile ? 16 : 18,
+              fontWeight: FontWeight.w600,
               color: Colors.white,
               letterSpacing: -0.9,
+              height: 1.1,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8), // Tăng khoảng cách một chút theo Figma (top 36 - 18 = 18? thực tế khoảng 8-12 là đẹp)
           Text(
             label,
-            // Figma: 14px, w400, -0.7 spacing
+            textAlign: TextAlign.center, // Đảm bảo text label cũng căn giữa
+            // Figma: 14px, w400, -0.7 spacing, #A3A3A3
             style: AppTextStyles.caption.copyWith(
               fontSize: isMobile ? 12 : 14,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFFA3A3A3), // Xám nhạt
+              color: const Color(0xFFA3A3A3),
               letterSpacing: -0.7,
+              height: 1.2,
             ),
           ),
         ],
@@ -2667,7 +2691,7 @@ class _SignalsPerformanceRow extends StatelessWidget {
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: ConstrainedBox(
-                                    constraints: const BoxConstraints(minHeight: 520, maxWidth: 560),
+                                    constraints: const BoxConstraints(minHeight: 520, maxWidth: 650),
                                     child: const SizedBox(
                                       width: double.infinity,
                                       child: _TransparentCardAnimated(),
@@ -2698,7 +2722,7 @@ class _TransparentCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(1.0),
+            height: 35, // Figma: Fixed height 35
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
               gradient: const LinearGradient(
@@ -2711,8 +2735,9 @@ class _TransparentCard extends StatelessWidget {
                 end: Alignment.bottomRight,
               ),
             ),
+            padding: const EdgeInsets.all(1.0),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: Colors.black,
@@ -2720,10 +2745,12 @@ class _TransparentCard extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 AppLocalizations.of(context)!.aiSignal,
-                style: AppTextStyles.body.copyWith(
+                style: AppTextStyles.bodyBold.copyWith(
                   color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
+                  fontSize: 18, // Figma: 18
+                  fontWeight: FontWeight.w600, // Figma: w600
+                  letterSpacing: -0.90, // Figma: -0.90
+                  height: 1.1,
                 ),
               ),
             ),
@@ -2733,27 +2760,26 @@ class _TransparentCard extends StatelessWidget {
     );
   }
 
-  Widget _pill(String text, bool isMobile) {
+  Widget _pill(String text, bool isMobile, {double? width}) {
     return Container(
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      width: isMobile ? null : width, // Optional fixed width
+      height: 35, // Figma: Fixed height 35
+      padding: isMobile ? const EdgeInsets.symmetric(horizontal: 16) : EdgeInsets.zero,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.white, width: 1),
-        color: Colors.black,
+        color: Colors.transparent,
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            text,
-            style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-            ),
-          ),
-        ],
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        style: AppTextStyles.bodyBold.copyWith(
+          color: Colors.white,
+          fontSize: isMobile ? 14 : 18, // Figma: 18
+          fontWeight: FontWeight.w600, // Figma: w600
+          letterSpacing: -0.90, // Figma: -0.90
+          height: 1.1,
+        ),
       ),
     );
   }
