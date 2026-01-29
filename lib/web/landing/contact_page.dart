@@ -139,7 +139,7 @@ class _ContactPageState extends State<ContactPage> {
           SizedBox(
             width: 420,
             child: _InfoCard(
-              title: 'Whatsapp', // Keep as English technical term or add to loc if needed
+              title: 'Whatsapp',
               subtitle: '+84 969.15.6969',
               icon: Icons.chat_bubble_outline,
               onTap: () => launchUrl(Uri.parse('https://wa.me/84969156969')),
@@ -150,7 +150,7 @@ class _ContactPageState extends State<ContactPage> {
             width: 420,
             child: _InfoCard(
               title: AppLocalizations.of(context)!.phone,
-              subtitle: '+84 969.15.6969', // This is a number, not for localization
+              subtitle: '+84 969.15.6969',
               icon: Icons.phone_in_talk_outlined,
               onTap: () => launchUrl(Uri.parse('tel:+84969156969')),
             ),
@@ -251,8 +251,8 @@ class _ContactPageState extends State<ContactPage> {
                           children: [
                             _textField(
                               context: context,
-                              label: AppLocalizations.of(context)!.yourEmail, // Reusing existing key
-                              hint: 'example123@gmail.com', // Keep as example, not localized
+                              label: AppLocalizations.of(context)!.yourEmail,
+                              hint: 'example123@gmail.com',
                               controller: _emailController,
                               requiredField: true,
                               keyboardType: TextInputType.emailAddress,
@@ -261,7 +261,7 @@ class _ContactPageState extends State<ContactPage> {
                             _textField(
                               context: context,
                               label: AppLocalizations.of(context)!.phone,
-                              hint: '+1 234 567 890', // Example number, not localized
+                              hint: '+1 234 567 890',
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
                             ),
@@ -273,8 +273,8 @@ class _ContactPageState extends State<ContactPage> {
                           Expanded(
                             child: _textField(
                               context: context,
-                              label: AppLocalizations.of(context)!.yourEmail, // Reusing existing key
-                              hint: 'example123@gmail.com', // Keep as example, not localized
+                              label: AppLocalizations.of(context)!.yourEmail,
+                              hint: 'example123@gmail.com',
                               controller: _emailController,
                               requiredField: true,
                               keyboardType: TextInputType.emailAddress,
@@ -285,7 +285,7 @@ class _ContactPageState extends State<ContactPage> {
                             child: _textField(
                               context: context,
                               label: AppLocalizations.of(context)!.phone,
-                              hint: '+1 234 567 890', // Example number, not localized
+                              hint: '+1 234 567 890',
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
                             ),

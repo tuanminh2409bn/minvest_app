@@ -341,9 +341,9 @@ class _PricingCardContentState extends State<_PricingCardContent> {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
     final appLocalizations = AppLocalizations.of(context)!;
-    // Tăng chiều cao tối thiểu để thẻ dài hơn
-    final double minCardHeight = isMobile ? 650 : 630;
-    final double verticalPadding = isMobile ? 48 : 64; // 24*2 hoặc 32*2
+    // Figma: 658px
+    final double minCardHeight = isMobile ? 658 : 658; 
+    final double verticalPadding = isMobile ? 48 : 64; 
 
     return _StaticBorderCard(
       child: Container(
@@ -438,23 +438,25 @@ class _PricingCardContentState extends State<_PricingCardContent> {
                       ],
                     ),
 
-                    // Phần 3: Nút đăng ký
+                    // Phần 3: Nút đăng ký (Figma: 368x55)
                     SizedBox(
                       width: double.infinity,
+                      height: 55, // Cố định chiều cao
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.black,
                           backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: EdgeInsets.symmetric(vertical: isMobile ? 24 : 18),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)), // Bo góc 6px theo Figma
+                          padding: EdgeInsets.zero, // Reset padding mặc định
                         ),
-                        onPressed: () {}, // Nút sáng và nhấn được nhưng không có tác vụ theo yêu cầu
+                        onPressed: () {}, 
                         child: Text(
                                 appLocalizations.chooseThisPlan,
-                                style: TextStyle(
-                                  fontSize: isMobile ? 22 : 14,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.2,
+                                style: AppTextStyles.bodyBold.copyWith(
+                                  color: Colors.black,
+                                  fontSize: 18, // Font 18
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: -0.9,
                                 ),
                               ),
                       ),

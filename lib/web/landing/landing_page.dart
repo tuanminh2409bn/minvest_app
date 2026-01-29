@@ -399,7 +399,7 @@ class _HeroInteractiveState extends State<_HeroInteractive>
   Widget _buildContent(bool isMobile) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 900),
+        constraints: const BoxConstraints(maxWidth: 1300), // Tăng width để chứa chữ to hơn trên 1 hàng ngang
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -409,22 +409,31 @@ class _HeroInteractiveState extends State<_HeroInteractive>
               child: Text(
                 AppLocalizations.of(context)!.heroTitle,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.h1.copyWith(fontSize: 44),
+                // Figma: 64px, -3.2 spacing (Desktop)
+                style: AppTextStyles.heroTitle.copyWith(
+                  fontSize: isMobile ? 40 : 64, 
+                  letterSpacing: isMobile ? -1.5 : -3.2,
+                ),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             _buildAnimatedWidget(
               slideAnim: isMobile ? _subtitleSlideUp : _subtitleSlide,
               fadeAnim: _subtitleFade,
               child: Text(
                 AppLocalizations.of(context)!.heroSubtitle,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.h3.copyWith(color: Colors.white),
+                // Figma: 36px, -1.8 spacing
+                style: AppTextStyles.h2.copyWith(
+                  color: Colors.white,
+                  fontSize: isMobile ? 24 : 36,
+                  letterSpacing: isMobile ? -1.0 : -1.8,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
             _buildAnimatedWidget(
-              slideAnim: _ctaSlide, // CTA is always vertical slide up
+              slideAnim: _ctaSlide, 
               fadeAnim: _ctaFade,
               child: Wrap(
                   spacing: AppSpacing.md,
@@ -433,15 +442,15 @@ class _HeroInteractiveState extends State<_HeroInteractive>
                   children: [
                     GradientButton(
                       label: AppLocalizations.of(context)!.getSignalsNow,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: isMobile ? 24 : 32,
-                          vertical: isMobile ? 12 : 14),
-                      borderRadius: isMobile ? 1 : 6,
-                      textStyle: AppTextStyles.body.copyWith(
-                        fontSize: isMobile ? 20 : 16,
-                        fontWeight: FontWeight.w700,
+                      width: 188,
+                      height: 38,
+                      padding: EdgeInsets.zero, // Padding handled by SizedBox
+                      borderRadius: 6,
+                      textStyle: AppTextStyles.bodyBold.copyWith(
+                        fontSize: 18,
                         color: Colors.white,
                         height: 1.1,
+                        letterSpacing: -0.9,
                       ),
                       onPressed: () {
                         if (FirebaseAuth.instance.currentUser != null) {
@@ -452,7 +461,7 @@ class _HeroInteractiveState extends State<_HeroInteractive>
                       },
                     ),
                     InkWell(
-                      borderRadius: BorderRadius.circular(isMobile ? 1 : 8),
+                      borderRadius: BorderRadius.circular(6),
                       onTap: () {
                         final authState = context.read<AuthBloc>().state;
                         if (authState.status == AuthStatus.authenticated) {
@@ -462,39 +471,30 @@ class _HeroInteractiveState extends State<_HeroInteractive>
                         }
                       },
                       child: Container(
+                        width: 100,
+                        height: 38,
+                        padding: const EdgeInsets.all(1), // Độ dày viền
                         decoration: BoxDecoration(
-                          borderRadius:
-                              BorderRadius.circular(isMobile ? 1 : 8),
+                          borderRadius: BorderRadius.circular(6),
                           gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFF04B3E9),
-                              Color(0xFF2E60FF),
-                              Color(0xFFD500F9)
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                            begin: Alignment.bottomLeft,
+                            end: Alignment.topRight,
+                            colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
                           ),
                         ),
-                        padding: const EdgeInsets.all(1),
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(isMobile ? 1 : 7),
-                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(5), // Radius trong = ngoài - độ dày
+                            color: Colors.black, // Màu nền cũ/chuẩn của nút outline
                           ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isMobile ? 24 : 32,
-                            vertical: isMobile
-                                ? 11
-                                : 13, // Reduced by 1 to match GradientButton (which has no border)
-                          ),
+                          alignment: Alignment.center,
                           child: Text(
                             AppLocalizations.of(context)!.freeTrial,
-                            style: AppTextStyles.body.copyWith(
+                            style: AppTextStyles.bodyBold.copyWith(
                               color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: isMobile ? 20 : 16,
-                              height: 1.1, // Sync with GradientButton
+                              fontSize: 18,
+                              height: 1.1,
+                              letterSpacing: -0.9,
                             ),
                           ),
                         ),
@@ -561,19 +561,22 @@ class HeroSubtitleSection extends StatelessWidget {
             Text(
               AppLocalizations.of(context)!.globalAiInnovationTitle,
               textAlign: TextAlign.center,
+              // Figma: 36px, w700, -1.8 spacing
               style: AppTextStyles.h2.copyWith(
-                fontSize: isMobile ? 32 : 28,
+                fontSize: isMobile ? 28 : 36,
+                letterSpacing: isMobile ? -1.2 : -1.8,
                 color: Colors.white,
-                fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               AppLocalizations.of(context)!.globalAiInnovationDesc,
               textAlign: TextAlign.center,
-              style: AppTextStyles.body.copyWith(
+              // Figma: 22px, w400, -1.1 spacing
+              style: AppTextStyles.bodyLarge.copyWith(
                 color: Colors.white,
-                fontSize: isMobile ? 18 : 16,
+                fontSize: isMobile ? 16 : 22,
+                letterSpacing: isMobile ? -0.5 : -1.1,
                 height: 1.5,
               ),
             ),
@@ -671,15 +674,14 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection>
                       constraints: BoxConstraints(maxWidth: maxWidth),
                       child: _AnimatedBorderCard(
                         child: Container(
-                          constraints: BoxConstraints(minHeight: isMobile ? 0 : 486),
+                          constraints: BoxConstraints(minHeight: isMobile ? 0 : 540), // Reverted to 540
                           padding: EdgeInsets.all(isMobile ? 16 : AppSpacing.md),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: isMobile
-                                ? MainAxisAlignment.start
-                                : MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.start, // Changed from spaceBetween to start
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              const SizedBox(height: 20),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -688,11 +690,12 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection>
                                   _buildTabs(context),
                                 ],
                               ),
+                              const SizedBox(height: 16), // Giảm từ 32 xuống 16
                               if (isMobile) const SizedBox(height: 24),
                               _CarouselSignalCards(
                                 onPageChanged: (index) {
                                   setState(() {
-                                    _currentCardIndex = index;
+                                    _currentCardIndex = index % 3;
                                   });
                                 },
                               ),
@@ -707,7 +710,7 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection>
                       left: -31,
                       right: -31,
                       bottom: -31, // Tràn xuống đáy của nền xám
-                      height: 180,
+                      height: 180, // Increased from 60
                       child: IgnorePointer(
                         child: Container(
                           decoration: BoxDecoration(
@@ -755,15 +758,20 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection>
   Widget _buildSearchBar(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
-        color: const Color(0xFF1B1B1B),
-        borderRadius: BorderRadius.circular(8),
+        color: const Color(0xFF141414),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         AppLocalizations.of(context)!.aiSignal,
-        style: AppTextStyles.body
-            .copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+        style: AppTextStyles.body.copyWith(
+          color: const Color(0xFF9A9A9A),
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -772,17 +780,19 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection>
     Widget tab(String text, {bool active = false}) {
       return InkWell(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          width: 72.71,
+          height: 31,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: active ? const Color(0xFF2B2B2B) : const Color(0xFF1F1F1F),
-            borderRadius: BorderRadius.circular(8),
+            color: const Color(0xFF141414),
+            borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
             text,
             style: AppTextStyles.body.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
+              color: const Color(0xFF9A9A9A),
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
             ),
           ),
         ),
@@ -937,22 +947,6 @@ class _CarouselSignalCardsState extends State<_CarouselSignalCards> {
   // Define 3 cards
   final List<Widget> _cards = const [
     _SignalCard(
-      icon: Icons.currency_bitcoin,
-      iconColor: Color(0xFF00B6FF),
-      pair: 'BTC/USD',
-      date: 'June 1, 2025',
-      entry: '93.000',
-      sl: '93.300',
-      tp1: '92.700',
-      tp2: '92.500',
-      badgeLabel: 'Sell Limit',
-      badgeGradient: LinearGradient(
-        colors: [Color(0xFFFF00FF), Color(0xFF9B00FF)],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ),
-    ),
-    _SignalCard(
       icon: Icons.auto_awesome,
       iconColor: Color(0xFFFFA000),
       pair: 'XAU/USD',
@@ -963,7 +957,23 @@ class _CarouselSignalCardsState extends State<_CarouselSignalCards> {
       tp2: '3350',
       badgeLabel: 'Buy Limit',
       badgeGradient: LinearGradient(
-        colors: [Color(0xFF3DA1FF), Color(0xFF2C6BFF)],
+        colors: [Color(0xFF2E60FF), Color(0xFF2E60FF)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ),
+    ),
+    _SignalCard(
+      icon: Icons.currency_bitcoin,
+      iconColor: Color(0xFF00B6FF),
+      pair: 'BTC/USD',
+      date: 'June 1, 2025',
+      entry: '93.000',
+      sl: '93.300',
+      tp1: '92.700',
+      tp2: '92.500',
+      badgeLabel: 'Sell Limit',
+      badgeGradient: LinearGradient(
+        colors: [Color(0xFFD500F9), Color(0xFFD500F9)],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ),
@@ -979,7 +989,39 @@ class _CarouselSignalCardsState extends State<_CarouselSignalCards> {
       tp2: '4.500',
       badgeLabel: 'Buy Limit',
       badgeGradient: LinearGradient(
-        colors: [Color(0xFF00C853), Color(0xFF64DD17)],
+        colors: [Color(0xFF2E60FF), Color(0xFF2E60FF)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ),
+    ),
+    _SignalCard(
+      icon: Icons.currency_yen,
+      iconColor: Color(0xFFFF5252),
+      pair: 'USD/JPY',
+      date: 'June 2, 2025',
+      entry: '155.40',
+      sl: '156.00',
+      tp1: '154.50',
+      tp2: '154.00',
+      badgeLabel: 'Sell Limit',
+      badgeGradient: LinearGradient(
+        colors: [Color(0xFFD500F9), Color(0xFFD500F9)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ),
+    ),
+    _SignalCard(
+      icon: Icons.currency_pound,
+      iconColor: Color(0xFF00BFA5),
+      pair: 'GBP/USD',
+      date: 'June 2, 2025',
+      entry: '1.2650',
+      sl: '1.2600',
+      tp1: '1.2720',
+      tp2: '1.2780',
+      badgeLabel: 'Buy Limit',
+      badgeGradient: LinearGradient(
+        colors: [Color(0xFF2E60FF), Color(0xFF2E60FF)],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ),
@@ -989,7 +1031,7 @@ class _CarouselSignalCardsState extends State<_CarouselSignalCards> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 1000 * _cards.length, viewportFraction: 0.5);
+    _pageController = PageController(initialPage: 1000 * _cards.length, viewportFraction: 0.35);
     // Timer trượt mỗi 3 giây
     _timer = java_async.Timer.periodic(const Duration(seconds: 3), (timer) {
       if (_pageController.hasClients) {
@@ -1011,7 +1053,7 @@ class _CarouselSignalCardsState extends State<_CarouselSignalCards> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 306,
+      height: 400, // Increased to show more cards
       child: PageView.builder(
         controller: _pageController,
         scrollDirection: Axis.vertical,
@@ -1025,7 +1067,7 @@ class _CarouselSignalCardsState extends State<_CarouselSignalCards> {
           final cardIndex = index % _cards.length;
           // Thêm Padding để tạo khoảng cách giữa các thẻ
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
             child: _cards[cardIndex],
           );
         },
@@ -1064,96 +1106,94 @@ class _SignalCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool isNarrow = constraints.maxWidth < 520;
-        // Các biến kích thước tùy chỉnh cho mobile/desktop
-        final double padding = isNarrow ? 10.0 : 14.0;
-        final double iconBoxSize = isNarrow ? 36.0 : 44.0;
-        final double iconSize = isNarrow ? 20.0 : 24.0;
         final double pairFontSize = isNarrow ? 16.0 : 18.0;
-        final double dateFontSize = isNarrow ? 11.0 : 13.0;
-        final double badgeFontSize = isNarrow ? 11.0 : 13.0;
-        final double badgeVerticalPadding = isNarrow ? 6.0 : 8.0;
-        final double badgeHorizontalPadding = isNarrow ? 10.0 : 14.0;
-        final double lineFontSize = isNarrow ? 13.0 : 15.0; // Giảm đáng kể kích thước chữ Entry/SL/TP
-        final double gap = isNarrow ? 8.0 : 12.0;
+        final double dateFontSize = isNarrow ? 14.0 : 16.0;
+        final double badgeFontSize = isNarrow ? 16.0 : 18.0;
+        final double lineFontSize = isNarrow ? 16.0 : 18.0;
 
         return Container(
           width: double.infinity,
-          padding: EdgeInsets.all(padding),
+          height: null, // Để thẻ tự co theo nội dung, loại bỏ khoảng thừa dưới
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), // Giảm padding dọc xuống 12 để tránh overflow
           decoration: BoxDecoration(
             color: Colors.black,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFF303030)),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: Colors.white, width: 0.40),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min, // Đảm bảo cột chỉ chiếm không gian vừa đủ
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    width: iconBoxSize,
-                    height: iconBoxSize,
+                    width: 48.53,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF121212),
-                      borderRadius: BorderRadius.circular(10),
+                      color: const Color(0xFF141414),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    child: Icon(icon, color: iconColor, size: iconSize),
+                    child: Icon(icon, color: iconColor, size: 24),
                   ),
-                  SizedBox(width: gap),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(pair,
-                            style: AppTextStyles.h3
-                                .copyWith(fontSize: pairFontSize, color: Colors.white)),
+                            style: AppTextStyles.bodyBold.copyWith(
+                                fontSize: pairFontSize,
+                                color: Colors.white,
+                                letterSpacing: -0.9,
+                                height: 1.1,
+                            )),
                         Text(date,
-                            style: AppTextStyles.body.copyWith(
+                            style: AppTextStyles.caption.copyWith(
                                 fontSize: dateFontSize,
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w600)),
+                                color: const Color(0xFF9A9A9A),
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.8,
+                                height: 1.1,
+                            )),
                       ],
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: badgeHorizontalPadding, vertical: badgeVerticalPadding),
+                    width: 108,
+                    height: 35,
                     decoration: BoxDecoration(
                       gradient: badgeGradient,
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(60),
                     ),
+                    alignment: Alignment.center,
                     child: Text(
                       badgeLabel,
-                      style: AppTextStyles.body.copyWith(
+                      style: AppTextStyles.bodyBold.copyWith(
                         fontSize: badgeFontSize,
                         color: Colors.white,
-                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.9,
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: gap),
-              Row(
+              const SizedBox(height: 12),
+              Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _line('Entry: $entry', lineFontSize),
-                        _line('SL : $sl', lineFontSize),
-                      ],
-                    ),
+                  Row(
+                    children: [
+                      Expanded(child: _line('Entry: $entry', lineFontSize)),
+                      Expanded(child: _line('TP1: $tp1', lineFontSize)),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _line('TP1: $tp1', lineFontSize),
-                        _line('TP2 : $tp2', lineFontSize),
-                      ],
-                    ),
+                  Row(
+                    children: [
+                      Expanded(child: _line('SL : $sl', lineFontSize)),
+                      Expanded(child: _line('TP2 : $tp2', lineFontSize)),
+                    ],
                   ),
                 ],
               ),
@@ -1166,10 +1206,15 @@ class _SignalCard extends StatelessWidget {
 
   Widget _line(String text, double fontSize) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2), // Giảm padding dọc
+      padding: const EdgeInsets.symmetric(vertical: 4), // Trả lại padding chữ như cũ
       child: Text(
         text,
-        style: AppTextStyles.h3.copyWith(fontSize: fontSize, color: Colors.white),
+        style: AppTextStyles.body.copyWith( // 18px, w400
+            fontSize: fontSize,
+            color: Colors.white,
+            letterSpacing: -0.9,
+            height: 1.2,
+        ),
       ),
     );
   }
@@ -1284,9 +1329,11 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
           const SizedBox(height: AppSpacing.md),
           Text(
             AppLocalizations.of(context)!.liveTradingSignalsDesc,
+            // Figma: 18px, w400, -0.9 spacing
             style: AppTextStyles.body.copyWith(
               color: Colors.white,
-              fontSize: isMobile ? 18 : 14,
+              fontSize: isMobile ? 16 : 18,
+              letterSpacing: -0.9,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -1315,8 +1362,12 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(
-          fontSize: isMobile ? 25.0 : 29, fontWeight: FontWeight.w800),
+      // Figma: 36px, w700, -1.8 spacing
+      style: AppTextStyles.h2.copyWith(
+          fontSize: isMobile ? 28.0 : 36, 
+          fontWeight: FontWeight.w700,
+          letterSpacing: isMobile ? -1.2 : -1.8,
+      ),
       softWrap: true,
     );
   }
@@ -1351,10 +1402,10 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
               alignment: Alignment.center,
               child: Text(
                 text,
-                style: AppTextStyles.body.copyWith(
+                // Figma: 18px, w600, -0.9 spacing
+                style: AppTextStyles.bodyBold.copyWith(
                   color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
+                  letterSpacing: -0.9,
                 ),
               ),
             ),
@@ -1366,8 +1417,8 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
 
   Widget _outlinedChip(String text, bool isMobile) {
     return Container(
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: 35, // Tăng height
+      padding: const EdgeInsets.symmetric(horizontal: 16), // Tăng padding
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
         border: Border.all(color: Colors.white, width: 1),
@@ -1378,10 +1429,11 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
         children: [
           Text(
             text,
-            style: AppTextStyles.body.copyWith(
+            // Figma: 18px, w600, -0.9 spacing
+            style: AppTextStyles.bodyBold.copyWith(
               color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
+              fontSize: isMobile ? 14 : 18,
+              letterSpacing: -0.9,
             ),
           ),
         ],
@@ -1622,9 +1674,11 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppLocalizations.of(context)!.orderExplanationEngineDesc,
+            // Figma: 18px, w400, -1.44 spacing
             style: AppTextStyles.body.copyWith(
               color: Colors.white,
-              fontSize: isMobile ? 18 : 14,
+              fontSize: isMobile ? 16 : 18,
+              letterSpacing: isMobile ? -0.8 : -1.44,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -1651,8 +1705,12 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(
-          fontSize: isMobile ? 27.8 : 29, fontWeight: FontWeight.w800),
+      // Figma: 36px, w700, -1.8 spacing
+      style: AppTextStyles.h2.copyWith(
+          fontSize: isMobile ? 28.0 : 36, 
+          fontWeight: FontWeight.w700,
+          letterSpacing: isMobile ? -1.2 : -1.8,
+      ),
       softWrap: true,
     );
   }
@@ -1686,10 +1744,10 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
               alignment: Alignment.center,
               child: Text(
                 AppLocalizations.of(context)!.aiSignal,
-                style: AppTextStyles.body.copyWith(
+                // Figma: 18px, w600, -0.9 spacing
+                style: AppTextStyles.bodyBold.copyWith(
                   color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
+                  letterSpacing: -0.9,
                 ),
               ),
             ),
@@ -1701,8 +1759,8 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
 
   Widget _pill(String text, bool isMobile) {
     return Container(
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: 35, // Tăng height
+      padding: const EdgeInsets.symmetric(horizontal: 16), // Tăng padding
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
         border: Border.all(color: Colors.white, width: 1),
@@ -1713,10 +1771,11 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
         children: [
           Text(
             text,
-            style: AppTextStyles.body.copyWith(
+            // Figma: 18px, w600, -0.9 spacing
+            style: AppTextStyles.bodyBold.copyWith(
               color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
+              fontSize: isMobile ? 14 : 18,
+              letterSpacing: -0.9,
             ),
           ),
         ],
@@ -1832,9 +1891,11 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
                     Text(
                       AppLocalizations.of(context)!
                           .transparentRealPerformanceDesc,
+                      // Figma: 18px, w400, -0.9 spacing
                       style: AppTextStyles.body.copyWith(
                         color: Colors.white,
-                        fontSize: isMobile ? 18 : 14,
+                        fontSize: isMobile ? 16 : 18,
+                        letterSpacing: isMobile ? -0.5 : -0.9,
                       ),
                     ),
                   ],
@@ -1870,8 +1931,12 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
           TextSpan(text: showCursor ? ' |' : '  '),
         ],
       ),
-      style: AppTextStyles.h1.copyWith(
-          fontSize: isMobile ? 23.6 : 29, fontWeight: FontWeight.w800),
+      // Figma: 36px, w700, -1.8 spacing
+      style: AppTextStyles.h2.copyWith(
+          fontSize: isMobile ? 28.0 : 36, 
+          fontWeight: FontWeight.w700,
+          letterSpacing: isMobile ? -1.2 : -1.8,
+      ),
       softWrap: true,
     );
   }
@@ -1914,8 +1979,12 @@ class _KeyFindingsCard extends StatelessWidget {
                   : MainAxisAlignment.spaceBetween,
               children: [
                 Text(AppLocalizations.of(context)!.keyFindings,
+                    // Figma: 20px, w600, -1.0 spacing
                     style: AppTextStyles.h3.copyWith(
-                        fontSize: isMobile ? 18 : 22, color: Colors.white)),
+                        fontSize: isMobile ? 18 : 20, 
+                        color: const Color(0xFF9A9A9A), // Màu xám nhạt theo thiết kế
+                        letterSpacing: -1.0,
+                    )),
                 SizedBox(height: isMobile ? 12 : AppSpacing.md),
                 // Trả về một widget StatefulWidget nhỏ chỉ để chạy animation biểu đồ
                 _AnimatedChartContent(),
@@ -1971,6 +2040,48 @@ class _KeyFindingsCard extends StatelessWidget {
   }
 }
 
+// Helper widget for metrics to keep code clean and apply styles consistently
+class _Metric extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _Metric({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 500; // Small breakpoint for metrics
+
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            // Figma: 18px, w600, -0.9 spacing
+            style: AppTextStyles.bodyBold.copyWith(
+              fontSize: isMobile ? 16 : 18,
+              color: Colors.white,
+              letterSpacing: -0.9,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            // Figma: 14px, w400, -0.7 spacing
+            style: AppTextStyles.caption.copyWith(
+              fontSize: isMobile ? 12 : 14,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFFA3A3A3), // Xám nhạt
+              letterSpacing: -0.7,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // Tách phần animation biểu đồ ra riêng để giữ hiệu ứng vẽ dần
 class _AnimatedChartContent extends StatefulWidget {
   @override
@@ -2014,34 +2125,6 @@ class _AnimatedChartContentState extends State<_AnimatedChartContent>
         child: CustomPaint(
           painter: _ChartPainter(progress: progress),
         ),
-      ),
-    );
-  }
-}
-
-class _Metric extends StatelessWidget {
-  final String label;
-  final String value;
-  const _Metric({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            value,
-            style: AppTextStyles.h3.copyWith(
-                fontSize: 22, color: Colors.white, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.caption.copyWith(color: Colors.white70),
-          ),
-        ],
       ),
     );
   }
