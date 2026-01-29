@@ -133,8 +133,11 @@ class _WinMoreSectionState extends State<WinMoreSection> with SingleTickerProvid
                   alignment: Alignment.center,
                   clipBehavior: Clip.none,
                   children: [
-                    // 1. Glow Background (Bottom)
-                    _GlowBackground(width: contentWidth * 1.5),
+                    // 1. Glow Background (Bottom) - Tập trung ở giữa và rực rỡ
+                    _GlowBackground(
+                      width: isNarrow ? screenWidth * 1.2 : contentWidth * 1.5,
+                      height: isNarrow ? 400 : 550,
+                    ),
 
                     // 2. Interactive Cards (Middle) - Behind phone, above glow
                     if (!isNarrow)
@@ -408,21 +411,73 @@ class _InteractiveSignalCardState extends State<_InteractiveSignalCard> with Sin
 
 class _GlowBackground extends StatelessWidget {
   final double? width;
-  const _GlowBackground({this.width});
+  final double? height;
+  const _GlowBackground({this.width, this.height});
 
   @override
   Widget build(BuildContext context) {
+    final w = width ?? 800;
+    final h = height ?? 600;
+
     return IgnorePointer(
       child: Center(
         child: SizedBox(
-          width: width,
-          child: Opacity(
-            opacity: 0.85,
-            child: Image.asset(
-              'assets/mockups/light.png',
-              fit: BoxFit.contain,
-              alignment: Alignment.center,
-            ),
+          width: w,
+          height: h,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Nguồn sáng Xanh (Lệch cực nhẹ sang trái từ tâm)
+              Transform.translate(
+                offset: Offset(-w * 0.05, 0),
+                child: Container(
+                  width: w * 0.6,
+                  height: h * 0.8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xFF2E60FF).withOpacity(0.5),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.7],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2E60FF).withOpacity(0.4),
+                        blurRadius: 120,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Nguồn sáng Tím/Hồng (Lệch cực nhẹ sang phải từ tâm)
+              Transform.translate(
+                offset: Offset(w * 0.05, 0),
+                child: Container(
+                  width: w * 0.6,
+                  height: h * 0.8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xFFBF4ED2).withOpacity(0.5),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.7],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFBF4ED2).withOpacity(0.3),
+                        blurRadius: 120,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -440,70 +495,75 @@ class _PhoneMockup extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxW = constraints.maxWidth;
-        // Kích thước điện thoại tự vẽ
-        final width = maxW < 360 ? maxW * 0.9 : 320.0;
-        final height = width * 2.05; // Tỉ lệ màn hình hiện đại
+        final bool isMobileLayout = maxW < 900;
+        
+        // Desktop: 320px width, 2.05 ratio
+        // Mobile: 260px width (tối đa), 2.0 ratio (bớt dài)
+        final double width = isMobileLayout ? math.min(maxW * 0.8, 260.0) : 320.0;
+        final double height = isMobileLayout ? width * 2.0 : width * 2.05;
 
-        return Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(48),
-            // Gradient viền kim loại (Titanium)
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF666666), // Xám sáng
-                Color(0xFF2a2a2a), // Xám tối
-                Color(0xFF888888), // Điểm sáng
-                Color(0xFF1a1a1a), // Tối
+        return Center(
+          child: Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(width * 0.15),
+              // Gradient viền kim loại (Titanium)
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF666666), // Xám sáng
+                  Color(0xFF2a2a2a), // Xám tối
+                  Color(0xFF888888), // Điểm sáng
+                  Color(0xFF1a1a1a), // Tối
+                ],
+                stops: [0.1, 0.4, 0.6, 0.9],
+              ),
+              boxShadow: [
+                 BoxShadow(
+                  color: Colors.black.withOpacity(0.7),
+                  blurRadius: 50,
+                  offset: const Offset(0, 30),
+                  spreadRadius: -10,
+                ),
               ],
-              stops: [0.1, 0.4, 0.6, 0.9],
             ),
-            boxShadow: [
-               BoxShadow(
-                color: Colors.black.withOpacity(0.7),
-                blurRadius: 50,
-                offset: const Offset(0, 30),
-                spreadRadius: -10,
-              ),
-            ],
-          ),
-          // Padding tạo độ dày viền kim loại
-          child: Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black, // Viền đen (Bezel)
-                borderRadius: BorderRadius.circular(45),
-              ),
-              padding: const EdgeInsets.all(10.0), // Độ dày Bezel
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(35),
-                child: Stack(
-                  children: [
-                    // Nội dung màn hình
-                    Positioned.fill(
-                      child: _PhoneScreen(
-                        onHoverStart: onHoverStart,
-                        onHoverEnd: onHoverEnd,
-                      ),
-                    ),
-                    // Dynamic Island
-                    Align(
-                      alignment: Alignment.topCenter,
-                      child: Container(
-                        margin: const EdgeInsets.only(top: 10),
-                        width: 96,
-                        height: 26,
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(13),
+            // Padding tạo độ dày viền kim loại
+            child: Padding(
+              padding: const EdgeInsets.all(3.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black, // Viền đen (Bezel)
+                  borderRadius: BorderRadius.circular(width * 0.14),
+                ),
+                padding: EdgeInsets.all(isMobileLayout ? 8.0 : 10.0), // Độ dày Bezel
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(width * 0.11),
+                  child: Stack(
+                    children: [
+                      // Nội dung màn hình
+                      Positioned.fill(
+                        child: _PhoneScreen(
+                          onHoverStart: onHoverStart,
+                          onHoverEnd: onHoverEnd,
                         ),
                       ),
-                    ),
-                  ],
+                      // Dynamic Island
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: Container(
+                          margin: EdgeInsets.only(top: isMobileLayout ? 8 : 10),
+                          width: width * 0.3,
+                          height: width * 0.08,
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -527,66 +587,65 @@ class _PhoneScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalPad = constraints.maxWidth * 0.05; 
-        // Đẩy lên cao để ngang hàng với Dynamic Island (height 26 + margin 10 = 36)
-        // Dùng topPad khoảng 15px là vừa tầm mắt
-        final topPad = 15.0;
-        final bottomPad = 20.0;
+        final w = constraints.maxWidth;
+        final bool isMobileLayout = w < 280; // Chiều rộng bên trong màn hình điện thoại giả lập
+
+        final horizontalPad = w * 0.06; 
+        final topPad = w * 0.05;
 
         return Container(
           decoration: const BoxDecoration(
             color: Color(0xFF0F0F0F),
           ),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              horizontalPad.clamp(12, 20), 
-              topPad, 
-              horizontalPad.clamp(12, 20), 
-              bottomPad
-            ),
+            padding: EdgeInsets.fromLTRB(horizontalPad, topPad, horizontalPad, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Status Bar - Ngang hàng Dynamic Island
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text('9:41', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Row(
-                        children: const [
-                          Icon(Icons.signal_cellular_alt, size: 14, color: Colors.white),
-                          SizedBox(width: 4),
-                          Icon(Icons.wifi, size: 14, color: Colors.white),
-                          SizedBox(width: 4),
-                          Icon(Icons.battery_full, size: 14, color: Colors.white),
-                        ],
+                // Status Bar
+                SizedBox(
+                  height: w * 0.12,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4.0, top: 4.0),
+                        child: Text('9:41', style: AppTextStyles.body.copyWith(color: Colors.white, fontSize: isMobileLayout ? 11 : 13, fontWeight: FontWeight.w600)),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.only(right: 4.0, top: 6.0),
+                        child: Row(
+                          children: [
+                            Icon(Icons.signal_cellular_alt, size: isMobileLayout ? 10 : 14, color: Colors.white),
+                            const SizedBox(width: 4),
+                            Icon(Icons.wifi, size: isMobileLayout ? 10 : 14, color: Colors.white),
+                            const SizedBox(width: 4),
+                            Icon(Icons.battery_full, size: isMobileLayout ? 10 : 14, color: Colors.white),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 32), // Tăng khoảng cách sau status bar
-                const Icon(Icons.arrow_back, color: Colors.white, size: 20),
-                const SizedBox(height: 16),
-                Text('AI Signals', style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
+                SizedBox(height: w * 0.05), 
+                Icon(Icons.arrow_back, color: Colors.white, size: isMobileLayout ? 18 : 20),
+                SizedBox(height: w * 0.04),
+                Text('AI Signals', style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: isMobileLayout ? 20 : 22, fontWeight: FontWeight.bold)),
+                SizedBox(height: w * 0.05),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      _chip('Gold', true),
+                      _chip('Gold', true, isMobileLayout),
                       const SizedBox(width: 8),
-                      _chip('Forex', false),
+                      _chip('Forex', false, isMobileLayout),
                       const SizedBox(width: 8),
-                      _chip('Crypto', false),
+                      _chip('Crypto', false, isMobileLayout),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: w * 0.05),
                 Expanded(
                   child: ListView.builder(
                     padding: EdgeInsets.zero,
@@ -616,19 +675,19 @@ class _PhoneScreen extends StatelessWidget {
     );
   }
 
-  Widget _chip(String text, bool active) {
+  Widget _chip(String text, bool active, bool isMobile) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFF0F0F0F), // Màu nền trùng màn hình
-        borderRadius: BorderRadius.circular(3),
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(color: Colors.white24, width: 1), // Viền mỏng
       ),
       child: Text(
         text,
         style: AppTextStyles.caption.copyWith(
           color: Colors.white,
-          fontSize: 10,
+          fontSize: isMobile ? 9 : 10,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -701,85 +760,90 @@ class _InteractivePhoneRowState extends State<_InteractivePhoneRow> with SingleT
   Widget build(BuildContext context) {
     final data = _phoneDataPool[_currentIndex];
     
-    return MouseRegion(
-      onEnter: (_) {
-        setState(() => _isHovered = true);
-        widget.onHoverChange(true);
-        _controller.forward();
-      },
-      onExit: (_) {
-        setState(() => _isHovered = false);
-        widget.onHoverChange(false);
-        _controller.reverse();
-      },
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: _cycleData,
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _scaleAnimation.value,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A1A),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: _isHovered ? const Color(0xFF289EFF) : const Color(0xFF242424),
-                    width: _isHovered ? 1.5 : 1.0,
+    return LayoutBuilder(builder: (context, constraints) {
+      final w = constraints.maxWidth;
+      final bool isMobile = w < 250;
+
+      return MouseRegion(
+        onEnter: (_) {
+          setState(() => _isHovered = true);
+          widget.onHoverChange(true);
+          _controller.forward();
+        },
+        onExit: (_) {
+          setState(() => _isHovered = false);
+          widget.onHoverChange(false);
+          _controller.reverse();
+        },
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: _cycleData,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1A1A),
+                    borderRadius: BorderRadius.circular(isMobile ? 6 : 8),
+                    border: Border.all(
+                      color: _isHovered ? const Color(0xFF289EFF) : const Color(0xFF242424),
+                      width: _isHovered ? 1.5 : 1.0,
+                    ),
+                    boxShadow: _isHovered ? [
+                      BoxShadow(
+                        color: const Color(0xFF289EFF).withOpacity(0.2),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      )
+                    ] : [],
                   ),
-                  boxShadow: _isHovered ? [
-                    BoxShadow(
-                      color: const Color(0xFF289EFF).withOpacity(0.2),
-                      blurRadius: 8,
-                      spreadRadius: 1,
-                    )
-                  ] : [],
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                child: Row(
-                  children: [
-                    Icon(data.icon, color: const Color(0xFF00A7FF), size: 18),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            data.pair, 
-                            style: AppTextStyles.body.copyWith(
-                              color: Colors.white, 
-                              fontSize: 13, 
-                              fontWeight: FontWeight.w700
-                            )
-                          ),
-                          Text(
-                            'Update: dd/mm/yyyy', 
-                            style: AppTextStyles.caption.copyWith(
-                              color: Colors.white70, 
-                              fontSize: 10
-                            )
-                          ),
-                        ],
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 10, vertical: isMobile ? 8 : 10),
+                  child: Row(
+                    children: [
+                      Icon(data.icon, color: const Color(0xFF00A7FF), size: isMobile ? 16 : 18),
+                      SizedBox(width: isMobile ? 8 : 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              data.pair, 
+                              style: AppTextStyles.body.copyWith(
+                                color: Colors.white, 
+                                fontSize: isMobile ? 11 : 13, 
+                                fontWeight: FontWeight.w700
+                              )
+                            ),
+                            Text(
+                              'Update: dd/mm/yyyy', 
+                              style: AppTextStyles.caption.copyWith(
+                                color: Colors.white70, 
+                                fontSize: isMobile ? 8 : 10
+                              )
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      data.side,
-                      style: AppTextStyles.body.copyWith(
-                        color: data.side.toLowerCase().contains('buy') ? Colors.greenAccent : Colors.redAccent,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                      const SizedBox(width: 8),
+                      Text(
+                        data.side,
+                        style: AppTextStyles.body.copyWith(
+                          color: data.side.toLowerCase().contains('buy') ? Colors.greenAccent : Colors.redAccent,
+                          fontSize: isMobile ? 11 : 13,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -1019,11 +1083,13 @@ class _SmartToolsSectionState extends State<SmartToolsSection> with SingleTicker
   Widget _buildFrontSide(BuildContext context) {
     // Dịch chuyển nội dung khi hover thanh trên
     final double translationY = _isOuterToolbarHovered ? 12.0 : 0.0;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = screenWidth < 900;
 
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 120),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 120), // Responsive padding
           child: MouseRegion(
             onEnter: (_) => setState(() => _isOuterToolbarHovered = true),
             onExit: (_) => setState(() => _isOuterToolbarHovered = false),
@@ -1574,9 +1640,9 @@ class _LaptopShowcase extends StatelessWidget {
       builder: (context, constraints) {
         final double maxW = constraints.maxWidth;
         final bool isNarrow = maxW < 900;
-        // Desktop: Tăng lên 1350. Mobile: Giảm xuống 0.85 lần chiều rộng màn hình
-        final double laptopWidth = isNarrow ? maxW * 0.85 : 1350;
-        final double height = isNarrow ? maxW * 0.6 : 780;
+        // Desktop: Tăng lên 1350. Mobile: Tăng kích thước lên 0.95
+        final double laptopWidth = isNarrow ? maxW * 0.95 : 1350;
+        final double height = isNarrow ? maxW * 0.65 : 780; // Tăng nhẹ height container
         final double offsetY = isNarrow ? 0 : -30;
 
         if (isNarrow) {
@@ -1590,7 +1656,7 @@ class _LaptopShowcase extends StatelessWidget {
                   clipBehavior: Clip.none,
                   alignment: Alignment.center,
                   children: [
-                    const _LaptopGlow(),
+                    _LaptopGlow(isNarrow: isNarrow, screenWidth: maxW),
                     _LaptopImage(width: laptopWidth, offsetY: offsetY),
                   ],
                 ),
@@ -1608,7 +1674,7 @@ class _LaptopShowcase extends StatelessWidget {
             clipBehavior: Clip.none,
             alignment: Alignment.center,
             children: [
-              const _LaptopGlow(),
+              _LaptopGlow(isNarrow: isNarrow, screenWidth: maxW),
               _LaptopImage(width: laptopWidth, offsetY: offsetY),
               _LaptopCards(availableWidth: laptopWidth),
             ],
@@ -1620,17 +1686,36 @@ class _LaptopShowcase extends StatelessWidget {
 }
 
 class _LaptopGlow extends StatelessWidget {
-  const _LaptopGlow();
+  final bool isNarrow;
+  final double screenWidth;
+  const _LaptopGlow({required this.isNarrow, required this.screenWidth});
 
   @override
   Widget build(BuildContext context) {
+    // Desktop (Original values)
+    double top = -400;
+    double containerWidth = 1000;
+    double glowSize = 500;
+    double glowOffsetWidth = 600;
+    double blur = 800;
+    double spread = 50;
+
+    // Mobile (Adjusted for focus)
+    if (isNarrow) {
+      top = -20; // Hạ quầng sáng xuống thấp hơn nữa
+      containerWidth = screenWidth;
+      glowSize = screenWidth * 0.8;
+      glowOffsetWidth = screenWidth * 0.7; // Tăng width để hai nguồn sáng giao thoa mạnh ở giữa
+      blur = 300;
+      spread = 10;
+    }
+
     return Positioned.fill(
-      // Đẩy toàn bộ vùng sáng lên trên
-      top: -400,
+      top: top,
       bottom: 100,
       child: Center(
         child: SizedBox(
-          width: 1000, // Rộng hơn để quầng sáng bao phủ hết laptop to
+          width: containerWidth,
           child: Stack(
             children: [
               // Nguồn sáng Xanh (Bên Trái)
@@ -1638,16 +1723,16 @@ class _LaptopGlow extends StatelessWidget {
                 left: 0,
                 top: 0,
                 bottom: 0,
-                width: 600,
+                width: glowOffsetWidth,
                 child: Center(
                   child: Container(
-                    width: 500,
-                    height: 500,
+                    width: glowSize,
+                    height: glowSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          const Color(0xFF2E60FF).withOpacity(0.5), // Tăng độ đậm
+                          const Color(0xFF2E60FF).withOpacity(0.5),
                           const Color(0xFF2E60FF).withOpacity(0.2),
                           Colors.transparent,
                         ],
@@ -1656,8 +1741,8 @@ class _LaptopGlow extends StatelessWidget {
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFF2E60FF).withOpacity(0.4),
-                          blurRadius: 800, // Giảm xuống 800
-                          spreadRadius: 50,
+                          blurRadius: blur,
+                          spreadRadius: spread,
                         ),
                       ],
                     ),
@@ -1669,16 +1754,16 @@ class _LaptopGlow extends StatelessWidget {
                 right: 0,
                 top: 0,
                 bottom: 0,
-                width: 600,
+                width: glowOffsetWidth,
                 child: Center(
                   child: Container(
-                    width: 500,
-                    height: 500,
+                    width: glowSize,
+                    height: glowSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          const Color(0xFFBF4ED2).withOpacity(0.5), // Tăng độ đậm
+                          const Color(0xFFBF4ED2).withOpacity(0.5),
                           const Color(0xFFBF4ED2).withOpacity(0.2),
                           Colors.transparent,
                         ],
@@ -1687,8 +1772,8 @@ class _LaptopGlow extends StatelessWidget {
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFFBF4ED2).withOpacity(0.4),
-                          blurRadius: 800, // Giảm xuống 800
-                          spreadRadius: 50,
+                          blurRadius: blur,
+                          spreadRadius: spread,
                         ),
                       ],
                     ),
@@ -2000,19 +2085,16 @@ class MaximizeResultsSection extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            boxShadow: const [
-              BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 4)),
-            ],
           ),
           child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),
               color: Colors.black,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             child: Text(
               AppLocalizations.of(context)!.startNow,
-              style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+              style: AppTextStyles.h3.copyWith(fontSize: 16, color: Colors.white),
             ),
           ),
         ),
@@ -2030,14 +2112,9 @@ class _ContentWrapper extends StatelessWidget {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1200),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-             final bool isNarrow = MediaQuery.of(context).size.width < 900;
-             return Padding(
-               padding: EdgeInsets.symmetric(horizontal: isNarrow ? 16 : 0),
-               child: child,
-             );
-          },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: child,
         ),
       ),
     );
