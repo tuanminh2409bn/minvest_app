@@ -44,13 +44,13 @@ class LandingNavBar extends StatelessWidget {
             final bool isCompact = constraints.maxWidth < 1250;
             final double padH = 0;
             final double padV = stacked ? 12 : 6;
-            final navSpacing = 25.0;
+            final navSpacing = 32.0;
             final fontSize = stacked
-                ? 14.0
+                ? 15.5
                 : isCompact
-                    ? 14.5
-                    : 16.0;
-            final double logoGap = isCompact ? 32.0 : 64.0;
+                    ? 16.5
+                    : 18.0;
+            final double logoGap = isCompact ? 64.0 : 110.0;
 
             final navLinks = Row(
               mainAxisSize: MainAxisSize.min,
@@ -77,7 +77,7 @@ class LandingNavBar extends StatelessWidget {
                     child: _NavBarItem(
                       title: item['title']!,
                       route: item['route']!,
-                      fontSize: 20, // Increased for mobile
+                      fontSize: 20, // Reduced for mobile
                     ),
                   ),
                 ),
@@ -123,7 +123,7 @@ class LandingNavBar extends StatelessWidget {
                       children: [
                         InkWell(
                           onTap: () => Navigator.of(context).pushNamed('/'),
-                          child: Image.asset('assets/mockups/logo.png', height: 42, fit: BoxFit.contain),
+                          child: Image.asset('assets/mockups/logo.png', height: 50, fit: BoxFit.contain),
                         ),
                         SizedBox(width: logoGap),
                         Expanded(
@@ -176,11 +176,14 @@ class LandingNavBar extends StatelessWidget {
       builder: (context) => GestureDetector(
         onTap: () => Navigator.of(context).pushNamed('/signup'),
         child: Container(
+          // Kích thước cố định theo Figma: 188x38
+          width: isMobile ? null : 188,
+          height: isMobile ? 48 : 38,
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
             gradient: const LinearGradient(
-              colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
+              colors: [Color(0xFF04B3E9), Color(0xFF2E60FF), Color(0xFFD500F9)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -189,7 +192,7 @@ class LandingNavBar extends StatelessWidget {
             ],
           ),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: isMobile ? 12 : 6),
+            // Padding sẽ tự động căn giữa text trong SizedBox 188x38
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(isMobile ? 1 : 5),
               color: Colors.transparent,
@@ -198,9 +201,10 @@ class LandingNavBar extends StatelessWidget {
               child: Text(
                 text,
                 style: AppTextStyles.h3.copyWith(
-                  fontSize: isMobile ? 20 : 14,
-                  fontWeight: FontWeight.w700,
+                  fontSize: isMobile ? 20 : 18, // Font 18 theo Figma
+                  fontWeight: FontWeight.w600,
                   color: Colors.white,
+                  letterSpacing: -0.9,
                 ),
               ),
             ),
@@ -215,24 +219,27 @@ class LandingNavBar extends StatelessWidget {
       builder: (context) => GestureDetector(
         onTap: onTap,
         child: Container(
+          // Kích thước cố định theo Figma: 100x38
+          width: isMobile ? null : 100,
+          height: isMobile ? 48 : 38,
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
-            gradient: AppGradients.cta,
+            gradient: AppGradients.cta, // Viền gradient
           ),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: isMobile ? 12 : 6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(isMobile ? 1 : 5),
-              color: Colors.black,
+              color: Colors.black, // Nền đen
             ),
             child: Center(
               child: Text(
                 text,
                 style: AppTextStyles.h3.copyWith(
-                  fontSize: isMobile ? 20 : 14,
-                  fontWeight: FontWeight.w700,
+                  fontSize: isMobile ? 20 : 18, // Font 18 theo Figma
+                  fontWeight: FontWeight.w600,
                   color: Colors.white,
+                  letterSpacing: -0.9,
                 ),
               ),
             ),
@@ -419,26 +426,15 @@ class _LanguageSelector extends StatelessWidget {
             );
           },
           child: Container(
-            height: 32,
+            height: 31,
+            width: 50.38,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.white24),
-              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(1),
+              border: Border.all(color: const Color(0xFF3F3F3F), width: 1),
+              color: Colors.black,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 32, 
-                  height: 20, 
-                  alignment: Alignment.center,
-                  child: _buildFlag(provider.locale?.languageCode ?? 'en', width: 24, height: 16),
-                ),
-                const SizedBox(width: 6),
-                const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 12),
-              ],
+            child: Center(
+              child: _buildFlag(provider.locale?.languageCode ?? 'en', width: 43.39, height: 22.85),
             ),
           ),
         );
@@ -618,7 +614,7 @@ class _MobileNavBarState extends State<_MobileNavBar> {
           children: [
             InkWell(
               onTap: () => Navigator.of(context).pushNamed('/'),
-              child: Image.asset('assets/mockups/logo.png', height: 38, fit: BoxFit.contain),
+              child: Image.asset('assets/mockups/logo.png', height: 40, fit: BoxFit.contain),
             ),
             const Spacer(),
             const _LanguageSelector(),

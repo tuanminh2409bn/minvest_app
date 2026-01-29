@@ -6,7 +6,6 @@ import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/fire
 import { ImageAnnotatorClient } from "@google-cloud/vision";
 import { onObjectFinalized } from "firebase-functions/v2/storage";
 import { onSchedule } from "firebase-functions/v2/scheduler";
-import { v2 as translate } from '@google-cloud/translate';
 import axios from "axios";
 import { GoogleAuth } from "google-auth-library";
 import { Response } from "express";
@@ -19,7 +18,6 @@ import * as jose from "node-jose";
 // =================================================================
 admin.initializeApp();
 const firestore = admin.firestore();
-const translateClient = new translate.Translate();
 
 const PRODUCT_PRICES: { [key: string]: number } = {
   'elite_1_month': 78,
@@ -206,21 +204,25 @@ export const telegramWebhook = functions.https.onRequest(
         let logMessage = "";
 
         // Logic parse giá đóng lệnh và pips từ tin nhắn reply
-        // Hỗ trợ các mẫu: 
-        // 1. "Giá: 1234.5 (+20p)"
-        // 2. "⏳ Exit tại giá 4387.38 (-11.4p)"
-        const priceRegex = /(?:Giá|giá|Exit tại giá|Close tại giá).*?\s*([\d.,]+)\s*\(([+-]?[\d.,]+)p\)/i;
+        // Hỗ trợ các mẫu English mới & Vietnamese cũ:
+        // 1. "Price: 5264.0 (+50.0p)"
+        // 2. "Exit at price 4960.46 (+19.6p)"
+        // 3. "This signal has hit entry at price 5262.23"
+        // 4. "Giá: 1234.5 (+20p)" (Old VI)
+        const priceRegex = /(?:Price:|Exit at price|entry at price|Giá|Close tại giá).*?\s*([\d.,]+)(?:\s*\(([+-]?[\d.,]+)p\))?/i;
         const priceMatch = updateText.match(priceRegex);
 
         if (priceMatch) {
             const parsedPrice = parseFloat(priceMatch[1].replace(/,/g, '')); // Loại bỏ dấu phẩy nếu có
-            const parsedPips = parseFloat(priceMatch[2].replace(/,/g, ''));
-            updatePayload.closedPrice = parsedPrice;
-            updatePayload.closedPips = parsedPips;
-            updatePayload.pips = parsedPips; // Cập nhật trường pips chính để tính toán thống kê
+            if (priceMatch[2]) {
+                const parsedPips = parseFloat(priceMatch[2].replace(/,/g, ''));
+                updatePayload.closedPrice = parsedPrice;
+                updatePayload.closedPips = parsedPips;
+                updatePayload.pips = parsedPips; // Cập nhật trường pips chính để tính toán thống kê
+            }
         }
 
-        if (updateText.includes("đã khớp entry tại giá")) {
+        if (updateText.includes("hit entry at price") || updateText.includes("đã khớp entry tại giá")) {
           updatePayload = { ...updatePayload, isMatched: true, result: "Matched", matchedAt: admin.firestore.FieldValue.serverTimestamp() };
           logMessage = `Tín hiệu ${signalDoc.id} đã KHỚP LỆNH (MATCHED).`;
         } else if (updateText.includes("tp1 hit")) {
@@ -235,31 +237,25 @@ export const telegramWebhook = functions.https.onRequest(
         } else if (updateText.includes("tp3 hit")) {
             updatePayload = { ...updatePayload, status: "closed", result: "TP3 Hit", hitTps: admin.firestore.FieldValue.arrayUnion(1, 2, 3), closedAt: admin.firestore.FieldValue.serverTimestamp() };
             logMessage = `Tín hiệu ${signalDoc.id} đã TP3 Hit.`;
-        } else if (updateText.includes("exit tại giá") || updateText.includes("exit lệnh")) {
+        } else if (updateText.includes("exit at price") || updateText.includes("exit lệnh") || updateText.includes("exit tại giá")) {
             updatePayload = { ...updatePayload, status: "closed", result: "Exited by Admin", closedAt: admin.firestore.FieldValue.serverTimestamp() };
             logMessage = `Tín hiệu ${signalDoc.id} đã được đóng bởi admin.`;
-        } else if (updateText.includes("bỏ tín hiệu")) {
+        } else if (updateText.includes("cancel:") || updateText.includes("bỏ tín hiệu") || updateText.includes("canceled")) {
             updatePayload = { ...updatePayload, status: "closed", result: "Cancelled", closedAt: admin.firestore.FieldValue.serverTimestamp() };
             logMessage = `Tín hiệu ${signalDoc.id} đã bị hủy.`;
         }
 
         // Logic xử lý tin nhắn Giải thích (Reply)
-        const reasonRegex = /===\s*GIẢI\s*THÍCH\s*===/i;
+        const reasonRegex = /===\s*(?:GIẢI\s*THÍCH|EXPLANATION)\s*===/i;
         const reasonMatch = message.text.match(reasonRegex); // Dùng message.text gốc để giữ format
         if (reasonMatch && reasonMatch.index !== undefined) {
             const reasonContent = message.text.substring(reasonMatch.index + reasonMatch[0].length).trim();
             if (reasonContent) {
-                let reasonData: any = { vi: reasonContent };
-                try {
-                    functions.logger.log(`Đang dịch phần giải thích (Reply): "${reasonContent}"`);
-                    const [translation] = await translateClient.translate(reasonContent, "en");
-                    reasonData.en = translation;
-                    functions.logger.log(`Dịch thành công: "${translation}"`);
-                } catch (translationError) {
-                    functions.logger.error("Lỗi khi dịch phần giải thích (Reply):", translationError);
-                    reasonData.en = "Translation failed.";
-                }
-                updatePayload.reason = reasonData;
+                // Mặc định tất cả các ngôn ngữ là nội dung gốc (Tiếng Anh)
+                updatePayload.reason = {
+                    vi: reasonContent,
+                    en: reasonContent
+                };
                 logMessage = logMessage ? `${logMessage} & Đã cập nhật Lý do.` : `Tín hiệu ${signalDoc.id} đã cập nhật Lý do.`;
             }
         }
@@ -272,22 +268,11 @@ export const telegramWebhook = functions.https.onRequest(
         const signalData = parseSignalMessage(message.text);
         if (signalData) {
           if (signalData.reason) {
-            try {
-              functions.logger.log(`Đang dịch phần giải thích: "${signalData.reason}"`);
-              const [translation] = await translateClient.translate(signalData.reason, "en");
-              functions.logger.log(`Dịch thành công: "${translation}"`);
-
-              signalData.reason = {
-                vi: signalData.reason,
-                en: translation,
-              };
-            } catch (translationError) {
-              functions.logger.error("Lỗi khi dịch phần giải thích:", translationError);
-              signalData.reason = {
-                vi: signalData.reason,
-                en: "Translation failed.",
-              };
-            }
+            // Mặc định tất cả các ngôn ngữ là nội dung gốc (Tiếng Anh)
+            signalData.reason = {
+              vi: signalData.reason,
+              en: signalData.reason,
+            };
           }
 
           const batch = firestore.batch();
@@ -335,15 +320,16 @@ export const telegramWebhook = functions.https.onRequest(
 function parseSignalMessage(text: string): any | null {
     const signal: any = { takeProfits: [] };
     
-    // Sử dụng Regex để tìm phần giải thích (không phân biệt hoa thường)
-    const reasonRegex = /===\s*GIẢI\s*THÍCH\s*===/i;
+    // Sử dụng Regex để tìm phần giải thích (không phân biệt hoa thường, hỗ trợ cả Tiếng Việt và Anh)
+    const reasonRegex = /===\s*(?:GIẢI\s*THÍCH|EXPLANATION)\s*===/i;
     const match = text.match(reasonRegex);
     
     const signalPart = match ? text.split(match[0])[0] : text;
     if (!signalPart) return null;
     
     const lines = signalPart.split("\n");
-    const titleLine = lines.find((line) => line.includes("Tín hiệu:"));
+    // Tìm dòng tiêu đề (Hỗ trợ "Tín hiệu:" hoặc "Signal:")
+    const titleLine = lines.find((line) => line.includes("Tín hiệu:") || line.includes("Signal:"));
     if (!titleLine) return null;
     
     // 1. Parse Type
@@ -361,7 +347,7 @@ function parseSignalMessage(text: string): any | null {
         const words = titleLine.trim().split(/\s+/);
         if (words.length > 0) {
             const lastWord = words[words.length - 1].toUpperCase();
-            const keywords = ["BUY", "SELL", "LIMIT", "STOP", "NOW", "TÍN", "HIỆU", ":"];
+            const keywords = ["BUY", "SELL", "LIMIT", "STOP", "NOW", "TÍN", "HIỆU", ":", "SIGNAL"];
             if (!keywords.includes(lastWord.toUpperCase()) && lastWord.length >= 3) {
                  signal.symbol = lastWord.toUpperCase();
             }
@@ -503,11 +489,11 @@ export const verifyPurchase = onCall(
                         type: "subscription_success",
                         title_loc: {
                             en: "Subscription Successful",
-                            vi: "Đăng ký thành công",
+                            vi: "Subscription Successful",
                         },
                         body_loc: {
                             en: "You have successfully upgraded your account.",
-                            vi: "Bạn đã nâng cấp tài khoản thành công.",
+                            vi: "You have successfully upgraded your account.",
                         },
                         timestamp: admin.firestore.FieldValue.serverTimestamp(),
                         isRead: false,
@@ -997,9 +983,9 @@ export const updateUserSubscriptionTier = onCall({ region: "asia-southeast1" }, 
         throw new HttpsError("invalid-argument", "Lý do thay đổi không được để trống.");
     }
 
-    // 3. Chuẩn bị nội dung thông báo cho người dùng (giữ nguyên)
+    // 3. Chuẩn bị nội dung thông báo cho người dùng
     const reasonForNotification = {
-        vi: `Tài khoản của bạn đã được quản trị viên cập nhật thành gói ${tier.toUpperCase()}. Lý do: ${reason}. Vui lòng đăng nhập lại.`,
+        vi: `Your account has been updated to the ${tier.toUpperCase()} plan by an administrator. Reason: ${reason}. Please log in again.`,
         en: `Your account has been updated to the ${tier.toUpperCase()} plan by an administrator. Reason: ${reason}. Please log in again.`,
     };
 
@@ -1031,11 +1017,11 @@ export const updateUserSubscriptionTier = onCall({ region: "asia-southeast1" }, 
             type: "subscription_success",
             title_loc: {
                 en: "Plan Updated",
-                vi: "Gói đã được cập nhật",
+                vi: "Plan Updated",
             },
             body_loc: {
                 en: `Your plan has been updated to ${tier.toUpperCase()}.`,
-                vi: `Gói của bạn đã được cập nhật thành ${tier.toUpperCase()}.`,
+                vi: `Your plan has been updated to ${tier.toUpperCase()}.`,
             },
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
             isRead: false,
@@ -1275,10 +1261,10 @@ export const checkExpiredSubscriptions = onSchedule (
             const notifRef = doc.ref.collection("notifications").doc();
             batch.set(notifRef, {
                 type: "subscription_expired",
-                title_loc: { en: "Elite Plan Expired", vi: "Gói Elite đã hết hạn" },
+                title_loc: { en: "Elite Plan Expired", vi: "Elite Plan Expired" },
                 body_loc: {
                     en: "Your Elite subscription has expired. You are now on the Free plan.",
-                    vi: "Gói Elite của bạn đã hết hạn. Bạn đã trở về gói miễn phí.",
+                    vi: "Your Elite subscription has expired. You are now on the Free plan.",
                 },
                 timestamp: admin.firestore.FieldValue.serverTimestamp(),
                 isRead: false,
@@ -1315,10 +1301,10 @@ export const checkExpiredSubscriptions = onSchedule (
                 const notifRef = doc.ref.collection("notifications").doc();
                 batch.set(notifRef, {
                     type: "subscription_expired",
-                    title_loc: { en: `${pkg.toUpperCase()} Plan Expired`, vi: `Gói ${pkg.toUpperCase()} đã hết hạn` },
+                    title_loc: { en: `${pkg.toUpperCase()} Plan Expired`, vi: `${pkg.toUpperCase()} Plan Expired` },
                     body_loc: {
                         en: `Your ${pkg.toUpperCase()} subscription has expired.`,
-                        vi: `Gói đăng ký ${pkg.toUpperCase()} của bạn đã hết hạn.`,
+                        vi: `Your ${pkg.toUpperCase()} subscription has expired.`,
                     },
                     timestamp: admin.firestore.FieldValue.serverTimestamp(),
                     isRead: false,
