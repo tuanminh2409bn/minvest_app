@@ -341,6 +341,9 @@ class _PricingCardContentState extends State<_PricingCardContent> {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
     final appLocalizations = AppLocalizations.of(context)!;
+    final currentLang = Localizations.localeOf(context).languageCode;
+    final bool isFullText = currentLang == 'en' || currentLang == 'vi';
+
     // Figma: 658px
     final double minCardHeight = isMobile ? 658 : 658; 
     final double verticalPadding = isMobile ? 48 : 64; 
@@ -386,17 +389,43 @@ class _PricingCardContentState extends State<_PricingCardContent> {
                           children: [
                             FaIcon(FontAwesomeIcons.crown, color: Colors.white, size: isMobile ? 36 : 26),
                             const SizedBox(width: 8),
-                            Text(
-                              widget.plan.title, 
-                              style: AppTextStyles.h3.copyWith(
-                                color: Colors.white, 
-                                fontSize: isMobile ? 34 : 24,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 2.0,
+                            // Title: Hiện đầy đủ cho EN/VI, dùng ellipsis cho ngôn ngữ khác
+                            if (isFullText)
+                              Text(
+                                widget.plan.title, 
+                                style: AppTextStyles.h3.copyWith(
+                                  color: Colors.white, 
+                                  fontSize: isMobile ? 34 : 24,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 2.0,
+                                ),
+                              )
+                            else
+                              Flexible(
+                                child: Text(
+                                  widget.plan.title, 
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: AppTextStyles.h3.copyWith(
+                                    color: Colors.white, 
+                                    fontSize: isMobile ? 34 : 24,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 2.0,
+                                  ),
+                                ),
                               ),
-                            ),
                             const Spacer(),
-                            _saveBadge(widget.plan.badge, isMobile),
+                            // Badge: Hiện đầy đủ cho EN/VI, dùng ellipsis cho ngôn ngữ khác
+                            if (isFullText)
+                              _saveBadge(widget.plan.badge, isMobile)
+                            else
+                              Flexible(
+                                child: _saveBadge(
+                                  widget.plan.badge, 
+                                  isMobile, 
+                                  useEllipsis: true
+                                ),
+                              ),
                           ],
                         ),
                         SizedBox(height: isMobile ? 42 : 32),
@@ -406,7 +435,7 @@ class _PricingCardContentState extends State<_PricingCardContent> {
                             fontSize: isMobile ? 68 : 48, 
                             color: const Color(0xFF00B2FF),
                             fontWeight: FontWeight.w900,
-                            letterSpacing: -1.0,
+                            letterSpacing: -0.6,
                           ),
                         ),
                         if (widget.plan.oldPrice != null && widget.plan.oldPrice!.isNotEmpty)
@@ -456,7 +485,7 @@ class _PricingCardContentState extends State<_PricingCardContent> {
                                   color: Colors.black,
                                   fontSize: 18, // Font 18
                                   fontWeight: FontWeight.w600,
-                                  letterSpacing: -0.9,
+                                  letterSpacing: -0.54,
                                 ),
                               ),
                       ),
@@ -471,7 +500,7 @@ class _PricingCardContentState extends State<_PricingCardContent> {
     );
   }
 
-  Widget _saveBadge(String text, bool isMobile) {
+  Widget _saveBadge(String text, bool isMobile, {bool useEllipsis = false}) {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: isMobile ? 24 : 16, 
@@ -483,6 +512,8 @@ class _PricingCardContentState extends State<_PricingCardContent> {
       ),
       child: Text(
         text,
+        overflow: useEllipsis ? TextOverflow.ellipsis : null,
+        maxLines: 1,
         style: AppTextStyles.caption.copyWith(
           color: Colors.white, 
           fontWeight: FontWeight.w700,

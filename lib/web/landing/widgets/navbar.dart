@@ -44,13 +44,24 @@ class LandingNavBar extends StatelessWidget {
             final bool isCompact = constraints.maxWidth < 1250;
             final double padH = 0;
             final double padV = stacked ? 12 : 6;
-            final navSpacing = 32.0;
+            
+            final currentLang = Localizations.localeOf(context).languageCode;
+            final isFrench = currentLang == 'fr';
+            final isEnglish = currentLang == 'en'; // Keep this for button width logic
+
+            // Only reduce spacing for French
+            final navSpacing = isFrench ? 20.0 : 32.0;
+            
             final fontSize = stacked
                 ? 15.5
                 : isCompact
                     ? 16.5
                     : 18.0;
-            final double logoGap = isCompact ? 64.0 : 110.0;
+            
+            // Only reduce logo gap for French
+            final double logoGap = isFrench 
+                ? (isCompact ? 32.0 : 64.0) 
+                : (isCompact ? 64.0 : 110.0);
 
             final navLinks = Row(
               mainAxisSize: MainAxisSize.min,
@@ -127,14 +138,16 @@ class LandingNavBar extends StatelessWidget {
                         ),
                         SizedBox(width: logoGap),
                         Expanded(
-                          child: Center(
+                          child: Align(
+                            alignment: Alignment.center, // Căn giữa rõ ràng hơn
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: navLinks,
                             ),
                           ),
                         ),
-                        // Actions on desktop should not be full width
+                        const SizedBox(width: 16), // Khoảng cách an toàn trước khi đến cụm nút
+                        // Actions on desktop
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -172,14 +185,16 @@ class LandingNavBar extends StatelessWidget {
   }
 
   Widget _ctaButton(BuildContext context, String text, {required bool isMobile}) {
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     return Builder(
       builder: (context) => GestureDetector(
         onTap: () => Navigator.of(context).pushNamed('/signup'),
         child: Container(
-          // Kích thước cố định theo Figma: 188x38
-          width: isMobile ? null : 188,
+          // Kích thước cố định theo Figma: 188x38 cho EN, co giãn cho ngôn ngữ khác
+          width: (isEnglish && !isMobile) ? 188 : null,
+          constraints: (isEnglish && !isMobile) ? null : const BoxConstraints(minWidth: 188),
           height: isMobile ? 48 : 38,
-          padding: const EdgeInsets.all(1),
+          padding: const EdgeInsets.all(1), // Luôn giữ viền 1px
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
             gradient: const LinearGradient(
@@ -192,21 +207,26 @@ class LandingNavBar extends StatelessWidget {
             ],
           ),
           child: Container(
-            // Padding sẽ tự động căn giữa text trong SizedBox 188x38
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(isMobile ? 1 : 5),
               color: Colors.transparent,
             ),
-            child: Center(
-              child: Text(
-                text,
-                style: AppTextStyles.h3.copyWith(
-                  fontSize: isMobile ? 20 : 18, // Font 18 theo Figma
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  letterSpacing: -0.9,
+            padding: (isEnglish && !isMobile) ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min, // Giúp nút không bị giãn hết cỡ
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  text,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.h3.copyWith(
+                    fontSize: isMobile ? 20 : 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    letterSpacing: -0.54,
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -215,14 +235,16 @@ class LandingNavBar extends StatelessWidget {
   }
 
   Widget _outlineButton(BuildContext context, String text, {required bool isMobile, VoidCallback? onTap}) {
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     return Builder(
       builder: (context) => GestureDetector(
         onTap: onTap,
         child: Container(
-          // Kích thước cố định theo Figma: 100x38
-          width: isMobile ? null : 100,
+          // Kích thước cố định theo Figma: 100x38 cho EN
+          width: (isEnglish && !isMobile) ? 100 : null,
+          constraints: (isEnglish && !isMobile) ? null : const BoxConstraints(minWidth: 100),
           height: isMobile ? 48 : 38,
-          padding: const EdgeInsets.all(1),
+          padding: const EdgeInsets.all(1), // Luôn giữ viền 1px
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
             gradient: AppGradients.cta, // Viền gradient
@@ -232,16 +254,22 @@ class LandingNavBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(isMobile ? 1 : 5),
               color: Colors.black, // Nền đen
             ),
-            child: Center(
-              child: Text(
-                text,
-                style: AppTextStyles.h3.copyWith(
-                  fontSize: isMobile ? 20 : 18, // Font 18 theo Figma
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  letterSpacing: -0.9,
+            padding: (isEnglish && !isMobile) ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  text,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.h3.copyWith(
+                    fontSize: isMobile ? 20 : 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    letterSpacing: -0.54,
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -673,6 +701,8 @@ class _NavBarItemState extends State<_NavBarItem> {
         ? const Color(0xFF04B3E9) 
         : Colors.white;
 
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+
     return MouseRegion(
       onEnter: (_) => WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() => _isHovered = true);
@@ -686,7 +716,8 @@ class _NavBarItemState extends State<_NavBarItem> {
           Navigator.of(context).pushNamed(widget.route);
         },
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 100),
+          // Giới hạn chiều rộng để ép xuống dòng nếu chữ quá dài, tránh đè lên nút
+          constraints: const BoxConstraints(maxWidth: 120),
           child: Text(
             widget.title,
             textAlign: TextAlign.center,
