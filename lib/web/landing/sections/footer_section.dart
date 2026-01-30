@@ -18,7 +18,8 @@ class FooterSection extends StatelessWidget {
         data: MediaQuery.of(context).copyWith(
           textScaler: isMobile ? const TextScaler.linear(0.72) : const TextScaler.linear(1.0),
         ),
-        child: LayoutBuilder(
+        child: RepaintBoundary(
+          child: LayoutBuilder(
       builder: (context, constraints) {
         final bool isMobileLayout = constraints.maxWidth < 1100;
         final double padH = 0; // Đã loại bỏ padding ngang nội bộ để thẳng hàng với body
@@ -188,7 +189,7 @@ class FooterSection extends StatelessWidget {
                 ),
         );
       }),
-    );
+    ));
   }
 }
 
@@ -297,7 +298,8 @@ class _FooterLinkState extends State<_FooterLink> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8), 
-      child: MouseRegion(
+      child: RepaintBoundary(
+        child: MouseRegion(
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() => _isHovered = false),
         cursor: SystemMouseCursors.click,
@@ -347,6 +349,6 @@ class _FooterLinkState extends State<_FooterLink> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

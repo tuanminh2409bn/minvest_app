@@ -218,7 +218,8 @@ class _LoginFormState extends State<_LoginForm> {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
-          child: Container(
+          child: RepaintBoundary(
+            child: Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
               color: const Color(0xFF07080E),
@@ -297,7 +298,7 @@ class _LoginFormState extends State<_LoginForm> {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 

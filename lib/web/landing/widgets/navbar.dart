@@ -35,7 +35,8 @@ class LandingNavBar extends StatelessWidget {
         data: MediaQuery.of(context).copyWith(
           textScaler: isMobile ? const TextScaler.linear(0.72) : const TextScaler.linear(1.0),
         ),
-        child: StreamBuilder<User?>(
+        child: RepaintBoundary(
+          child: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           final user = snapshot.data;
@@ -47,7 +48,6 @@ class LandingNavBar extends StatelessWidget {
             
             final currentLang = Localizations.localeOf(context).languageCode;
             final isFrench = currentLang == 'fr';
-            final isEnglish = currentLang == 'en'; // Keep this for button width logic
 
             // Only reduce spacing for French
             final navSpacing = isFrench ? 20.0 : 32.0;
@@ -181,7 +181,7 @@ class LandingNavBar extends StatelessWidget {
           });
         },
       ),
-    );
+    ));
   }
 
   Widget _ctaButton(BuildContext context, String text, {required bool isMobile}) {
@@ -703,7 +703,8 @@ class _NavBarItemState extends State<_NavBarItem> {
 
     final isEnglish = Localizations.localeOf(context).languageCode == 'en';
 
-    return MouseRegion(
+    return RepaintBoundary(
+      child: MouseRegion(
       onEnter: (_) => WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() => _isHovered = true);
       }),
@@ -732,7 +733,7 @@ class _NavBarItemState extends State<_NavBarItem> {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 

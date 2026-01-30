@@ -99,9 +99,9 @@
         serviceWorkerVersion: serviceWorkerVersion,
       }
     }).then(function(engineInitializer) {
-      // Khởi tạo Flutter engine với renderer là html để đảm bảo tương thích font tốt nhất
+      // Khởi tạo Flutter engine với renderer tự động (CanvasKit trên desktop, HTML trên mobile)
       return engineInitializer.initializeEngine({
-        renderer: "html"
+        renderer: "auto"
       });
     }).then(function(appRunner) {
       // Ẩn chỉ báo tải khi Flutter sẵn sàng chạy

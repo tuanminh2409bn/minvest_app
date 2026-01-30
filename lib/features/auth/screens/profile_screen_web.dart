@@ -108,11 +108,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildTabContent(String name) {
     switch (_tabIndex) {
       case 0:
-        return const _OverviewContent();
+        return const RepaintBoundary(child: _OverviewContent());
       case 1:
-        return const _SettingContent();
+        return const RepaintBoundary(child: _SettingContent());
       case 2:
-        return const _PaymentContent();
+        return const RepaintBoundary(child: _PaymentContent());
       default:
         return const SizedBox.shrink();
     }
@@ -173,7 +173,8 @@ class _ProfileSidebar extends StatelessWidget {
     final userProvider = Provider.of<UserProvider>(context);
     final userRole = userProvider.role ?? 'user';
 
-    return Container(
+    return RepaintBoundary(
+      child: Container(
       width: isMobile ? double.infinity : 260,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -246,7 +247,7 @@ class _ProfileSidebar extends StatelessWidget {
           ],
         ],
       ),
-    );
+    ));
   }
 
   Widget _tabButton(String text, int index, {bool horizontal = false}) {

@@ -312,7 +312,8 @@ class _InteractiveSignalCardState extends State<_InteractiveSignalCard> with Sin
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
+    return RepaintBoundary(
+      child: MouseRegion(
       onEnter: (_) {
         Future.delayed(Duration.zero, () {
           if (mounted) {
@@ -405,7 +406,7 @@ class _InteractiveSignalCardState extends State<_InteractiveSignalCard> with Sin
           },
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -1636,7 +1637,8 @@ class _LaptopShowcase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
+    return RepaintBoundary(
+      child: LayoutBuilder(
       builder: (context, constraints) {
         final double maxW = constraints.maxWidth;
         final bool isNarrow = maxW < 900;
@@ -1681,7 +1683,7 @@ class _LaptopShowcase extends StatelessWidget {
           ),
         );
       },
-    );
+    ));
   }
 }
 

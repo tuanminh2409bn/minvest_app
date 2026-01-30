@@ -272,7 +272,8 @@ class _AnimatedPricingCardState extends State<_AnimatedPricingCard> with SingleT
 
   @override
   Widget build(BuildContext context) {
-    return VisibilityDetector(
+    return RepaintBoundary(
+      child: VisibilityDetector(
       key: Key('pricing_card_${widget.plan.title}'),
       onVisibilityChanged: (info) {
         if (!_hasPlayed && info.visibleFraction > 0.15) {
@@ -290,7 +291,7 @@ class _AnimatedPricingCardState extends State<_AnimatedPricingCard> with SingleT
           ),
         ),
       ),
-    );
+    ));
   }
 }
 

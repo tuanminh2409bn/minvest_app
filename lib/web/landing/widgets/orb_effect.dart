@@ -34,6 +34,8 @@ class _OrbEffectState extends State<OrbEffect> {
 
   @override
   Widget build(BuildContext context) {
-    return HtmlElementView(viewType: _viewId);
+    return const RepaintBoundary(
+      child: HtmlElementView(viewType: 'orb-effect-view'),
+    );
   }
 }
