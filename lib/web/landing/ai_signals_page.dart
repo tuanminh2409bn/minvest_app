@@ -308,7 +308,7 @@ class _TabChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 132,
+        width: 136,
         height: 40,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
@@ -321,7 +321,12 @@ class _TabChip extends StatelessWidget {
               : null,
           color: isActive ? null : Colors.transparent,
           boxShadow: isActive ? const [
-            BoxShadow(color: Colors.black54, blurRadius: 12, offset: Offset(0, 6)),
+            BoxShadow(
+              color: Color(0x3F2E60FF),
+              blurRadius: 4,
+              offset: Offset(0, 0),
+              spreadRadius: 0,
+            )
           ] : null,
         ),
         alignment: Alignment.center,
@@ -329,8 +334,8 @@ class _TabChip extends StatelessWidget {
           label,
           style: AppTextStyles.body.copyWith(
             color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -1293,7 +1298,7 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       return Center(
         child: Container(
           width: double.infinity,
-          height: 200,
+          height: 150,
           constraints: const BoxConstraints(maxWidth: 600),
           decoration: BoxDecoration(
             color: const Color(0xFF0F0F0F),
@@ -1637,7 +1642,7 @@ class _SignalColumnLive extends StatelessWidget {
         const SizedBox(height: 12),
         if (signals.isEmpty)
           Container(
-            height: 170,
+            height: 150,
             decoration: BoxDecoration(
               color: const Color(0xFF0F0F0F),
               borderRadius: BorderRadius.circular(10),
@@ -1717,7 +1722,7 @@ class _SampleSignalWebCard extends StatelessWidget {
     }
 
     final isBuy = signal.type.toLowerCase() == 'buy';
-    final actionColor = isBuy ? const Color(0xFF3DCC5C) : const Color(0xFFE54747);
+    final actionColor = isBuy ? const Color(0xFF3BFF00) : const Color(0xFFD81400);
     final typeText = isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell;
     
     return GestureDetector(
@@ -1964,7 +1969,7 @@ class _EmptyColumn extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Container(
-          height: 170,
+          height: 150,
           decoration: BoxDecoration(
             color: const Color(0xFF0F0F0F),
             borderRadius: BorderRadius.circular(10),
@@ -2247,7 +2252,7 @@ class _SignalWebCard extends StatelessWidget {
     }
 
     final isBuy = signal.type.toLowerCase() == 'buy';
-    final actionColor = isBuy ? const Color(0xFF3DCC5C) : const Color(0xFFE54747);
+    final actionColor = isBuy ? const Color(0xFF3BFF00) : const Color(0xFFD81400);
     final typeText = isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell;
     
     // Check permission to view Entry

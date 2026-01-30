@@ -311,7 +311,7 @@ class _ContactPageState extends State<ContactPage> {
                         textStyle: AppTextStyles.body.copyWith(
                           fontSize: 18,
                           fontWeight: FontWeight.w400,
-                          letterSpacing: -0.90,
+                          letterSpacing: -0.54,
                           fontFamily: 'Be Vietnam Pro',
                         ),
                       ),
@@ -348,7 +348,7 @@ class _ContactPageState extends State<ContactPage> {
       fontSize: 18,
       fontFamily: 'Be Vietnam Pro',
       fontWeight: FontWeight.w400,
-      letterSpacing: -0.90,
+      letterSpacing: -0.54,
     );
     
     const inputStyle = TextStyle(
@@ -356,7 +356,7 @@ class _ContactPageState extends State<ContactPage> {
       fontSize: 18,
       fontFamily: 'Be Vietnam Pro',
       fontWeight: FontWeight.w400,
-      letterSpacing: -0.90,
+      letterSpacing: -0.54,
     );
 
     const hintStyle = TextStyle(
@@ -364,7 +364,7 @@ class _ContactPageState extends State<ContactPage> {
       fontSize: 18,
       fontFamily: 'Be Vietnam Pro',
       fontWeight: FontWeight.w400,
-      letterSpacing: -0.90,
+      letterSpacing: -0.54,
     );
 
     return Column(
@@ -419,7 +419,7 @@ class _ContactPageState extends State<ContactPage> {
       fontSize: 18,
       fontFamily: 'Be Vietnam Pro',
       fontWeight: FontWeight.w400,
-      letterSpacing: -0.90,
+      letterSpacing: -0.54,
     );
     
     const inputStyle = TextStyle(
@@ -427,7 +427,7 @@ class _ContactPageState extends State<ContactPage> {
       fontSize: 18,
       fontFamily: 'Be Vietnam Pro',
       fontWeight: FontWeight.w400,
-      letterSpacing: -0.90,
+      letterSpacing: -0.54,
     );
 
     const hintStyle = TextStyle(
@@ -435,7 +435,7 @@ class _ContactPageState extends State<ContactPage> {
       fontSize: 18,
       fontFamily: 'Be Vietnam Pro',
       fontWeight: FontWeight.w400,
-      letterSpacing: -0.90,
+      letterSpacing: -0.54,
     );
 
     return Column(
@@ -575,7 +575,7 @@ class _InfoCardState extends State<_InfoCard> {
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                                 fontFamily: 'Be Vietnam Pro',
-                                letterSpacing: -0.90,
+                                letterSpacing: -0.54,
                               ),
                             ),
                           ],
@@ -588,7 +588,7 @@ class _InfoCardState extends State<_InfoCard> {
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                             fontFamily: 'Be Vietnam Pro',
-                            letterSpacing: -0.90,
+                            letterSpacing: -0.54,
                           ),
                         ),
                       ],

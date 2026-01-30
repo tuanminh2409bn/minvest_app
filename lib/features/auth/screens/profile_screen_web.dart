@@ -14,7 +14,7 @@ import 'package:minvest_forex_app/features/admin/screens/admin_panel_screen_web.
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key}); 
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
