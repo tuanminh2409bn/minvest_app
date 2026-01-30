@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
-import 'package:minvest_forex_app/web/widgets/signals_background.dart';
+import 'package:minvest_forex_app/web/widgets/landing_background.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 class SignupScreenWeb extends StatelessWidget {
@@ -50,7 +50,7 @@ class SignupScreenWeb extends StatelessWidget {
                       Container(
                         alignment: Alignment.center,
                         padding: const EdgeInsets.only(top: 40, bottom: 40),
-                        child: SignalsBackground(
+                        child: LandingBackgroundWrapper(
                           child: const _SignupForm(),
                         ),
                       ),
@@ -97,43 +97,75 @@ class _SignupFormState extends State<_SignupForm> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
+          constraints: const BoxConstraints(maxWidth: 480), // Slightly wider
           child: RepaintBoundary(
             child: Container(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.symmetric(horizontal: 45, vertical: 32), 
             decoration: BoxDecoration(
-              color: const Color(0xFF07080E),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white10),
-              boxShadow: const [
-                BoxShadow(color: Colors.black54, blurRadius: 20, spreadRadius: 2),
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFF595959), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0x7FB49CFF),
+                  blurRadius: 12,
+                  offset: const Offset(0, 0),
+                  spreadRadius: 0,
+                ),
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(AppLocalizations.of(context)!.signUpAccount, textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
-                const SizedBox(height: 6),
-                Text(AppLocalizations.of(context)!.enterPersonalData, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
+                Text(
+                  AppLocalizations.of(context)!.signUpAccount, 
+                  textAlign: TextAlign.center, 
+                  style: const TextStyle(
+                    fontSize: 28, 
+                    fontWeight: FontWeight.w700, 
+                    color: Colors.white,
+                    fontFamily: 'Be Vietnam Pro',
+                    letterSpacing: -1.0,
+                  )
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  AppLocalizations.of(context)!.enterPersonalData, 
+                  textAlign: TextAlign.center, 
+                  style: const TextStyle(
+                    color: Color(0xFF9A9A9A), 
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  )
+                ),
                 const SizedBox(height: 24),
                 _SocialSignInButton(
-                  icon: Image.asset('assets/images/google_logo.png', height: 20, width: 20),
+                  icon: Image.asset('assets/images/google_logo.png', height: 24, width: 24),
                   text: AppLocalizations.of(context)!.continueByGoogle,
                   onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Expanded(child: Divider(color: Colors.white12, thickness: 1)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(AppLocalizations.of(context)!.or, style: const TextStyle(color: Colors.white70)),
-                    ),
-                    const Expanded(child: Divider(color: Colors.white12, thickness: 1)),
-                  ],
+                _SocialSignInButton(
+                  icon: Image.asset('assets/images/facebook_logo.png', height: 24, width: 24),
+                  text: AppLocalizations.of(context)!.continueByFacebook,
+                  onPressed: () => context.read<AuthBloc>().add(SignInWithFacebookRequested()),
                 ),
                 const SizedBox(height: 12),
+                _SocialSignInButton(
+                  icon: Image.asset('assets/images/apple_logo.png', height: 24, width: 24, color: Colors.white),
+                  text: AppLocalizations.of(context)!.continueByApple,
+                  onPressed: () => context.read<AuthBloc>().add(SignInWithAppleRequested()),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    const Spacer(),
+                    Text(AppLocalizations.of(context)!.or, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                    const Spacer(),
+                  ],
+                ),
+                const SizedBox(height: 20),
                 _TextField(label: AppLocalizations.of(context)!.nameLabel, hint: AppLocalizations.of(context)!.enterNameHint, controller: _nameController),
                 const SizedBox(height: 12),
                 _TextField(label: AppLocalizations.of(context)!.emailLabel, hint: AppLocalizations.of(context)!.emailHint, controller: _emailController),
@@ -145,7 +177,7 @@ class _SignupFormState extends State<_SignupForm> {
                   onChangedCode: (code) => setState(() => _countryCode = code),
                   controller: _phoneController,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 _PrimaryButton(
                   text: AppLocalizations.of(context)!.continueButton,
                   onPressed: _submit,
@@ -208,27 +240,34 @@ class _SocialSignInButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 48,
+      height: 50,
+      width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          side: const BorderSide(color: Colors.white12),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          side: const BorderSide(color: Color(0xFF424242), width: 1),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          elevation: 0,
         ),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              icon,
-              const SizedBox(width: 12),
-              Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-            ],
-          ),
+        child: Row(
+          children: [
+            Container(
+              width: 32, 
+              alignment: Alignment.center,
+              child: icon,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text, 
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w400, fontSize: 15),
+                textAlign: TextAlign.left,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -248,27 +287,30 @@ class _TextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
         const SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          obscureText: obscure,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
-            filled: true,
-            fillColor: const Color(0xFF0F0F0F),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.white12),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF3FA9F5)),
+        SizedBox(
+          height: 45,
+          child: TextField(
+            controller: controller,
+            obscureText: obscure,
+            style: const TextStyle(color: Colors.white, fontSize: 15),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(color: Color(0xFF9A9A9A), fontSize: 14),
+              filled: true,
+              fillColor: const Color(0xFF111111),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: const BorderSide(color: Color(0xFF424242), width: 1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: const BorderSide(color: Color(0xFF289EFF)),
+              ),
             ),
           ),
-          style: const TextStyle(color: Colors.white, fontSize: 14),
         ),
       ],
     );
@@ -290,25 +332,25 @@ class _PhoneField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.phoneLabel, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+        Text(AppLocalizations.of(context)!.phoneLabel, style: const TextStyle(color: Colors.white, fontSize: 14)),
         const SizedBox(height: 6),
         Row(
           children: [
             Container(
-              width: 100,
-              height: 48,
+              width: 90,
+              height: 45,
               decoration: BoxDecoration(
-                color: const Color(0xFF0F0F0F),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white12),
+                color: const Color(0xFF111111),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: const Color(0xFF424242)),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: DropdownButton<String>(
                 value: countryCode,
                 isExpanded: true,
                 underline: const SizedBox.shrink(),
                 dropdownColor: Colors.black,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white, fontSize: 13),
                 iconEnabledColor: Colors.white,
                 items: const [
                   DropdownMenuItem(value: 'VN(+84)', child: Text('VN(+84)')),
@@ -316,7 +358,7 @@ class _PhoneField extends StatelessWidget {
                   DropdownMenuItem(value: 'ZH(+86)', child: Text('ZH(+86)')),
                   DropdownMenuItem(value: 'FR(+33)', child: Text('FR(+33)')),
                   DropdownMenuItem(value: 'JA(+81)', child: Text('JA(+81)')),
-                  DropdownMenuItem(value: 'KO(+82)', child: Text('FR(+82)')),
+                  DropdownMenuItem(value: 'KO(+82)', child: Text('KO(+82)')),
                 ],
                 onChanged: (value) {
                   if (value != null) onChangedCode(value);
@@ -325,25 +367,28 @@ class _PhoneField extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: TextField(
-            controller: controller,
-            keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              hintText: '+123 567 890',
-                  hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
-                  filled: true,
-                  fillColor: const Color(0xFF0F0F0F),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.white12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF3FA9F5)),
+              child: SizedBox(
+                height: 45,
+                child: TextField(
+                  controller: controller,
+                  keyboardType: TextInputType.phone,
+                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: '+123 567 890',
+                    hintStyle: const TextStyle(color: Color(0xFF9A9A9A), fontSize: 14),
+                    filled: true,
+                    fillColor: const Color(0xFF111111),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide: const BorderSide(color: Color(0xFF424242), width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide: const BorderSide(color: Color(0xFF289EFF)),
+                    ),
                   ),
                 ),
-                style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
             ),
           ],
@@ -362,17 +407,19 @@ class _PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 48,
+      height: 45,
+      width: double.infinity,
       child: ElevatedButton(
         onPressed: loading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2E97FF),
+          backgroundColor: const Color(0xFF289EFF),
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          elevation: 0,
         ),
         child: loading
             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            : Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
       ),
     );
   }
