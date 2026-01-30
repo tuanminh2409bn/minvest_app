@@ -267,7 +267,8 @@ class _FeaturedArticleCardState extends State<_FeaturedArticleCard> {
     final double imgWidth = widget.isDesktop ? 381.46 : double.infinity;
     final double imgHeight = widget.isDesktop ? 426.89 : 280;
 
-    return MouseRegion(
+    return RepaintBoundary(
+      child: MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       cursor: SystemMouseCursors.click,
@@ -404,7 +405,7 @@ class _FeaturedArticleCardState extends State<_FeaturedArticleCard> {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -511,7 +512,8 @@ class _ArticleCardState extends State<_ArticleCard> {
           ],
         );
 
-    return MouseRegion(
+    return RepaintBoundary(
+      child: MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       cursor: SystemMouseCursors.click,
@@ -615,6 +617,6 @@ class _ArticleCardState extends State<_ArticleCard> {
                 ),
         ),
       ),
-    );
+    ));
   }
 }

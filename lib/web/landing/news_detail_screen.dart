@@ -319,7 +319,8 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
       ),
       child: MouseRegion(
         cursor: SystemMouseCursors.basic,
-        child: AbsorbPointer(
+        child: RepaintBoundary(
+          child: AbsorbPointer(
           child: QuillEditor.basic(
             controller: _quillController,
             config: QuillEditorConfig(
@@ -335,7 +336,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _heroImage(String url) {
@@ -430,7 +431,8 @@ class _PopularItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final DateTime? published = article.publishedAt is Timestamp ? (article.publishedAt as Timestamp).toDate() : null;
     final String dateText = published != null ? DateFormat('MMM d, yyyy').format(published) : '';
-    return InkWell(
+    return RepaintBoundary(
+      child: InkWell(
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => NewsDetailScreen(article: article)),
@@ -474,7 +476,7 @@ class _PopularItem extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -533,7 +535,8 @@ class _RelatedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final DateTime? published = article.publishedAt is Timestamp ? (article.publishedAt as Timestamp).toDate() : null;
     final String dateText = published != null ? DateFormat('MMM d, yyyy').format(published) : '';
-    return InkWell(
+    return RepaintBoundary(
+      child: InkWell(
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => NewsDetailScreen(article: article)),
@@ -582,6 +585,6 @@ class _RelatedCard extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }

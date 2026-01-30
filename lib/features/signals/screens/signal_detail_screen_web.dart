@@ -119,7 +119,8 @@ class SignalDetailScreen extends StatelessWidget {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1100),
-              child: SingleChildScrollView(
+              child: RepaintBoundary(
+                child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -185,7 +186,7 @@ class SignalDetailScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 
   DateTime _toDateTime(dynamic createdAt) {

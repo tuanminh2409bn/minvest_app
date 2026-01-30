@@ -1725,7 +1725,8 @@ class _SampleSignalWebCard extends StatelessWidget {
     final actionColor = isBuy ? const Color(0xFF3BFF00) : const Color(0xFFD81400);
     final typeText = isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell;
     
-    return GestureDetector(
+    return RepaintBoundary(
+      child: GestureDetector(
       onTap: () {
         showDialog(
           context: context,
@@ -1754,7 +1755,7 @@ class _SampleSignalWebCard extends StatelessWidget {
                         boxShadow: isPopupHovered ? [
                           BoxShadow(
                             color: const Color(0xFF289EFF).withOpacity(0.4),
-                            blurRadius: 30,
+                              blurRadius: 20,
                             spreadRadius: 2,
                           )
                         ] : [],
@@ -1917,7 +1918,7 @@ class _SampleSignalWebCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -2111,7 +2112,7 @@ class _SignalWebCard extends StatelessWidget {
                       boxShadow: isPopupHovered ? [
                         BoxShadow(
                           color: const Color(0xFF289EFF).withOpacity(0.4),
-                          blurRadius: 30,
+                            blurRadius: 20,
                           spreadRadius: 2,
                         )
                       ] : [],
@@ -2265,7 +2266,8 @@ class _SignalWebCard extends StatelessWidget {
             unlockedSignals: userProvider.unlockedSignals
         );
 
-    return GestureDetector(
+    return RepaintBoundary(
+      child: GestureDetector(
       onTap: () => _openDetail(context),
       child: Container(
         constraints: const BoxConstraints(minHeight: 150),
@@ -2360,7 +2362,7 @@ class _SignalWebCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 

@@ -188,7 +188,8 @@ class HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
+    return RepaintBoundary(
+      child: LayoutBuilder(builder: (context, constraints) {
       final bool isNarrow = constraints.maxWidth < 720;
       final double heroHeight = isNarrow ? 620 : 760;
       final Size baseSize = Size(constraints.maxWidth, heroHeight);
@@ -206,7 +207,7 @@ class HeroSection extends StatelessWidget {
           ),
         ),
       );
-    });
+    }));
   }
 }
 
@@ -323,11 +324,12 @@ class _HeroInteractiveState extends State<_HeroInteractive>
         alignment: Alignment.center,
         children: [
           // Thay thế _buildBlob bằng OrbEffect
-          const Positioned.fill(child: OrbEffect()),
+          Positioned.fill(child: const RepaintBoundary(child: OrbEffect())),
 
           // Lớp bắt sự kiện chuột (Catcher)
           Positioned.fill(
-            child: MouseRegion(
+            child: RepaintBoundary(
+              child: MouseRegion(
               hitTestBehavior: HitTestBehavior.opaque, // Bắt sự kiện chắc chắn
               onHover: (event) {
                 // Logic tính toán tọa độ
@@ -368,7 +370,7 @@ class _HeroInteractiveState extends State<_HeroInteractive>
               },
               child: Container(color: Colors.transparent),
             ),
-          ),
+          )),
 
           Positioned.fill(
             child: VisibilityDetector(
@@ -563,7 +565,8 @@ class HeroSubtitleSection extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    return _RevealOnScroll(
+    return RepaintBoundary(
+      child: _RevealOnScroll(
       child: Padding(
         padding:
             EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32, vertical: 0),
@@ -598,7 +601,7 @@ class HeroSubtitleSection extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -650,7 +653,8 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection>
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    return LayoutBuilder(
+    return RepaintBoundary(
+      child: LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth.clamp(320.0, 500.0);
         return Center(
@@ -767,7 +771,7 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection>
           ),
         );
       },
-    );
+    ));
   }
 
   Widget _buildSearchBar(BuildContext context) {
@@ -1301,7 +1305,8 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    return Padding(
+    return RepaintBoundary(
+      child: Padding(
       padding: EdgeInsets.only(top: isMobile ? 0 : 140),
       child: VisibilityDetector(
         key: const Key('live_signals_visibility'),
@@ -1319,7 +1324,7 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildContent(bool isMobile) {
@@ -1538,7 +1543,8 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
+    return RepaintBoundary(
+      child: LayoutBuilder(
       builder: (context, constraints) {
         final bool isNarrow = constraints.maxWidth < 900;
         final isMobile = constraints.maxWidth < Breakpoints.tablet;
@@ -1631,7 +1637,7 @@ class _OrderEngineSectionState extends State<OrderEngineSection>
           ),
         );
       },
-    );
+    ));
   }
 }
 
@@ -1888,7 +1894,8 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
 
-    return VisibilityDetector(
+    return RepaintBoundary(
+      child: VisibilityDetector(
       key: const Key('transparent_card_visibility'),
       onVisibilityChanged: (info) {
         if (!_hasPlayed && info.visibleFraction > 0.2) {
@@ -1958,7 +1965,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildTypingTitle(bool isMobile) {
