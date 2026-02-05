@@ -85,7 +85,7 @@ class _PricingSectionState extends State<PricingSection> {
 
     return MediaQuery(
         data: MediaQuery.of(context).copyWith(
-          textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+          textScaler: isMobile ? const TextScaler.linear(0.9) : const TextScaler.linear(1.0),
         ),
         child: Padding(
         padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 32, vertical: 32),
@@ -388,48 +388,26 @@ class _PricingCardContentState extends State<_PricingCardContent> {
                       children: [
                         Row(
                           children: [
-                            FaIcon(FontAwesomeIcons.crown, color: Colors.white, size: isMobile ? 36 : 26),
+                            FaIcon(FontAwesomeIcons.crown, color: Colors.white, size: isMobile ? 32 : 26),
                             const SizedBox(width: 8),
-                            // Title: Hiện đầy đủ cho EN/VI, dùng ellipsis cho ngôn ngữ khác
-                            if (isFullText)
-                              Text(
+                            Expanded(
+                              child: Text(
                                 widget.plan.title, 
                                 style: AppTextStyles.h3.copyWith(
                                   color: Colors.white, 
-                                  fontSize: isMobile ? 34 : 24,
+                                  fontSize: isMobile ? 28 : 24,
                                   fontWeight: FontWeight.w800,
-                                  letterSpacing: 2.0,
+                                  letterSpacing: isMobile ? 1.0 : 2.0,
                                 ),
-                              )
-                            else
-                              Flexible(
-                                child: Text(
-                                  widget.plan.title, 
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style: AppTextStyles.h3.copyWith(
-                                    color: Colors.white, 
-                                    fontSize: isMobile ? 34 : 24,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 2.0,
-                                  ),
-                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
-                            const Spacer(),
-                            // Badge: Hiện đầy đủ cho EN/VI, dùng ellipsis cho ngôn ngữ khác
-                            if (isFullText)
-                              _saveBadge(widget.plan.badge, isMobile)
-                            else
-                              Flexible(
-                                child: _saveBadge(
-                                  widget.plan.badge, 
-                                  isMobile, 
-                                  useEllipsis: true
-                                ),
-                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _saveBadge(widget.plan.badge, isMobile),
                           ],
                         ),
-                        SizedBox(height: isMobile ? 42 : 32),
+                        SizedBox(height: isMobile ? 32 : 32),
                         Text(
                           widget.plan.price, 
                           style: AppTextStyles.h1.copyWith(
@@ -479,7 +457,13 @@ class _PricingCardContentState extends State<_PricingCardContent> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)), // Bo góc 6px theo Figma
                           padding: EdgeInsets.zero, // Reset padding mặc định
                         ),
-                        onPressed: () {}, 
+                        onPressed: () {
+                          if (FirebaseAuth.instance.currentUser == null) {
+                            Navigator.of(context).pushNamed('/signup');
+                          } else {
+                            // Logic cho người dùng đã đăng nhập (nếu có)
+                          }
+                        }, 
                         child: Text(
                                 appLocalizations.chooseThisPlan,
                                 style: AppTextStyles.bodyBold.copyWith(
