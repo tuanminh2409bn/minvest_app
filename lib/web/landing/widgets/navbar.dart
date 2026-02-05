@@ -13,6 +13,349 @@ import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:minvest_forex_app/features/notifications/screens/notification_screen_web.dart';
+import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
+
+class _ProfilePopup extends StatelessWidget {
+  final User user;
+  final Offset buttonPosition;
+  final Size buttonSize;
+
+  const _ProfilePopup({
+    required this.user,
+    required this.buttonPosition,
+    required this.buttonSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final l10n = AppLocalizations.of(context)!;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final String name = (userProvider.displayName ?? user.displayName ?? user.email ?? 'User').trim();
+
+    // Popup dimensions from Figma logic
+    final double popupWidth = 250;
+    
+    // Position the popup so it's aligned with the button
+    double right = size.width - (buttonPosition.dx + buttonSize.width);
+    double top = buttonPosition.dy - 10; // Align top or slightly offset
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            behavior: HitTestBehavior.translucent,
+            child: Container(color: Colors.transparent),
+          ),
+        ),
+        Positioned(
+          top: top,
+          right: right,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: popupWidth,
+              height: 226,
+              child: Stack(
+                children: [
+                  // User Info Header (Top part)
+                  Positioned(
+                    left: 40,
+                    top: 0,
+                    child: Container(
+                      width: 210,
+                      height: 59,
+                      padding: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            name,
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: -0.9,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _AvatarCircle(user: user),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  // Menu Items
+                  _buildMenuItem(context, 
+                    top: 70, 
+                    title: 'Profile', 
+                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(6)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushNamed('/profile', arguments: 0);
+                    }
+                  ),
+                  _buildMenuItem(context, 
+                    top: 107, 
+                    title: 'Email preferences', 
+                    borderRadius: BorderRadius.zero, // Middle item
+                    hasBottomBorder: true,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushNamed('/profile', arguments: 1);
+                    }
+                  ),
+                  _buildMenuItem(context, 
+                    top: 144, 
+                    title: 'Log out', 
+                    borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(6), bottomRight: Radius.circular(6)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      showDialog(
+                        context: context,
+                        builder: (context) => const _LogoutDialog(),
+                      );
+                    }
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuItem(BuildContext context, {
+    required double top, 
+    required String title, 
+    required BorderRadius borderRadius,
+    required VoidCallback onTap,
+    bool hasBottomBorder = false,
+  }) {
+    return Positioned(
+      left: 58,
+      top: top,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: 192,
+          height: 37,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: borderRadius,
+            border: Border.all(color: const Color(0xFF3D3D3D), width: 1),
+          ),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: 22),
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.9,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LogoutDialog extends StatelessWidget {
+  const _LogoutDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: Container(
+        width: 384,
+        height: 227,
+        decoration: ShapeDecoration(
+          color: Colors.black,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          shadows: const [
+            BoxShadow(
+              color: Color(0x66B49CFF),
+              blurRadius: 8,
+              offset: Offset(0, 0),
+              spreadRadius: 2,
+            )
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Header bar with separator
+            Positioned(
+              left: 0,
+              top: 0,
+              child: Opacity(
+                opacity: 0.30,
+                child: Container(
+                  width: 384,
+                  height: 51.72,
+                  decoration: const BoxDecoration(
+                    color: Colors.black,
+                    border: Border(bottom: BorderSide(color: Colors.white, width: 1)),
+                  ),
+                ),
+              ),
+            ),
+            // Title
+            const Positioned(
+              left: 0,
+              right: 0,
+              top: 17,
+              child: Text(
+                'Confirm Logout',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.90,
+                ),
+              ),
+            ),
+            // Content text
+            const Positioned(
+              left: 33,
+              right: 33,
+              top: 85,
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Are you sure you want to log out?\n',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: -0.90,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'You will be redirected to the login page.',
+                      style: TextStyle(
+                        color: Color(0xFF9A9A9A),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: -0.90,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Cancel Button
+            Positioned(
+              left: 147,
+              bottom: 15,
+              child: InkWell(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 78,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFF424242), width: 1),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.90,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Logout Button
+            Positioned(
+              right: 33,
+              bottom: 15,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  context.read<AuthBloc>().add(SignOutRequested(providersToReset: [
+                    context.read<UserProvider>(),
+                    context.read<NotificationProvider>(),
+                  ]));
+                  Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                },
+                child: Container(
+                  width: 114,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Logout',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.90,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AvatarCircle extends StatelessWidget {
+  final User user;
+  const _AvatarCircle({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final photoUrl = user.photoURL;
+    return Container(
+      width: 37,
+      height: 37,
+      decoration: const BoxDecoration(
+        color: Color(0xFFD9D9D9),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Container(
+          width: 35,
+          height: 35,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            image: photoUrl != null
+                ? DecorationImage(image: NetworkImage(photoUrl), fit: BoxFit.cover)
+                : null,
+            color: photoUrl == null ? Colors.white24 : null,
+          ),
+          child: photoUrl == null
+              ? const Icon(Icons.person, color: Colors.white, size: 18)
+              : null,
+        ),
+      ),
+    );
+  }
+}
 
 class LandingNavBar extends StatelessWidget {
   const LandingNavBar({super.key});
@@ -33,7 +376,7 @@ class LandingNavBar extends StatelessWidget {
 
     return MediaQuery(
         data: MediaQuery.of(context).copyWith(
-          textScaler: isMobile ? const TextScaler.linear(0.72) : const TextScaler.linear(1.0),
+          textScaler: isMobile ? const TextScaler.linear(0.9) : const TextScaler.linear(1.0),
         ),
         child: RepaintBoundary(
           child: StreamBuilder<User?>(
@@ -53,10 +396,8 @@ class LandingNavBar extends StatelessWidget {
             final navSpacing = isFrench ? 20.0 : 32.0;
             
             final fontSize = stacked
-                ? 15.5
-                : isCompact
-                    ? 16.5
-                    : 18.0;
+                ? 16.0 // Slightly larger for mobile
+                : 18.0; // Consistent 18.0 for desktop as per Figma
             
             // Only reduce logo gap for French
             final double logoGap = isFrench 
@@ -277,28 +618,6 @@ class LandingNavBar extends StatelessWidget {
     );
   }
 
-  Widget _userAvatar(User user, {VoidCallback? onTap}) {
-    final photoUrl = user.photoURL;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white24),
-          image: photoUrl != null
-              ? DecorationImage(image: NetworkImage(photoUrl), fit: BoxFit.cover)
-              : null,
-          color: photoUrl == null ? Colors.white24 : null,
-        ),
-        child: photoUrl == null
-            ? const Icon(Icons.person, color: Colors.white, size: 18)
-            : null,
-      ),
-    );
-  }
-
   Widget _userNameChip(BuildContext context, User user, {VoidCallback? onTap}) {
     final userProvider = Provider.of<UserProvider>(context);
     final String name = (userProvider.displayName ?? user.displayName ?? user.email ?? 'User').trim();
@@ -308,21 +627,51 @@ class LandingNavBar extends StatelessWidget {
     final activeSubs = userProvider.activeSubscriptions;
     final isPremium = tier == 'elite' || (activeSubs != null && activeSubs.isNotEmpty);
 
+    final GlobalKey buttonKey = GlobalKey();
+
     return GestureDetector(
-      onTap: onTap,
+      key: buttonKey,
+      onTap: () {
+        final RenderBox renderBox = buttonKey.currentContext!.findRenderObject() as RenderBox;
+        final offset = renderBox.localToGlobal(Offset.zero);
+        final size = renderBox.size;
+
+        showDialog(
+          context: context,
+          barrierColor: Colors.transparent,
+          builder: (context) => _ProfilePopup(
+            user: user,
+            buttonPosition: offset,
+            buttonSize: size,
+          ),
+        );
+      },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        // Removed border and background as requested
+        height: 59, // Figma height
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          color: Colors.transparent, // Figma has alpha: 0
+          borderRadius: BorderRadius.circular(6),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text(
+              name,
+              textAlign: TextAlign.right, // Figma spec
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontFamily: 'Be Vietnam Pro',
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.9,
+              ),
+            ),
+            const SizedBox(width: 12),
             Stack(
               clipBehavior: Clip.none,
               children: [
-                _userAvatar(user, onTap: onTap),
+                _AvatarCircle(user: user),
                 if (isPremium)
                   Positioned(
                     top: -16,
@@ -337,14 +686,6 @@ class LandingNavBar extends StatelessWidget {
                     ),
                   ),
               ],
-            ),
-            const SizedBox(width: 8),
-            Text(
-              name,
-              style: AppTextStyles.body.copyWith(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700),
             ),
           ],
         ),
@@ -724,12 +1065,14 @@ class _NavBarItemState extends State<_NavBarItem> {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.visible,
-            style: AppTextStyles.h3.copyWith(
-              fontSize: widget.fontSize,
-              fontWeight: FontWeight.w700,
-              color: color,
-              height: 1.2, // Adjust line height for better spacing when wrapped
-            ),
+            style: const TextStyle(
+              fontSize: 18, // Base size, can be overridden by widget.fontSize if passed correctly
+              fontWeight: FontWeight.w600, // Figma: w600
+              color: Colors.white, // Will be overridden by color variable
+              fontFamily: 'Be Vietnam Pro',
+              letterSpacing: -0.90, // Figma: -0.90
+              height: 1.2,
+            ).copyWith(color: color, fontSize: widget.fontSize),
           ),
         ),
       ),

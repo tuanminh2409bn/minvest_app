@@ -16,7 +16,7 @@ class FooterSection extends StatelessWidget {
 
     return MediaQuery(
         data: MediaQuery.of(context).copyWith(
-          textScaler: isMobile ? const TextScaler.linear(0.72) : const TextScaler.linear(1.0),
+          textScaler: isMobile ? const TextScaler.linear(0.9) : const TextScaler.linear(1.0),
         ),
         child: RepaintBoundary(
           child: LayoutBuilder(

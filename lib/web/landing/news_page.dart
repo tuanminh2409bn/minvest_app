@@ -48,7 +48,7 @@ class _NewsPageState extends State<NewsPage> {
 
         return MediaQuery(
             data: MediaQuery.of(context).copyWith(
-              textScaler: isMobile ? const TextScaler.linear(0.72) : const TextScaler.linear(1.0),
+              textScaler: isMobile ? const TextScaler.linear(0.9) : const TextScaler.linear(1.0),
             ),
             child: Scaffold(        backgroundColor: AppColors.background,
         floatingActionButton: const WebChatBubble(),
