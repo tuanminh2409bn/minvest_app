@@ -1325,6 +1325,144 @@ export const checkExpiredSubscriptions = onSchedule (
 );
 
 // =================================================================
+// === PASSWORD RESET WITH CODE ===
+// =================================================================
+
+export const generateAndSendResetCode = onCall({ region: "asia-southeast1" }, async (request) => {
+    const email = request.data.email;
+    if (!email || !email.includes("@")) {
+        throw new HttpsError("invalid-argument", "Địa chỉ email không hợp lệ.");
+    }
+
+    try {
+        // 1. Kiểm tra user có tồn tại không
+        try {
+            await admin.auth().getUserByEmail(email);
+        } catch (e) {
+            // Để bảo mật, không báo lỗi nếu user không tồn tại, chỉ log
+            functions.logger.warn(`Yêu cầu reset pass cho email không tồn tại: ${email}`);
+            return { success: true, message: "Nếu email tồn tại, mã xác nhận sẽ được gửi." };
+        }
+
+        // 2. Tạo mã 6 số
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = admin.firestore.Timestamp.fromDate(new Date(Date.now() + 15 * 60000)); // Hết hạn sau 15 phút
+
+        // 3. Lưu vào Firestore
+        await firestore.collection("password_reset_codes").doc(email).set({
+            code,
+            expiresAt,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        // 4. Gửi Email
+        // Lưu ý: Trong thực tế bạn cần dùng SendGrid hoặc Firebase Email Extension.
+        // Ở đây tôi sẽ lưu vào collection 'mail' để Firebase Email Extension tự gửi nếu bạn đã cài đặt.
+        await firestore.collection("mail").add({
+            to: email,
+            message: {
+                subject: "Mã xác nhận đặt lại mật khẩu - mInvest",
+                html: `Mã xác nhận của bạn là: <b>${code}</b>. Mã này có hiệu lực trong 15 phút.`,
+            },
+        });
+
+        functions.logger.log(`Đã tạo mã reset cho ${email}: ${code}`);
+        return { success: true };
+    } catch (error) {
+        functions.logger.error("Lỗi generateAndSendResetCode:", error);
+        throw new HttpsError("internal", "Không thể gửi mã xác nhận.");
+    }
+});
+
+export const resetPasswordWithCode = onCall({ region: "asia-southeast1" }, async (request) => {
+    const { email, code, newPassword } = request.data;
+
+    if (!email || !code || !newPassword || newPassword.length < 6) {
+        throw new HttpsError("invalid-argument", "Thông tin không hợp lệ hoặc mật khẩu quá ngắn.");
+    }
+
+    try {
+        const resetDoc = await firestore.collection("password_reset_codes").doc(email).get();
+        if (!resetDoc.exists) {
+            throw new HttpsError("not-found", "Mã xác nhận không tồn tại hoặc đã hết hạn.");
+        }
+
+        const data = resetDoc.data()!;
+        const now = admin.firestore.Timestamp.now();
+
+        if (data.code !== code) {
+            throw new HttpsError("permission-denied", "Mã xác nhận không đúng.");
+        }
+
+        if (now.seconds > data.expiresAt.seconds) {
+            await resetDoc.ref.delete();
+            throw new HttpsError("deadline-exceeded", "Mã xác nhận đã hết hạn.");
+        }
+
+        // 1. Cập nhật mật khẩu trong Firebase Auth
+        const user = await admin.auth().getUserByEmail(email);
+        await admin.auth().updateUser(user.uid, {
+            password: newPassword,
+        });
+
+        // 2. Xóa mã sau khi dùng
+        await resetDoc.ref.delete();
+
+        functions.logger.log(`Đã reset mật khẩu thành công cho ${email}`);
+        return { success: true };
+    } catch (error: any) {
+        functions.logger.error("Lỗi resetPasswordWithCode:", error);
+        if (error instanceof HttpsError) throw error;
+        throw new HttpsError("internal", error.message || "Lỗi khi đổi mật khẩu.");
+    }
+});
+
+export const generateAndSendSignupCode = onCall({ region: "asia-southeast1" }, async (request) => {
+    const email = request.data.email;
+    if (!email || !email.includes("@")) {
+        throw new HttpsError("invalid-argument", "Địa chỉ email không hợp lệ.");
+    }
+
+    try {
+        // 1. Kiểm tra xem email đã tồn tại chưa
+        try {
+            await admin.auth().getUserByEmail(email);
+            throw new HttpsError("already-exists", "Email này đã được đăng ký.");
+        } catch (e: any) {
+            if (e.code === 'auth/user-not-found') {
+                // Email chưa tồn tại, tiếp tục gửi mã
+            } else {
+                throw e;
+            }
+        }
+
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = admin.firestore.Timestamp.fromDate(new Date(Date.now() + 15 * 60000));
+
+        await firestore.collection("signup_verification_codes").doc(email).set({
+            code,
+            expiresAt,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        await firestore.collection("mail").add({
+            to: email,
+            message: {
+                subject: "Mã xác minh đăng ký tài khoản - mInvest",
+                html: `Mã xác minh của bạn là: <b>${code}</b>. Mã này có hiệu lực trong 15 phút.`,
+            },
+        });
+
+        functions.logger.log(`Đã tạo mã xác minh đăng ký cho ${email}: ${code}`);
+        return { success: true };
+    } catch (error: any) {
+        functions.logger.error("Lỗi generateAndSendSignupCode:", error);
+        if (error instanceof HttpsError) throw error;
+        throw new HttpsError("internal", error.message || "Không thể gửi mã xác minh.");
+    }
+});
+
+// =================================================================
 // === STATS WEBHOOK CHO TELEGRAM BOT (BÁO CÁO LỢI NHUẬN) ===
 // =================================================================
 const STATS_CHAT_ID = "-1003103146104";
