@@ -404,17 +404,16 @@ class LandingNavBar extends StatelessWidget {
                 ? (isCompact ? 32.0 : 64.0) 
                 : (isCompact ? 64.0 : 110.0);
 
-            final navLinks = Row(
-              mainAxisSize: MainAxisSize.min,
+            final navLinks = Wrap(
+              spacing: navSpacing,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 ...navItems.map(
-                  (item) => Padding(
-                    padding: EdgeInsets.symmetric(horizontal: navSpacing / 2),
-                    child: _NavBarItem(
-                      title: item['title']!,
-                      route: item['route']!,
-                      fontSize: fontSize,
-                    ),
+                  (item) => _NavBarItem(
+                    title: item['title']!,
+                    route: item['route']!,
+                    fontSize: fontSize,
                   ),
                 ),
               ],
@@ -437,31 +436,24 @@ class LandingNavBar extends StatelessWidget {
             );
 
             final actions = Row(
+              mainAxisSize: MainAxisSize.min, // Đảm bảo cụm actions không chiếm quá nhiều chỗ
               children: [
                 if (user == null) ...[
-                  Expanded(
-                    flex: 3,
-                    child: _ctaButton(context, l10n.getSignalsNow, isMobile: isMobile),
-                  ),
+                  _ctaButton(context, l10n.getSignalsNow, isMobile: isMobile),
                   const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    flex: 2,
-                    child: _outlineButton(
-                      context,
-                      l10n.signIn,
-                      isMobile: isMobile,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-                      ),
+                  _outlineButton(
+                    context,
+                    l10n.signIn,
+                    isMobile: isMobile,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
                     ),
                   ),
                 ] else ...[
-                  Expanded(
-                    child: _userNameChip(
-                      context,
-                      user,
-                      onTap: () => Navigator.of(context).pushNamed('/profile'),
-                    ),
+                  _userNameChip(
+                    context,
+                    user,
+                    onTap: () => Navigator.of(context).pushNamed('/profile'),
                   ),
                 ],
               ],
@@ -477,41 +469,12 @@ class LandingNavBar extends StatelessWidget {
                           onTap: () => Navigator.of(context).pushNamed('/'),
                           child: Image.asset('assets/mockups/logo.png', height: 50, fit: BoxFit.contain),
                         ),
-                        SizedBox(width: logoGap),
+                        const SizedBox(width: 80), // Khoảng cách tăng lên để dịch navlinks sang phải
                         Expanded(
-                          child: Align(
-                            alignment: Alignment.center, // Căn giữa rõ ràng hơn
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: navLinks,
-                            ),
-                          ),
+                          child: navLinks, // Wrap trong Expanded để tự co giãn và xuống dòng
                         ),
-                        const SizedBox(width: 16), // Khoảng cách an toàn trước khi đến cụm nút
-                        // Actions on desktop
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (user == null) ...[
-                              _ctaButton(context, l10n.getSignalsNow, isMobile: false),
-                              const SizedBox(width: AppSpacing.sm),
-                              _outlineButton(
-                                context,
-                                l10n.signIn,
-                                isMobile: false,
-                                onTap: () => Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-                                ),
-                              ),
-                            ] else ...[
-                              _userNameChip(
-                                context,
-                                user,
-                                onTap: () => Navigator.of(context).pushNamed('/profile'),
-                              ),
-                            ],
-                          ],
-                        ),
+                        const SizedBox(width: 24), // Khoảng cách an toàn trước actions
+                        actions,
                         const SizedBox(width: AppSpacing.sm),
                         const _LanguageSelector(),
                         const SizedBox(width: AppSpacing.sm),
