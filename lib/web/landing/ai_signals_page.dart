@@ -220,28 +220,26 @@ class _TitleSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = Text(
       AppLocalizations.of(context)!.aiSignal,
+      textAlign: TextAlign.center,
       style: AppTextStyles.h1.copyWith(
-        fontSize: 34,
-        fontWeight: FontWeight.w700,
+        fontSize: isMobile ? 28 : 34,
+        fontWeight: FontWeight.w600,
         color: Colors.white,
+        letterSpacing: isMobile ? -1 : null,
       ),
     );
 
-    if (isMobile && FirebaseAuth.instance.currentUser != null) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          title,
-          // Use FittedBox to ensure it scales down if screen is too narrow
-          const Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: _UserSubscriptionStatus(),
-            ),
-          ),
-        ],
-      );
+    if (isMobile) {
+      if (FirebaseAuth.instance.currentUser != null) {
+        return Column(
+          children: [
+            Center(child: title),
+            const SizedBox(height: 8),
+            const _UserSubscriptionStatus(),
+          ],
+        );
+      }
+      return Center(child: title);
     }
 
     return title;
@@ -257,6 +255,56 @@ class _TabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
+
+    if (isMobile) {
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _TabChip(
+                  label: AppLocalizations.of(context)!.aiSignal,
+                  isActive: selected == AISignalsTab.aiSignals,
+                  onTap: () => onSelect(AISignalsTab.aiSignals),
+                  isMobile: true,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _TabChip(
+                  label: AppLocalizations.of(context)!.performance,
+                  isActive: selected == AISignalsTab.performance,
+                  onTap: () => onSelect(AISignalsTab.performance),
+                  isMobile: true,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Row(
+            children: [
+              Expanded(
+                child: _TabChip(
+                  label: AppLocalizations.of(context)!.history,
+                  isActive: selected == AISignalsTab.history,
+                  onTap: () => onSelect(AISignalsTab.history),
+                  isMobile: true,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _TabChip(
+                  label: AppLocalizations.of(context)!.pricing,
+                  isActive: selected == AISignalsTab.pricing,
+                  onTap: () => onSelect(AISignalsTab.pricing),
+                  isMobile: true,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
 
     return Wrap(
       spacing: 8,
@@ -308,13 +356,13 @@ class _TabChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 136,
-        height: 40,
+        width: isMobile ? null : 136,
+        height: isMobile ? 35 : 40,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
+          borderRadius: BorderRadius.circular(4), // Tăng nhẹ radius cho cân đối
           gradient: isActive 
               ? const LinearGradient(
-                  colors: [Color(0xFF00BFFF), Color(0xFFD500F9)],
+                  colors: [Color(0xFFD500F9), Color(0xFF2E60FF), Color(0xFF04B3E9)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
@@ -334,8 +382,9 @@ class _TabChip extends StatelessWidget {
           label,
           style: AppTextStyles.body.copyWith(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: isMobile ? 16 : 18,
             fontWeight: FontWeight.w600,
+            letterSpacing: isMobile ? -0.6 : null,
           ),
         ),
       ),
@@ -407,7 +456,6 @@ class _FiltersRow extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                flex: 3,
                 child: _DateRangePicker(
                   dateRange: dateRange,
                   onChanged: onDateRangeChanged,
@@ -416,7 +464,6 @@ class _FiltersRow extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                flex: 2,
                 child: _TimezoneDropdown(
                   value: selectedTimezone,
                   items: availableTimezones,
