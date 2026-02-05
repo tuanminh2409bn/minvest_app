@@ -438,6 +438,61 @@ class AuthService {
     }
   }
 
+  Future<void> requestPasswordResetCode(String email) async {
+    try {
+      final callable = _functions.httpsCallable('generateAndSendResetCode');
+      await callable.call({'email': email});
+    } catch (e) {
+      print('Lỗi gọi generateAndSendResetCode: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> requestSignupVerificationCode(String email) async {
+    try {
+      final callable = _functions.httpsCallable('generateAndSendSignupCode');
+      await callable.call({'email': email});
+    } catch (e) {
+      print('Lỗi gọi generateAndSendSignupCode: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> verifySignupCode(String email, String code) async {
+    try {
+      final doc = await _firestore
+          .collection('signup_verification_codes')
+          .doc(email)
+          .get();
+      if (!doc.exists) return false;
+      final data = doc.data()!;
+      final expiresAt = (data['expiresAt'] as Timestamp).toDate();
+      if (DateTime.now().isAfter(expiresAt)) return false;
+      return data['code'] == code;
+    } catch (e) {
+      print('Lỗi verifySignupCode: $e');
+      return false;
+    }
+  }
+
+  Future<void> resetPasswordWithCode({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      final callable = _functions.httpsCallable('resetPasswordWithCode');
+      await callable.call({
+        'email': email,
+        'code': code,
+        'newPassword': newPassword,
+      });
+    } catch (e) {
+      print('Lỗi gọi resetPasswordWithCode: $e');
+      rethrow;
+    }
+  }
+
   Future<void> deleteAccountAndData() async {
     try {
       final callable = _functions.httpsCallable('deleteUserAccount');
