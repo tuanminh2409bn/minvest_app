@@ -407,7 +407,7 @@ class _OverviewContent extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 30),
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      l10n.aiMinvest,
+                      l10n.aiSignalGPT,
                       style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: -0.9),
                     ),
                   ),

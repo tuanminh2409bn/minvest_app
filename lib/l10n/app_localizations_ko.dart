@@ -120,14 +120,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get reuploadImage => '이미지 재업로드';
 
   @override
-  String get accountNotLinked => '계정이 Minvest에 연결되지 않음';
+  String get accountNotLinked => '계정이 Signal GPT에 연결되지 않음';
 
   @override
   String get accountNotLinkedDesc =>
-      '독점 신호를 받으려면 Exness 계정이 Minvest 파트너 링크를 통해 등록되어야 합니다. 아래 링크를 사용하여 새  계정을 만드세요.';
+      '독점 신호를 받으려면 Exness 계정이 Signal GPT 파트너 링크를 통해 등록되어야 합니다. 아래 링크를 사용하여 새  계정을 만드세요.';
 
   @override
-  String get registerExnessViaMinvest => 'Minvest를 통해 Exness 등록';
+  String get registerExnessViaSignalGPT => 'Signal GPT를 통해 Exness 등록';
 
   @override
   String get iHaveRegisteredReupload => '등록했습니다, 재업로드';
@@ -283,7 +283,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get accountVerificationPrompt =>
-      '승인을 받으려면 Exness 계정의 스크린샷을 업로드하세요 (계정은 Minvest의 Exness 링크로 개설되어야 함)';
+      '승인을 받으려면 Exness 계정의 스크린샷을 업로드하세요 (계정은 Signal GPT의 Exness 링크로 개설되어야 함)';
 
   @override
   String get selectPhotoFromLibrary => '라이브러리에서 사진 선택';
@@ -334,7 +334,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get upgradeNow => '지금 업그레이드';
 
   @override
-  String get followMinvest => 'MInvest 팔로우';
+  String get followSignalGPT => 'Signal GPT 팔로우';
 
   @override
   String get tabSignal => '신호';
@@ -455,7 +455,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get exnessUpgradeNoteForIos =>
-      'Minvest를 통해 Exness 계정을 등록한 고객의 경우, 계정을 업그레이드하려면 문의하기를 클릭하세요.';
+      'Signal GPT를 통해 Exness 계정을 등록한 고객의 경우, 계정을 업그레이드하려면 문의하기를 클릭하세요.';
 
   @override
   String get chatWelcomeTitle => '👋 Signal GPT에 오신 것을 환영합니다!';
@@ -744,7 +744,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onDemandFinancialExpertDesc =>
-      'AI 플랫폼이 트레이딩 신호를 제안 - 자가 학습, 24/7 시장 분석, 감정에 영향을 받지 않음. Minvest는 정확하고 안정적이며 적용하기 쉬운 신호를 찾는 여정에서\n10,000명 이상의 금융 분석가를 지원했습니다';
+      'AI 플랫폼이 트레이딩 신호를 제안 - 자가 학습, 24/7 시장 분석, 감정에 영향을 받지 않음. Signal GPT는 정확하고 안정적이며 적용하기 쉬운 신호를 찾는 여정에서\n10,000명 이상의 금융 분석가를 지원했습니다';
 
   @override
   String get aiPoweredSignalPlatform => 'AI 기반 트레이딩 신호 플랫폼';
@@ -1168,7 +1168,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get signalsPlan => '信号计划';
 
   @override
-  String get aiMinvest => 'AI Minvest';
+  String get aiSignalGPT => 'AI Signal GPT';
 
   @override
   String get yourTokens => '您的代币';
@@ -1234,7 +1234,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get performance => '성과';
 
   @override
-  String get minvestSupport => 'SignalGpt Support';
+  String get minvestSupport => 'Signal GPT Support';
 
   @override
   String get leaveMessagePart1 =>

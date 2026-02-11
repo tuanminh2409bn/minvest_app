@@ -1,7 +1,7 @@
 name: minvest_forex_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.0+11
+version: 1.1.0+1
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -29,8 +29,8 @@ dependencies:
   flutter_bloc:
   equatable:
   provider:
-  shared_preferences:
-  intl:
+  shared_preferences: ^2.5.4
+  intl: ^0.20.2
   google_fonts:
 
   # Other packages
@@ -38,7 +38,7 @@ dependencies:
   cupertino_icons:
   url_launcher:
   image_picker:
-  webview_flutter:
+  webview_flutter: ^4.13.1
   in_app_purchase:
   flutter_local_notifications:
   device_info_plus:
@@ -49,13 +49,33 @@ dependencies:
   flutter_quill:
   font_awesome_flutter: ^10.9.1
   flutter_svg: ^2.2.3
+  web_socket_channel: ^3.0.3
+  flutter_native_splash: ^2.4.7
+  share_plus: ^12.0.1
+  app_settings: ^7.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
+  flutter_launcher_icons: ^0.13.1
   flutter_lints:
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo_signalgpt.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/images/logo_signalgpt.png"
+
+flutter_native_splash:
+  color: "#000000"
+  image: "assets/images/logo_signalgpt.png"
+  android: true
+  ios: true
+  web: false
 
 flutter:
   generate: true
@@ -64,3 +84,13 @@ flutter:
     - assets/images/
     - assets/mockups/
     - assets/icons/
+  fonts:
+    - family: Be Vietnam Pro
+      fonts:
+        - asset: assets/fonts/BeVietnamPro-Regular.ttf
+        - asset: assets/fonts/BeVietnamPro-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/BeVietnamPro-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/BeVietnamPro-Bold.ttf
+          weight: 700

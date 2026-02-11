@@ -1,18 +1,22 @@
 // lib/features/signals/screens/signal_screen.dart
 
 import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
-import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
-import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
-import 'package:minvest_forex_app/features/signals/widgets/signal_card.dart';
-import 'package:minvest_forex_app/features/verification/screens/upgrade_screen.dart';
-import 'package:minvest_forex_app/features/notifications/screens/notification_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:minvest_forex_app/core/utils/signal_access_helper.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/features/notifications/screens/notification_screen.dart';
+import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
+import 'package:minvest_forex_app/services/price_service.dart';
+import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
+import 'package:minvest_forex_app/features/signals/screens/signal_analyze_screen.dart';
+import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+enum AssetFilter { all, gold, crypto, forex }
 
 class SignalScreen extends StatefulWidget {
   const SignalScreen({super.key});
@@ -22,197 +26,121 @@ class SignalScreen extends StatefulWidget {
 }
 
 class _SignalScreenState extends State<SignalScreen> {
-  bool _isLive = true;
-  String? _selectedSymbol; // Null means "All"
-  final SignalService _signalService = SignalService();
+  final PriceService _priceService = PriceService();
+  final NumberFormat _currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+  
+  AssetFilter _assetFilter = AssetFilter.all;
+  String _selectedTimezone = 'GMT+7';
+  String? _expandedSymbol;
 
-  final List<String> _popularSymbols = [
-    'XAU/USD',
-    'BTC/USDT',
-    'ETH/USDT',
-    'EUR/USD',
-    'GBP/USD',
-    'USD/JPY',
+  final List<String> _timezones = [
+    'GMT+0', 'GMT+7', 'GMT+8'
   ];
 
-  bool _isWithinGoldenHours() {
-    final nowInVietnam = DateTime.now().toUtc().add(const Duration(hours: 7));
-    return nowInVietnam.hour >= 8 && nowInVietnam.hour < 17;
+  @override
+  void initState() {
+    super.initState();
+    _priceService.connect();
   }
 
   @override
-  Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-    final userTier = userProvider.userTier ?? 'free';
-    final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
+  void dispose() {
+    _priceService.disconnect();
+    super.dispose();
+  }
+
+  Future<void> _launchApp(String url, String webUrl) async {
+    final Uri appUri = Uri.parse(url);
+    final Uri webUri = Uri.parse(webUrl);
+    try {
+      if (await canLaunchUrl(appUri)) {
+        await launchUrl(appUri, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      if (await canLaunchUrl(webUri)) {
+        await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      }
+    }
+  }
+
+  void _showAppSelection(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
       backgroundColor: Colors.transparent,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0D1117), Color(0xFF161B22), Color.fromARGB(255, 20, 29, 110)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: _buildTabs(l10n),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _LanguageSwitcher(),
-                        const SizedBox(width: 4),
-                        if (userTier != 'free')
-                          Consumer<NotificationProvider>(
-                            builder: (context, notificationProvider, child) {
-                              final bool hasUnread = notificationProvider.unreadCount > 0;
-                              return Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.notifications_none, size: 28),
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => const NotificationScreen()),
-                                      );
-                                    },
-                                  ),
-                                  if (hasUnread)
-                                    Positioned(
-                                      top: 10,
-                                      right: 10,
-                                      child: Container(
-                                        height: 9,
-                                        width: 9,
-                                        decoration: const BoxDecoration(
-                                            color: Colors.redAccent,
-                                            shape: BoxShape.circle,
-                                            border: Border.fromBorderSide(BorderSide(color: Color(0xFF0D1117), width: 1.5))
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              );
-                            },
-                          ),
-                      ],
-                    )
-                  ],
+      isScrollControlled: true,
+      builder: (context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.6,
+            decoration: ShapeDecoration(
+              gradient: LinearGradient(
+                begin: const Alignment(0.00, 0.78),
+                end: const Alignment(1.00, 0.20),
+                colors: [
+                  const Color(0xFF1E1E1E).withValues(alpha: 0.4),
+                  const Color(0xFF0D0D0D).withValues(alpha: 0.2)
+                ],
+              ),
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  width: 1,
+                  color: Colors.white.withValues(alpha: 0.15),
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: _buildFilters(l10n),
+              shadows: [
+                const BoxShadow(
+                  color: Colors.black54,
+                  blurRadius: 30,
+                  offset: Offset(0, -10),
+                  spreadRadius: 0,
+                ),
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  blurRadius: 15,
+                  offset: const Offset(0, -1),
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: SafeArea(
+              bottom: true,
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 20),
+                      children: [
+                        _buildAppOption(context, 'BingX', 'https://bingx.com', '', 'assets/icons/bingx.png'),
+                        _buildAppOption(context, 'Binance', 'https://binance.com', '', 'assets/icons/binance.png'),
+                        _buildAppOption(context, 'Exness', 'https://exness.com', '', 'assets/icons/exness.png', isSelected: true),
+                        _buildAppOption(context, 'ByBit', 'https://bybit.com', '', 'assets/icons/bybit.png'),
+                        _buildAppOption(context, 'Bitget', 'https://bitget.com', '', 'assets/icons/bitget.png'),
+                        _buildAppOption(context, 'MEXC', 'https://mexc.com', '', 'assets/icons/mexc.png'),
+                        _buildAppOption(context, 'OKX', 'https://okx.com', '', 'assets/icons/okx.png'),
+                        _buildAppOption(context, 'MT4', 'https://metatrader4.com', '', 'assets/icons/mt4.png'),
+                        _buildAppOption(context, 'MT5', 'https://metatrader5.com', '', 'assets/icons/mt5.png'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: _buildContent(userTier, l10n),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContent(String userTier, AppLocalizations l10n) {
-    if (userTier == 'free') {
-      return _buildFreeUserView(l10n);
-    }
-
-    if (_isLive && (userTier == 'vip' || userTier == 'demo') && !_isWithinGoldenHours()) {
-      return _buildOutOfHoursView(userTier, l10n);
-    }
-    return _buildSignalList(userTier, l10n);
-  }
-
-  Widget _buildFreeUserView(AppLocalizations l10n) {
-    final dummySignal1 = Signal(
-      id: 'dummy1', symbol: 'XAU/USD', type: 'Buy', status: 'running',
-      createdAt: Timestamp.now(), entryPrice: 0, stopLoss: 0, takeProfits: [], isMatched: false, matchStatus: 'NOT MATCHED',
-    );
-    final dummySignal2 = Signal(
-      id: 'dummy2', symbol: 'EUR/USD', type: 'Sell', status: 'running',
-      createdAt: Timestamp.now(), entryPrice: 0, stopLoss: 0, takeProfits: [], isMatched: false, matchStatus: 'NOT MATCHED',
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: Column(
-        children: [
-          SignalCard(signal: dummySignal1, userTier: 'free', isLocked: true),
-          SignalCard(signal: dummySignal2, userTier: 'free', isLocked: true),
-          const SizedBox(height: 20),
-          _buildUpgradeButton(l10n),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSignalList(String userTier, AppLocalizations l10n) {
-    return StreamBuilder<List<Signal>>(
-      stream: _signalService.getSignals(
-        isLive: _isLive, 
-        userTier: userTier,
-        symbol: _selectedSymbol // Pass the selected symbol here
-      ),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('${l10n.error}: ${snapshot.error}'));
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text(l10n.noSignalsAvailable));
-        }
-
-        final signals = snapshot.data!;
-        int itemCount = signals.length;
-        bool Function(int) isLockedCallback;
-
-        switch (userTier) {
-          case 'demo':
-            if (_isLive && signals.length > 8) {
-              itemCount = 9;
-            }
-            isLockedCallback = (index) => _isLive && index >= 8;
-            break;
-          default:
-            isLockedCallback = (index) => false;
-            break;
-        }
-
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 700),
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              itemCount: itemCount,
-              itemBuilder: (context, index) {
-                if (userTier == 'demo' && _isLive && index == 8) {
-                  return _buildUpgradeButton(l10n);
-                }
-                final signal = signals[index];
-                final bool isLocked = isLockedCallback(index);
-                return SignalCard(
-                  signal: signal,
-                  userTier: userTier,
-                  isLocked: isLocked,
-                );
-              },
             ),
           ),
         );
@@ -220,151 +148,775 @@ class _SignalScreenState extends State<SignalScreen> {
     );
   }
 
-  Widget _buildOutOfHoursView(String userTier, AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.timer_off_outlined, size: 80, color: Colors.blueAccent),
-          const SizedBox(height: 20),
-          Text(
-            l10n.outOfGoldenHours,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            userTier == 'vip' ? l10n.outOfGoldenHoursVipDesc : l10n.outOfGoldenHoursDemoDesc,
-            style: TextStyle(fontSize: 16, color: Colors.grey[400]),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 30),
-          _buildUpgradeButton(l10n),
-        ],
+  Widget _buildAppOption(BuildContext context, String name, String webUrl, String appUrl, String iconPath, {bool isSelected = false}) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        _launchApp(appUrl, webUrl);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Image.asset(
+                iconPath,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.account_balance_wallet, size: 14, color: Colors.white54),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Text(
+              name,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const Spacer(),
+            Container(
+              width: 19,
+              height: 19,
+              decoration: ShapeDecoration(
+                color: isSelected ? const Color(0xFF276EFB) : Colors.white.withValues(alpha: 0.1),
+                shape: const OvalBorder(),
+              ),
+              child: Center(
+                child: Container(
+                  width: 11,
+                  height: 11,
+                  decoration: ShapeDecoration(
+                    color: isSelected ? Colors.white : Colors.transparent,
+                    shape: const OvalBorder(),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildUpgradeButton(AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: SizedBox(
-        height: 50,
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const UpgradeScreen()),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          child: Ink(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF172AFE), Color(0xFF3C4BFE), Color(0xFF5E69FD)],
-                stops: [0.0, 0.5, 1.0],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Container(
-              alignment: Alignment.center,
+  String _getAssetLabel(AssetFilter filter, AppLocalizations l10n) {
+    switch (filter) {
+      case AssetFilter.all:
+        return l10n.allAssets;
+      case AssetFilter.gold:
+        return 'Gold';
+      case AssetFilter.crypto:
+        return 'Crypto';
+      case AssetFilter.forex:
+        return 'Forex';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = context.watch<UserProvider>();
+    final l10n = AppLocalizations.of(context)!;
+    
+    final isElite = (userProvider.userTier ?? '').toLowerCase() == 'elite';
+    final tokenBalance = userProvider.tokenBalance;
+    final tokenText = isElite ? l10n.unlimited : l10n.freeSignalsCount(tokenBalance);
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.asset('assets/images/crown_icon.png', height: 24, width: 24),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.upgradeAccount,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  const Text(
+                    'Favourite Assets',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      const _LanguageSwitcher(),
+                      const SizedBox(width: 4),
+                      Consumer<NotificationProvider>(
+                        builder: (context, notificationProvider, child) {
+                          final bool hasUnread = notificationProvider.unreadCount > 0;
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.notifications_none, size: 28, color: Colors.white),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                                  );
+                                },
+                              ),
+                              if (hasUnread)
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: Container(
+                                    height: 9,
+                                    width: 9,
+                                    decoration: const BoxDecoration(
+                                        color: Colors.redAccent,
+                                        shape: BoxShape.circle,
+                                        border: Border.fromBorderSide(BorderSide(color: Color(0xFF0D1117), width: 1.5))
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+
+            // Tab bar (Assets / GMT) - Functional Filters
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  // Assets Filter
+                  Expanded(
+                    child: Container(
+                      height: 41,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: const Alignment(0.00, 1.00),
+                          end: const Alignment(1.00, 0.12),
+                          colors: [
+                            Colors.white.withValues(alpha: 0.15),
+                            Colors.white.withValues(alpha: 0.05)
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<AssetFilter>(
+                          value: _assetFilter,
+                          isExpanded: true,
+                          dropdownColor: const Color(0xFF0D0D0D),
+                          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 20),
+                          style: const TextStyle(color: Colors.white, fontSize: 18),
+                          onChanged: (value) {
+                            if (value != null) setState(() => _assetFilter = value);
+                          },
+                          items: [
+                            DropdownMenuItem(value: AssetFilter.all, child: Text(l10n.allAssets)),
+                            const DropdownMenuItem(value: AssetFilter.gold, child: Text('Gold')),
+                            const DropdownMenuItem(value: AssetFilter.crypto, child: Text('Crypto')),
+                            const DropdownMenuItem(value: AssetFilter.forex, child: Text('Forex')),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // GMT Filter
+                  Expanded(
+                    child: Container(
+                      height: 41,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: const Alignment(0.00, 1.00),
+                          end: const Alignment(1.00, 0.12),
+                          colors: [
+                            Colors.white.withValues(alpha: 0.15),
+                            Colors.white.withValues(alpha: 0.05)
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedTimezone,
+                          isExpanded: true,
+                          dropdownColor: const Color(0xFF0D0D0D),
+                          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 20),
+                          style: const TextStyle(color: Colors.white, fontSize: 18),
+                          onChanged: (value) {
+                            if (value != null) setState(() => _selectedTimezone = value);
+                          },
+                          items: _timezones.map((tz) => DropdownMenuItem(
+                            value: tz,
+                            child: Text(tz),
+                          )).toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+            
+            // Dynamic Tokens Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: const Alignment(0.00, 1.00),
+                    end: const Alignment(1.00, 0.12),
+                    colors: [
+                      Colors.white.withValues(alpha: 0.15),
+                      Colors.white.withValues(alpha: 0.05)
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Tokens',
+                      style: TextStyle(color: Color(0xFF686868), fontSize: 16),
+                    ),
+                    Text(
+                      tokenText,
+                      style: const TextStyle(color: Color(0xFF00BB32), fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+
+            // Asset List (Filtered Real-time Prices)
+            Expanded(
+              child: StreamBuilder<Map<String, double>>(
+                stream: _priceService.priceStream,
+                initialData: const {'BTC': 0.0, 'ETH': 0.0, 'XAU': 0.0},
+                builder: (context, snapshot) {
+                  final prices = snapshot.data!;
+                  
+                  // Filter list based on selected asset filter
+                  List<Widget> assetWidgets = [];
+                  
+                  if (_assetFilter == AssetFilter.all || _assetFilter == AssetFilter.gold) {
+                    assetWidgets.add(_buildAssetItem(
+                      symbol: 'XAUUSD',
+                      price: prices['XAU'] ?? 0.0,
+                      iconPath: 'assets/icons/XAUUSD.png',
+                      color: const Color(0xFFFFAD00),
+                      priceColor: const Color(0xFF197DFF),
+                      userProvider: userProvider,
+                      l10n: l10n,
+                    ));
+                  }
+                  
+                  if (_assetFilter == AssetFilter.all || _assetFilter == AssetFilter.crypto) {
+                    if (assetWidgets.isNotEmpty) assetWidgets.add(const SizedBox(height: 12));
+                    assetWidgets.add(_buildAssetItem(
+                      symbol: 'BTC',
+                      price: prices['BTC'] ?? 0.0,
+                      iconPath: 'assets/icons/BTC.png',
+                      color: const Color(0xFFFF8800),
+                      priceColor: const Color(0xFF197DFF),
+                      userProvider: userProvider,
+                      l10n: l10n,
+                    ));
+                    assetWidgets.add(const SizedBox(height: 12));
+                    assetWidgets.add(_buildAssetItem(
+                      symbol: 'ETH',
+                      price: prices['ETH'] ?? 0.0,
+                      iconPath: 'assets/icons/ETH.png',
+                      color: Colors.white,
+                      priceColor: const Color(0xFFE39300),
+                      userProvider: userProvider,
+                      l10n: l10n,
+                    ));
+                  }
+                  
+                  // Forex is empty for now as no symbols are being streamed
+                  if (_assetFilter == AssetFilter.forex && assetWidgets.isEmpty) {
+                    assetWidgets.add(const Center(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 40),
+                        child: Text('No Forex assets available', style: TextStyle(color: Colors.white54)),
+                      ),
+                    ));
+                  }
+
+                  return ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: assetWidgets,
+                  );
+                },
+              ),
+            ),
+
+            // Open EXNESS Button
+            Padding(
+              padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 85.0),
+              child: GestureDetector(
+                onTap: () => _showAppSelection(context),
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
+                    ),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Open EXNESS',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4998FF),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(Icons.arrow_outward, size: 16, color: Colors.white),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAssetItem({
+    required String symbol,
+    required double price,
+    required String iconPath,
+    required Color color,
+    required Color priceColor,
+    required UserProvider userProvider,
+    required AppLocalizations l10n,
+  }) {
+    final bool isExpanded = _expandedSymbol == symbol;
+
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _expandedSymbol = isExpanded ? null : symbol;
+            });
+          },
+          child: Container(
+            height: 55,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              border: Border(bottom: BorderSide(color: Color(0xFF1E1E1E))),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.currency_exchange, size: 16, color: Colors.white70),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  symbol,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: priceColor),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Text(
+                    _currencyFormat.format(price),
+                    style: TextStyle(
+                      color: priceColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (isExpanded)
+          SignalDetailExpandedView(
+            symbol: symbol == 'XAUUSD' ? 'XAU/USD' : (symbol == 'BTC' ? 'BTC/USD' : 'ETH/USD'),
+            userTier: userProvider.userTier ?? 'free',
+            userProvider: userProvider,
+            l10n: l10n,
+          ),
+      ],
+    );
+  }
+}
+
+class SignalDetailExpandedView extends StatefulWidget {
+  final String symbol;
+  final String userTier;
+  final UserProvider userProvider;
+  final AppLocalizations l10n;
+
+  const SignalDetailExpandedView({
+    super.key,
+    required this.symbol,
+    required this.userTier,
+    required this.userProvider,
+    required this.l10n,
+  });
+
+  @override
+  State<SignalDetailExpandedView> createState() => _SignalDetailExpandedViewState();
+}
+
+class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
+  late final Stream<List<Signal>> _signalStream;
+  final SignalService _signalService = SignalService();
+
+  @override
+  void initState() {
+    super.initState();
+    _signalStream = _signalService.getSignals(
+      isLive: true,
+      userTier: widget.userTier,
+      symbol: widget.symbol,
+      limit: 1,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Signal>>(
+      stream: _signalStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+              ),
+            ),
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(child: Text(widget.l10n.noSignalsAvailable, style: const TextStyle(color: Colors.white54))),
+          );
+        }
+
+        final signal = snapshot.data!.first;
+        
+        // LOGIC MỚI: Luôn kiểm tra xem đã unlock chưa (dựa trên ID trong unlockedSignals)
+        // Thay vì chỉ kiểm tra quyền (canViewEntry)
+        final bool isUnlocked = widget.userProvider.unlockedSignals.contains(signal.id);
+        
+        // Kiểm tra quyền miễn phí (Elite/Subscribed)
+        final bool isEliteOrSubscribed = SignalAccessHelper.canViewEntry(
+          signal,
+          widget.userProvider.userTier,
+          widget.userProvider.activeSubscriptions,
+          // Không truyền unlockedSignals vào đây vì ta muốn kiểm tra quyền "gốc"
+        );
+
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            _buildSignalDetails(signal, widget.l10n),
+            if (!isUnlocked)
+              _buildBlurredOverlay(context, signal, widget.userProvider, isEliteOrSubscribed),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSignalDetails(Signal signal, AppLocalizations l10n) {
+    // Xác định màu sắc cho Status: Nếu là Matched (và chưa hit TP) thì dùng xanh dương
+    final bool isJustMatched = signal.status == 'running' && signal.isMatched && signal.hitTps.isEmpty;
+    final Color statusColor = isJustMatched ? const Color(0xFF197DFF) : signal.getStatusColor();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildSignalInfoBox(
+                label: 'Status',
+                value: signal.getTranslatedResult(l10n),
+                valueColor: statusColor,
+              ),
+              _buildSignalInfoBox(
+                label: 'ENTRY',
+                value: signal.entryPrice.toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
+                valueColor: const Color(0xFF00BB32),
+              ),
+              _buildSignalInfoBox(
+                label: 'SL',
+                value: signal.stopLoss.toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
+                valueColor: const Color(0xFFE3001E),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildSignalInfoBox(
+                label: 'TP1',
+                value: signal.takeProfits.isNotEmpty ? signal.takeProfits[0].toString() : '-',
+                valueColor: Colors.white,
+              ),
+              _buildSignalInfoBox(
+                label: 'TP2',
+                value: signal.takeProfits.length > 1 ? signal.takeProfits[1].toString() : '-',
+                valueColor: Colors.white,
+              ),
+              _buildSignalInfoBox(
+                label: 'TP3',
+                value: signal.takeProfits.length > 2 ? signal.takeProfits[2].toString() : '-',
+                valueColor: Colors.white,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SignalAnalyzeScreen(signal: signal),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0), // Thêm vertical padding cho dễ bấm
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        'assets/icons/analyze.png',
+                        width: 24,
+                        height: 24,
+                        errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.analytics_outlined,
+                          size: 24,
+                          color: Color(0xFF636363),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'Analyze',
+                        style: TextStyle(
+                          color: Color(0xFF636363),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Reddit Sans',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Color(0xFF636363),
+                    size: 24,
                   ),
                 ],
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabs(AppLocalizations l10n) {
-    return Container(
-      height: 32,
-      decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildTabItem(l10n.live, _isLive, () => setState(() => _isLive = true)),
-          _buildTabItem(l10n.end, !_isLive, () => setState(() => _isLive = false)),
         ],
       ),
     );
   }
 
-  Widget _buildTabItem(String text, bool isSelected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        decoration: BoxDecoration(
-          gradient: isSelected
-              ? const LinearGradient(
-            colors: [
-              Color(0xFF172AFE),
-              Color(0xFF3C4BFE),
-              Color(0xFF5E69FD),
-            ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          )
-              : null,
-          borderRadius: BorderRadius.circular(8),
+  Widget _buildBlurredOverlay(BuildContext context, Signal signal, UserProvider userProvider, bool isFreeUnlock) {
+    return Container(
+      width: double.infinity,
+      height: 210, // Tăng chiều cao
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: ShapeDecoration(
+              gradient: LinearGradient(
+                begin: const Alignment(-0.00, 1.00),
+                end: const Alignment(1.09, -0.05),
+                colors: [
+                  Colors.black.withValues(alpha: 0.25), // Tăng độ trong suốt (giảm alpha)
+                  Colors.black.withValues(alpha: 0.05),
+                ],
+              ),
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  width: 1,
+                  color: Colors.white.withValues(alpha: 0.1),
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12.0),
+                  child: Text(
+                    'Use Token to view Signal', // Luôn hiển thị dòng chữ này
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (isFreeUnlock) {
+                      await userProvider.unlockSignal(signal.id, freeUnlock: true);
+                    } else {
+                      if (userProvider.tokenBalance > 0) {
+                        final success = await userProvider.unlockSignal(signal.id, freeUnlock: false);
+                        if (!success && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Failed to unlock signal')),
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Not enough tokens')),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF276EFB),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                  ),
+                  child: const Text(
+                    'View Now',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        child: Center(
-            child: Text(
-              text,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              softWrap: false,
-            )),
       ),
     );
   }
 
-  Widget _buildFilters(AppLocalizations l10n) {
-    return Row(
+  Widget _buildSignalInfoBox({
+    required String label,
+    required String value,
+    required Color valueColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Symbol Filter
-        PopupMenuButton<String>(
-          onSelected: (value) {
-            setState(() {
-              _selectedSymbol = value == 'All' ? null : value;
-            });
-          },
-          itemBuilder: (context) {
-            return [
-              const PopupMenuItem(value: 'All', child: Text('All Symbols')),
-              ..._popularSymbols.map((s) => PopupMenuItem(value: s, child: Text(s))),
-            ];
-          },
-          child: _FilterButtonContent(
-            text: _selectedSymbol ?? l10n.symbol,
-            isActive: _selectedSymbol != null,
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF686868),
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
           ),
         ),
-        const SizedBox(width: 16),
-        // AI Filter (Not implemented yet, just UI)
-        _FilterButtonContent(
-          text: l10n.aiSignal,
-          isActive: false,
-          onPressed: () {},
+        const SizedBox(height: 4),
+        Container(
+          width: 107,
+          height: 41,
+          alignment: Alignment.center,
+          decoration: ShapeDecoration(
+            gradient: LinearGradient(
+              begin: const Alignment(0.00, 1.00),
+              end: const Alignment(1.00, 0.12),
+              colors: [
+                const Color(0xFF1E1E1E).withValues(alpha: 0.9),
+                const Color(0xFF1E1E1E).withValues(alpha: 0.6),
+              ],
+            ),
+            shape: RoundedRectangleBorder(
+              side: BorderSide(
+                width: 1,
+                color: Colors.white.withValues(alpha: 0.15),
+              ),
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          child: Text(
+            value,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: valueColor,
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
         ),
       ],
     );
@@ -397,56 +949,6 @@ class _LanguageSwitcher extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _FilterButtonContent extends StatelessWidget {
-  final String text;
-  final bool isActive;
-  final VoidCallback? onPressed;
-
-  const _FilterButtonContent({required this.text, this.isActive = false, this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 120),
-      child: Container(
-        height: 32,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Color(0xFF0D1117), Color(0xFF161B22), Color.fromARGB(255, 20, 29, 110)]),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: isActive ? Colors.blueAccent : Colors.blueGrey.withOpacity(0.5)),
-        ),
-        child: ElevatedButton(
-          onPressed: onPressed, // Can be null if wrapped in PopupMenuButton
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                text, 
-                style: TextStyle(
-                  fontSize: 11, 
-                  color: isActive ? Colors.blueAccent : Colors.white
-                )
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.arrow_drop_down, 
-                size: 18,
-                color: isActive ? Colors.blueAccent : Colors.white
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

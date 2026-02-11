@@ -3,10 +3,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:minvest_forex_app/features/notifications/models/notification_model.dart';
-import 'package:minvest_forex_app/features/notifications/services/notification_service.dart';
+import 'package:minvest_forex_app/features/notifications/services/notification_service.dart' as feat_service;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class NotificationProvider with ChangeNotifier {
-  final NotificationService _notificationService = NotificationService();
+  final feat_service.NotificationService _notificationService = feat_service.NotificationService();
 
   List<NotificationModel> _notifications = [];
   int _unreadCount = 0;
@@ -14,8 +16,84 @@ class NotificationProvider with ChangeNotifier {
   StreamSubscription? _notificationsSubscription;
   StreamSubscription? _unreadCountSubscription;
 
+  // Settings
+  bool _isAllEnabled = true;
+  bool _isGoldEnabled = true;
+  bool _isCryptoEnabled = true;
+  bool _isForexEnabled = true;
+
   List<NotificationModel> get notifications => _notifications;
   int get unreadCount => _unreadCount;
+
+  bool get isAllEnabled => _isAllEnabled;
+  bool get isGoldEnabled => _isGoldEnabled;
+  bool get isCryptoEnabled => _isCryptoEnabled;
+  bool get isForexEnabled => _isForexEnabled;
+
+  NotificationProvider() {
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isAllEnabled = prefs.getBool('notif_all') ?? true;
+    _isGoldEnabled = prefs.getBool('notif_gold') ?? true;
+    _isCryptoEnabled = prefs.getBool('notif_crypto') ?? true;
+    _isForexEnabled = prefs.getBool('notif_forex') ?? true;
+    notifyListeners();
+  }
+
+  Future<void> toggleAll(bool value) async {
+    _isAllEnabled = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notif_all', value);
+    
+    if (value) {
+      await FirebaseMessaging.instance.subscribeToTopic('all_signals');
+    } else {
+      await FirebaseMessaging.instance.unsubscribeFromTopic('all_signals');
+    }
+    notifyListeners();
+  }
+
+  Future<void> toggleGold(bool value) async {
+    _isGoldEnabled = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notif_gold', value);
+    
+    if (value) {
+      await FirebaseMessaging.instance.subscribeToTopic('gold_signals');
+    } else {
+      await FirebaseMessaging.instance.unsubscribeFromTopic('gold_signals');
+    }
+    notifyListeners();
+  }
+
+  Future<void> toggleCrypto(bool value) async {
+    _isCryptoEnabled = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notif_crypto', value);
+    
+    if (value) {
+      await FirebaseMessaging.instance.subscribeToTopic('crypto_signals');
+    } else {
+      await FirebaseMessaging.instance.unsubscribeFromTopic('crypto_signals');
+    }
+    notifyListeners();
+  }
+
+  Future<void> toggleForex(bool value) async {
+    _isForexEnabled = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notif_forex', value);
+    
+    if (value) {
+      await FirebaseMessaging.instance.subscribeToTopic('forex_signals');
+    } else {
+      await FirebaseMessaging.instance.unsubscribeFromTopic('forex_signals');
+    }
+    notifyListeners();
+  }
 
   // 1. Xóa hàm khởi tạo cũ để provider không tự động lắng nghe nữa
   // NotificationProvider() {

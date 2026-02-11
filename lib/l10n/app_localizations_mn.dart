@@ -126,15 +126,15 @@ class AppLocalizationsMn extends AppLocalizations {
   String get reuploadImage => 'Зургийг дахин байршуулах';
 
   @override
-  String get accountNotLinked => 'Бүртгэл Minvest-тэй холбогдоогүй байна';
+  String get accountNotLinked => 'Бүртгэл Signal GPT-тэй холбогдоогүй байна';
 
   @override
   String get accountNotLinkedDesc =>
-      'Онцгой дохиог авахын тулд таны Exness бүртгэл Minvest түншийн холбоосоор бүртгэгдсэн байх ёстой. Доорх холбоосыг ашиглан шинэ бүртгэл үүсгэнэ үү.';
+      'Онцгой дохиог авахын тулд таны Exness бүртгэл Signal GPT түншийн холбоосоор бүртгэгдсэн байх ёстой. Доорх холбоосыг ашиглан шинэ бүртгэл үүсгэнэ үү.';
 
   @override
-  String get registerExnessViaMinvest =>
-      'Minvest-ээр дамжуулан Exness бүртгүүлэх';
+  String get registerExnessViaSignalGPT =>
+      'Signal GPT-ээр дамжуулан Exness бүртгүүлэх';
 
   @override
   String get iHaveRegisteredReupload => 'Би бүртгүүлсэн, дахин байршуулах';
@@ -293,7 +293,7 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get accountVerificationPrompt =>
-      'Зөвшөөрөл авахын тулд Exness дансны дэлгэцийн агшинг байршуулна уу (таны данс Minvest-ийн Exness холбоосоор нээгдсэн байх ёстой)';
+      'Зөвшөөрөл авахын тулд Exness дансны дэлгэцийн агшинг байршуулна уу (таны данс Signal GPT-ийн Exness холбоосоор нээгдсэн байх ёстой)';
 
   @override
   String get selectPhotoFromLibrary => 'Номын сангаас зураг сонгох';
@@ -345,7 +345,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get upgradeNow => 'Одоо сайжруулах';
 
   @override
-  String get followMinvest => 'MInvest-ийг дагах';
+  String get followSignalGPT => 'Signal GPT-ийг дагах';
 
   @override
   String get tabSignal => 'Дохио';
@@ -467,7 +467,7 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get exnessUpgradeNoteForIos =>
-      'Minvest-ээр дамжуулан Exness данс бүртгүүлсэн үйлчлүүлэгчид бидэнтэй холбогдох товчийг дарж дансаа сайжруулна уу.';
+      'Signal GPT-ээр дамжуулан Exness данс бүртгүүлсэн үйлчлүүлэгчид бидэнтэй холбогдох товчийг дарж дансаа сайжруулна уу.';
 
   @override
   String get chatWelcomeTitle => '👋 Signal GPT-д тавтай морил!';
@@ -766,7 +766,7 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get onDemandFinancialExpertDesc =>
-      'AI платформ худалдааны дохио санал болгодог - өөрөө суралцдаг, зах зээлийг 24/7 шинжилдэг, сэтгэл хөдлөлд автдаггүй. Minvest нь 10,000 гаруй санхүүгийн шинжээчдэд нарийн, тогтвортой, хэрэглэхэд хялбар дохио олоход нь дэмжлэг үзүүлсэн';
+      'AI платформ худалдааны дохио санал болгодог - өөрөө суралцдаг, зах зээлийг 24/7 шинжилдэг, сэтгэл хөдлөлд автдаггүй. Signal GPT нь 10,000 гаруй санхүүгийн шинжээчдэд нарийн, тогтвортой, хэрэглэхэд хялбар дохио олоход нь дэмжлэг үзүүлсэн';
 
   @override
   String get aiPoweredSignalPlatform =>
@@ -1208,7 +1208,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get signalsPlan => 'Дохионы төлөвлөгөө';
 
   @override
-  String get aiMinvest => 'AI Minvest';
+  String get aiSignalGPT => 'AI Signal GPT';
 
   @override
   String get yourTokens => 'Таны Токенууд';
@@ -1276,7 +1276,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get performance => 'Гүйцэтгэл';
 
   @override
-  String get minvestSupport => 'SignalGpt Support';
+  String get minvestSupport => 'Signal GPT Support';
 
   @override
   String get leaveMessagePart1 =>

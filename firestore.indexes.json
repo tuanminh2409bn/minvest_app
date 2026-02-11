@@ -92,20 +92,53 @@
         }
       ]
     },
-    {
-      "collectionGroup": "users",
-      "queryScope": "COLLECTION",
-      "fields": [
         {
-          "fieldPath": "activeSubscriptions",
-          "arrayConfig": "CONTAINS"
+          "collectionGroup": "users",
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "activeSubscriptions",
+              "arrayConfig": "CONTAINS"
+            },
+            {
+              "fieldPath": "subscriptionsExpiry.crypto",
+              "order": "ASCENDING"
+            }
+          ]
         },
         {
-          "fieldPath": "subscriptionsExpiry.crypto",
-          "order": "ASCENDING"
+          "collectionGroup": "signals",
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "status",
+              "order": "ASCENDING"
+            },
+            {
+              "fieldPath": "createdAt",
+              "order": "DESCENDING"
+            }
+          ]
+        },
+        {
+          "collectionGroup": "signals",
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "status",
+              "order": "ASCENDING"
+            },
+            {
+              "fieldPath": "symbol",
+              "order": "ASCENDING"
+            },
+            {
+              "fieldPath": "createdAt",
+              "order": "DESCENDING"
+            }
+          ]
         }
-      ]
+      ],
+      "fieldOverrides": []
     }
-  ],
-  "fieldOverrides": []
-}
+    

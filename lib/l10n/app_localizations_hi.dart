@@ -126,15 +126,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get reuploadImage => 'छवि पुनः अपलोड करें';
 
   @override
-  String get accountNotLinked => 'खाता Minvest से लिंक नहीं है';
+  String get accountNotLinked => 'खाता Signal GPT से लिंक नहीं है';
 
   @override
   String get accountNotLinkedDesc =>
-      'विशिष्ट संकेत प्राप्त करने के लिए, आपका Exness खाता Minvest भागीदार लिंक के माध्यम से पंजीकृत होना चाहिए। कृपया नीचे दिए गए लिंक का उपयोग करके एक नया खाता बनाएँ।';
+      'विशिष्ट संकेत प्राप्त करने के लिए, आपका Exness खाता Signal GPT भागीदार लिंक के माध्यम से पंजीकृत होना चाहिए। कृपया नीचे दिए गए लिंक का उपयोग करके एक नया खाता बनाएँ।';
 
   @override
-  String get registerExnessViaMinvest =>
-      'Minvest के माध्यम से Exness पंजीकृत करें';
+  String get registerExnessViaSignalGPT =>
+      'Signal GPT के माध्यम से Exness पंजीकृत करें';
 
   @override
   String get iHaveRegisteredReupload =>
@@ -294,7 +294,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get accountVerificationPrompt =>
-      'अधिकृत होने के लिए कृपया अपने Exness खाते का स्क्रीनशॉट अपलोड करें (आपका खाता Minvest के Exness लिंक के तहत खोला जाना चाहिए)';
+      'अधिकृत होने के लिए कृपया अपने Exness खाते का स्क्रीनशॉट अपलोड करें (आपका खाता Signal GPT के Exness लिंक के तहत खोला जाना चाहिए)';
 
   @override
   String get selectPhotoFromLibrary => 'लाइब्रेरी से फोटो चुनें';
@@ -346,7 +346,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get upgradeNow => 'अभी अपग्रेड करें';
 
   @override
-  String get followMinvest => 'MInvest का पालन करें';
+  String get followSignalGPT => 'Signal GPT का पालन करें';
 
   @override
   String get tabSignal => 'संकेत';
@@ -468,7 +468,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get exnessUpgradeNoteForIos =>
-      'जिन ग्राहकों ने Minvest के माध्यम से Exness खाता पंजीकृत किया है, कृपया अपने खाते को अपग्रेड करने के लिए हमसे संपर्क करें पर क्लिक करें।';
+      'जिन ग्राहकों ने Signal GPT के माध्यम से Exness खाता पंजीकृत किया है, कृपया अपने खाते को अपग्रेड करने के लिए हमसे संपर्क करें पर क्लिक करें।';
 
   @override
   String get chatWelcomeTitle => '👋 Signal GPT में आपका स्वागत है!';
@@ -764,7 +764,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get onDemandFinancialExpertDesc =>
-      'AI प्लेटफ़ॉर्म ट्रेडिंग संकेतों का सुझाव देता है - स्व-सीखने वाला, 24/7 बाजार का विश्लेषण करता है, भावनाओं से अप्रभावित। Minvest ने सटीक, स्थिर और आसानी से लागू होने वाले संकेतों को खोजने की अपनी यात्रा में 10,000 से अधिक वित्तीय विश्लेषकों का समर्थन किया है';
+      'AI प्लेटफ़ॉर्म ट्रेडिंग संकेतों का सुझाव देता है - स्व-सीखने वाला, 24/7 बाजार का विश्लेषण करता है, भावनाओं से अप्रभावित। Signal GPT ने सटीक, स्थिर और आसानी से लागू होने वाले संकेतों को खोजने की अपनी यात्रा में 10,000 से अधिक वित्तीय विश्लेषकों का समर्थन किया है';
 
   @override
   String get aiPoweredSignalPlatform => 'AI-संचालित ट्रेडिंग सिग्नल प्लेटफॉर्म';
@@ -1203,7 +1203,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get signalsPlan => 'संकेत योजना';
 
   @override
-  String get aiMinvest => 'AI Minvest';
+  String get aiSignalGPT => 'AI Signal GPT';
 
   @override
   String get yourTokens => 'आपके टोकन';
@@ -1271,7 +1271,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get performance => 'प्रदर्शन';
 
   @override
-  String get minvestSupport => 'SignalGpt Support';
+  String get minvestSupport => 'Signal GPT Support';
 
   @override
   String get leaveMessagePart1 =>

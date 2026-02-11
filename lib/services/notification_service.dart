@@ -11,8 +11,8 @@ final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = Flutter
 
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'minvest_channel_id',
-  'Minvest Forex Signals',
-  description: 'Kênh nhận thông báo tín hiệu từ Minvest.',
+  'Signal GPT Signals',
+  description: 'Kênh nhận thông báo tín hiệu từ Signal GPT.',
   importance: Importance.max,
   playSound: true,
 );
@@ -108,7 +108,7 @@ class NotificationService {
 
       // Fallback cho tin nhắn data-only
       if (title == null && message.data.isNotEmpty) {
-        title = message.data['title'] ?? 'Minvest Signal';
+        title = message.data['title'] ?? 'Signal GPT Signal';
         body = message.data['body'] ?? message.data['message'] ?? 'Bạn có tin nhắn mới.';
       }
 

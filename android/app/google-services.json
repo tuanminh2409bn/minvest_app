@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "245218403052-6qchi0i5rj37i0qp5jub43gtnu17j507.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.minvest.aisignals",
+            "certificate_hash": "695c06b870ede521619fbf3427ebcf55ae12ed58"
+          }
+        },
+        {
           "client_id": "245218403052-od4o65p52jq9aljgd7pqlcs3d3d4v5u8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

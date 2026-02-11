@@ -120,14 +120,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reuploadImage => '重新上传图片';
 
   @override
-  String get accountNotLinked => '账户未关联到 Minvest';
+  String get accountNotLinked => '账户未关联到 Signal GPT';
 
   @override
   String get accountNotLinkedDesc =>
-      '为了获得独家信号，您的 Exness 账户必须通过 Minvest 合作伙伴链接注册。请使用下面的链接创建一个新账户。';
+      '为了获得独家信号，您的 Exness 账户必须通过 Signal GPT 合作伙伴链接注册。请使用下面的链接创建一个新账户。';
 
   @override
-  String get registerExnessViaMinvest => '通过 Minvest 注册 Exness';
+  String get registerExnessViaSignalGPT => '通过 Signal GPT 注册 Exness';
 
   @override
   String get iHaveRegisteredReupload => '我已经注册，重新上传';
@@ -283,7 +283,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get accountVerificationPrompt =>
-      '请上传您的 Exness 账户截图以进行授权（您的账户必须在 Minvest 的 Exness 链接下开设）';
+      '请上传您的 Exness 账户截图以进行授权（您的账户必须在 Signal GPT 的 Exness 链接下开设）';
 
   @override
   String get selectPhotoFromLibrary => '从图库选择照片';
@@ -334,7 +334,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get upgradeNow => '立即升级';
 
   @override
-  String get followMinvest => '关注 MInvest';
+  String get followSignalGPT => '关注 Signal GPT';
 
   @override
   String get tabSignal => '信号';
@@ -454,7 +454,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get exnessUpgradeNoteForIos =>
-      '对于通过 Minvest 注册 Exness 账户的客户，请点击联系我们以升级您的账户。';
+      '对于通过 Signal GPT 注册 Exness 账户的客户，请点击联系我们以升级您的账户。';
 
   @override
   String get chatWelcomeTitle => '👋 欢迎来到 Signal GPT！';
@@ -736,7 +736,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onDemandFinancialExpertDesc =>
-      'AI 平台建议交易信号 - 自我学习，24/7 分析市场，不受情绪影响。Minvest 已支持超过 10,000 名金融分析师\n在寻找准确、稳定和易于应用的信号的旅程中';
+      'AI 平台建议交易信号 - 自我学习，24/7 分析市场，不受情绪影响。Signal GPT 已支持超过 10,000 名金融分析师\n在寻找准确、稳定和易于应用的信号的旅程中';
 
   @override
   String get aiPoweredSignalPlatform => 'AI 驱动的交易信号平台';
@@ -1158,7 +1158,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get signalsPlan => '信号计划';
 
   @override
-  String get aiMinvest => 'AI Minvest';
+  String get aiSignalGPT => 'AI Signal GPT';
 
   @override
   String get yourTokens => '您的代币';
@@ -1224,7 +1224,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get performance => '业绩';
 
   @override
-  String get minvestSupport => 'SignalGpt Support';
+  String get minvestSupport => 'Signal GPT Support';
 
   @override
   String get leaveMessagePart1 => '请留言，我们的团队将尽快回复。您也可以联系 ';
