@@ -302,8 +302,11 @@ class AuthService {
     }
 
     if (!isAnonymous) {
-      await SessionService().updateUserSession();
-      await listenForSessionChanges();
+      // Không dùng await ở đây để tránh treo màn hình Login nếu Cloud Function chậm
+      SessionService().updateUserSession().catchError((e) {
+        print('Lỗi cập nhật session (không chặn login): $e');
+      });
+      listenForSessionChanges();
     }
     return user;
   }
@@ -489,6 +492,31 @@ class AuthService {
       });
     } catch (e) {
       print('Lỗi gọi resetPasswordWithCode: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null || user.email == null) {
+      throw Exception('Người dùng chưa đăng nhập.');
+    }
+
+    try {
+      // Re-authenticate user
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      // Update password
+      await user.updatePassword(newPassword);
+    } catch (e) {
+      print('Lỗi đổi mật khẩu: $e');
       rethrow;
     }
   }

@@ -127,14 +127,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get reuploadImage => 'Bild erneut hochladen';
 
   @override
-  String get accountNotLinked => 'Konto nicht mit Minvest verknüpft';
+  String get accountNotLinked => 'Konto nicht mit Signal GPT verknüpft';
 
   @override
   String get accountNotLinkedDesc =>
-      'Um exklusive Signale zu erhalten, muss Ihr Exness-Konto über den Minvest-Partnerlink registriert sein. Bitte erstellen Sie ein neues Konto über den untenstehenden Link.';
+      'Um exklusive Signale zu erhalten, muss Ihr Exness-Konto über den Signal GPT-Partnerlink registriert sein. Bitte erstellen Sie ein neues Konto über den untenstehenden Link.';
 
   @override
-  String get registerExnessViaMinvest => 'Exness über Minvest registrieren';
+  String get registerExnessViaSignalGPT =>
+      'Exness über Signal GPT registrieren';
 
   @override
   String get iHaveRegisteredReupload =>
@@ -293,7 +294,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get accountVerificationPrompt =>
-      'Bitte laden Sie einen Screenshot Ihres Exness-Kontos hoch, um autorisiert zu werden (Ihr Konto muss unter dem Exness-Link von Minvest eröffnet worden sein)';
+      'Bitte laden Sie einen Screenshot Ihres Exness-Kontos hoch, um autorisiert zu werden (Ihr Konto muss unter dem Exness-Link von Signal GPT eröffnet worden sein)';
 
   @override
   String get selectPhotoFromLibrary => 'Foto aus Bibliothek auswählen';
@@ -345,7 +346,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get upgradeNow => 'Jetzt upgraden';
 
   @override
-  String get followMinvest => 'Folgen Sie MInvest';
+  String get followSignalGPT => 'Folgen Sie Signal GPT';
 
   @override
   String get tabSignal => 'Signal';
@@ -467,7 +468,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get exnessUpgradeNoteForIos =>
-      'Kunden, die ein Exness-Konto über Minvest registriert haben, klicken bitte auf Kontakt, um ihr Konto upgraden zu lassen.';
+      'Kunden, die ein Exness-Konto über Signal GPT registriert haben, klicken bitte auf Kontakt, um ihr Konto upgraden zu lassen.';
 
   @override
   String get chatWelcomeTitle => '👋 Willkommen bei Signal GPT!';
@@ -765,7 +766,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get onDemandFinancialExpertDesc =>
-      'KI-Plattform schlägt Handelssignale vor - selbstlernend, analysiert den Markt 24/7, unbeeinflusst von Emotionen. Minvest hat über 10.000 Finanzanalysten auf ihrem Weg zu präzisen, stabilen und einfach anzuwendenden Signalen unterstützt';
+      'KI-Plattform schlägt Handelssignale vor - selbstlernend, analysiert den Markt 24/7, unbeeinflusst von Emotionen. Signal GPT hat über 10.000 Finanzanalysten auf ihrem Weg zu präzisen, stabilen und einfach anzuwendenden Signalen unterstützt';
 
   @override
   String get aiPoweredSignalPlatform => 'KI-gestützte Handelssignal-Plattform';
@@ -1208,7 +1209,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get signalsPlan => 'Signal-Plan';
 
   @override
-  String get aiMinvest => 'AI Minvest';
+  String get aiSignalGPT => 'AI Signal GPT';
 
   @override
   String get yourTokens => 'Ihre Token';
@@ -1277,7 +1278,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get performance => 'Leistung';
 
   @override
-  String get minvestSupport => 'SignalGpt Support';
+  String get minvestSupport => 'Signal GPT Support';
 
   @override
   String get leaveMessagePart1 =>

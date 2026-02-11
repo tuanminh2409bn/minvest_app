@@ -11,6 +11,7 @@ class Signal {
   final double stopLoss;
   final List<dynamic> takeProfits;
   final Timestamp createdAt;
+  final Timestamp? matchedAt;
   final String? result;
   final num? pips;
   final dynamic reason;
@@ -30,6 +31,7 @@ class Signal {
     required this.stopLoss,
     required this.takeProfits,
     required this.createdAt,
+    this.matchedAt,
     this.result,
     this.pips,
     this.reason,
@@ -52,6 +54,7 @@ class Signal {
       stopLoss: (data['stopLoss'] ?? 0.0).toDouble(),
       takeProfits: List.from(data['takeProfits'] ?? []),
       createdAt: data['createdAt'] ?? Timestamp.now(),
+      matchedAt: data['matchedAt'],
       result: data['result'],
       pips: data['pips'],
       reason: data['reason'],
@@ -65,15 +68,12 @@ class Signal {
   }
 
   String getTranslatedResult(AppLocalizations l10n) {
-    // --- ƯU TIÊN 1: Hiển thị thành tích TP cao nhất đã đạt được ---
     if (hitTps.contains(3)) return l10n.tp3Hit;
     if (hitTps.contains(2)) return l10n.tp2Hit;
     if (hitTps.contains(1)) return l10n.tp1Hit;
 
-    // --- ƯU TIÊN 2: Nếu chưa có TP, hiển thị các trạng thái khác ---
     final lowercasedResult = result?.toLowerCase() ?? '';
     switch (lowercasedResult) {
-    // (Không cần case cho TP nữa vì đã xử lý ở trên)
       case 'sl hit':
         return l10n.slHit;
       case 'cancelled':
@@ -83,20 +83,16 @@ class Signal {
         return l10n.exitedByAdmin;
     }
 
-    // --- ƯU TIÊN 3: Xử lý các tín hiệu đang chạy ---
     if (status == 'running') {
       return isMatched ? l10n.matched : l10n.notMatched;
     }
 
-    // --- DỰ PHÒNG: Trả về trạng thái gốc nếu không khớp ---
     return result ?? l10n.signalClosed;
   }
 
   Color getStatusColor() {
-    // --- ƯU TIÊN 1: Màu cho thành tích TP ---
     if (hitTps.isNotEmpty) return Colors.greenAccent.shade400;
 
-    // --- ƯU TIÊN 2: Màu cho các trạng thái khác ---
     final lowercasedResult = result?.toLowerCase() ?? '';
     switch (lowercasedResult) {
       case 'sl hit':
@@ -107,12 +103,10 @@ class Signal {
         return Colors.grey;
     }
 
-    // --- ƯU TIÊN 3: Màu cho các tín hiệu đang chạy ---
     if (status == 'running') {
       return isMatched ? Colors.greenAccent.shade400 : Colors.amber.shade400;
     }
 
-    // Màu dự phòng
     return Colors.blueGrey.shade200;
   }
 }

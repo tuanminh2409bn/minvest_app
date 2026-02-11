@@ -293,7 +293,7 @@ class _AccountVerificationScreenState extends State<AccountVerificationScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset('assets/images/minvest_logo.png', height: 60),
+        Image.asset('assets/mockups/logo.png', height: 60),
         const SizedBox(height: 24),
         Text(
           l10n.accountNotLinked,
@@ -308,7 +308,7 @@ class _AccountVerificationScreenState extends State<AccountVerificationScreen> {
         ),
         const SizedBox(height: 32),
         _buildActionButton(
-          text: l10n.registerExnessViaMinvest,
+          text: l10n.registerExnessViaSignalGPT,
           onPressed: () => _launchURL(_exnessSignUpUrl),
           isPrimary: true,
         ),

@@ -177,6 +177,30 @@ class UserProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> unlockSignal(String signalId, {bool freeUnlock = false}) async {
+    if (_uid == null) return false;
+    
+    // Nếu không phải freeUnlock thì kiểm tra số dư
+    if (!freeUnlock && _tokenBalance < 1) return false;
+
+    try {
+      final Map<String, dynamic> updates = {
+        'unlockedSignals': FieldValue.arrayUnion([signalId]),
+      };
+
+      // Chỉ trừ token nếu không phải là freeUnlock
+      if (!freeUnlock) {
+        updates['tokenBalance'] = FieldValue.increment(-1);
+      }
+
+      await FirebaseFirestore.instance.collection('users').doc(_uid!).update(updates);
+      return true;
+    } catch (e) {
+      print("Error unlocking signal: $e");
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     _userSubscription?.cancel();

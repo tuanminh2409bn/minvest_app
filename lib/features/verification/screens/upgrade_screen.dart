@@ -1,236 +1,343 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:minvest_forex_app/features/verification/screens/account_verification_screen.dart';
-import 'package:minvest_forex_app/features/verification/screens/package_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/core/services/purchase_service.dart';
+import 'package:provider/provider.dart';
 
-class UpgradeScreen extends StatelessWidget {
+class UpgradeScreen extends StatefulWidget {
   const UpgradeScreen({super.key});
 
-  Future<void> _launchURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-    }
-  }
+  @override
+  State<UpgradeScreen> createState() => _UpgradeScreenState();
+}
+
+class _UpgradeScreenState extends State<UpgradeScreen> {
+  bool isMonthly = true;
+  int selectedCategoryIndex = 0; // 0: GOLD, 1: FOREX, 2: CRYPTO
+
+  final List<Map<String, String>> categories = [
+    {'name': 'GOLD', 'price': '\$78'},
+    {'name': 'FOREX', 'price': '\$78'},
+    {'name': 'CRYPTO', 'price': '\$78'},
+  ];
+
+  final List<String> features = [
+    'Entry, SL, TP included',
+    'Detailed signal analysis',
+    'Performance statistics',
+    'Real-time email alerts',
+    '24/7 market updates',
+    'Best real-time signals',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final bool isIos = Platform.isIOS;
+    final purchaseService = context.watch<PurchaseService>();
+    final isPurchasing = purchaseService.isPurchasePending;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Text(
-          l10n.upgradeAccount,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0D1117), Color(0xFF161B22), Color.fromARGB(255, 20, 29, 110)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.0, 0.5, 1.0],
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: const Text(
+              'Upgrade To Pro',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            centerTitle: true,
           ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  Center(
-                    child: Text(
-                      l10n.compareTiers,
-                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+          body: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        // Features List
+                        ...features.map((feature) => _buildFeatureItem(feature)),
+                        
+                        const SizedBox(height: 40),
+                        
+                        // Plan Selector Header
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Choose Your Plan',
+                              style: TextStyle(
+                                color: Color(0xFF636363),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            _buildPlanToggle(),
+                          ],
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Category Selection
+                        ...List.generate(categories.length, (index) {
+                          final price = isMonthly ? '\$78' : '\$460';
+                          return _buildCategoryItem(
+                            index,
+                            categories[index]['name']!,
+                            price,
+                          );
+                        }),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  _buildTiersTable(l10n),
-                  const SizedBox(height: 30),
-                  if (!isIos) ...[
-                    _buildActionButton(
-                      context,
-                      text: l10n.openExnessAccount,
-                      onPressed: () {
-                        _launchURL('https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1');
-                      },
-                      isPrimary: true,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildActionButton(
-                      context,
-                      text: l10n.accountVerificationWithExness,
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AccountVerificationScreen()),
-                        );
-                      },
-                      isPrimary: true,
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                  _buildActionButton(
-                    context,
-                    text: l10n.payInAppToUpgrade,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const PackageScreen()),
-                      );
-                    },
-                    isPrimary: true,
-                  ),
-                  const SizedBox(height: 24),
-                  _buildActionButton(
-                    context,
-                    text: l10n.contactUs,
-                    onPressed: () {
-                      _launchURL('https://t.me/HotlineMinvest');
-                    },
-                    isPrimary: false,
-                  ),
-                  if (isIos) ...[
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        l10n.exnessUpgradeNoteForIos,
-                        textAlign: TextAlign.center,
+                ),
+                
+                // Buy Now Button
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: GestureDetector(
+                    onTap: isPurchasing ? null : () => _handleBuyNow(context, purchaseService),
+                    child: Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Buy Now',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 13,
-                          height: 1.5,
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                  ],
-                  const SizedBox(height: 30),
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ),
+        if (isPurchasing)
+          Container(
+            color: Colors.black54,
+            child: const Center(
+              child: CircularProgressIndicator(color: Color(0xFF276EFB)),
+            ),
+          ),
+      ],
     );
   }
 
-  Widget _buildTiersTable(AppLocalizations l10n) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Table(
-        border: TableBorder(
-          horizontalInside: BorderSide(color: Colors.blueGrey.withOpacity(0.3), width: 1),
-          verticalInside: BorderSide(color: Colors.blueGrey.withOpacity(0.3), width: 1),
-        ),
-        columnWidths: const {
-          0: FlexColumnWidth(1.6),
-          1: FlexColumnWidth(1),
-          2: FlexColumnWidth(1),
-          3: FlexColumnWidth(1),
-        },
+  Future<void> _handleBuyNow(BuildContext context, PurchaseService purchaseService) async {
+    final String productId;
+    if (Platform.isIOS) {
+      productId = isMonthly ? 'minvest.01' : 'minvest.12';
+    } else {
+      productId = isMonthly ? 'elite_1_month' : 'elite_12_months';
+    }
+
+    final product = purchaseService.products.firstWhere(
+      (p) => p.id == productId,
+      orElse: () => throw Exception('Product not found'),
+    );
+
+    try {
+      await purchaseService.buyProduct(product);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  Widget _buildFeatureItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Row(
         children: [
-          _buildTableRow([l10n.feature, l10n.tierDemo, l10n.tierVIP, l10n.tierElite], isHeader: true),
-          _buildTableRow([l10n.balance, '< \$200', '> \$200', '> \$500']),
-          _buildTableRow([l10n.signalTime, '8h-17h', '8h-17h', l10n.tableValueFulltime]),
-          _buildTableRow([l10n.signalQty, '7-8/day', l10n.tableValueFull, l10n.tableValueFull]),
-          _buildTableRow([l10n.analysis, 'icon:cancel', 'icon:cancel', 'icon:check']),
-          _buildTableRow([l10n.lotPerWeek, '0.05', '0.3', '0.5']),
+          Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: const Icon(
+              Icons.check,
+              color: Color(0xFF276EFB),
+              size: 10,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  TableRow _buildTableRow(List<String> cells, {bool isHeader = false}) {
-    return TableRow(
-      decoration: isHeader ? const BoxDecoration(color: Color(0xFF151a2e)) : null,
-      children: cells.map((cell) {
-        final isFirstCell = cells.indexOf(cell) == 0;
-        Widget cellWidget;
-
-        if (cell.startsWith('icon:')) {
-          IconData iconData = cell == 'icon:check' ? Icons.check_circle : Icons.cancel;
-          Color iconColor = cell == 'icon:check' ? Colors.greenAccent : Colors.redAccent;
-          cellWidget = Icon(iconData, color: iconColor, size: 18);
-        } else {
-          cellWidget = Text(
-            cell,
-            textAlign: isFirstCell ? TextAlign.left : TextAlign.center,
-            softWrap: true,
-            style: TextStyle(
-              fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
-              color: isHeader ? Colors.white : Colors.white70,
-              fontSize: 13,
-            ),
-          );
-        }
-
-        return TableCell(
-          verticalAlignment: TableCellVerticalAlignment.middle,
-          child: Container(
-            decoration: (isHeader && !isFirstCell)
-                ? const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF172AFE), Color(0xFF3C4BFE), Color(0xFF5E69FD)],
+  Widget _buildPlanToggle() {
+    return Container(
+      width: 161,
+      height: 32,
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(23),
+        border: Border.all(color: const Color(0xFF289EFF)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => isMonthly = true),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: isMonthly
+                      ? const LinearGradient(colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)])
+                      : null,
+                  borderRadius: BorderRadius.circular(60),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Monthly',
+                  style: TextStyle(
+                    color: isMonthly ? Colors.white : const Color(0xFF636363),
+                    fontSize: 14,
+                  ),
+                ),
               ),
-            )
-                : (isHeader && isFirstCell)
-                ? const BoxDecoration(
-              color: Color(0xFF172AFE),
-            )
-                : null,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-              child: cellWidget,
             ),
           ),
-        );
-      }).toList(),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => isMonthly = false),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: !isMonthly
+                      ? const LinearGradient(colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)])
+                      : null,
+                  borderRadius: BorderRadius.circular(60),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Annually',
+                  style: TextStyle(
+                    color: !isMonthly ? Colors.white : const Color(0xFF636363),
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildActionButton(BuildContext context, {required String text, required VoidCallback onPressed, required bool isPrimary}) {
-    return SizedBox(
-      height: 50,
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  Widget _buildCategoryItem(int index, String name, String price) {
+    final isSelected = selectedCategoryIndex == index;
+    
+    return GestureDetector(
+      onTap: () => setState(() => selectedCategoryIndex = index),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        width: double.infinity,
+        height: 60,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: isSelected
+                ? [const Color(0xFF0CA3ED).withOpacity(0.3), const Color(0xFF276EFB).withOpacity(0.3)]
+                : [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.05)],
+          ),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF289EFF) : Colors.white.withOpacity(0.2),
+          ),
         ),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: isPrimary
-                ? const LinearGradient(
-              colors: [Color(0xFF172AFE), Color(0xFF3C4BFE), Color(0xFF5E69FD)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            )
-                : null,
-            color: isPrimary ? null : const Color(0xFF151a2e),
-            borderRadius: BorderRadius.circular(12),
-            border: isPrimary ? null : Border.all(color: Colors.blueAccent),
-          ),
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF289EFF) : const Color(0xFF636363),
+                  width: 1.5,
+                ),
+              ),
+              child: isSelected
+                  ? Center(
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF289EFF),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    )
+                  : null,
             ),
-          ),
+            const SizedBox(width: 12),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const Text(
+                  'Upgrade To Pro',
+                  style: TextStyle(
+                    color: Color(0xFF636363),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Text(
+              price,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            const SizedBox(width: 16),
+          ],
         ),
       ),
     );

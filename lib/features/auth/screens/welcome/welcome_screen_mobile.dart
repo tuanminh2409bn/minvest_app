@@ -1,188 +1,237 @@
-// lib/features/auth/screens/welcome/welcome_screen_mobile.dart
-
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
-import 'package:provider/provider.dart';
-import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/features/auth/screens/welcome/login_screen_mobile.dart';
+import 'package:minvest_forex_app/features/auth/screens/welcome/signup_screen_mobile.dart';
+// Removed unused import
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final languageProvider = Provider.of<LanguageProvider>(
-        context, listen: false);
-    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF0D1117),
-              Color(0xFF161B22),
-              Color.fromARGB(255, 20, 29, 110)
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.0, 0.5, 1.0],
+      backgroundColor: Colors.black,
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state.status == AuthStatus.authenticated) {
+            if (context.mounted) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
+          } else if (state.status == AuthStatus.unauthenticated && state.errorMessage != null) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.errorMessage!), backgroundColor: Colors.red),
+              );
+            }
+          }
+        },
+        child: Stack(
+          children: [
+          // Status bar placeholder (44px from Figma)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 44,
+            child: Container(), // Empty for now, handled by SafeArea
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Phần còn lại của UI của bạn giữ nguyên, không thay đổi
-                Padding(
-                  padding: const EdgeInsets.only(top: 30),
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: PopupMenuButton<Locale>(
-                      onSelected: (Locale locale) =>
-                          languageProvider.setLocale(locale),
-                      itemBuilder: (context) =>
-                      [
-                        const PopupMenuItem(value: Locale('en'), child: Text(
-                            'English')),
-                        const PopupMenuItem(value: Locale('vi'), child: Text(
-                            'Tiếng Việt')),
-                      ],
-                      child: Consumer<LanguageProvider>(
-                        builder: (context, provider, child) {
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(4.0),
-                            child: Image.asset(
-                              provider.locale?.languageCode == 'vi'
-                                  ? 'assets/images/vn_flag.png'
-                                  : 'assets/images/us_flag.png',
-                              height: 24,
-                              width: 36,
-                              fit: BoxFit.cover,
-                            ),
-                          );
-                        },
+          
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 100),
+                  
+                  // Title
+                  const Text(
+                    'Let’s Get You In!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 60),
+                  
+                  // Social Login Buttons
+                  _SocialButton(
+                    iconPath: 'assets/images/facebook_logo.png',
+                    text: 'Continue With Facebook',
+                    color: const Color(0xFF1877F2),
+                    onPressed: () => context.read<AuthBloc>().add(SignInWithFacebookRequested()),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  _SocialButton(
+                    iconPath: 'assets/images/google_logo.png',
+                    text: 'Continue With Google',
+                    color: Colors.white,
+                    textColor: Colors.white, // Đã đổi từ black sang white
+                    onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  if (Platform.isIOS)
+                    _SocialButton(
+                      iconPath: 'assets/images/apple_logo.png',
+                      text: 'Continue With Apple',
+                      color: const Color(0xFF121212),
+                      onPressed: () => context.read<AuthBloc>().add(SignInWithAppleRequested()),
+                    ),
+                  
+                  const Spacer(),
+                  
+                  // "or" text
+                  const Text(
+                    'or',
+                    style: TextStyle(
+                      color: Color(0xFF636363),
+                      fontSize: 18,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Sign In Button
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const LoginScreenMobile()),
+                      );
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Sign In',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const Spacer(),
-                Text(l10n.welcomeTo, textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18, color: Colors.white)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Image.asset(
-                      'assets/images/minvest_ai.png', height: 150),
-                ),
-                Text(l10n.appSlogan, textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 16, color: Colors.white, height: 1.5)),
-                const SizedBox(height: 50),
-                Text(l10n.signIn, textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)),
-                const SizedBox(height: 24),
-                _SocialSignInButton(
-                  icon: Image.asset(
-                      'assets/images/google_logo.png', height: 24, width: 24),
-                  text: l10n.continueByGoogle,
-                  onPressed: () =>
-                      context.read<AuthBloc>().add(SignInWithGoogleRequested()),
-                ),
-                const SizedBox(height: 16),
-                _SocialSignInButton(
-                  icon: Image.asset(
-                      'assets/images/facebook_logo.png', height: 24, width: 24),
-                  text: l10n.continueByFacebook,
-                  onPressed: () =>
-                      context.read<AuthBloc>().add(
-                          SignInWithFacebookRequested()),
-                ),
-                const SizedBox(height: 16),
-                if (Platform.isIOS)
-                  _SocialSignInButton(
-                    icon: const Icon(Icons.apple, color: Colors.white, size: 28),
-                    text: l10n.continueByApple,
-                    onPressed: () =>
-                        context.read<AuthBloc>().add(SignInWithAppleRequested()),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Create Account Link
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      const Text(
+                        'Don’t have an account? ',
+                        style: TextStyle(
+                          color: Color(0xFF636363),
+                          fontSize: 16,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => const SignupScreenMobile()),
+                          );
+                        },
+                        child: const Text(
+                          'Create Account',
+                          style: TextStyle(
+                            color: Color(0xFF0094FF),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(height: 24),
-                TextButton(
-                  onPressed: () {
-                    context.read<AuthBloc>().add(SignInAnonymouslyRequested());
-                    print('Guest login pressed');
-                  },
-                  child: Text(
-                    l10n.continueAsGuest,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      decoration: TextDecoration.underline,
-                      decorationColor: Colors.white,
-                    ),
-                  ),
-                ),
-                const Spacer(flex: 2),
-              ],
+                  
+                  const SizedBox(height: 30),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
+    ),
     );
   }
 }
 
-class _SocialSignInButton extends StatelessWidget {
-  final Widget icon;
+class _SocialButton extends StatelessWidget {
+  final String iconPath;
   final String text;
+  final Color color;
+  final Color textColor;
   final VoidCallback onPressed;
 
-  const _SocialSignInButton({
-    required this.icon,
+  const _SocialButton({
+    required this.iconPath,
     required this.text,
+    required this.color,
+    this.textColor = Colors.white,
     required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 50,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: double.infinity,
+        height: 50,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1), // Figma shows translucent backgrounds
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1,
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              Colors.white.withValues(alpha: 0.1),
+              Colors.white.withValues(alpha: 0.05),
+            ],
+          ),
         ),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0C0938), Color(0xFF141A4C), Color(0xFF1D2B62)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: Image.asset(iconPath, width: 28, height: 28), // Tăng kích thước từ 20 lên 28
+              ),
             ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                icon,
-                const SizedBox(width: 24),
-                Text(
-                    text,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)
+            Center(
+              child: Text(
+                text,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

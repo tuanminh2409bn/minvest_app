@@ -58,17 +58,21 @@ class _ChartScreenState extends State<ChartScreen> {
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            WebViewWidget(controller: _controller),
-            if (_isLoading)
-              Container(
-                color: const Color(0xFF0D1117),
-                child: const Center(
-                  child: CircularProgressIndicator(),
+        bottom: false, // Tắt mặc định để tự kiểm soát khoảng cách với Nav Bar
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 120), // Tạo khoảng trống cho Floating Nav Bar (72px height + padding)
+          child: Stack(
+            children: [
+              WebViewWidget(controller: _controller),
+              if (_isLoading)
+                Container(
+                  color: const Color(0xFF0D1117),
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

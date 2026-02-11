@@ -125,14 +125,14 @@ class AppLocalizationsKm extends AppLocalizations {
   String get reuploadImage => 'បង្ហោះរូបភាពឡើងវិញ';
 
   @override
-  String get accountNotLinked => 'គណនីមិនត្រូវបានភ្ជាប់ទៅ Minvest ទេ';
+  String get accountNotLinked => 'គណនីមិនត្រូវបានភ្ជាប់ទៅ Signal GPT ទេ';
 
   @override
   String get accountNotLinkedDesc =>
-      'ដើម្បីទទួលបានសញ្ញាពិសេស គណនី Exness របស់អ្នកត្រូវតែចុះឈ្មោះតាមរយៈតំណដៃគូ Minvest ។ សូមបង្កើតគណនីថ្មីដោយប្រើតំណខាងក្រោម។';
+      'ដើម្បីទទួលបានសញ្ញាពិសេស គណនី Exness របស់អ្នកត្រូវតែចុះឈ្មោះតាមរយៈតំណដៃគូ Signal GPT ។ សូមបង្កើតគណនីថ្មីដោយប្រើតំណខាងក្រោម។';
 
   @override
-  String get registerExnessViaMinvest => 'ចុះឈ្មោះ Exness តាមរយៈ Minvest';
+  String get registerExnessViaSignalGPT => 'ចុះឈ្មោះ Exness តាមរយៈ Signal GPT';
 
   @override
   String get iHaveRegisteredReupload => 'ខ្ញុំបានចុះឈ្មោះហើយ បង្ហោះឡើងវិញ';
@@ -290,7 +290,7 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get accountVerificationPrompt =>
-      'សូមបង្ហោះរូបថតអេក្រង់នៃគណនី Exness របស់អ្នកដើម្បីទទួលបានការអនុញ្ញាត (គណនីរបស់អ្នកត្រូវតែបើកនៅក្រោមតំណ Exness របស់ Minvest)';
+      'សូមបង្ហោះរូបថតអេក្រង់នៃគណនី Exness របស់អ្នកដើម្បីទទួលបានការអនុញ្ញាត (គណនីរបស់អ្នកត្រូវតែបើកនៅក្រោមតំណ Exness របស់ Signal GPT)';
 
   @override
   String get selectPhotoFromLibrary => 'ជ្រើសរើសរូបថតពីបណ្ណាល័យ';
@@ -341,7 +341,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get upgradeNow => 'ដំឡើងកំណែឥឡូវនេះ';
 
   @override
-  String get followMinvest => 'តាមដាន MInvest';
+  String get followSignalGPT => 'តាមដាន Signal GPT';
 
   @override
   String get tabSignal => 'សញ្ញា';
@@ -463,7 +463,7 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get exnessUpgradeNoteForIos =>
-      'សម្រាប់អតិថិជនដែលបានចុះឈ្មោះគណនី Exness តាមរយៈ Minvest សូមចុចទាក់ទងមកយើងខ្ញុំ ដើម្បីដំឡើងគណនីរបស់អ្នក។';
+      'សម្រាប់អតិថិជនដែលបានចុះឈ្មោះគណនី Exness តាមរយៈ Signal GPT សូមចុចទាក់ទងមកយើងខ្ញុំ ដើម្បីដំឡើងគណនីរបស់អ្នក។';
 
   @override
   String get chatWelcomeTitle => '👋 សូមស្វាគមន៍មកកាន់ Signal GPT!';
@@ -760,7 +760,7 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get onDemandFinancialExpertDesc =>
-      'វេទិកា AI ណែនាំសញ្ញាជួញដូរ - ស្វ័យសិក្សា វិភាគទីផ្សារ 24/7 មិនរងផលប៉ះពាល់ដោយអារម្មណ៍។ Minvest បានគាំទ្រអ្នកវិភាគហិរញ្ញវត្ថុជាង 10,000 នាក់ក្នុងដំណើរស្វែងរកសញ្ញាត្រឹមត្រូវ ស្ថិរភាព និងងាយស្រួលអនុវត្ត';
+      'វេទិកា AI ណែនាំសញ្ញាជួញដូរ - ស្វ័យសិក្សា វិភាគទីផ្សារ 24/7 មិនរងផលប៉ះពាល់ដោយអារម្មណ៍។ Signal GPT បានគាំទ្រអ្នកវិភាគហិរញ្ញវត្ថុជាង 10,000 នាក់ក្នុងដំណើរស្វែងរកសញ្ញាត្រឹមត្រូវ ស្ថិរភាព និងងាយស្រួលអនុវត្ត';
 
   @override
   String get aiPoweredSignalPlatform => 'វេទិកាសញ្ញាជួញដូរដែលដំណើរការដោយ AI';
@@ -1198,7 +1198,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get signalsPlan => 'ផែនការសញ្ញា';
 
   @override
-  String get aiMinvest => 'AI Minvest';
+  String get aiSignalGPT => 'AI Signal GPT';
 
   @override
   String get yourTokens => 'Tokens របស់អ្នក';
@@ -1266,7 +1266,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get performance => 'ការអនុវត្ត';
 
   @override
-  String get minvestSupport => 'SignalGpt Support';
+  String get minvestSupport => 'Signal GPT Support';
 
   @override
   String get leaveMessagePart1 =>

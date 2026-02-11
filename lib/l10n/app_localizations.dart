@@ -341,20 +341,20 @@ abstract class AppLocalizations {
   /// No description provided for @accountNotLinked.
   ///
   /// In en, this message translates to:
-  /// **'Account Not Linked to Minvest'**
+  /// **'Account Not Linked to Signal GPT'**
   String get accountNotLinked;
 
   /// No description provided for @accountNotLinkedDesc.
   ///
   /// In en, this message translates to:
-  /// **'To get exclusive signals, your Exness account must be registered through the Minvest partner link. Please create a new account using the link below.'**
+  /// **'To get exclusive signals, your Exness account must be registered through the Signal GPT partner link. Please create a new account using the link below.'**
   String get accountNotLinkedDesc;
 
-  /// No description provided for @registerExnessViaMinvest.
+  /// No description provided for @registerExnessViaSignalGPT.
   ///
   /// In en, this message translates to:
-  /// **'Register Exness via Minvest'**
-  String get registerExnessViaMinvest;
+  /// **'Register Exness via Signal GPT'**
+  String get registerExnessViaSignalGPT;
 
   /// No description provided for @iHaveRegisteredReupload.
   ///
@@ -659,7 +659,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountVerificationPrompt.
   ///
   /// In en, this message translates to:
-  /// **'Please upload a screenshot of your Exness account to be authorized (your account must be opened under Minvest\'s Exness link)'**
+  /// **'Please upload a screenshot of your Exness account to be authorized (your account must be opened under Signal GPT\'s Exness link)'**
   String get accountVerificationPrompt;
 
   /// No description provided for @selectPhotoFromLibrary.
@@ -758,11 +758,11 @@ abstract class AppLocalizations {
   /// **'Upgrade Now'**
   String get upgradeNow;
 
-  /// No description provided for @followMinvest.
+  /// No description provided for @followSignalGPT.
   ///
   /// In en, this message translates to:
-  /// **'Follow MInvest'**
-  String get followMinvest;
+  /// **'Follow Signal GPT'**
+  String get followSignalGPT;
 
   /// No description provided for @tabSignal.
   ///
@@ -995,7 +995,7 @@ abstract class AppLocalizations {
   /// No description provided for @exnessUpgradeNoteForIos.
   ///
   /// In en, this message translates to:
-  /// **'For customers who have registered an Exness account through Minvest, please click contact us to have your account upgraded.'**
+  /// **'For customers who have registered an Exness account through Signal GPT, please click contact us to have your account upgraded.'**
   String get exnessUpgradeNoteForIos;
 
   /// No description provided for @chatWelcomeTitle.
@@ -1523,7 +1523,7 @@ abstract class AppLocalizations {
   /// No description provided for @onDemandFinancialExpertDesc.
   ///
   /// In en, this message translates to:
-  /// **'AI platform suggests trading signals - self-learning, analyses the market 24/7, unaffected by emotions. Minvest has supported over 10,000 financial analysts\nin their journey to find accurate, stable, and easy-to-apply signals'**
+  /// **'AI platform suggests trading signals - self-learning, analyses the market 24/7, unaffected by emotions. Signal GPT has supported over 10,000 financial analysts\nin their journey to find accurate, stable, and easy-to-apply signals'**
   String get onDemandFinancialExpertDesc;
 
   /// No description provided for @aiPoweredSignalPlatform.
@@ -2330,11 +2330,11 @@ abstract class AppLocalizations {
   /// **'Signals Plan'**
   String get signalsPlan;
 
-  /// No description provided for @aiMinvest.
+  /// No description provided for @aiSignalGPT.
   ///
   /// In en, this message translates to:
-  /// **'AI Minvest'**
-  String get aiMinvest;
+  /// **'AI Signal GPT'**
+  String get aiSignalGPT;
 
   /// No description provided for @yourTokens.
   ///
@@ -2459,7 +2459,7 @@ abstract class AppLocalizations {
   /// No description provided for @minvestSupport.
   ///
   /// In en, this message translates to:
-  /// **'SignalGpt Support'**
+  /// **'Signal GPT Support'**
   String get minvestSupport;
 
   /// No description provided for @leaveMessagePart1.

@@ -169,6 +169,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
                             onTimezoneChanged: (value) => setState(() => _selectedTimezone = value),
                             onStatusChanged: (value) => setState(() => _selectedStatus = value),
                             onDateRangeChanged: (value) => setState(() => _dateRange = value),
+                            showBanner: selectedTab == AISignalsTab.aiSignals,
                           ),
                           const SizedBox(height: 32),
                         ],
@@ -230,15 +231,6 @@ class _TitleSection extends StatelessWidget {
     );
 
     if (isMobile) {
-      if (FirebaseAuth.instance.currentUser != null) {
-        return Column(
-          children: [
-            Center(child: title),
-            const SizedBox(height: 8),
-            const _UserSubscriptionStatus(),
-          ],
-        );
-      }
       return Center(child: title);
     }
 
@@ -406,6 +398,7 @@ class _FiltersRow extends StatelessWidget {
   final ValueChanged<String> onTimezoneChanged;
   final ValueChanged<String> onStatusChanged;
   final ValueChanged<DateTimeRange?> onDateRangeChanged;
+  final bool showBanner;
 
   const _FiltersRow({
     required this.assetFilter,
@@ -421,14 +414,95 @@ class _FiltersRow extends StatelessWidget {
     required this.onTimezoneChanged,
     required this.onStatusChanged,
     required this.onDateRangeChanged,
+    this.showBanner = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < Breakpoints.tablet;
+    final bool isLoggedIn = FirebaseAuth.instance.currentUser != null;
 
     if (isMobile) {
+      if (isLoggedIn) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Hàng 1: Asset & Orders
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _label('Asset'),
+                      const SizedBox(height: 4),
+                      _AssetDropdown(value: assetFilter, onChanged: onAssetChanged, isMobile: true, height: 32),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _label('Orders'),
+                      const SizedBox(height: 4),
+                      _PairDropdown(label: '', value: selectedPair, items: availablePairs, onChanged: onPairChanged, isMobile: true, height: 32),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Hàng 2: Date Range, Status, Time
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _label('Date Range'),
+                      const SizedBox(height: 4),
+                      _DateRangePicker(dateRange: dateRange, onChanged: onDateRangeChanged, isMobile: true, height: 32),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _label('Status'),
+                      const SizedBox(height: 4),
+                      _StatusDropdown(value: selectedStatus, items: availableStatuses, onChanged: onStatusChanged, isMobile: true, height: 32),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _label('Time'),
+                      const SizedBox(height: 4),
+                      _TimezoneDropdown(value: selectedTimezone, items: availableTimezones, onChanged: onTimezoneChanged, isMobile: true, height: 32),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (showBanner) ...[
+              const SizedBox(height: 20),
+              _freeSignalsBanner(context),
+            ],
+          ],
+        );
+      }
+
+      // Giao diện cho người dùng CHƯA đăng nhập (giữ nguyên như yêu cầu)
       return Column(
         children: [
           Row(
@@ -533,6 +607,54 @@ class _FiltersRow extends StatelessWidget {
       ],
     );
   }
+
+  Widget _label(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 12,
+        fontFamily: 'Be Vietnam Pro',
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.60,
+      ),
+    );
+  }
+
+  Widget _freeSignalsBanner(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final l10n = AppLocalizations.of(context)!;
+    
+    final isElite = (userProvider.userTier ?? '').toLowerCase() == 'elite';
+    final tokenBalance = userProvider.tokenBalance;
+
+    // Sử dụng đúng các chuỗi localization như trên Desktop
+    String text = isElite ? l10n.unlimited : l10n.freeSignalsCount(tokenBalance);
+
+    return Container(
+      width: double.infinity,
+      height: 32,
+      decoration: ShapeDecoration(
+        color: Colors.black,
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(width: 1, color: Color(0xFF474747)),
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Color(0xFF3BFF00),
+          fontSize: 18,
+          fontFamily: 'Be Vietnam Pro',
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.90,
+        ),
+      ),
+    );
+  }
 }
 
 class _PairDropdown extends StatefulWidget {
@@ -541,6 +663,7 @@ class _PairDropdown extends StatefulWidget {
   final List<String> items;
   final ValueChanged<String> onChanged;
   final bool isMobile;
+  final double? height;
 
   const _PairDropdown({
     required this.label,
@@ -548,6 +671,7 @@ class _PairDropdown extends StatefulWidget {
     required this.items,
     required this.onChanged,
     this.isMobile = false,
+    this.height,
   });
 
   @override
@@ -562,7 +686,7 @@ class _PairDropdownState extends State<_PairDropdown> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!widget.isMobile) ...[
+        if (!widget.isMobile && widget.label.isNotEmpty) ...[
           Text(
             widget.label,
             style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 13),
@@ -574,12 +698,12 @@ class _PairDropdownState extends State<_PairDropdown> {
           onExit: (_) => setState(() => _isHovered = false),
           child: Container(
             width: double.infinity,
-            height: 44,
+            height: widget.height ?? 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF0D0D0D),
-              borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
-              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : Colors.white12),
+              color: const Color(0xFF111111),
+              borderRadius: BorderRadius.circular(widget.isMobile ? 2 : 8),
+              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : const Color(0xFF474747)),
             ),
             child: DropdownButtonHideUnderline(
               child: Theme(
@@ -662,12 +786,14 @@ class _TimezoneDropdown extends StatefulWidget {
   final List<String> items;
   final ValueChanged<String> onChanged;
   final bool isMobile;
+  final double? height;
 
   const _TimezoneDropdown({
     required this.value,
     required this.items,
     required this.onChanged,
     this.isMobile = false,
+    this.height,
   });
 
   @override
@@ -694,12 +820,12 @@ class _TimezoneDropdownState extends State<_TimezoneDropdown> {
           onExit: (_) => setState(() => _isHovered = false),
           child: Container(
             width: double.infinity,
-            height: 44,
+            height: widget.height ?? 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF0D0D0D),
-              borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
-              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : Colors.white12),
+              color: const Color(0xFF111111),
+              borderRadius: BorderRadius.circular(widget.isMobile ? 2 : 8),
+              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : const Color(0xFF3F3F3F)),
             ),
             child: DropdownButtonHideUnderline(
               child: Theme(
@@ -770,12 +896,14 @@ class _StatusDropdown extends StatefulWidget {
   final List<String> items;
   final ValueChanged<String> onChanged;
   final bool isMobile;
+  final double? height;
 
   const _StatusDropdown({
     required this.value,
     required this.items,
     required this.onChanged,
     this.isMobile = false,
+    this.height,
   });
 
   @override
@@ -816,12 +944,12 @@ class _StatusDropdownState extends State<_StatusDropdown> {
           onExit: (_) => setState(() => _isHovered = false),
           child: Container(
             width: double.infinity,
-            height: 44,
+            height: widget.height ?? 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF0D0D0D),
-              borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
-              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : Colors.white12),
+              color: const Color(0xFF111111),
+              borderRadius: BorderRadius.circular(widget.isMobile ? 2 : 8),
+              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : const Color(0xFF3F3F3F)),
             ),
             child: DropdownButtonHideUnderline(
               child: Theme(
@@ -893,11 +1021,13 @@ class _AssetDropdown extends StatefulWidget {
   final AssetFilter value;
   final ValueChanged<AssetFilter> onChanged;
   final bool isMobile;
+  final double? height;
 
   const _AssetDropdown({
     required this.value,
     required this.onChanged,
     this.isMobile = false,
+    this.height,
   });
 
   @override
@@ -924,12 +1054,12 @@ class _AssetDropdownState extends State<_AssetDropdown> {
           onExit: (_) => setState(() => _isHovered = false),
           child: Container(
             width: double.infinity,
-            height: 44,
+            height: widget.height ?? 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF0D0D0D),
-              borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
-              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : Colors.white12),
+              color: const Color(0xFF111111),
+              borderRadius: BorderRadius.circular(widget.isMobile ? 2 : 8),
+              border: Border.all(color: _isHovered ? const Color(0xFF289EFF) : const Color(0xFF474747)),
             ),
             child: DropdownButtonHideUnderline(
               child: Theme(
@@ -1016,11 +1146,13 @@ class _DateRangePicker extends StatefulWidget {
   final DateTimeRange? dateRange;
   final ValueChanged<DateTimeRange?> onChanged;
   final bool isMobile;
+  final double? height;
 
   const _DateRangePicker({
     required this.dateRange,
     required this.onChanged,
     this.isMobile = false,
+    this.height,
   });
 
   @override
@@ -1129,12 +1261,12 @@ class _DateRangePickerState extends State<_DateRangePicker> {
             onTap: _toggleDropdown,
             child: Container(
               width: double.infinity,
-              height: 44,
+              height: widget.height ?? 44,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF0D0D0D),
-                borderRadius: BorderRadius.circular(widget.isMobile ? 1 : 8),
-                border: Border.all(color: isActive ? const Color(0xFF289EFF) : Colors.white12),
+                color: const Color(0xFF111111),
+                borderRadius: BorderRadius.circular(widget.isMobile ? 2 : 8),
+                border: Border.all(color: isActive ? const Color(0xFF289EFF) : const Color(0xFF474747)),
               ),
               child: Row(
                 children: [

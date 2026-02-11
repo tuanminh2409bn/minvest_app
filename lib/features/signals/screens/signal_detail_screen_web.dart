@@ -101,7 +101,7 @@ class SignalDetailScreen extends StatelessWidget {
 
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
-        textScaler: isMobile ? const TextScaler.linear(0.6) : const TextScaler.linear(1.0),
+        textScaler: isMobile ? const TextScaler.linear(0.9) : const TextScaler.linear(1.0),
       ),
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -132,6 +132,7 @@ class SignalDetailScreen extends StatelessWidget {
                       statusColor: statusColor,
                       type: signal.type,
                       createdLabel: createdLabel,
+                      isMobile: isMobile,
                     ),
                     const SizedBox(height: 16),
                     _SectionCard(
@@ -174,7 +175,7 @@ class SignalDetailScreen extends StatelessWidget {
                       child: Text(
                         reasonText,
                         style: const TextStyle(
-                            color: Colors.white70, height: 1.6, fontSize: 14),
+                            color: Colors.white70, height: 1.6, fontSize: 16),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -260,6 +261,8 @@ class _Header extends StatelessWidget {
   final Color statusColor;
   final String type;
   final String createdLabel;
+  final bool isMobile;
+
   const _Header({
     required this.flagPaths,
     required this.symbol,
@@ -267,6 +270,7 @@ class _Header extends StatelessWidget {
     required this.statusColor,
     required this.type,
     required this.createdLabel,
+    this.isMobile = false,
   });
 
   static const Map<String, String> _currencyFlags = {
@@ -338,13 +342,26 @@ class _Header extends StatelessWidget {
         // Try to parse symbol for base/quote if possible
         final parts = symbol.split('/');
         if (parts.length == 2) {
-             // For crypto pairs like BTC/USD, we might want to show two icons or just base
-             // For simplicity, let's show the base crypto icon
              iconWidget = _buildCryptoIcon(parts[0]);
         } else {
              iconWidget = _buildCryptoIcon(symbol);
         }
     }
+
+    final backButton = TextButton.icon(
+      onPressed: () => Navigator.of(context).pop(),
+      icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 16),
+      label: Text(AppLocalizations.of(context)!.goBack,
+          style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600)),
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.white,
+        padding: isMobile ? EdgeInsets.zero : null,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -356,58 +373,85 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              iconWidget,
-              const SizedBox(width: 10),
-              Text(
-                symbol.toUpperCase(),
-                style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                statusText,
-                style: TextStyle(
-                    color: statusColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(width: 12),
-              Row(
-                children: [
-                  Icon(isBuy ? Icons.north_east : Icons.south_east,
-                      color: typeColor, size: 16),
-                  const SizedBox(width: 6),
-                  Text(
-                    isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell,
-                    style: TextStyle(
-                        color: typeColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back_ios_new,
-                    color: Colors.white, size: 16),
-                label: Text(AppLocalizations.of(context)!.goBack,
+          if (isMobile) ...[
+            Row(
+              children: [
+                iconWidget,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    symbol.toUpperCase(),
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600)),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white),
+                  ),
                 ),
-              ),
-            ],
-          ),
+                Text(
+                  statusText,
+                  style: TextStyle(
+                      color: statusColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(isBuy ? Icons.north_east : Icons.south_east,
+                    color: typeColor, size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell,
+                  style: TextStyle(
+                      color: typeColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700),
+                ),
+                const Spacer(),
+                backButton,
+              ],
+            ),
+          ] else
+            Row(
+              children: [
+                iconWidget,
+                const SizedBox(width: 10),
+                Text(
+                  symbol.toUpperCase(),
+                  style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  statusText,
+                  style: TextStyle(
+                      color: statusColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(width: 12),
+                Row(
+                  children: [
+                    Icon(isBuy ? Icons.north_east : Icons.south_east,
+                        color: typeColor, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      isBuy ? AppLocalizations.of(context)!.buy : AppLocalizations.of(context)!.sell,
+                      style: TextStyle(
+                          color: typeColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                backButton,
+              ],
+            ),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -417,7 +461,7 @@ class _Header extends StatelessWidget {
                 createdLabel,
                 style: const TextStyle(
                     color: Colors.white70,
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600),
               ),
             ],
@@ -534,14 +578,14 @@ class _PriceBox extends StatelessWidget {
             '${cell.label}:',
             style: const TextStyle(
                 color: Colors.white70,
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 6),
           Text(
             cell.value,
             style: TextStyle(
-                color: cell.color, fontSize: 15, fontWeight: FontWeight.w800),
+                color: cell.color, fontSize: 18, fontWeight: FontWeight.w800),
           ),
         ],
       ),

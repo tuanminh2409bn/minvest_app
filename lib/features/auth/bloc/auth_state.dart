@@ -1,7 +1,7 @@
 // lib/features/auth/bloc/auth_state.dart
 part of 'auth_bloc.dart';
 
-enum AuthStatus { unknown, authenticated, unauthenticated, loggingOut }
+enum AuthStatus { unknown, authenticated, unauthenticated, loggingOut, loading }
 
 class AuthState extends Equatable {
   final AuthStatus status;
@@ -22,6 +22,8 @@ class AuthState extends Equatable {
       : this._(status: AuthStatus.unauthenticated, errorMessage: errorMessage);
 
   const AuthState.loggingOut() : this._(status: AuthStatus.loggingOut);
+  
+  const AuthState.loading() : this._(status: AuthStatus.loading);
 
   @override
   List<Object?> get props => [status, user, errorMessage];

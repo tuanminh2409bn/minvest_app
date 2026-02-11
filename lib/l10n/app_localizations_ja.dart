@@ -120,14 +120,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reuploadImage => '画像を再アップロード';
 
   @override
-  String get accountNotLinked => 'アカウントがMinvestにリンクされていません';
+  String get accountNotLinked => 'アカウントがSignal GPTにリンクされていません';
 
   @override
   String get accountNotLinkedDesc =>
-      '限定シグナルを取得するには、ExnessアカウントをMinvestパートナーリンク経由で登録する必要があります。以下の リンクを使用して新しいアカウントを作成してください。';
+      '限定シグナルを取得するには、ExnessアカウントをSignal GPTパートナーリンク経由で登録する必要があります。以下の リンクを使用して新しいアカウントを作成してください。';
 
   @override
-  String get registerExnessViaMinvest => 'Minvest経由でExnessに登録';
+  String get registerExnessViaSignalGPT => 'Signal GPT経由でExnessに登録';
 
   @override
   String get iHaveRegisteredReupload => '登録済み、再アップロード';
@@ -283,7 +283,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get accountVerificationPrompt =>
-      '承認されるには、Exnessアカウントのスクリーンショットをアップロードしてください（アカウントはMinvestのExnessリンクの下で開設されている必要があります）';
+      '承認されるには、Exnessアカウントのスクリーンショットをアップロードしてください（アカウントはSignal GPTのExnessリンクの下で開設されている必要があります）';
 
   @override
   String get selectPhotoFromLibrary => 'ライブラリから写真を選択';
@@ -334,7 +334,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get upgradeNow => '今すぐアップグレード';
 
   @override
-  String get followMinvest => 'MInvestをフォロー';
+  String get followSignalGPT => 'Signal GPTをフォロー';
 
   @override
   String get tabSignal => 'シグナル';
@@ -454,7 +454,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get exnessUpgradeNoteForIos =>
-      'Minvestを通じてExnessアカウントを登録されたお客様は、アカウントをアップグレードするためにお問い合わせをクリックしてください。';
+      'Signal GPTを通じてExnessアカウントを登録されたお客様は、アカウントをアップグレードするためにお問い合わせをクリックしてください。';
 
   @override
   String get chatWelcomeTitle => '👋 Signal GPTへようこそ！';
@@ -742,7 +742,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get onDemandFinancialExpertDesc =>
-      'AIプラットフォームがトレーディングシグナルを提案 - 自己学習し、24時間365日市場を分析し、感情に左右 されません。Minvestは、正確で安定した、適用しやすいシグナルを見つける旅において、\n10,000人以上の金融アナリストをサポートしてきました';
+      'AIプラットフォームがトレーディングシグナルを提案 - 自己学習し、24時間365日市場を分析し、感情に左右 されません。Signal GPTは、正確で安定した、適用しやすいシグナルを見つける旅において、\n10,000人以上の金融アナリストをサポートしてきました';
 
   @override
   String get aiPoweredSignalPlatform => 'AI搭載トレーディングシグナルプラットフォーム';
@@ -1168,7 +1168,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get signalsPlan => 'シグナルプラン';
 
   @override
-  String get aiMinvest => 'AI Minvest';
+  String get aiSignalGPT => 'AI Signal GPT';
 
   @override
   String get yourTokens => 'あなたのトークン';
@@ -1234,7 +1234,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get performance => '実績';
 
   @override
-  String get minvestSupport => 'SignalGpt Support';
+  String get minvestSupport => 'Signal GPT Support';
 
   @override
   String get leaveMessagePart1 =>

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -34,42 +35,60 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    systemNavigationBarColor: Colors.transparent,
-  ));
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => LanguageProvider()),
-        Provider<AuthService>(create: (_) => AuthService()),
-        Provider<SessionService>(create: (_) => SessionService()),
-        BlocProvider<AuthBloc>(
-          create: (context) => AuthBloc(
-            authService: context.read<AuthService>(),
-            sessionService: context.read<SessionService>(),
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+    ));
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.presentError(details);
+      debugPrint('🚨 Flutter Error: ${details.exception}');
+      debugPrint('Stack trace: ${details.stack}');
+      // Có thể thêm tích hợp Crashlytics ở đây trong tương lai
+    };
+
+    PlatformDispatcher.instance.onError = (error, stack) {
+      debugPrint('🚨 Platform Error: $error');
+      debugPrint('Stack trace: $stack');
+      return true;
+    };
+    
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => LanguageProvider()),
+          Provider<AuthService>(create: (_) => AuthService()),
+          Provider<SessionService>(create: (_) => SessionService()),
+          BlocProvider<AuthBloc>(
+            create: (context) => AuthBloc(
+              authService: context.read<AuthService>(),
+              sessionService: context.read<SessionService>(),
+            ),
           ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => UserProvider(
-            authService: context.read<AuthService>(),
+          ChangeNotifierProvider(
+            create: (context) => UserProvider(
+              authService: context.read<AuthService>(),
+            ),
           ),
-        ),
-        ChangeNotifierProvider(create: (context) => NotificationProvider()),
-        ChangeNotifierProvider(create: (context) => PurchaseService()),
-        ChangeNotifierProvider(create: (context) => ChatProvider(context.read<AuthService>())),
-      ],
-      child: const MyApp(),
-    ),
-  );
+          ChangeNotifierProvider(create: (context) => NotificationProvider()),
+          ChangeNotifierProvider(create: (context) => PurchaseService()),
+          ChangeNotifierProvider(create: (context) => ChatProvider(context.read<AuthService>())),
+        ],
+        child: const MyApp(),
+      ),
+    );
+  }, (error, stack) {
+    debugPrint('🚨 Uncaught Error: $error');
+    debugPrint('Stack trace: $stack');
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -131,47 +150,48 @@ class _MyAppState extends State<MyApp> {
   Future<void> _handleNotificationNavigation(Map<String, dynamic> data) async {
     final String? type = data['type'];
     if (type == null) {
-      print('Lỗi: Thông báo không có trường "type"');
+      debugPrint('Lỗi: Thông báo không có trường "type"');
       return;
     }
 
-    await Future.delayed(const Duration(milliseconds: 500));
-    // Cần kiểm tra mounted trước khi truy cập context trong async
+    // Chờ một chút để đảm bảo navigator và provider đã sẵn sàng
+    await Future.delayed(const Duration(milliseconds: 800));
+    
     if (!mounted) return;
     
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userRole = userProvider.role;
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userRole = userProvider.role;
 
-    switch (type) {
-      case 'new_signal':
-      case 'signal_matched':
-      case 'tp1_hit':
-      case 'tp2_hit':
-      case 'tp3_hit':
-      case 'sl_hit':
-      final String? signalId = data['signalId'];
-      if (signalId == null) return;
-      try {
-        final signal = await SignalService().getSignalById(signalId);
-        final userTier = userProvider.userTier ?? 'free';
-        if (signal != null && navigatorKey.currentState != null) {
-          navigatorKey.currentState!.push(
-            MaterialPageRoute(
-              builder: (_) => SignalDetailScreen(signal: signal, userTier: userTier),
-            ),
-          );
-        }
-      } catch (e) {
-        print('Lỗi khi điều hướng từ thông báo tín hiệu: $e');
-      }
-      break;
+      switch (type) {
+        case 'new_signal':
+        case 'signal_matched':
+        case 'tp1_hit':
+        case 'tp2_hit':
+        case 'tp3_hit':
+        case 'sl_hit':
+          final String? signalId = data['signalId'];
+          if (signalId == null) return;
+          
+          final signal = await SignalService().getSignalById(signalId);
+          final userTier = userProvider.userTier ?? 'free';
+          
+          if (signal != null && navigatorKey.currentState != null) {
+            navigatorKey.currentState!.push(
+              MaterialPageRoute(
+                builder: (_) => SignalDetailScreen(signal: signal, userTier: userTier),
+              ),
+            );
+          } else {
+            debugPrint('⚠️ Navigator chưa sẵn sàng hoặc không tìm thấy tín hiệu');
+          }
+          break;
 
-      case 'new_chat_message':
-        final String? chatRoomId = data['chatRoomId'];
-        if (chatRoomId == null) return;
+        case 'new_chat_message':
+          final String? chatRoomId = data['chatRoomId'];
+          if (chatRoomId == null) return;
 
-        if (userRole == 'support') {
-          try {
+          if (userRole == 'support') {
             final chatUser = await ChatService().getUserDetails(chatRoomId);
             if (chatUser != null && navigatorKey.currentState != null) {
               navigatorKey.currentState!.push(
@@ -183,26 +203,22 @@ class _MyAppState extends State<MyApp> {
                 ),
               );
             }
-          } catch (e) {
-            print('Lỗi khi điều hướng support đến màn hình chat: $e');
-          }
-        }
-        else {
-          if (kIsWeb) {
-            if (navigatorKey.currentState != null) {
-              navigatorKey.currentState!.push(
+          } else {
+            if (kIsWeb) {
+              navigatorKey.currentState?.push(
                 MaterialPageRoute(builder: (_) => const ChatScreen()),
               );
+            } else {
+              mainScreenKey.currentState?.switchToTab(2);
             }
-          } else {
-             // Nếu là Mobile, dùng key của Mobile và index 2
-            mainScreenKey.currentState?.switchToTab(2);
           }
-        }
-        break;
+          break;
 
-      default:
-        print('Không nhận dạng được loại thông báo: $type');
+        default:
+          debugPrint('Không nhận dạng được loại thông báo: $type');
+      }
+    } catch (e) {
+      debugPrint('🚨 Lỗi khi xử lý điều hướng thông báo: $e');
     }
   }
 
@@ -259,9 +275,18 @@ class _MyAppState extends State<MyApp> {
             ],
             supportedLocales: AppLocalizations.supportedLocales,
             builder: (context, child) {
-              return Directionality(
-                textDirection: TextDirection.ltr,
-                child: child!,
+              return GestureDetector(
+                onTap: () {
+                  // Thu bàn phím khi chạm ra ngoài các ô nhập liệu
+                  FocusScopeNode currentFocus = FocusScope.of(context);
+                  if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  }
+                },
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: child!,
+                ),
               );
             },
             routes: getWebRoutes(),
@@ -281,9 +306,18 @@ class _MyAppState extends State<MyApp> {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) {
-            return Directionality(
-              textDirection: TextDirection.ltr,
-              child: child!,
+            return GestureDetector(
+              onTap: () {
+                // Thu bàn phím cho phiên bản Mobile
+                FocusScopeNode currentFocus = FocusScope.of(context);
+                if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
+              },
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: child!,
+              ),
             );
           },
           home: const AuthGate(),
@@ -295,7 +329,8 @@ class _MyAppState extends State<MyApp> {
 
 ThemeData _buildAppTheme() {
   final base = ThemeData.dark();
-  final textTheme = GoogleFonts.beVietnamProTextTheme(base.textTheme);
+  // Sử dụng font offline đã khai báo trong pubspec.yaml
+  final textTheme = base.textTheme.apply(fontFamily: 'Be Vietnam Pro');
 
   TextStyle? applySpacing(TextStyle? style) {
     if (style == null) return null;

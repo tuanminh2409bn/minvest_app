@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#000000",
     "theme_color": "#000000",
-    "description": "Signal GPT",
+    "description": "Signal GPT - AI Trading Signals",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

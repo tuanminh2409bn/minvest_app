@@ -127,14 +127,15 @@ class AppLocalizationsFi extends AppLocalizations {
   String get reuploadImage => 'Lataa kuva uudelleen';
 
   @override
-  String get accountNotLinked => 'Tiliä ei ole linkitetty Minvestiin';
+  String get accountNotLinked => 'Tiliä ei ole linkitetty Signal GPTiin';
 
   @override
   String get accountNotLinkedDesc =>
-      'Saadaksesi eksklusiivisia signaaleja, Exness-tilisi on oltava rekisteröity Minvest-kumppanilinkin kautta. Luo uusi tili alla olevan linkin kautta.';
+      'Saadaksesi eksklusiivisia signaaleja, Exness-tilisi on oltava rekisteröity Signal GPT-kumppanilinkin kautta. Luo uusi tili alla olevan linkin kautta.';
 
   @override
-  String get registerExnessViaMinvest => 'Rekisteröi Exness Minvestin kautta';
+  String get registerExnessViaSignalGPT =>
+      'Rekisteröi Exness Signal GPTin kautta';
 
   @override
   String get iHaveRegisteredReupload => 'Olen rekisteröitynyt, lataa uudelleen';
@@ -291,7 +292,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get accountVerificationPrompt =>
-      'Lataa kuvakaappaus Exness-tilistäsi valtuutusta varten (tilisi on oltava avattu Minvestin Exness-linkin kautta)';
+      'Lataa kuvakaappaus Exness-tilistäsi valtuutusta varten (tilisi on oltava avattu Signal GPTin Exness-linkin kautta)';
 
   @override
   String get selectPhotoFromLibrary => 'Valitse kuva kirjastosta';
@@ -342,7 +343,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get upgradeNow => 'Päivitä nyt';
 
   @override
-  String get followMinvest => 'Seuraa MInvestiä';
+  String get followSignalGPT => 'Seuraa Signal GPTiä';
 
   @override
   String get tabSignal => 'Signaali';
@@ -465,7 +466,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get exnessUpgradeNoteForIos =>
-      'Asiakkaille, jotka ovat rekisteröineet Exness-tilin Minvestin kautta, napsauta ota yhteyttä päivittääksesi tilisi.';
+      'Asiakkaille, jotka ovat rekisteröineet Exness-tilin Signal GPTin kautta, napsauta ota yhteyttä päivittääksesi tilisi.';
 
   @override
   String get chatWelcomeTitle => '👋 Tervetuloa Signal GPT:hin!';
@@ -763,7 +764,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get onDemandFinancialExpertDesc =>
-      'AI-alusta ehdottaa kaupankäyntisignaaleja - itseoppiva, analysoi markkinoita 24/7, tunteet eivät vaikuta. Minvest on tukenut yli 10 000 talousanalyytikkoa heidän matkallaan löytää tarkkoja, vakaita ja helposti sovellettavia signaaleja';
+      'AI-alusta ehdottaa kaupankäyntisignaaleja - itseoppiva, analysoi markkinoita 24/7, tunteet eivät vaikuta. Signal GPT on tukenut yli 10 000 talousanalyytikkoa heidän matkallaan löytää tarkkoja, vakaita ja helposti sovellettavia signaaleja';
 
   @override
   String get aiPoweredSignalPlatform =>
@@ -1202,7 +1203,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get signalsPlan => 'Signaalisuunnitelma';
 
   @override
-  String get aiMinvest => 'AI Minvest';
+  String get aiSignalGPT => 'AI Signal GPT';
 
   @override
   String get yourTokens => 'Sinun Tokenit';
@@ -1270,7 +1271,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get performance => 'Suorituskyky';
 
   @override
-  String get minvestSupport => 'SignalGpt Support';
+  String get minvestSupport => 'Signal GPT Support';
 
   @override
   String get leaveMessagePart1 =>

@@ -1,6 +1,6 @@
 // lib/features/auth/bloc/auth_bloc.dart
 import 'dart:async';
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +34,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignInWithFacebookRequested>(_onSignInWithFacebookRequested);
     on<SignInWithAppleRequested>(_onSignInWithAppleRequested);
     on<SignInAnonymouslyRequested>(_onSignInAnonymouslyRequested);
+    on<SignInWithEmailRequested>(_onSignInWithEmailRequested);
+    on<SignUpWithEmailRequested>(_onSignUpWithEmailRequested);
     on<DeleteAccountRequested>(_onDeleteAccountRequested);
+  }
+
+  Future<void> _onSignInWithEmailRequested(
+      SignInWithEmailRequested event, Emitter<AuthState> emit) async {
+    await _handleSignIn(
+      () => _authService.signInWithEmailPassword(
+        email: event.email,
+        password: event.password,
+      ),
+      emit,
+    );
+  }
+
+  Future<void> _onSignUpWithEmailRequested(
+      SignUpWithEmailRequested event, Emitter<AuthState> emit) async {
+    await _handleSignIn(
+      () => _authService.signUpWithEmailPassword(
+        email: event.email,
+        password: event.password,
+        displayName: event.displayName,
+      ),
+      emit,
+    );
   }
 
   Future<void> _onDeleteAccountRequested(
@@ -59,35 +84,43 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onSignOutRequested(SignOutRequested event, Emitter<AuthState> emit) async {
     print("AuthBloc: Yêu cầu đăng xuất. Bắt đầu dọn dẹp provider...");
-
-    _authService.stopListeningForSessionChanges();
-
-    for (var provider in event.providersToReset) {
-      if (provider is UserProvider) {
-        await provider.stopListeningAndReset();
-      }
-      if (provider is NotificationProvider) {
-        await provider.stopListeningAndReset();
-      }
-    }
-
-    print("AuthBloc: Dọn dẹp provider hoàn tất.");
+    
+    // Phát ra loggingOut ngay để UI chuyển về màn hình chờ
     emit(const AuthState.loggingOut());
-    print("AuthBloc: Đã phát ra trạng thái loggingOut.");
-    await Future.delayed(const Duration(milliseconds: 50));
-    print("AuthBloc: Thực hiện đăng xuất khỏi Firebase.");
-    await _authService.signOut();
+
+    try {
+      _authService.stopListeningForSessionChanges();
+
+      for (var provider in event.providersToReset) {
+        if (provider is UserProvider) {
+          await provider.stopListeningAndReset();
+        }
+        if (provider is NotificationProvider) {
+          await provider.stopListeningAndReset();
+        }
+      }
+
+      print("AuthBloc: Dọn dẹp provider hoàn tất.");
+      await _authService.signOut();
+      print("AuthBloc: Đã đăng xuất khỏi Firebase.");
+    } catch (e) {
+      print("AuthBloc: Lỗi trong quá trình đăng xuất: $e");
+      emit(AuthState.unauthenticated(errorMessage: e.toString()));
+    }
   }
 
   void _onAuthStateChanged(AuthStateChanged event, Emitter<AuthState> emit) {
     if (event.user != null) {
-      print("AuthBloc: User authenticated. Updating session and starting listener...");
-      _sessionService.updateUserSession().then((_) {
-        print("AuthBloc: Session updated. Now starting to listen for changes.");
-        _authService.listenForSessionChanges();
-      }).catchError((error) {
-        print("AuthBloc: Error during session update/listen setup: $error");
-      });
+      // Chỉ cập nhật session nếu trước đó chưa ở trạng thái authenticated
+      if (state.status != AuthStatus.authenticated) {
+        print("AuthBloc: User authenticated. Updating session and starting listener...");
+        _sessionService.updateUserSession().then((_) {
+          print("AuthBloc: Session updated. Now starting to listen for changes.");
+          _authService.listenForSessionChanges();
+        }).catchError((error) {
+          print("AuthBloc: Error during session update/listen setup: $error");
+        });
+      }
       emit(AuthState.authenticated(event.user!));
     } else {
       print("AuthBloc: User is unauthenticated. Stopping session listener.");
@@ -100,7 +133,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _handleSignIn(Future<User?> Function() signInMethod, Emitter<AuthState> emit) async {
     try {
-      await signInMethod();
+      emit(const AuthState.loading());
+      final user = await signInMethod();
+      if (user != null) {
+        emit(AuthState.authenticated(user));
+      } else {
+        emit(const AuthState.unauthenticated(errorMessage: 'Đăng nhập thất bại. Vui lòng thử lại.'));
+      }
     } on SuspendedAccountException catch (e) {
       emit(AuthState.unauthenticated(errorMessage: e.reason));
     } catch (e) {

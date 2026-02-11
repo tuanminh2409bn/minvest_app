@@ -27,4 +27,25 @@ class SignInWithAppleRequested extends AuthEvent {}
 // MỚI BẮT ĐẦU
 class SignInAnonymouslyRequested extends AuthEvent {}
 class DeleteAccountRequested extends AuthEvent {}
+
+class SignInWithEmailRequested extends AuthEvent {
+  final String email;
+  final String password;
+  const SignInWithEmailRequested(this.email, this.password);
+  @override
+  List<Object?> get props => [email, password];
+}
+
+class SignUpWithEmailRequested extends AuthEvent {
+  final String email;
+  final String password;
+  final String displayName;
+  const SignUpWithEmailRequested({
+    required this.email,
+    required this.password,
+    required this.displayName,
+  });
+  @override
+  List<Object?> get props => [email, password, displayName];
+}
 // MỚI KẾT THÚC

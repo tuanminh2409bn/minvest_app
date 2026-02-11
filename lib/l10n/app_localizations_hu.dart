@@ -126,15 +126,15 @@ class AppLocalizationsHu extends AppLocalizations {
   String get reuploadImage => 'Kép feltöltése újra';
 
   @override
-  String get accountNotLinked => 'A fiók nincs összekapcsolva a Minvesttel';
+  String get accountNotLinked => 'A fiók nincs összekapcsolva a Signal GPTtel';
 
   @override
   String get accountNotLinkedDesc =>
-      'Az exkluzív jelzések eléréséhez az Exness-fiókját a Minvest partnerlinkjén keresztül kell regisztrálni. Kérjük, hozzon létre új fiókot az alábbi link segítségével.';
+      'Az exkluzív jelzések eléréséhez az Exness-fiókját a Signal GPT partnerlinkjén keresztül kell regisztrálni. Kérjük, hozzon létre új fiókot az alábbi link segítségével.';
 
   @override
-  String get registerExnessViaMinvest =>
-      'Exness regisztráció Minvesten keresztül';
+  String get registerExnessViaSignalGPT =>
+      'Exness regisztráció Signal GPTen keresztül';
 
   @override
   String get iHaveRegisteredReupload => 'Már regisztráltam, feltöltés újra';
@@ -292,7 +292,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get accountVerificationPrompt =>
-      'Kérjük, töltsön fel egy képernyőképet Exness-fiókjáról az engedélyezéshez (a fiókját a Minvest Exness-linkjén keresztül kell megnyitni)';
+      'Kérjük, töltsön fel egy képernyőképet Exness-fiókjáról az engedélyezéshez (a fiókját a Signal GPT Exness-linkjén keresztül kell megnyitni)';
 
   @override
   String get selectPhotoFromLibrary => 'Fénykép kiválasztása a könyvtárból';
@@ -344,7 +344,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get upgradeNow => 'Frissítés most';
 
   @override
-  String get followMinvest => 'Kövesse a MInvestet';
+  String get followSignalGPT => 'Kövesse a Signal GPTet';
 
   @override
   String get tabSignal => 'Jelzés';
@@ -466,7 +466,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get exnessUpgradeNoteForIos =>
-      'Azon ügyfelek számára, akik Exness-fiókot regisztráltak a Minvesten keresztül, kérjük, kattintson a kapcsolatfelvételre a fiók frissítéséhez.';
+      'Azon ügyfelek számára, akik Exness-fiókot regisztráltak a Signal GPTen keresztül, kérjük, kattintson a kapcsolatfelvételre a fiók frissítéséhez.';
 
   @override
   String get chatWelcomeTitle => '👋 Üdvözli a Signal GPT!';
@@ -766,7 +766,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get onDemandFinancialExpertDesc =>
-      'AI platform kereskedési jelzéseket javasol - öntanuló, 24/7 elemzi a piacot, érzelemektől mentes. A Minvest több mint 10 000 pénzügyi elemzőt támogatott abban, hogy pontos, stabil és könnyen alkalmazható jelzéseket találjanak';
+      'AI platform kereskedési jelzéseket javasol - öntanuló, 24/7 elemzi a piacot, érzelemektől mentes. A Signal GPT több mint 10 000 pénzügyi elemzőt támogatott abban, hogy pontos, stabil és könnyen alkalmazható jelzéseket találjanak';
 
   @override
   String get aiPoweredSignalPlatform => 'AI-alapú Kereskedési Jelzés Platform';
@@ -1208,7 +1208,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get signalsPlan => 'Jelzés terv';
 
   @override
-  String get aiMinvest => 'AI Minvest';
+  String get aiSignalGPT => 'AI Signal GPT';
 
   @override
   String get yourTokens => 'Tokenjei';
@@ -1276,7 +1276,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get performance => 'Teljesítmény';
 
   @override
-  String get minvestSupport => 'SignalGpt Support';
+  String get minvestSupport => 'Signal GPT Support';
 
   @override
   String get leaveMessagePart1 =>

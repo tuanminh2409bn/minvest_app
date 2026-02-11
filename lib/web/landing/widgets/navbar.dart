@@ -174,11 +174,15 @@ class _LogoutDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 600;
+    final dialogWidth = isMobile ? width * 0.9 : 384.0;
+
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
       child: Container(
-        width: 384,
+        width: dialogWidth,
         height: 227,
         decoration: ShapeDecoration(
           color: Colors.black,
@@ -201,7 +205,7 @@ class _LogoutDialog extends StatelessWidget {
               child: Opacity(
                 opacity: 0.30,
                 child: Container(
-                  width: 384,
+                  width: dialogWidth,
                   height: 51.72,
                   decoration: const BoxDecoration(
                     color: Colors.black,
@@ -462,18 +466,20 @@ class LandingNavBar extends StatelessWidget {
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
               child: stacked
-                  ? _MobileNavBar(navLinks: verticalNavLinks, actions: actions)
+                  ? _MobileNavBar(navLinks: verticalNavLinks, actions: actions, user: user)
                   : Row(
                       children: [
                         InkWell(
                           onTap: () => Navigator.of(context).pushNamed('/'),
                           child: Image.asset('assets/mockups/logo.png', height: 50, fit: BoxFit.contain),
                         ),
-                        const SizedBox(width: 80), // Khoảng cách tăng lên để dịch navlinks sang phải
+                        const SizedBox(width: 40), // Giảm khoảng cách cố định để nhường chỗ cho Center
                         Expanded(
-                          child: navLinks, // Wrap trong Expanded để tự co giãn và xuống dòng
+                          child: Center(
+                            child: navLinks, // Tự động căn giữa trong khoảng trống còn lại
+                          ),
                         ),
-                        const SizedBox(width: 24), // Khoảng cách an toàn trước actions
+                        const SizedBox(width: 40), // Khoảng cách an toàn trước actions
                         actions,
                         const SizedBox(width: AppSpacing.sm),
                         const _LanguageSelector(),
@@ -595,19 +601,26 @@ class LandingNavBar extends StatelessWidget {
     return GestureDetector(
       key: buttonKey,
       onTap: () {
-        final RenderBox renderBox = buttonKey.currentContext!.findRenderObject() as RenderBox;
-        final offset = renderBox.localToGlobal(Offset.zero);
-        final size = renderBox.size;
+        // Trên mobile (trong menu) chúng ta có logic riêng, 
+        // nhưng trên Desktop (navbar) chúng ta cần hiện popup
+        final width = MediaQuery.of(context).size.width;
+        if (width >= Breakpoints.tablet) {
+          final RenderBox renderBox = buttonKey.currentContext!.findRenderObject() as RenderBox;
+          final offset = renderBox.localToGlobal(Offset.zero);
+          final size = renderBox.size;
 
-        showDialog(
-          context: context,
-          barrierColor: Colors.transparent,
-          builder: (context) => _ProfilePopup(
-            user: user,
-            buttonPosition: offset,
-            buttonSize: size,
-          ),
-        );
+          showDialog(
+            context: context,
+            barrierColor: Colors.transparent,
+            builder: (context) => _ProfilePopup(
+              user: user,
+              buttonPosition: offset,
+              buttonSize: size,
+            ),
+          );
+        } else {
+          if (onTap != null) onTap();
+        }
       },
       child: Container(
         height: 59, // Figma height
@@ -928,7 +941,8 @@ class _LanguagePopup extends StatelessWidget {
 class _MobileNavBar extends StatefulWidget {
   final Widget navLinks;
   final Widget actions;
-  const _MobileNavBar({required this.navLinks, required this.actions});
+  final User? user;
+  const _MobileNavBar({required this.navLinks, required this.actions, this.user});
 
   @override
   State<_MobileNavBar> createState() => _MobileNavBarState();
@@ -959,20 +973,102 @@ class _MobileNavBarState extends State<_MobileNavBar> {
             ),
           ],
         ),
-        if (_menuOpen) ...[
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: widget.navLinks,
+        if (_menuOpen)
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Colors.black,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: widget.navLinks,
+                ),
+                if (widget.user != null) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    child: Divider(color: Colors.white, thickness: 1),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: _buildProfileSection(context),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: widget.actions,
+                  ),
+                ],
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: widget.actions,
-          ),
-          const SizedBox(height: 24),
-        ],
       ],
+    );
+  }
+
+  Widget _buildProfileSection(BuildContext context) {
+    final user = widget.user!;
+    final userProvider = Provider.of<UserProvider>(context);
+    final String name = (userProvider.displayName ?? user.displayName ?? user.email ?? 'User').trim();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Name only (Crown and Avatar removed)
+        Text(
+          name,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.9,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 20),
+        // Menu Items
+        _profileLink(
+          title: 'Profile', 
+          onTap: () => Navigator.of(context).pushNamed('/profile', arguments: 0)
+        ),
+        _profileLink(
+          title: 'Email preferences', 
+          onTap: () => Navigator.of(context).pushNamed('/profile', arguments: 1)
+        ),
+        _profileLink(
+          title: 'Log out', 
+          color: Colors.redAccent,
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => const _LogoutDialog(),
+            );
+          }
+        ),
+      ],
+    );
+  }
+
+  Widget _profileLink({required String title, required VoidCallback onTap, Color color = Colors.white}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: InkWell(
+        onTap: onTap,
+        child: Text(
+          title,
+          style: TextStyle(
+            color: color,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.9,
+          ),
+        ),
+      ),
     );
   }
 }
