@@ -2,6 +2,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
+import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
+import 'package:minvest_forex_app/features/auth/screens/welcome/email_verification_screen.dart';
 
 class SignupScreenMobile extends StatefulWidget {
   const SignupScreenMobile({super.key});
@@ -17,6 +19,7 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLocalLoading = false;
 
   @override
   void dispose() {
@@ -24,6 +27,47 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignup() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLocalLoading = true);
+
+    try {
+      final email = _emailController.text.trim();
+      debugPrint('Attempting to send code to: $email');
+      
+      // Gọi Cloud Function gửi mã
+      await context.read<AuthService>().requestSignupVerificationCode(email);
+      
+      debugPrint('Code sent successfully, navigating...');
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => EmailVerificationScreen(
+              email: email,
+              password: _passwordController.text,
+              displayName: email.split('@')[0],
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error sending code: $e');
+      if (mounted) {
+        // Hiển thị thông báo lỗi rõ ràng hơn để người dùng biết cần deploy function
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi hệ thống: $e. Hãy đảm bảo bạn đã deploy Cloud Functions.'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLocalLoading = false);
+    }
   }
 
   @override
@@ -45,212 +89,207 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
           }
         },
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 20),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
-                    ),
-                  ),
-                  const SizedBox(height: 60),
-                  const Text(
-                    'Create your account',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  
-                  // Email Field
-                  _buildGlassTextField(
-                    controller: _emailController,
-                    hintText: 'Email',
-                    icon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) return 'Please enter your email';
-                      return null;
-                    },
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Password Field
-                  _buildGlassTextField(
-                    controller: _passwordController,
-                    hintText: 'Password',
-                    icon: Icons.lock_outline,
-                    obscureText: _obscurePassword,
-                    suffixIcon: GestureDetector(
-                      onTap: () => setState(() => _obscurePassword = !_obscurePassword),
-                      child: Icon(
-                        _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                        color: const Color(0xFF636363),
-                        size: 20,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) return 'Please enter your password';
-                      if (value.length < 6) return 'Password must be at least 6 characters';
-                      return null;
-                    },
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Confirm Password Field
-                  _buildGlassTextField(
-                    controller: _confirmPasswordController,
-                    hintText: 'Confirm Password',
-                    icon: Icons.lock_outline,
-                    obscureText: _obscureConfirmPassword,
-                    suffixIcon: GestureDetector(
-                      onTap: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
-                      child: Icon(
-                        _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                        color: const Color(0xFF636363),
-                        size: 20,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) return 'Please confirm your password';
-                      if (value != _passwordController.text) return 'Passwords do not match';
-                      return null;
-                    },
-                  ),
-                  
-                  const SizedBox(height: 50),
-                  
-                  // Create Account Button
-                  BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, state) {
-                      final isLoading = state.status == AuthStatus.loading;
-                      
-                      return GestureDetector(
-                        onTap: isLoading ? null : () {
-                          if (_formKey.currentState!.validate()) {
-                            context.read<AuthBloc>().add(
-                              SignUpWithEmailRequested(
-                                email: _emailController.text,
-                                password: _passwordController.text,
-                                displayName: _emailController.text.split('@')[0],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 20),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: GestureDetector(
+                                onTap: () => Navigator.of(context).pop(),
+                                child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
                               ),
-                            );
-                          }
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
                             ),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          alignment: Alignment.center,
-                          child: isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                )
-                              : const Text(
-                                  'Create Account',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
+                            const SizedBox(height: 30),
+                            const Text(
+                              'Create your account',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            
+                            // Email Field
+                            _buildGlassTextField(
+                              controller: _emailController,
+                              hintText: 'Email',
+                              icon: Icons.email_outlined,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) return 'Please enter your email';
+                                return null;
+                              },
+                            ),
+                            
+                            const SizedBox(height: 16),
+                            
+                            // Password Field
+                            _buildGlassTextField(
+                              controller: _passwordController,
+                              hintText: 'Password',
+                              icon: Icons.lock_outline,
+                              obscureText: _obscurePassword,
+                              suffixIcon: GestureDetector(
+                                onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                                child: Icon(
+                                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                  color: const Color(0xFF636363),
+                                  size: 20,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) return 'Please enter your password';
+                                if (value.length < 6) return 'Password must be at least 6 characters';
+                                return null;
+                              },
+                            ),
+                            
+                            const SizedBox(height: 16),
+                            
+                            // Confirm Password Field
+                            _buildGlassTextField(
+                              controller: _confirmPasswordController,
+                              hintText: 'Confirm Password',
+                              icon: Icons.lock_outline,
+                              obscureText: _obscureConfirmPassword,
+                              suffixIcon: GestureDetector(
+                                onTap: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                                child: Icon(
+                                  _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                  color: const Color(0xFF636363),
+                                  size: 20,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) return 'Please confirm your password';
+                                if (value != _passwordController.text) return 'Passwords do not match';
+                                return null;
+                              },
+                            ),
+                            
+                            const SizedBox(height: 30),
+                            
+                            // Create Account Button
+                            GestureDetector(
+                              onTap: _isLocalLoading ? null : _handleSignup,
+                              child: Container(
+                                width: double.infinity,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                    colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
+                                  ),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                alignment: Alignment.center,
+                                child: _isLocalLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      )
+                                    : const Text(
+                                        'Create Account',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            
+                            const Spacer(),
+                            
+                            Row(
+                              children: [
+                                Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.3), thickness: 1)),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 16),
+                                  child: Text(
+                                    'or',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Color(0xFF636363),
+                                      fontSize: 18,
+                                    ),
                                   ),
                                 ),
-                        ),
-                      );
-                    },
-                  ),
-                  
-                  const SizedBox(height: 100), // Đẩy khối dịch xuống dưới thêm
-                  
-                  Row(
-                    children: [
-                      Expanded(child: Divider(color: Colors.white.withOpacity(0.3), thickness: 1)),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'or',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color(0xFF636363),
-                            fontSize: 18,
-                          ),
+                                Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.3), thickness: 1)),
+                              ],
+                            ),
+                            
+                            const SizedBox(height: 20),
+                            
+                            const Text(
+                              'Sign in with',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Color(0xFF636363),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            
+                            const SizedBox(height: 24),
+                            
+                            // Social Buttons
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _SocialCircleButton(
+                                  iconPath: 'assets/images/facebook_logo.png',
+                                  color: Colors.transparent, 
+                                  size: 62, 
+                                  padding: 0, 
+                                  onPressed: () => context.read<AuthBloc>().add(SignInWithFacebookRequested()),
+                                ),
+                                const SizedBox(width: 30),
+                                if (Platform.isIOS) ...[
+                                  _SocialCircleButton(
+                                    iconPath: 'assets/images/apple_logo.png',
+                                    color: Colors.transparent, 
+                                    size: 45, 
+                                    padding: 5, 
+                                    iconColor: Colors.white, 
+                                    onPressed: () => context.read<AuthBloc>().add(SignInWithAppleRequested()),
+                                  ),
+                                  const SizedBox(width: 30),
+                                ],
+                                _SocialCircleButton(
+                                  iconPath: 'assets/images/google_logo.png',
+                                  color: Colors.white,
+                                  size: 45, 
+                                  padding: 5, 
+                                  onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
+                                ),
+                              ],
+                            ),
+                            
+                            const SizedBox(height: 30),
+                          ],
                         ),
                       ),
-                      Expanded(child: Divider(color: Colors.white.withOpacity(0.3), thickness: 1)),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 30),
-                  
-                  const Text(
-                    'Sign in with',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFF636363),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Social Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _SocialCircleButton(
-                        iconPath: 'assets/images/facebook_logo.png',
-                        color: Colors.transparent, // Không bọc ngoài hình tròn màu xanh
-                        size: 62, // Tăng kích thước từ 56 lên 62
-                        padding: 0, // Để logo to bằng kích thước các logo khác
-                        onPressed: () => context.read<AuthBloc>().add(SignInWithFacebookRequested()),
-                      ),
-                      const SizedBox(width: 30),
-                      if (Platform.isIOS) ...[
-                        _SocialCircleButton(
-                          iconPath: 'assets/images/apple_logo.png',
-                          color: Colors.transparent, // Bỏ vòng tròn bên ngoài
-                          size: 45, // Vòng tròn 45px
-                          padding: 5, // Padding 5px
-                          iconColor: Colors.white, // Logo màu trắng
-                          onPressed: () => context.read<AuthBloc>().add(SignInWithAppleRequested()),
-                        ),
-                        const SizedBox(width: 30),
-                      ],
-                      _SocialCircleButton(
-                        iconPath: 'assets/images/google_logo.png',
-                        color: Colors.white,
-                        size: 45, // Vòng tròn 45px
-                        padding: 5, // Padding 5px
-                        onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 40), // Giảm 20px từ 60 xuống 40
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -272,12 +311,12 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
           colors: [
-            Colors.white.withOpacity(0.1),
-            Colors.white.withOpacity(0.05),
+            Colors.white.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
       ),
       child: TextFormField(
         controller: controller,
@@ -360,7 +399,7 @@ class _SocialCircleButton extends StatelessWidget {
 
                 BoxShadow(
 
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
 
                   blurRadius: 8,
 

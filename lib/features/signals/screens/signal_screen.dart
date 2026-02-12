@@ -13,6 +13,8 @@ import 'package:minvest_forex_app/services/price_service.dart';
 import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
 import 'package:minvest_forex_app/features/signals/screens/signal_analyze_screen.dart';
 import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
+import 'package:minvest_forex_app/features/auth/screens/settings_screen.dart';
+import 'package:minvest_forex_app/features/signals/widgets/custom_filter_dropdown.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -32,6 +34,10 @@ class _SignalScreenState extends State<SignalScreen> {
   AssetFilter _assetFilter = AssetFilter.all;
   String _selectedTimezone = 'GMT+7';
   String? _expandedSymbol;
+  
+  String _selectedAppName = 'Exness';
+  String _selectedAppWebUrl = 'https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1';
+  String _selectedAppUrl = '';
 
   final List<String> _timezones = [
     'GMT+0', 'GMT+7', 'GMT+8'
@@ -80,34 +86,20 @@ class _SignalScreenState extends State<SignalScreen> {
                 begin: const Alignment(0.00, 0.78),
                 end: const Alignment(1.00, 0.20),
                 colors: [
-                  const Color(0xFF1E1E1E).withValues(alpha: 0.4),
-                  const Color(0xFF0D0D0D).withValues(alpha: 0.2)
+                  const Color(0xFF1E1E1E).withValues(alpha: 0.9),
+                  const Color(0xFF0D0D0D).withValues(alpha: 0.8)
                 ],
               ),
-              shape: RoundedRectangleBorder(
+              shape: const RoundedRectangleBorder(
                 side: BorderSide(
                   width: 1,
-                  color: Colors.white.withValues(alpha: 0.15),
+                  color: Colors.white10,
                 ),
-                borderRadius: const BorderRadius.only(
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
                 ),
               ),
-              shadows: [
-                const BoxShadow(
-                  color: Colors.black54,
-                  blurRadius: 30,
-                  offset: Offset(0, -10),
-                  spreadRadius: 0,
-                ),
-                BoxShadow(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  blurRadius: 15,
-                  offset: const Offset(0, -1),
-                  spreadRadius: 1,
-                ),
-              ],
             ),
             child: SafeArea(
               bottom: true,
@@ -127,13 +119,13 @@ class _SignalScreenState extends State<SignalScreen> {
                     child: ListView(
                       padding: const EdgeInsets.only(left: 24, right: 24, bottom: 20),
                       children: [
-                        _buildAppOption(context, 'BingX', 'https://bingx.com', '', 'assets/icons/bingx.png'),
-                        _buildAppOption(context, 'Binance', 'https://binance.com', '', 'assets/icons/binance.png'),
-                        _buildAppOption(context, 'Exness', 'https://exness.com', '', 'assets/icons/exness.png', isSelected: true),
-                        _buildAppOption(context, 'ByBit', 'https://bybit.com', '', 'assets/icons/bybit.png'),
-                        _buildAppOption(context, 'Bitget', 'https://bitget.com', '', 'assets/icons/bitget.png'),
-                        _buildAppOption(context, 'MEXC', 'https://mexc.com', '', 'assets/icons/mexc.png'),
-                        _buildAppOption(context, 'OKX', 'https://okx.com', '', 'assets/icons/okx.png'),
+                        _buildAppOption(context, 'BingX', 'https://bingx.com/invite/S6UV9A', '', 'assets/icons/bingx.png'),
+                        _buildAppOption(context, 'Binance', 'https://www.binance.com/vi/register?ref=12345678', '', 'assets/icons/binance.png'),
+                        _buildAppOption(context, 'Exness', 'https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1', '', 'assets/icons/exness.png'),
+                        _buildAppOption(context, 'ByBit', 'https://www.bybit.com/invite?ref=MINVEST', '', 'assets/icons/bybit.png'),
+                        _buildAppOption(context, 'Bitget', 'https://www.bitget.com/expressly?languageType=0&channelCode=minvest&vipCode=minvest', '', 'assets/icons/bitget.png'),
+                        _buildAppOption(context, 'MEXC', 'https://www.mexc.com/register?inviteCode=mexc-MINVEST', '', 'assets/icons/mexc.png'),
+                        _buildAppOption(context, 'OKX', 'https://www.okx.com/join/minvest', '', 'assets/icons/okx.png'),
                         _buildAppOption(context, 'MT4', 'https://metatrader4.com', '', 'assets/icons/mt4.png'),
                         _buildAppOption(context, 'MT5', 'https://metatrader5.com', '', 'assets/icons/mt5.png'),
                       ],
@@ -148,11 +140,16 @@ class _SignalScreenState extends State<SignalScreen> {
     );
   }
 
-  Widget _buildAppOption(BuildContext context, String name, String webUrl, String appUrl, String iconPath, {bool isSelected = false}) {
+  Widget _buildAppOption(BuildContext context, String name, String webUrl, String appUrl, String iconPath) {
+    bool isSelected = _selectedAppName == name;
     return GestureDetector(
       onTap: () {
+        setState(() {
+          _selectedAppName = name;
+          _selectedAppWebUrl = webUrl;
+          _selectedAppUrl = appUrl;
+        });
         Navigator.pop(context);
-        _launchApp(appUrl, webUrl);
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 4),
@@ -230,66 +227,68 @@ class _SignalScreenState extends State<SignalScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            );
+          },
+        ),
+        title: const Text(
+          'Signal GPT',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        actions: [
+          Consumer<NotificationProvider>(
+            builder: (context, notificationProvider, child) {
+              final bool hasUnread = notificationProvider.unreadCount > 0;
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none, size: 28, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                      );
+                    },
+                  ),
+                  if (hasUnread)
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: Container(
+                        height: 9,
+                        width: 9,
+                        decoration: const BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                            border: Border.fromBorderSide(BorderSide(color: Color(0xFF0D1117), width: 1.5))
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Favourite Assets',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      const _LanguageSwitcher(),
-                      const SizedBox(width: 4),
-                      Consumer<NotificationProvider>(
-                        builder: (context, notificationProvider, child) {
-                          final bool hasUnread = notificationProvider.unreadCount > 0;
-                          return Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.notifications_none, size: 28, color: Colors.white),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const NotificationScreen()),
-                                  );
-                                },
-                              ),
-                              if (hasUnread)
-                                Positioned(
-                                  top: 10,
-                                  right: 10,
-                                  child: Container(
-                                    height: 9,
-                                    width: 9,
-                                    decoration: const BoxDecoration(
-                                        color: Colors.redAccent,
-                                        shape: BoxShape.circle,
-                                        border: Border.fromBorderSide(BorderSide(color: Color(0xFF0D1117), width: 1.5))
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            ),
-
+            const SizedBox(height: 12),
             // Tab bar (Assets / GMT) - Functional Filters
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -297,75 +296,28 @@ class _SignalScreenState extends State<SignalScreen> {
                 children: [
                   // Assets Filter
                   Expanded(
-                    child: Container(
-                      height: 41,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: const Alignment(0.00, 1.00),
-                          end: const Alignment(1.00, 0.12),
-                          colors: [
-                            Colors.white.withValues(alpha: 0.15),
-                            Colors.white.withValues(alpha: 0.05)
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<AssetFilter>(
-                          value: _assetFilter,
-                          isExpanded: true,
-                          dropdownColor: const Color(0xFF0D0D0D),
-                          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 20),
-                          style: const TextStyle(color: Colors.white, fontSize: 18),
-                          onChanged: (value) {
-                            if (value != null) setState(() => _assetFilter = value);
-                          },
-                          items: [
-                            DropdownMenuItem(value: AssetFilter.all, child: Text(l10n.allAssets)),
-                            const DropdownMenuItem(value: AssetFilter.gold, child: Text('Gold')),
-                            const DropdownMenuItem(value: AssetFilter.crypto, child: Text('Crypto')),
-                            const DropdownMenuItem(value: AssetFilter.forex, child: Text('Forex')),
-                          ],
-                        ),
-                      ),
+                    child: CustomFilterDropdown<AssetFilter>(
+                      value: _assetFilter,
+                      items: [
+                        CustomDropdownItem(value: AssetFilter.all, label: l10n.allAssets),
+                        CustomDropdownItem(value: AssetFilter.gold, label: 'Gold'),
+                        CustomDropdownItem(value: AssetFilter.crypto, label: 'Crypto'),
+                        CustomDropdownItem(value: AssetFilter.forex, label: 'Forex'),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) setState(() => _assetFilter = value);
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),
                   // GMT Filter
                   Expanded(
-                    child: Container(
-                      height: 41,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: const Alignment(0.00, 1.00),
-                          end: const Alignment(1.00, 0.12),
-                          colors: [
-                            Colors.white.withValues(alpha: 0.15),
-                            Colors.white.withValues(alpha: 0.05)
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _selectedTimezone,
-                          isExpanded: true,
-                          dropdownColor: const Color(0xFF0D0D0D),
-                          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 20),
-                          style: const TextStyle(color: Colors.white, fontSize: 18),
-                          onChanged: (value) {
-                            if (value != null) setState(() => _selectedTimezone = value);
-                          },
-                          items: _timezones.map((tz) => DropdownMenuItem(
-                            value: tz,
-                            child: Text(tz),
-                          )).toList(),
-                        ),
-                      ),
+                    child: CustomFilterDropdown<String>(
+                      value: _selectedTimezone,
+                      items: _timezones.map((tz) => CustomDropdownItem(value: tz, label: tz)).toList(),
+                      onChanged: (value) {
+                        if (value != null) setState(() => _selectedTimezone = value);
+                      },
                     ),
                   ),
                 ],
@@ -473,41 +425,62 @@ class _SignalScreenState extends State<SignalScreen> {
               ),
             ),
 
-            // Open EXNESS Button
+            // Open SELECTED APP Button
             Padding(
               padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 85.0),
-              child: GestureDetector(
-                onTap: () => _showAppSelection(context),
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
-                    ),
-                    borderRadius: BorderRadius.circular(6),
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Open EXNESS',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 44), // Spacer to balance the right icon
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _launchApp(_selectedAppUrl, _selectedAppWebUrl),
+                        behavior: HitTestBehavior.opaque,
+                        child: Center(
+                          child: Text(
+                            'Open ${_selectedAppName.toUpperCase()}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4998FF),
-                          borderRadius: BorderRadius.circular(6),
+                    ),
+                    GestureDetector(
+                      onTap: () => _showAppSelection(context),
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        width: 44,
+                        height: 50,
+                        alignment: Alignment.center,
+                        child: Container(
+                          width: 23,
+                          height: 24,
+                          decoration: ShapeDecoration(
+                            color: const Color(0xFF4998FF),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                          ),
+                          child: Center(
+                            child: Image.asset(
+                              'assets/icons/home.png',
+                              width: 22,
+                              height: 22,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
                         ),
-                        child: const Icon(Icons.arrow_outward, size: 16, color: Colors.white),
-                      )
-                    ],
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -560,13 +533,23 @@ class _SignalScreenState extends State<SignalScreen> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Text(
-                  symbol,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      symbol,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                      color: const Color(0xFF276EFB),
+                      size: 20,
+                    ),
+                  ],
                 ),
                 const Spacer(),
                 Container(

@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/features/verification/screens/upgrade_screen.dart';
+import 'package:minvest_forex_app/features/notifications/screens/notification_screen.dart';
+import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:minvest_forex_app/features/auth/screens/settings_screen.dart';
 
@@ -205,6 +207,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            );
+          },
+        ),
+        title: const Text(
+          'Accounts',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        actions: [
+          Consumer<NotificationProvider>(
+            builder: (context, notificationProvider, child) {
+              final bool hasUnread = notificationProvider.unreadCount > 0;
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none, size: 28, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                      );
+                    },
+                  ),
+                  if (hasUnread)
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: Container(
+                        height: 9,
+                        width: 9,
+                        decoration: const BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                            border: Border.fromBorderSide(BorderSide(color: Color(0xFF0D1117), width: 1.5))
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Stack(
@@ -215,7 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 top: -81,
                 child: Container(
                   width: MediaQuery.of(context).size.width + 2,
-                  height: 512,
+                  height: 450,
                   decoration: ShapeDecoration(
                     color: Colors.white.withValues(alpha: 0.05),
                     shape: const RoundedRectangleBorder(
@@ -231,14 +291,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               Column(
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 16, bottom: 24),
-                    child: Text(
-                      'Accounts',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w500),
-                    ),
-                  ),
+                  const SizedBox(height: 16),
 
                   // Token Card
                   Padding(

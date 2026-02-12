@@ -60,7 +60,7 @@ class _ChartScreenState extends State<ChartScreen> {
       body: SafeArea(
         bottom: false, // Tắt mặc định để tự kiểm soát khoảng cách với Nav Bar
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 120), // Tạo khoảng trống cho Floating Nav Bar (72px height + padding)
+          padding: const EdgeInsets.only(bottom: 160), // Giảm xuống 160 theo yêu cầu
           child: Stack(
             children: [
               WebViewWidget(controller: _controller),
