@@ -6,6 +6,10 @@ import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
 import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
 import 'package:minvest_forex_app/features/signals/screens/signal_trading_history_screen.dart';
+import 'package:minvest_forex_app/features/auth/screens/settings_screen.dart';
+import 'package:minvest_forex_app/features/notifications/screens/notification_screen.dart';
+import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
+import 'package:minvest_forex_app/features/signals/widgets/custom_filter_dropdown.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -31,7 +35,9 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
   late Stream<List<Signal>> _historyStream;
 
   final List<String> _statusOptions = ['ALL', 'TP1', 'TP2', 'TP3', 'SL', 'CANCELLED', 'EXIT'];
-  final List<String> _timezones = [for (int i = -12; i <= 14; i++) 'GMT${i >= 0 ? '+' : ''}$i'];
+  final List<String> _timezones = [
+    'GMT+0', 'GMT+7', 'GMT+8'
+  ];
 
   @override
   bool get wantKeepAlive => true;
@@ -59,18 +65,68 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
 
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            );
+          },
+        ),
+        title: const Text(
+          'Signal History',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        actions: [
+          Consumer<NotificationProvider>(
+            builder: (context, notificationProvider, child) {
+              final bool hasUnread = notificationProvider.unreadCount > 0;
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none, size: 28, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                      );
+                    },
+                  ),
+                  if (hasUnread)
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: Container(
+                        height: 9,
+                        width: 9,
+                        decoration: const BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                            border: Border.fromBorderSide(BorderSide(color: Color(0xFF0D1117), width: 1.5))
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Text(
-                'Signal History',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w500),
-              ),
-            ),
-
+            const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -155,30 +211,30 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
   }
 
   Widget _buildAssetDropdown() {
-    return _buildDropdownWrapper(
+    return CustomFilterDropdown<AssetCategory>(
       value: _assetCategory,
       items: [
-        const DropdownMenuItem(value: AssetCategory.all, child: Text('All Assets')),
-        const DropdownMenuItem(value: AssetCategory.gold, child: Text('Gold')),
-        const DropdownMenuItem(value: AssetCategory.crypto, child: Text('Crypto')),
-        const DropdownMenuItem(value: AssetCategory.forex, child: Text('Forex')),
+        CustomDropdownItem(value: AssetCategory.all, label: 'All Assets'),
+        CustomDropdownItem(value: AssetCategory.gold, label: 'Gold'),
+        CustomDropdownItem(value: AssetCategory.crypto, label: 'Crypto'),
+        CustomDropdownItem(value: AssetCategory.forex, label: 'Forex'),
       ],
       onChanged: (v) => setState(() => _assetCategory = v as AssetCategory),
     );
   }
 
   Widget _buildGMTDropdown() {
-    return _buildDropdownWrapper(
+    return CustomFilterDropdown<String>(
       value: _selectedGMT,
-      items: _timezones.map((tz) => DropdownMenuItem(value: tz, child: Text(tz))).toList(),
+      items: _timezones.map((tz) => CustomDropdownItem(value: tz, label: tz)).toList(),
       onChanged: (v) => setState(() => _selectedGMT = v as String),
     );
   }
 
   Widget _buildStatusDropdown() {
-    return _buildDropdownWrapper(
+    return CustomFilterDropdown<String>(
       value: _selectedStatus,
-      items: _statusOptions.map((st) => DropdownMenuItem(value: st, child: Text(st))).toList(),
+      items: _statusOptions.map((st) => CustomDropdownItem(value: st, label: st)).toList(),
       onChanged: (v) => setState(() => _selectedStatus = v as String),
     );
   }
@@ -204,14 +260,17 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
               gradient: LinearGradient(
                 begin: const Alignment(0.00, 0.78),
                 end: const Alignment(1.00, 0.20),
-                colors: [Colors.white.withValues(alpha: 0.83), Colors.white.withValues(alpha: 0.44)],
+                colors: [
+                  const Color(0xFF1E1E1E).withValues(alpha: 0.9),
+                  const Color(0xFF0D0D0D).withValues(alpha: 0.8)
+                ],
               ),
               shape: RoundedRectangleBorder(
-                side: BorderSide(width: 1, color: Colors.white.withValues(alpha: 0.50)),
+                side: BorderSide(width: 1, color: Colors.white.withValues(alpha: 0.1)),
                 borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
               ),
               shadows: const [
-                BoxShadow(color: Color(0x3F8D8D8D), blurRadius: 22.97, offset: Offset(0, -6)),
+                BoxShadow(color: Colors.black54, blurRadius: 22.97, offset: Offset(0, -6)),
               ],
             ),
             child: Theme(
@@ -220,16 +279,23 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
                   primary: Color(0xFF276EFB),
                   onPrimary: Colors.white,
                   surface: Colors.transparent,
-                  onSurface: Colors.black,
+                  onSurface: Colors.white,
                 ),
                 textButtonTheme: TextButtonThemeData(
-                  style: TextButton.styleFrom(foregroundColor: Colors.black),
+                  style: TextButton.styleFrom(foregroundColor: Colors.white),
                 ),
               ),
               child: Column(
                 children: [
                   const SizedBox(height: 12),
-                  Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(2))),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                   Expanded(
                     child: CalendarDatePicker(
                       initialDate: _selectedDate ?? DateTime.now(),
@@ -250,25 +316,6 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
     );
   }
 
-  Widget _buildDropdownWrapper({required dynamic value, required List<DropdownMenuItem> items, required Function onChanged}) {
-    return Container(
-      height: 41,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: _filterDecoration(),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton(
-          value: value,
-          isExpanded: true,
-          dropdownColor: const Color(0xFF1A1A1A),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF686868), size: 18),
-          style: const TextStyle(color: Color(0xFF686868), fontSize: 14),
-          items: items,
-          onChanged: (v) => onChanged(v),
-        ),
-      ),
-    );
-  }
-
   Decoration _filterDecoration() { // Sửa từ BoxDecoration thành Decoration
     return ShapeDecoration(
       gradient: LinearGradient(
@@ -283,7 +330,7 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
     );
   }
 
-  Widget _buildFilterBox(String label, String value) {
+  Widget _buildFilterBox(String label, String value, {bool isSelected = false}) {
     return Container(
       height: 41,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -291,8 +338,15 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(value, style: const TextStyle(color: Color(0xFF686868), fontSize: 14)),
-          const Icon(Icons.keyboard_arrow_down, color: Color(0xFF686868), size: 18),
+          Text(
+            value,
+            style: TextStyle(
+              color: isSelected ? const Color(0xFF276EFB) : const Color(0xFF686868),
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+            ),
+          ),
+          Icon(Icons.keyboard_arrow_down, color: isSelected ? const Color(0xFF276EFB) : const Color(0xFF686868), size: 18),
         ],
       ),
     );

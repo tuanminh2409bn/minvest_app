@@ -73,7 +73,7 @@ class WelcomeScreen extends StatelessWidget {
                     iconPath: 'assets/images/google_logo.png',
                     text: 'Continue With Google',
                     color: Colors.white,
-                    textColor: Colors.white, // Đã đổi từ black sang white
+                    iconSize: 22, // Giảm một chút kích thước logo Google
                     onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
                   ),
                   
@@ -90,12 +90,21 @@ class WelcomeScreen extends StatelessWidget {
                   const Spacer(),
                   
                   // "or" text
-                  const Text(
-                    'or',
-                    style: TextStyle(
-                      color: Color(0xFF636363),
-                      fontSize: 18,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: Colors.white.withOpacity(0.3), thickness: 1)),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'or',
+                          style: TextStyle(
+                            color: Color(0xFF636363),
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: Colors.white.withOpacity(0.3), thickness: 1)),
+                    ],
                   ),
                   
                   const SizedBox(height: 16),
@@ -133,33 +142,35 @@ class WelcomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   
                   // Create Account Link
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      const Text(
-                        'Don’t have an account? ',
-                        style: TextStyle(
-                          color: Color(0xFF636363),
-                          fontSize: 16,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => const SignupScreenMobile()),
-                          );
-                        },
-                        child: const Text(
-                          'Create Account',
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Don’t have an account? ',
                           style: TextStyle(
-                            color: Color(0xFF0094FF),
+                            color: Color(0xFF636363),
                             fontSize: 16,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                    ],
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (context) => const SignupScreenMobile()),
+                            );
+                          },
+                          child: const Text(
+                            'Create Account',
+                            style: TextStyle(
+                              color: Color(0xFF0094FF),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   
                   const SizedBox(height: 30),
@@ -179,6 +190,7 @@ class _SocialButton extends StatelessWidget {
   final String text;
   final Color color;
   final Color textColor;
+  final double iconSize;
   final VoidCallback onPressed;
 
   const _SocialButton({
@@ -186,6 +198,7 @@ class _SocialButton extends StatelessWidget {
     required this.text,
     required this.color,
     this.textColor = Colors.white,
+    this.iconSize = 24,
     required this.onPressed,
   });
 
@@ -196,42 +209,44 @@ class _SocialButton extends StatelessWidget {
       child: Container(
         width: double.infinity,
         height: 50,
+        padding: const EdgeInsets.all(1), // Độ dày viền
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1), // Figma shows translucent backgrounds
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.3),
-            width: 1,
-          ),
           gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
+            begin: const Alignment(-1.0, -2.0), // Đẩy góc trái lên cao hơn nữa
+            end: const Alignment(1.0, 2.0),    // Kéo góc phải xuống thấp hơn nữa
             colors: [
-              Colors.white.withValues(alpha: 0.1),
-              Colors.white.withValues(alpha: 0.05),
+              Colors.white,
+              Colors.white.withValues(alpha: 0),
+              Colors.white.withValues(alpha: 0),
+              Colors.white,
             ],
+            // Góc trên bên trái tăng lên 7% (0.0 -> 0.07)
+            // Góc dưới bên phải tăng lên 12% (0.88 -> 1.0)
+            stops: const [0.0, 0.07, 0.88, 1.0], 
           ),
         ),
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 16.0),
-                child: Image.asset(iconPath, width: 28, height: 28), // Tăng kích thước từ 20 lên 28
-              ),
-            ),
-            Center(
-              child: Text(
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B0B0B),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(iconPath, width: iconSize, height: iconSize),
+              const SizedBox(width: 12),
+              Text(
                 text,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 16,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
                   fontWeight: FontWeight.w400,
+                  fontFamily: 'Be Vietnam Pro',
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
