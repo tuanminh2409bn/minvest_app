@@ -187,7 +187,7 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
                               onTap: _isLocalLoading ? null : _handleSignup,
                               child: Container(
                                 width: double.infinity,
-                                height: 50,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     begin: Alignment.centerLeft,
@@ -209,6 +209,7 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
                                           color: Colors.white,
                                           fontSize: 18,
                                           fontWeight: FontWeight.w700,
+                                          fontFamily: 'Be Vietnam Pro',
                                         ),
                                       ),
                               ),
@@ -306,31 +307,49 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
     String? Function(String?)? validator,
   }) {
     return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(1), // Độ dày viền
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [
-            Colors.white.withValues(alpha: 0.1),
-            Colors.white.withValues(alpha: 0.05),
-          ],
-        ),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+        gradient: LinearGradient(
+          begin: const Alignment(-1.0, -2.0),
+          end: const Alignment(1.0, 2.0),
+          colors: [
+            Colors.white.withValues(alpha: 0.6),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0.8),
+          ],
+          stops: const [0.0, 0.07, 0.88, 1.0],
+        ),
       ),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        validator: validator,
-        style: const TextStyle(color: Colors.white, fontSize: 18),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: const TextStyle(color: Color(0xFF636363), fontSize: 18),
-          prefixIcon: Icon(icon, color: const Color(0xFF636363), size: 20),
-          suffixIcon: suffixIcon,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: TextFormField(
+          controller: controller,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontFamily: 'Be Vietnam Pro',
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: const TextStyle(
+              color: Color(0xFF636363),
+              fontSize: 18,
+              fontFamily: 'Be Vietnam Pro',
+            ),
+            prefixIcon: Icon(icon, color: const Color(0xFF636363), size: 20),
+            suffixIcon: suffixIcon,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          ),
         ),
       ),
     );
@@ -338,97 +357,51 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
 }
 
 class _SocialCircleButton extends StatelessWidget {
-
   final String iconPath;
-
   final Color color;
-
   final VoidCallback onPressed;
-
   final double padding;
-
   final double size;
-
   final Color? iconColor;
 
-
-
   const _SocialCircleButton({
-
     required this.iconPath,
-
     required this.color,
-
     required this.onPressed,
-
     this.padding = 12,
-
     this.size = 56,
-
     this.iconColor,
-
   });
 
-
-
   @override
-
   Widget build(BuildContext context) {
-
     return GestureDetector(
-
       onTap: onPressed,
-
       child: Container(
-
         width: size,
-
         height: size,
-
         decoration: BoxDecoration(
-
           color: color,
-
           shape: BoxShape.circle,
-
           boxShadow: (color == Colors.transparent || color == Colors.black)
-
             ? null 
-
             : [
-
                 BoxShadow(
-
                   color: Colors.black.withValues(alpha: 0.2),
-
                   blurRadius: 8,
-
                   offset: const Offset(0, 4),
-
                 ),
-
               ],
-
         ),
-
         padding: EdgeInsets.all(padding),
-
         child: Image.asset(
-
           iconPath, 
-
           fit: BoxFit.contain,
-
           color: iconColor,
-
         ),
-
       ),
-
     );
-
   }
-
 }
 
 

@@ -192,7 +192,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                             onTap: _isLoading ? null : _verifyCode,
                             child: Container(
                               width: double.infinity,
-                              height: 50,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   begin: Alignment.centerLeft,
@@ -214,6 +214,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                                         color: Colors.white,
                                         fontSize: 18,
                                         fontWeight: FontWeight.w700,
+                                        fontFamily: 'Be Vietnam Pro',
                                       ),
                                     ),
                             ),
@@ -303,34 +304,50 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   Widget _buildCodeBox(int index) {
     return Container(
       width: 45,
-      height: 45,
+      height: 50,
+      padding: const EdgeInsets.all(1), // Độ dày viền
       decoration: BoxDecoration(
-        color: const Color(0xFF222222),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFF7B7B7B), width: 1),
-      ),
-      child: TextField(
-        controller: _controllers[index],
-        focusNode: _focusNodes[index],
-        textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
-        maxLength: 1,
-        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-        decoration: const InputDecoration(
-          counterText: '',
-          border: InputBorder.none,
+        gradient: LinearGradient(
+          begin: const Alignment(-1.0, -2.0),
+          end: const Alignment(1.0, 2.0),
+          colors: [
+            Colors.white.withValues(alpha: 0.6),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0.8),
+          ],
+          stops: const [0.0, 0.07, 0.88, 1.0],
         ),
-        onChanged: (value) {
-          if (value.isNotEmpty && index < 5) {
-            _focusNodes[index + 1].requestFocus();
-          } else if (value.isEmpty && index > 0) {
-            _focusNodes[index - 1].requestFocus();
-          }
-          if (index == 5 && value.isNotEmpty) {
-            _focusNodes[index].unfocus();
-            _verifyCode();
-          }
-        },
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: TextField(
+          controller: _controllers[index],
+          focusNode: _focusNodes[index],
+          textAlign: TextAlign.center,
+          keyboardType: TextInputType.number,
+          maxLength: 1,
+          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Be Vietnam Pro'),
+          decoration: const InputDecoration(
+            counterText: '',
+            border: InputBorder.none,
+          ),
+          onChanged: (value) {
+            if (value.isNotEmpty && index < 5) {
+              _focusNodes[index + 1].requestFocus();
+            } else if (value.isEmpty && index > 0) {
+              _focusNodes[index - 1].requestFocus();
+            }
+            if (index == 5 && value.isNotEmpty) {
+              _focusNodes[index].unfocus();
+              _verifyCode();
+            }
+          },
+        ),
       ),
     );
   }

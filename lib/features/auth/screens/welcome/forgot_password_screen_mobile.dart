@@ -119,7 +119,7 @@ We will send a verification code to your email address.''',
             onTap: _sendCode,
             child: Container(
               width: double.infinity,
-              height: 50,
+              padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   begin: Alignment.centerLeft,
@@ -133,7 +133,7 @@ We will send a verification code to your email address.''',
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                 : const Text(
                     'send',
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Be Vietnam Pro'),
                   ),
             ),
           ),
@@ -174,28 +174,38 @@ We will send a verification code to your email address.''',
     TextInputType? keyboardType,
   }) {
     return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(1), // Độ dày viền
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [
-            Colors.white.withOpacity(0.1),
-            Colors.white.withOpacity(0.05),
-          ],
-        ),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        gradient: LinearGradient(
+          begin: const Alignment(-1.0, -2.0),
+          end: const Alignment(1.0, 2.0),
+          colors: [
+            Colors.white.withValues(alpha: 0.6),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0.8),
+          ],
+          stops: const [0.0, 0.07, 0.88, 1.0],
+        ),
       ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white, fontSize: 18),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: const TextStyle(color: Color(0xFF636363), fontSize: 18),
-          prefixIcon: Icon(icon, color: const Color(0xFF636363), size: 20),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          style: const TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Be Vietnam Pro'),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: const TextStyle(color: Color(0xFF636363), fontSize: 18, fontFamily: 'Be Vietnam Pro'),
+            prefixIcon: Icon(icon, color: const Color(0xFF636363), size: 20),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          ),
         ),
       ),
     );
@@ -286,7 +296,7 @@ class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
             onTap: _resetPassword,
             child: Container(
               width: double.infinity,
-              height: 50,
+              padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   begin: Alignment.centerLeft,
@@ -300,7 +310,7 @@ class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                 : const Text(
                     'Reset Password',
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Be Vietnam Pro'),
                   ),
             ),
           ),
@@ -314,22 +324,38 @@ class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
     return Container(
       width: 45,
       height: 50,
+      padding: const EdgeInsets.all(1), // Độ dày viền
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        gradient: LinearGradient(
+          begin: const Alignment(-1.0, -2.0),
+          end: const Alignment(1.0, 2.0),
+          colors: [
+            Colors.white.withValues(alpha: 0.6),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0.8),
+          ],
+          stops: const [0.0, 0.07, 0.88, 1.0],
+        ),
       ),
-      child: TextField(
-        controller: _codeControllers[index],
-        textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
-        maxLength: 1,
-        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-        decoration: const InputDecoration(counterText: '', border: InputBorder.none),
-        onChanged: (value) {
-          if (value.length == 1 && index < 5) FocusScope.of(context).nextFocus();
-          if (value.isEmpty && index > 0) FocusScope.of(context).previousFocus();
-        },
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: TextField(
+          controller: _codeControllers[index],
+          textAlign: TextAlign.center,
+          keyboardType: TextInputType.number,
+          maxLength: 1,
+          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          decoration: const InputDecoration(counterText: '', border: InputBorder.none),
+          onChanged: (value) {
+            if (value.length == 1 && index < 5) FocusScope.of(context).nextFocus();
+            if (value.isEmpty && index > 0) FocusScope.of(context).previousFocus();
+          },
+        ),
       ),
     );
   }
@@ -342,29 +368,39 @@ class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
     Widget? suffixIcon,
   }) {
     return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(1), // Độ dày viền
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [
-            Colors.white.withOpacity(0.1),
-            Colors.white.withOpacity(0.05),
-          ],
-        ),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        gradient: LinearGradient(
+          begin: const Alignment(-1.0, -2.0),
+          end: const Alignment(1.0, 2.0),
+          colors: [
+            Colors.white.withValues(alpha: 0.6),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0.8),
+          ],
+          stops: const [0.0, 0.07, 0.88, 1.0],
+        ),
       ),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscureText,
-        style: const TextStyle(color: Colors.white, fontSize: 18),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: const TextStyle(color: Color(0xFF636363), fontSize: 18),
-          prefixIcon: Icon(icon, color: const Color(0xFF636363), size: 20),
-          suffixIcon: suffixIcon,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: TextFormField(
+          controller: controller,
+          obscureText: obscureText,
+          style: const TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Be Vietnam Pro'),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: const TextStyle(color: Color(0xFF636363), fontSize: 18, fontFamily: 'Be Vietnam Pro'),
+            prefixIcon: Icon(icon, color: const Color(0xFF636363), size: 20),
+            suffixIcon: suffixIcon,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          ),
         ),
       ),
     );
