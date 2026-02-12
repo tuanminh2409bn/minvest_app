@@ -213,22 +213,21 @@ class _SocialButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
           gradient: LinearGradient(
-            begin: const Alignment(-1.0, -2.0), // Đẩy góc trái lên cao hơn nữa
-            end: const Alignment(1.0, 2.0),    // Kéo góc phải xuống thấp hơn nữa
+            begin: const Alignment(-1.0, -2.0),
+            end: const Alignment(1.0, 2.0),
             colors: [
-              Colors.white,
+              Colors.white.withValues(alpha: 0.6),
               Colors.white.withValues(alpha: 0),
               Colors.white.withValues(alpha: 0),
-              Colors.white,
+              Colors.white.withValues(alpha: 0.8),
             ],
-            // Góc trên bên trái tăng lên 7% (0.0 -> 0.07)
-            // Góc dưới bên phải tăng lên 12% (0.88 -> 1.0)
+            // Khôi phục tỉ lệ cũ (7% trái và 12% phải)
             stops: const [0.0, 0.07, 0.88, 1.0], 
           ),
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF0B0B0B),
+            color: const Color(0xFF161616), // Thay đổi từ 0xFF0B0B0B sang màu xám đậm
             borderRadius: BorderRadius.circular(5),
           ),
           child: Row(
@@ -239,7 +238,7 @@ class _SocialButton extends StatelessWidget {
               Text(
                 text,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.white, // Quay lại màu trắng để dễ đọc trên nền tối
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
                   fontFamily: 'Be Vietnam Pro',
