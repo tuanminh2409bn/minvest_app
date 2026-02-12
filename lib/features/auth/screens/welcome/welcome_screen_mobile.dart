@@ -64,6 +64,7 @@ class WelcomeScreen extends StatelessWidget {
                     iconPath: 'assets/images/facebook_logo.png',
                     text: 'Continue With Facebook',
                     color: const Color(0xFF1877F2),
+                    iconSize: 32, // Tăng thêm kích thước Facebook
                     onPressed: () => context.read<AuthBloc>().add(SignInWithFacebookRequested()),
                   ),
                   
@@ -73,7 +74,7 @@ class WelcomeScreen extends StatelessWidget {
                     iconPath: 'assets/images/google_logo.png',
                     text: 'Continue With Google',
                     color: Colors.white,
-                    iconSize: 22, // Giảm một chút kích thước logo Google
+                    iconSize: 26, // Tăng kích thước Google
                     onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
                   ),
                   
@@ -84,6 +85,7 @@ class WelcomeScreen extends StatelessWidget {
                       iconPath: 'assets/images/apple_logo.png',
                       text: 'Continue With Apple',
                       color: const Color(0xFF121212),
+                      iconSize: 22, // Giảm kích thước Apple
                       onPressed: () => context.read<AuthBloc>().add(SignInWithAppleRequested()),
                     ),
                   
@@ -118,7 +120,7 @@ class WelcomeScreen extends StatelessWidget {
                     },
                     child: Container(
                       width: double.infinity,
-                      height: 50,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           begin: Alignment.centerLeft,
@@ -208,7 +210,6 @@ class _SocialButton extends StatelessWidget {
       onTap: onPressed,
       child: Container(
         width: double.infinity,
-        height: 50,
         padding: const EdgeInsets.all(1), // Độ dày viền
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
@@ -226,8 +227,9 @@ class _SocialButton extends StatelessWidget {
           ),
         ),
         child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14), // Đồng bộ kích thước chuẩn
           decoration: BoxDecoration(
-            color: const Color(0xFF161616), // Thay đổi từ 0xFF0B0B0B sang màu xám đậm
+            color: const Color(0xFF161616),
             borderRadius: BorderRadius.circular(5),
           ),
           child: Row(

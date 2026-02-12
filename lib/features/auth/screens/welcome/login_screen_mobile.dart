@@ -157,7 +157,7 @@ class _LoginScreenMobileState extends State<LoginScreenMobile> {
                         },
                         child: Container(
                           width: double.infinity,
-                          height: 50,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
                               begin: Alignment.centerLeft,
@@ -179,6 +179,7 @@ class _LoginScreenMobileState extends State<LoginScreenMobile> {
                                     color: Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.w700,
+                                    fontFamily: 'Be Vietnam Pro',
                                   ),
                                 ),
                         ),
@@ -253,31 +254,49 @@ class _LoginScreenMobileState extends State<LoginScreenMobile> {
     String? Function(String?)? validator,
   }) {
     return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(1), // Độ dày viền
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [
-            Colors.white.withOpacity(0.1),
-            Colors.white.withOpacity(0.05),
-          ],
-        ),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        gradient: LinearGradient(
+          begin: const Alignment(-1.0, -2.0),
+          end: const Alignment(1.0, 2.0),
+          colors: [
+            Colors.white.withValues(alpha: 0.6),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0.8),
+          ],
+          stops: const [0.0, 0.07, 0.88, 1.0],
+        ),
       ),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        validator: validator,
-        style: const TextStyle(color: Colors.white, fontSize: 18),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: const TextStyle(color: Color(0xFF636363), fontSize: 18),
-          prefixIcon: Icon(icon, color: const Color(0xFF636363), size: 20),
-          suffixIcon: suffixIcon,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: TextFormField(
+          controller: controller,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontFamily: 'Be Vietnam Pro',
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: const TextStyle(
+              color: Color(0xFF636363),
+              fontSize: 18,
+              fontFamily: 'Be Vietnam Pro',
+            ),
+            prefixIcon: Icon(icon, color: const Color(0xFF636363), size: 20),
+            suffixIcon: suffixIcon,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          ),
         ),
       ),
     );
