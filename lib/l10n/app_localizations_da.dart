@@ -550,6 +550,9 @@ class AppLocalizationsDa extends AppLocalizations {
   String get noNotificationsYet => 'Ingen notifikationer endnu.';
 
   @override
+  String get markAllRead => 'Mark all as read';
+
+  @override
   String daysAgo(int count) {
     return '$count dage siden';
   }

@@ -221,7 +221,7 @@
 
         function resize() {
             if (!container) return;
-            const dpr = window.devicePixelRatio || 1;
+            const dpr = window.innerWidth < 768 ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.5);
             const width = container.clientWidth;
             const height = container.clientHeight;
             renderer.setSize(width * dpr, height * dpr);
@@ -266,6 +266,9 @@
         let rafId;
         const update = t => {
             rafId = requestAnimationFrame(update);
+            // Giới hạn ~60fps
+            if (t - lastTime < 16) return;
+            
             const dt = (t - lastTime) * 0.001;
             lastTime = t;
             program.uniforms.iTime.value = t * 0.001;

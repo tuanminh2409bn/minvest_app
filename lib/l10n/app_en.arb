@@ -172,6 +172,7 @@
     },
     "contactToUpgrade": "Contact to upgrade",
     "noNotificationsYet": "No notifications yet.",
+    "markAllRead": "Mark all as read",
     "daysAgo": "{count} days ago",
     "@daysAgo": {
         "placeholders": {

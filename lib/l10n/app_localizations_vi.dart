@@ -554,6 +554,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get noNotificationsYet => 'Chưa có thông báo nào.';
 
   @override
+  String get markAllRead => 'Đánh dấu tất cả đã đọc';
+
+  @override
   String daysAgo(int count) {
     return '$count ngày trước';
   }

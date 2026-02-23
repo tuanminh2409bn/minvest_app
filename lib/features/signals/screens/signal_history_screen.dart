@@ -316,38 +316,45 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
     );
   }
 
-  Decoration _filterDecoration() { // Sửa từ BoxDecoration thành Decoration
-    return ShapeDecoration(
-      gradient: LinearGradient(
-        begin: const Alignment(0.00, 1.00),
-        end: const Alignment(1.00, 0.12),
-        colors: [Colors.white.withValues(alpha: 0.15), Colors.white.withValues(alpha: 0.05)],
-      ),
-      shape: RoundedRectangleBorder(
-        side: BorderSide(width: 1, color: Colors.white.withValues(alpha: 0.2)),
-        borderRadius: BorderRadius.circular(6),
-      ),
-    );
-  }
-
   Widget _buildFilterBox(String label, String value, {bool isSelected = false}) {
     return Container(
       height: 41,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: _filterDecoration(),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              color: isSelected ? const Color(0xFF276EFB) : const Color(0xFF686868),
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+      padding: const EdgeInsets.all(1), // Độ dày viền
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        gradient: LinearGradient(
+          begin: const Alignment(-1.0, -2.0),
+          end: const Alignment(1.0, 2.0),
+          colors: [
+            Colors.white.withValues(alpha: 0.6),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0.8),
+          ],
+          stops: const [0.0, 0.07, 0.88, 1.0],
+        ),
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              value,
+              style: TextStyle(
+                color: isSelected ? const Color(0xFF276EFB) : const Color(0xFF686868),
+                fontSize: 14,
+                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                fontFamily: 'Be Vietnam Pro',
+              ),
             ),
-          ),
-          Icon(Icons.keyboard_arrow_down, color: isSelected ? const Color(0xFF276EFB) : const Color(0xFF686868), size: 18),
-        ],
+            Icon(Icons.keyboard_arrow_down, color: isSelected ? const Color(0xFF276EFB) : const Color(0xFF686868), size: 18),
+          ],
+        ),
       ),
     );
   }

@@ -549,6 +549,9 @@ class AppLocalizationsKm extends AppLocalizations {
   String get noNotificationsYet => 'មិនទាន់មានការជូនដំណឹងនៅឡើយទេ។';
 
   @override
+  String get markAllRead => 'Mark all as read';
+
+  @override
   String daysAgo(int count) {
     return '$count ថ្ងៃមុន';
   }

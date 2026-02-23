@@ -538,6 +538,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noNotificationsYet => '通知はまだありません。';
 
   @override
+  String get markAllRead => 'Mark all as read';
+
+  @override
   String daysAgo(int count) {
     return '$count 日前';
   }

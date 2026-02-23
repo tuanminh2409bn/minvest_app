@@ -538,6 +538,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noNotificationsYet => '暂无通知。';
 
   @override
+  String get markAllRead => 'Mark all as read';
+
+  @override
   String daysAgo(int count) {
     return '$count 天前';
   }

@@ -555,6 +555,9 @@ class AppLocalizationsCs extends AppLocalizations {
   String get noNotificationsYet => 'Zatím žádná oznámení.';
 
   @override
+  String get markAllRead => 'Mark all as read';
+
+  @override
   String daysAgo(int count) {
     return 'před $count dny';
   }

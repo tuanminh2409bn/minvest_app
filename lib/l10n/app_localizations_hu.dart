@@ -555,6 +555,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get noNotificationsYet => 'Még nincsenek értesítések.';
 
   @override
+  String get markAllRead => 'Mark all as read';
+
+  @override
   String daysAgo(int count) {
     return '$count napja';
   }

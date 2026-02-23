@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
@@ -203,19 +204,6 @@ class _SignalScreenState extends State<SignalScreen> {
     );
   }
 
-  String _getAssetLabel(AssetFilter filter, AppLocalizations l10n) {
-    switch (filter) {
-      case AssetFilter.all:
-        return l10n.allAssets;
-      case AssetFilter.gold:
-        return 'Gold';
-      case AssetFilter.crypto:
-        return 'Crypto';
-      case AssetFilter.forex:
-        return 'Forex';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
@@ -330,31 +318,49 @@ class _SignalScreenState extends State<SignalScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.all(1), // Độ dày viền
                 decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
                   gradient: LinearGradient(
-                    begin: const Alignment(0.00, 1.00),
-                    end: const Alignment(1.00, 0.12),
+                    begin: const Alignment(-1.0, -2.0),
+                    end: const Alignment(1.0, 2.0),
                     colors: [
-                      Colors.white.withValues(alpha: 0.15),
-                      Colors.white.withValues(alpha: 0.05)
+                      Colors.white.withValues(alpha: 0.6),
+                      Colors.white.withValues(alpha: 0),
+                      Colors.white.withValues(alpha: 0),
+                      Colors.white.withValues(alpha: 0.8),
+                    ],
+                    stops: const [0.0, 0.07, 0.88, 1.0],
+                  ),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF161616),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Tokens',
+                        style: TextStyle(
+                          color: Color(0xFF686868),
+                          fontSize: 16,
+                          fontFamily: 'Be Vietnam Pro',
+                        ),
+                      ),
+                      Text(
+                        tokenText,
+                        style: const TextStyle(
+                          color: Color(0xFF00BB32),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Be Vietnam Pro',
+                        ),
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Tokens',
-                      style: TextStyle(color: Color(0xFF686868), fontSize: 16),
-                    ),
-                    Text(
-                      tokenText,
-                      style: const TextStyle(color: Color(0xFF00BB32), fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -427,7 +433,7 @@ class _SignalScreenState extends State<SignalScreen> {
 
             // Open SELECTED APP Button
             Padding(
-              padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 85.0),
+              padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 100.0),
               child: Container(
                 height: 50,
                 decoration: BoxDecoration(
@@ -514,10 +520,10 @@ class _SignalScreenState extends State<SignalScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: const BoxDecoration(
               color: Colors.black,
-              border: Border(bottom: BorderSide(color: Color(0xFF1E1E1E))),
             ),
             child: Row(
               children: [
+                // Icon tròn bên trái
                 Container(
                   width: 32,
                   height: 32,
@@ -533,40 +539,66 @@ class _SignalScreenState extends State<SignalScreen> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Row(
-                  children: [
-                    Text(
-                      symbol,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                      color: const Color(0xFF276EFB),
-                      size: 20,
-                    ),
-                  ],
+                // Tên Symbol
+                Text(
+                  symbol,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Be Vietnam Pro',
+                  ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 12),
+                // Ô chỉ số giá
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    border: Border.all(color: priceColor),
+                    border: Border.all(color: priceColor, width: 1),
                     borderRadius: BorderRadius.circular(3),
                   ),
                   child: Text(
                     _currencyFormat.format(price),
                     style: TextStyle(
                       color: priceColor,
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.w400,
+                      fontFamily: 'Be Vietnam Pro',
                     ),
                   ),
                 ),
+                const SizedBox(width: 12), // Tăng từ 4px lên 12px để đồng bộ khoảng cách
+                // Mũi tên nhỏ sát cạnh giá
+                RotatedBox(
+                  quarterTurns: isExpanded ? 2 : 0,
+                  child: Image.asset(
+                    'assets/icons/muiten.png',
+                    width: 12, // Thu nhỏ mũi tên
+                    height: 12,
+                    color: const Color(0xFF276EFB),
+                  ),
+                ),
+                const Spacer(),
+                // Nút Load chỉ hiện khi mở rộng
+                if (isExpanded)
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        // Logic load lại tín hiệu mới
+                        _expandedSymbol = null;
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          setState(() {
+                            _expandedSymbol = symbol;
+                          });
+                        });
+                      });
+                    },
+                    child: Image.asset(
+                      'assets/icons/load.png',
+                      width: 24,
+                      height: 24,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -639,16 +671,30 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
           );
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(child: Text(widget.l10n.noSignalsAvailable, style: const TextStyle(color: Colors.white54))),
+          // Khi không có tín hiệu mới, tạo một placeholder để hiện lớp phủ mờ
+          final dummySignal = Signal(
+            id: 'placeholder',
+            symbol: widget.symbol,
+            type: 'buy',
+            status: 'running',
+            entryPrice: 0.0,
+            stopLoss: 0.0,
+            takeProfits: [],
+            createdAt: Timestamp.now(),
+            matchStatus: 'NOT MATCHED',
+          );
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              _buildSignalDetails(dummySignal, widget.l10n),
+              _buildBlurredOverlay(context, dummySignal, widget.userProvider, false),
+            ],
           );
         }
 
         final signal = snapshot.data!.first;
         
         // LOGIC MỚI: Luôn kiểm tra xem đã unlock chưa (dựa trên ID trong unlockedSignals)
-        // Thay vì chỉ kiểm tra quyền (canViewEntry)
         final bool isUnlocked = widget.userProvider.unlockedSignals.contains(signal.id);
         
         // Kiểm tra quyền miễn phí (Elite/Subscribed)
@@ -656,7 +702,6 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
           signal,
           widget.userProvider.userTier,
           widget.userProvider.activeSubscriptions,
-          // Không truyền unlockedSignals vào đây vì ta muốn kiểm tra quyền "gốc"
         );
 
         return Stack(
@@ -672,9 +717,9 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
   }
 
   Widget _buildSignalDetails(Signal signal, AppLocalizations l10n) {
-    // Xác định màu sắc cho Status: Nếu là Matched (và chưa hit TP) thì dùng xanh dương
     final bool isJustMatched = signal.status == 'running' && signal.isMatched && signal.hitTps.isEmpty;
     final Color statusColor = isJustMatched ? const Color(0xFF197DFF) : signal.getStatusColor();
+    final bool isPlaceholder = signal.id == 'placeholder';
 
     return Container(
       width: double.infinity,
@@ -686,17 +731,17 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
             children: [
               _buildSignalInfoBox(
                 label: 'Status',
-                value: signal.getTranslatedResult(l10n),
-                valueColor: statusColor,
+                value: isPlaceholder ? '-' : signal.getTranslatedResult(l10n),
+                valueColor: isPlaceholder ? Colors.white54 : statusColor,
               ),
               _buildSignalInfoBox(
                 label: 'ENTRY',
-                value: signal.entryPrice.toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
+                value: isPlaceholder ? '-' : signal.entryPrice.toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
                 valueColor: const Color(0xFF00BB32),
               ),
               _buildSignalInfoBox(
                 label: 'SL',
-                value: signal.stopLoss.toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
+                value: isPlaceholder ? '-' : signal.stopLoss.toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
                 valueColor: const Color(0xFFE3001E),
               ),
             ],
@@ -707,17 +752,17 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
             children: [
               _buildSignalInfoBox(
                 label: 'TP1',
-                value: signal.takeProfits.isNotEmpty ? signal.takeProfits[0].toString() : '-',
+                value: !isPlaceholder && signal.takeProfits.isNotEmpty ? signal.takeProfits[0].toString() : '-',
                 valueColor: Colors.white,
               ),
               _buildSignalInfoBox(
                 label: 'TP2',
-                value: signal.takeProfits.length > 1 ? signal.takeProfits[1].toString() : '-',
+                value: !isPlaceholder && signal.takeProfits.length > 1 ? signal.takeProfits[1].toString() : '-',
                 valueColor: Colors.white,
               ),
               _buildSignalInfoBox(
                 label: 'TP3',
-                value: signal.takeProfits.length > 2 ? signal.takeProfits[2].toString() : '-',
+                value: !isPlaceholder && signal.takeProfits.length > 2 ? signal.takeProfits[2].toString() : '-',
                 valueColor: Colors.white,
               ),
             ],
@@ -733,7 +778,7 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
               );
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0), // Thêm vertical padding cho dễ bấm
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -756,7 +801,7 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
                           color: Color(0xFF636363),
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
-                          fontFamily: 'Reddit Sans',
+                          fontFamily: 'Be Vietnam Pro',
                         ),
                       ),
                     ],
@@ -778,77 +823,100 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
   Widget _buildBlurredOverlay(BuildContext context, Signal signal, UserProvider userProvider, bool isFreeUnlock) {
     return Container(
       width: double.infinity,
-      height: 210, // Tăng chiều cao
+      height: 210,
       margin: const EdgeInsets.symmetric(horizontal: 8),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            decoration: ShapeDecoration(
-              gradient: LinearGradient(
-                begin: const Alignment(-0.00, 1.00),
-                end: const Alignment(1.09, -0.05),
-                colors: [
-                  Colors.black.withValues(alpha: 0.25), // Tăng độ trong suốt (giảm alpha)
-                  Colors.black.withValues(alpha: 0.05),
-                ],
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 12.0),
+                        child: Text(
+                          'Use Token to view Signal',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Be Vietnam Pro',
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (signal.id == 'placeholder') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Waiting for new signals...')),
+                            );
+                            return;
+                          }
+                          if (isFreeUnlock) {
+                            await userProvider.unlockSignal(signal.id, freeUnlock: true);
+                          } else {
+                            if (userProvider.tokenBalance > 0) {
+                              final success = await userProvider.unlockSignal(signal.id, freeUnlock: false);
+                              if (!success && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Failed to unlock signal')),
+                                );
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Not enough tokens')),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF276EFB),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                        ),
+                        child: const Text(
+                          'View Now',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Be Vietnam Pro'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              shape: RoundedRectangleBorder(
-                side: BorderSide(
-                  width: 1,
-                  color: Colors.white.withValues(alpha: 0.1),
-                ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 12.0),
-                  child: Text(
-                    'Use Token to view Signal', // Luôn hiển thị dòng chữ này
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (isFreeUnlock) {
-                      await userProvider.unlockSignal(signal.id, freeUnlock: true);
-                    } else {
-                      if (userProvider.tokenBalance > 0) {
-                        final success = await userProvider.unlockSignal(signal.id, freeUnlock: false);
-                        if (!success && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Failed to unlock signal')),
-                          );
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Not enough tokens')),
-                        );
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF276EFB),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                  ),
-                  child: const Text(
-                    'View Now',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ),
-              ],
             ),
           ),
-        ),
+          IgnorePointer(
+            child: CustomPaint(
+              size: const Size(double.infinity, 210),
+              painter: GradientPainter(
+                strokeWidth: 1.5,
+                radius: 12,
+                gradient: LinearGradient(
+                  begin: const Alignment(-1.0, 1.0),
+                  end: const Alignment(1.0, -1.0),
+                  colors: [
+                    Colors.white,
+                    Colors.white.withValues(alpha: 0),
+                    Colors.white.withValues(alpha: 0),
+                    Colors.white.withValues(alpha: 0.9),
+                  ],
+                  stops: const [0.0, 0.12, 0.88, 1.0],
+                ),
+              ),
+              child: Container(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -867,6 +935,7 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
             color: Color(0xFF686868),
             fontSize: 14,
             fontWeight: FontWeight.w400,
+            fontFamily: 'Be Vietnam Pro',
           ),
         ),
         const SizedBox(height: 4),
@@ -898,6 +967,7 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
               color: valueColor,
               fontSize: 15,
               fontWeight: FontWeight.w400,
+              fontFamily: 'Be Vietnam Pro',
             ),
           ),
         ),
@@ -906,33 +976,25 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
   }
 }
 
-class _LanguageSwitcher extends StatelessWidget {
-  const _LanguageSwitcher();
+class GradientPainter extends CustomPainter {
+  final double strokeWidth;
+  final double radius;
+  final Gradient gradient;
+
+  GradientPainter({required this.strokeWidth, required this.radius, required this.gradient});
 
   @override
-  Widget build(BuildContext context) {
-    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
-    return PopupMenuButton<Locale>(
-      onSelected: (Locale locale) => languageProvider.setLocale(locale),
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: Locale('en'), child: Text('English')),
-        const PopupMenuItem(value: Locale('vi'), child: Text('Tiếng Việt')),
-      ],
-      child: Consumer<LanguageProvider>(
-        builder: (context, provider, child) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(4.0),
-            child: Image.asset(
-              provider.locale?.languageCode == 'vi'
-                  ? 'assets/images/vn_flag.png'
-                  : 'assets/images/us_flag.png',
-              height: 24,
-              width: 36,
-              fit: BoxFit.cover,
-            ),
-          );
-        },
-      ),
-    );
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final paint = Paint()
+      ..strokeWidth = strokeWidth
+      ..shader = gradient.createShader(rect)
+      ..style = PaintingStyle.stroke;
+
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
+    canvas.drawRRect(rrect, paint);
   }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
