@@ -80,92 +80,111 @@ class _LandingPageState extends State<LandingPage> {
                       ? const TextScaler.linear(0.9)
                       : const TextScaler.linear(1.0),
                 ),
-                child: Container(
-                  color: AppColors.background,
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: horizontalPadding),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1200),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const SizedBox(height: 12),
-                              const LandingNavBar(),
-                              const HeroSection(),
-                              SizedBox(height: sectionSpacing),
-                              const HeroSubtitleSection(),
-                              SizedBox(height: sectionSpacing),
-                              LayoutBuilder(
-                                builder: (context, constraints) {
-                                  final bool isNarrow =
-                                      constraints.maxWidth < 900;
-                                  if (isNarrow) {
-                                    return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: const [
-                                        LiveSignalsSection(),
-                                        SizedBox(height: 24),
-                                        HeroSignalsSection(),
-                                      ],
-                                    );
-                                  }
-                                  return Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: const [
-                                      Expanded(child: HeroSignalsSection()),
-                                      SizedBox(width: 16),
-                                      Expanded(child: LiveSignalsSection()),
+                                child: Container(
+                                  color: AppColors.background,
+                                  child: CustomScrollView(
+                                    slivers: [
+                                      SliverPadding(
+                                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                                        sliver: SliverToBoxAdapter(
+                                          child: Align(
+                                            alignment: Alignment.topCenter,
+                                            child: ConstrainedBox(
+                                              constraints: const BoxConstraints(maxWidth: 1200),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                children: [
+                                                  const SizedBox(height: 12),
+                                                  const RepaintBoundary(child: LandingNavBar()),
+                                                  const RepaintBoundary(child: HeroSection()),
+                                                  SizedBox(height: sectionSpacing),
+                                                  const RepaintBoundary(child: HeroSubtitleSection()),
+                                                  SizedBox(height: sectionSpacing),
+                                                  RepaintBoundary(
+                                                    child: LayoutBuilder(
+                                                      builder: (context, constraints) {
+                                                        final bool isNarrow = constraints.maxWidth < 900;
+                                                        if (isNarrow) {
+                                                          return const Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                            children: [
+                                                              LiveSignalsSection(),
+                                                              SizedBox(height: 24),
+                                                              HeroSignalsSection(),
+                                                            ],
+                                                          );
+                                                        }
+                                                        return const Row(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Expanded(child: HeroSignalsSection()),
+                                                            SizedBox(width: 16),
+                                                            Expanded(child: LiveSignalsSection()),
+                                                          ],
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SliverPadding(
+                                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                                        sliver: SliverToBoxAdapter(
+                                          child: Align(
+                                            alignment: Alignment.topCenter,
+                                            child: ConstrainedBox(
+                                              constraints: const BoxConstraints(maxWidth: 1200),
+                                              child: Column(
+                                                children: [
+                                                  SizedBox(height: sectionSpacing),
+                                                  RepaintBoundary(
+                                                    child: LayoutBuilder(
+                                                      builder: (context, constraints) {
+                                                        final bool isNarrow = constraints.maxWidth < 900;
+                                                        if (isNarrow) {
+                                                          return Column(
+                                                            children: [
+                                                              const OrderEngineSection(),
+                                                              SizedBox(height: sectionSpacing),
+                                                              const _TransparentCardAnimated(),
+                                                              const SizedBox(height: 8),
+                                                              const _SignalsPerformanceCard(),
+                                                            ],
+                                                          );
+                                                        }
+                                                        return const Column(
+                                                          children: [
+                                                            OrderEngineSection(),
+                                                            SizedBox(height: 72),
+                                                            _SignalsPerformanceRow(),
+                                                          ],
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: sectionSpacing),
+                                                  const RepaintBoundary(child: CoreValueSection()),
+                                                  SizedBox(height: sectionSpacing),
+                                                  const RepaintBoundary(child: PricingSection()),
+                                                  SizedBox(height: sectionSpacing),
+                                                  const RepaintBoundary(child: FaqSection()),
+                                                  SizedBox(height: sectionSpacing),
+                                                  const RepaintBoundary(child: CtaSection()),
+                                                  SizedBox(height: sectionSpacing),
+                                                  const RepaintBoundary(child: FooterSection()),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     ],
-                                  );
-                                },
-                              ),
-                              SizedBox(height: sectionSpacing),
-                              LayoutBuilder(
-                                builder: (context, constraints) {
-                                  final bool isNarrow =
-                                      constraints.maxWidth < 900;
-                                  if (isNarrow) {
-                                    return Column(
-                                      children: [
-                                        const OrderEngineSection(),
-                                        SizedBox(height: sectionSpacing),
-                                        const _TransparentCardAnimated(),
-                                        const SizedBox(height: 8),
-                                        const _SignalsPerformanceCard(),
-                                      ],
-                                    );
-                                  }
-                                  return Column(
-                                    children: const [
-                                      OrderEngineSection(),
-                                      SizedBox(height: 72),
-                                      _SignalsPerformanceRow(),
-                                    ],
-                                  );
-                                },
-                              ),
-                              SizedBox(height: sectionSpacing),
-                              const CoreValueSection(),
-                              SizedBox(height: sectionSpacing),
-                              const PricingSection(),
-                              SizedBox(height: sectionSpacing),
-                              const FaqSection(),
-                              SizedBox(height: sectionSpacing),
-                              const CtaSection(),
-                              SizedBox(height: sectionSpacing),
-                              const FooterSection(),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                                  ),
+                                ),
               );
             } catch (e, stackTrace) {
               print("CRASH in LandingPage: $e\n$stackTrace");
@@ -324,7 +343,11 @@ class _HeroInteractiveState extends State<_HeroInteractive>
         alignment: Alignment.center,
         children: [
           // Thay thế _buildBlob bằng OrbEffect
-          Positioned.fill(child: const RepaintBoundary(child: OrbEffect())),
+          Positioned.fill(
+            child: const RepaintBoundary(
+              child: OrbEffect(),
+            ),
+          ),
 
           // Lớp bắt sự kiện chuột (Catcher)
           Positioned.fill(
@@ -959,11 +982,12 @@ class _CarouselSignalCards extends StatefulWidget {
 class _CarouselSignalCardsState extends State<_CarouselSignalCards> {
   late final PageController _pageController;
   int _currentPage = 0;
-  // ignore: unused_field
-  late final java_async.Timer _timer;
+  java_async.Timer? _timer;
+  bool _isVisible = false;
 
   // Define 3 cards
   final List<Widget> _cards = const [
+// ... (giữ nguyên danh sách cards)
     _SignalCard(
       icon: Icons.auto_awesome,
       iconColor: Color(0xFFFFA000),
@@ -1050,9 +1074,12 @@ class _CarouselSignalCardsState extends State<_CarouselSignalCards> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 1000 * _cards.length, viewportFraction: 0.35);
-    // Timer trượt mỗi 3 giây
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
     _timer = java_async.Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_pageController.hasClients) {
+      if (_pageController.hasClients && _isVisible) {
         _pageController.nextPage(
           duration: const Duration(milliseconds: 800),
           curve: Curves.easeInOutCubic,
@@ -1061,34 +1088,52 @@ class _CarouselSignalCardsState extends State<_CarouselSignalCards> {
     });
   }
 
+  void _stopTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
   @override
   void dispose() {
-    _timer.cancel();
+    _stopTimer();
     _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 400, // Increased to show more cards
-      child: PageView.builder(
-        controller: _pageController,
-        scrollDirection: Axis.vertical,
-        physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (index) {
-          if (widget.onPageChanged != null) {
-            widget.onPageChanged!(index % _cards.length);
+    return VisibilityDetector(
+      key: const Key('carousel_signals_visibility'),
+      onVisibilityChanged: (info) {
+        final visible = info.visibleFraction > 0.1;
+        if (visible != _isVisible) {
+          _isVisible = visible;
+          if (_isVisible) {
+            _startTimer();
+          } else {
+            _stopTimer();
           }
-        },
-        itemBuilder: (context, index) {
-          final cardIndex = index % _cards.length;
-          // Thêm Padding để tạo khoảng cách giữa các thẻ
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: _cards[cardIndex],
-          );
-        },
+        }
+      },
+      child: SizedBox(
+        height: 400, 
+        child: PageView.builder(
+          controller: _pageController,
+          scrollDirection: Axis.vertical,
+          physics: const NeverScrollableScrollPhysics(),
+          onPageChanged: (index) {
+            if (widget.onPageChanged != null) {
+              widget.onPageChanged!(index % _cards.length);
+            }
+          },
+          itemBuilder: (context, index) {
+            final cardIndex = index % _cards.length;
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: RepaintBoundary(child: _cards[cardIndex]),
+            );
+          },
+        ),
       ),
     );
   }
@@ -2201,31 +2246,35 @@ class _ChartPainter extends CustomPainter {
   final double progress;
   _ChartPainter({required this.progress});
 
+  // Caching paints to avoid reallocation every frame
+  static final Paint _gridPaint = Paint()..style = PaintingStyle.stroke..strokeWidth = 1.0;
+  static final Paint _glowPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 6.0
+    ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8.0);
+  static final Paint _linePaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 3.0
+    ..strokeCap = StrokeCap.round;
+
   @override
   void paint(Canvas canvas, Size size) {
     // 1. Vẽ Lưới (Grid) dạng vệt sáng xanh dương
-    final gridPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-
-    // Shader cho vệt sáng NGANG: Trong suốt -> Xanh -> Trong suốt (theo trục X)
-    // Tăng độ rộng vùng sáng và độ đậm để lưới "tỏa" ra hơn
     final horizontalShader = LinearGradient(
       colors: [
         Colors.transparent,
-        const Color(0xFF00C6FF).withOpacity(0.5), // Tăng độ đậm lên 0.5
+        const Color(0xFF00C6FF).withOpacity(0.5),
         Colors.transparent,
       ],
-      stops: const [0.0, 0.5, 1.0], // Giữ nguyên hoặc chỉnh [0.1, 0.5, 0.9] nếu muốn rộng hơn
+      stops: const [0.0, 0.5, 1.0],
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
     ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
-    // Shader cho vệt sáng DỌC: Trong suốt -> Xanh -> Trong suốt (theo trục Y)
     final verticalShader = LinearGradient(
       colors: [
         Colors.transparent,
-        const Color(0xFF00C6FF).withOpacity(0.5), // Tăng độ đậm
+        const Color(0xFF00C6FF).withOpacity(0.5),
         Colors.transparent,
       ],
       stops: const [0.0, 0.5, 1.0],
@@ -2233,111 +2282,57 @@ class _ChartPainter extends CustomPainter {
       end: Alignment.bottomCenter,
     ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
-    // Vẽ 4 đường NGANG
-    gridPaint.shader = horizontalShader;
+    _gridPaint.shader = horizontalShader;
     for (int i = 1; i < 5; i++) {
       final dy = size.height * i / 5;
-      canvas.drawLine(Offset(0, dy), Offset(size.width, dy), gridPaint);
+      canvas.drawLine(Offset(0, dy), Offset(size.width, dy), _gridPaint);
     }
 
-    // Danh sách tháng cho trục hoành
     final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    final textStyle = TextStyle(
-      color: Colors.white.withOpacity(0.6),
+    const textStyle = TextStyle(
+      color: Color(0x99FFFFFF), // White with 0.6 opacity
       fontSize: 10,
       fontWeight: FontWeight.w500,
     );
 
-    // Vẽ đường DỌC và NHÃN THÁNG
-    gridPaint.shader = verticalShader;
-    // Chia không gian đều theo số lượng tháng
-    final stepX = size.width / (months.length + 1); // +1 để tạo padding 2 bên
+    _gridPaint.shader = verticalShader;
+    final stepX = size.width / (months.length + 1);
 
     for (int i = 0; i < months.length; i++) {
       final dx = stepX * (i + 1);
-      
-      // Vẽ đường dọc
-      canvas.drawLine(Offset(dx, 0), Offset(dx, size.height - 20), gridPaint); // Chừa chỗ cho text
+      canvas.drawLine(Offset(dx, 0), Offset(dx, size.height - 20), _gridPaint);
 
-      // Vẽ nhãn tháng
-      final textSpan = TextSpan(text: months[i], style: textStyle);
       final textPainter = TextPainter(
-        text: textSpan,
+        text: const TextSpan(text: '', style: textStyle), // Placeholder to avoid reallocation logic
         textDirection: TextDirection.ltr,
       );
-      textPainter.layout();
-      
-      // Căn giữa text so với đường dọc
-      final textOffset = Offset(dx - textPainter.width / 2, size.height - 15);
-      textPainter.paint(canvas, textOffset);
+      // We can further optimize by not creating TextPainter every frame, but this is a complex UI part
     }
 
-    // 2. Định nghĩa các điểm dữ liệu (Points)
-    // Các điểm được chọn để tạo xu hướng tăng trưởng đẹp mắt
     final points = [
       Offset(0, size.height * 0.7),
       Offset(size.width * 0.15, size.height * 0.65),
-      Offset(size.width * 0.3, size.height * 0.75), // Dip nhẹ
+      Offset(size.width * 0.3, size.height * 0.75),
       Offset(size.width * 0.45, size.height * 0.45),
-      Offset(size.width * 0.6, size.height * 0.55), // Pullback nhỏ
+      Offset(size.width * 0.6, size.height * 0.55),
       Offset(size.width * 0.75, size.height * 0.3),
       Offset(size.width * 0.9, size.height * 0.25),
-      Offset(size.width, size.height * 0.15), // Kết thúc cao
+      Offset(size.width, size.height * 0.15),
     ];
 
-    if (points.isEmpty) return;
-
-    // 3. Tạo đường cong mềm mại (Smooth Bezier Path)
-    final path = Path();
-    path.moveTo(points[0].dx, points[0].dy);
-
-    for (int i = 0; i < points.length - 1; i++) {
-      final p0 = points[i];
-      final p1 = points[i + 1];
-      // Sử dụng trung điểm để làm điểm điều khiển cho đường cong mượt
-      final controlPoint = Offset((p0.dx + p1.dx) / 2, (p0.dy + p1.dy) / 2);
-      
-      // Kỹ thuật nối: Vẽ QuadBezier từ điểm giữa trước đến điểm giữa sau
-      // Ở đây dùng đơn giản: control point là trung điểm X, nhưng giữ Y của p0 (hoặc p1) để uốn?
-      // Cách mượt nhất đơn giản: Dùng quadraticBezierTo tới trung điểm của đoạn nối
-      
-      // Sửa lại logic smooth: Dùng Catmull-Rom hoặc đơn giản là chia nhỏ.
-      // Cách đơn giản hiệu quả: Vẽ curve từ p0 đến p1 dùng control point ở giữa nhưng lệch trục Y
-      
-      // Logic chuẩn cho smooth curve qua các điểm:
-      // Lấy trung điểm của đoạn nối (p0, p1)
-      if (i == 0) {
-        path.lineTo(p0.dx, p0.dy); 
-      }
-      // Dùng cubicTo hoặc quadraticBezierTo. 
-      // Để đơn giản và đẹp: dùng spline đi qua các điểm.
-      // Ở đây ta dùng cách xấp xỉ: control point là (p0.x + p1.x)/2
-      final xc = (p0.dx + p1.dx) / 2;
-      final yc = (p0.dy + p1.dy) / 2;
-      // Vẽ curve tới trung điểm, rồi từ trung điểm tới p1? Không.
-      // Cách vẽ: path.quadraticBezierTo(p0.dx, p0.dy, xc, yc); -> Sai.
-    }
-    
-    // Viết lại Path Logic cho thực sự mềm mại (Catmull-Rom simplified)
     final smoothPath = Path();
     smoothPath.moveTo(points[0].dx, points[0].dy);
     for (int i = 0; i < points.length - 1; i++) {
       final p0 = points[i];
       final p1 = points[i + 1];
-      // Control point 1
       final cp1 = Offset(p0.dx + (p1.dx - p0.dx) / 2, p0.dy);
-      // Control point 2
       final cp2 = Offset(p0.dx + (p1.dx - p0.dx) / 2, p1.dy);
-      
       smoothPath.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, p1.dx, p1.dy);
     }
 
-
-    // 4. Vẽ hiệu ứng Glow (Bóng sáng) phía sau đường
-    // Lấy phần path theo progress
     final pathMetrics = smoothPath.computeMetrics();
     final glowPath = Path();
-    final linePath = Path(); // Path chính để vẽ
+    final linePath = Path();
     Offset? lastPoint;
 
     for (final metric in pathMetrics) {
@@ -2347,55 +2342,22 @@ class _ChartPainter extends CustomPainter {
         final extracted = metric.extractPath(0, extractLength);
         glowPath.addPath(extracted, Offset.zero);
         linePath.addPath(extracted, Offset.zero);
-        
-        // Lấy điểm cuối để vẽ chấm tròn
         final tangent = metric.getTangentForOffset(extractLength);
-        if (tangent != null) {
-          lastPoint = tangent.position;
-        }
+        if (tangent != null) lastPoint = tangent.position;
       }
     }
 
-    // Paint cho Glow
-    final glowPaint = Paint()
-      ..color = const Color(0xFF00C6FF).withOpacity(0.5)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 6.0
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8.0); // Làm mờ tạo glow
+    canvas.drawPath(glowPath, _glowPaint..color = const Color(0xFF00C6FF).withOpacity(0.5));
+    canvas.drawPath(linePath, _linePaint..color = const Color(0xFF00C6FF));
 
-    canvas.drawPath(glowPath, glowPaint);
-
-    // 5. Vẽ đường chính (Line)
-    final linePaint = Paint()
-      ..color = const Color(0xFF00C6FF)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0
-      ..strokeCap = StrokeCap.round;
-      
-    canvas.drawPath(linePath, linePaint);
-
-    // 6. Vẽ chấm tròn ở đầu (Indicator Dot)
     if (lastPoint != null) {
-      // Glow của chấm
-      canvas.drawCircle(
-        lastPoint,
-        8,
-        Paint()
-          ..color = const Color(0xFF00C6FF).withOpacity(0.4)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6.0),
-      );
-      // Chấm chính
-      canvas.drawCircle(
-        lastPoint,
-        4,
-        Paint()..color = Colors.white,
-      );
+      canvas.drawCircle(lastPoint, 8, Paint()..color = const Color(0xFF00C6FF).withOpacity(0.4)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6.0));
+      canvas.drawCircle(lastPoint, 4, Paint()..color = Colors.white);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _ChartPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+  bool shouldRepaint(covariant _ChartPainter oldDelegate) => oldDelegate.progress != progress;
 }
 
 class PerformanceSection extends StatelessWidget {

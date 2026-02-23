@@ -172,6 +172,7 @@
     },
     "contactToUpgrade": "Liên hệ để nâng cấp",
     "noNotificationsYet": "Chưa có thông báo nào.",
+    "markAllRead": "Đánh dấu tất cả đã đọc",
     "daysAgo": "{count} ngày trước",
     "@daysAgo": {
         "placeholders": {

@@ -1154,6 +1154,12 @@ abstract class AppLocalizations {
   /// **'No notifications yet.'**
   String get noNotificationsYet;
 
+  /// No description provided for @markAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get markAllRead;
+
   /// No description provided for @daysAgo.
   ///
   /// In en, this message translates to:

@@ -500,11 +500,11 @@ class LandingNavBar extends StatelessWidget {
       builder: (context) => GestureDetector(
         onTap: () => Navigator.of(context).pushNamed('/signup'),
         child: Container(
-          // Kích thước cố định theo Figma: 188x38 cho EN, co giãn cho ngôn ngữ khác
-          width: (isEnglish && !isMobile) ? 188 : null,
-          constraints: (isEnglish && !isMobile) ? null : const BoxConstraints(minWidth: 188),
-          height: isMobile ? 48 : 38,
-          padding: const EdgeInsets.all(1), // Luôn giữ viền 1px
+          // Giảm kích thước nút Get Signals Now
+          width: (isEnglish && !isMobile) ? 160 : null,
+          constraints: (isEnglish && !isMobile) ? null : const BoxConstraints(minWidth: 160),
+          height: isMobile ? 40 : 34,
+          padding: const EdgeInsets.all(1), 
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
             gradient: const LinearGradient(
@@ -523,14 +523,14 @@ class LandingNavBar extends StatelessWidget {
             ),
             padding: (isEnglish && !isMobile) ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              mainAxisSize: MainAxisSize.min, // Giúp nút không bị giãn hết cỡ
+              mainAxisSize: MainAxisSize.min, 
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   text,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.h3.copyWith(
-                    fontSize: isMobile ? 20 : 18,
+                    fontSize: isMobile ? 18 : 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                     letterSpacing: -0.54,
@@ -550,19 +550,19 @@ class LandingNavBar extends StatelessWidget {
       builder: (context) => GestureDetector(
         onTap: onTap,
         child: Container(
-          // Kích thước cố định theo Figma: 100x38 cho EN
-          width: (isEnglish && !isMobile) ? 100 : null,
-          constraints: (isEnglish && !isMobile) ? null : const BoxConstraints(minWidth: 100),
-          height: isMobile ? 48 : 38,
-          padding: const EdgeInsets.all(1), // Luôn giữ viền 1px
+          // Giảm kích thước nút Sign in
+          width: (isEnglish && !isMobile) ? 90 : null,
+          constraints: (isEnglish && !isMobile) ? null : const BoxConstraints(minWidth: 90),
+          height: isMobile ? 40 : 34,
+          padding: const EdgeInsets.all(1), 
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(isMobile ? 1 : 6),
-            gradient: AppGradients.cta, // Viền gradient
+            gradient: AppGradients.cta, 
           ),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(isMobile ? 1 : 5),
-              color: Colors.black, // Nền đen
+              color: Colors.black, 
             ),
             padding: (isEnglish && !isMobile) ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
@@ -573,7 +573,7 @@ class LandingNavBar extends StatelessWidget {
                   text,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.h3.copyWith(
-                    fontSize: isMobile ? 20 : 18,
+                    fontSize: isMobile ? 18 : 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                     letterSpacing: -0.54,

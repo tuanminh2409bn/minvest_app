@@ -116,6 +116,29 @@ class _NotificationScreenState extends State<NotificationScreen> {
         title: Text(l10n.notifications, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          Consumer<NotificationProvider>(
+            builder: (context, provider, child) {
+              if (provider.notifications.isEmpty) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: TextButton.icon(
+                  onPressed: () => provider.markAllAsRead(),
+                  icon: const Icon(Icons.done_all, size: 18, color: Colors.blueAccent),
+                  label: Text(
+                    l10n.markAllRead,
+                    style: const TextStyle(
+                      color: Colors.blueAccent,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
         shape: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1), width: 1)),
       ),
       body: Container(
@@ -137,12 +160,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   itemCount: provider.notifications.length,
                   itemBuilder: (context, index) {
                     final notification = provider.notifications[index];
-                    return _buildNotificationTile(
-                      notification, 
-                      l10n, 
-                      langCode, 
-                      isElite, 
-                      activeSubs
+                    return RepaintBoundary(
+                      child: _buildNotificationTile(
+                        notification, 
+                        l10n, 
+                        langCode, 
+                        isElite, 
+                        activeSubs
+                      ),
                     );
                   },
                 );

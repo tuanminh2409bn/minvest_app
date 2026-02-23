@@ -324,38 +324,22 @@ class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
     return Container(
       width: 45,
       height: 50,
-      padding: const EdgeInsets.all(1), // Độ dày viền
       decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(6),
-        gradient: LinearGradient(
-          begin: const Alignment(-1.0, -2.0),
-          end: const Alignment(1.0, 2.0),
-          colors: [
-            Colors.white.withValues(alpha: 0.6),
-            Colors.white.withValues(alpha: 0),
-            Colors.white.withValues(alpha: 0),
-            Colors.white.withValues(alpha: 0.8),
-          ],
-          stops: const [0.0, 0.07, 0.88, 1.0],
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF161616),
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: TextField(
-          controller: _codeControllers[index],
-          textAlign: TextAlign.center,
-          keyboardType: TextInputType.number,
-          maxLength: 1,
-          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          decoration: const InputDecoration(counterText: '', border: InputBorder.none),
-          onChanged: (value) {
-            if (value.length == 1 && index < 5) FocusScope.of(context).nextFocus();
-            if (value.isEmpty && index > 0) FocusScope.of(context).previousFocus();
-          },
-        ),
+      child: TextField(
+        controller: _codeControllers[index],
+        textAlign: TextAlign.center,
+        keyboardType: TextInputType.number,
+        maxLength: 1,
+        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        decoration: const InputDecoration(counterText: '', border: InputBorder.none),
+        onChanged: (value) {
+          if (value.length == 1 && index < 5) FocusScope.of(context).nextFocus();
+          if (value.isEmpty && index > 0) FocusScope.of(context).previousFocus();
+        },
       ),
     );
   }

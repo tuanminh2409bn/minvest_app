@@ -174,29 +174,42 @@ class _CustomFilterDropdownState<T> extends State<CustomFilterDropdown<T>> {
         onTap: _toggleDropdown,
         child: Container(
           height: 41,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.all(1), // Độ dày viền
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
             gradient: LinearGradient(
-              begin: const Alignment(0.00, 1.00),
-              end: const Alignment(1.00, 0.12),
+              begin: const Alignment(-1.0, -2.0),
+              end: const Alignment(1.0, 2.0),
               colors: [
-                Colors.white.withValues(alpha: 0.15),
-                Colors.white.withValues(alpha: 0.05)
+                Colors.white.withValues(alpha: 0.6),
+                Colors.white.withValues(alpha: 0),
+                Colors.white.withValues(alpha: 0),
+                Colors.white.withValues(alpha: 0.8),
+              ],
+              stops: const [0.0, 0.07, 0.88, 1.0],
+            ),
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161616),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _getSelectedLabel(),
+                    style: const TextStyle(
+                      color: Color(0xFF686868),
+                      fontSize: 14,
+                      fontFamily: 'Be Vietnam Pro',
+                    ),
+                  ),
+                ),
+                const Icon(Icons.keyboard_arrow_down, color: Color(0xFF686868), size: 20),
               ],
             ),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _getSelectedLabel(),
-                  style: const TextStyle(color: Color(0xFF686868), fontSize: 14),
-                ),
-              ),
-              const Icon(Icons.keyboard_arrow_down, color: Color(0xFF686868), size: 20),
-            ],
           ),
         ),
       ),

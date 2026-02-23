@@ -539,6 +539,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get noNotificationsYet => '아직 알림이 없습니다.';
 
   @override
+  String get markAllRead => 'Mark all as read';
+
+  @override
   String daysAgo(int count) {
     return '$count일 전';
   }
