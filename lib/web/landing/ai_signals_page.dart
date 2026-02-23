@@ -17,7 +17,6 @@ import '../theme/gradients.dart';
 import 'widgets/navbar.dart';
 import 'sections/footer_section.dart';
 import 'sections/pricing_tab.dart';
-import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/core/utils/signal_access_helper.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -111,8 +110,6 @@ class _AISignalsPageState extends State<AISignalsPage> {
               textScaler: isMobile ? const TextScaler.linear(0.9) : const TextScaler.linear(1.0),
             ),
             child: Scaffold(        backgroundColor: AppColors.background,
-        floatingActionButton: const WebChatBubble(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SingleChildScrollView(
           child: Center(
             child: ConstrainedBox(

@@ -18,7 +18,6 @@ import 'widgets/gradient_button.dart';
 import 'widgets/orb_effect.dart';
 import 'sections/pricing_section.dart';
 import 'sections/footer_section.dart';
-import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
@@ -54,8 +53,6 @@ class _LandingPageState extends State<LandingPage> {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        floatingActionButton: const WebChatBubble(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: LayoutBuilder(
           builder: (context, constraints) {
             try {

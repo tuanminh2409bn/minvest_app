@@ -3,7 +3,6 @@ import '../theme/colors.dart';
 import 'widgets/navbar.dart';
 import 'sections/pricing_section.dart';
 import 'sections/footer_section.dart';
-import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class PricingPage extends StatelessWidget {
@@ -13,8 +12,6 @@ class PricingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: const WebChatBubble(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(

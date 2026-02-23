@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/features/news/models/news_model.dart';
 import 'package:minvest_forex_app/features/news/services/news_service.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
-import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
@@ -158,8 +157,6 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
               textScaler: isMobile ? const TextScaler.linear(0.72) : const TextScaler.linear(1.0),
             ),
             child: Scaffold(        backgroundColor: AppColors.background,
-        floatingActionButton: const WebChatBubble(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SafeArea(
           child: SingleChildScrollView(
             controller: _scrollController, // Attach controller

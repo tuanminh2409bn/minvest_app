@@ -11,7 +11,6 @@ import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/web/landing/sections/footer_section.dart';
 import 'package:minvest_forex_app/web/theme/gradients.dart';
-import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 import 'package:minvest_forex_app/web/widgets/signal_history_table.dart';
 import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
@@ -33,8 +32,6 @@ class FeaturesPage extends StatelessWidget {
       ),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        floatingActionButton: const WebChatBubble(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

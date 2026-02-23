@@ -6,7 +6,6 @@ import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../theme/gradients.dart';
 import 'widgets/navbar.dart';
-import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
 class ContactPage extends StatefulWidget {
@@ -80,8 +79,6 @@ class _ContactPageState extends State<ContactPage> {
       ),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        floatingActionButton: const WebChatBubble(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SingleChildScrollView(
           child: Center(
             child: ConstrainedBox(
