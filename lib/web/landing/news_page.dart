@@ -8,7 +8,6 @@ import '../theme/text_styles.dart';
 import 'widgets/navbar.dart';
 import 'sections/footer_section.dart';
 import 'news_detail_screen.dart';
-import 'package:minvest_forex_app/web/chat/web_chat_bubble.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
@@ -51,8 +50,6 @@ class _NewsPageState extends State<NewsPage> {
               textScaler: isMobile ? const TextScaler.linear(0.9) : const TextScaler.linear(1.0),
             ),
             child: Scaffold(        backgroundColor: AppColors.background,
-        floatingActionButton: const WebChatBubble(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SingleChildScrollView(
           child: Center(
             child: ConstrainedBox(
