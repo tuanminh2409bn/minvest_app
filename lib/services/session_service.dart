@@ -40,7 +40,11 @@ class SessionService {
       print(
           'SessionService: Chuẩn bị cập nhật session với DeviceID: $deviceId và FCM Token: ${fcmToken ?? "N/A"}');
       final callable = _functions.httpsCallable('manageUserSession');
-      await callable.call({'deviceId': deviceId, 'fcmToken': fcmToken});
+      await callable.call({
+        'deviceId': deviceId, 
+        'fcmToken': fcmToken,
+        'platform': kIsWeb ? 'web' : 'mobile',
+      });
       print('SessionService: Đã gọi manageUserSession thành công.');
 
     } catch (e) {
