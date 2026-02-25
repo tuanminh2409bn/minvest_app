@@ -1452,4 +1452,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get popupLoginExplore => 'Log in to explore this trading bulletin!';
+
+  @override
+  String get disclaimer => 'Disclaimer';
+
+  @override
+  String get disclaimerContent =>
+      'The information on signalgpt.ai is for reference and knowledge-sharing purposes only, and does not constitute investment advice. Users are solely responsible for their own trading decisions.';
 }

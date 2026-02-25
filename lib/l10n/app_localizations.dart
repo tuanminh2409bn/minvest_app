@@ -2875,6 +2875,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Log in to explore this trading bulletin!'**
   String get popupLoginExplore;
+
+  /// No description provided for @disclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Disclaimer'**
+  String get disclaimer;
+
+  /// No description provided for @disclaimerContent.
+  ///
+  /// In en, this message translates to:
+  /// **'The information on signalgpt.ai is for reference and knowledge-sharing purposes only, and does not constitute investment advice. Users are solely responsible for their own trading decisions.'**
+  String get disclaimerContent;
 }
 
 class _AppLocalizationsDelegate
