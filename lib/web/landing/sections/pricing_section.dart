@@ -30,8 +30,8 @@ class _PricingSectionState extends State<PricingSection> {
 
   List<_PlanData> _buildPlans(BuildContext context) {
     final appLocalizations = AppLocalizations.of(context)!;
-    final price = _isAnnual ? '\$460' : '\$78';
-    final oldPrice = _isAnnual ? '\$920' : null;
+    final price = _isAnnual ? appLocalizations.price12Months : appLocalizations.price1Month;
+    final oldPrice = _isAnnual ? appLocalizations.price12MonthsOld : null;
     final badge = appLocalizations.save50Percent;
     final suffix = _isAnnual ? '_12_months' : '_1_month';
     // Sử dụng màu xanh dương sáng chung cho hiệu ứng glow

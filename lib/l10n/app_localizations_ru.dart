@@ -523,6 +523,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get price12Months => '\$460';
 
   @override
+  String get price12MonthsOld => '\$920';
+
+  @override
   String get foreignTraderSupport =>
       'Для иностранных трейдеров, пожалуйста, свяжитесь с нами через WhatsApp (+84969.15.6969) для поддержки';
 

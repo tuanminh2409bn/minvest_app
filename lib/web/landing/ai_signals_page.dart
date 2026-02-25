@@ -119,12 +119,12 @@ class _AISignalsPageState extends State<AISignalsPage> {
                 children: [
                   const SizedBox(height: 12),
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 8), // Giảm từ 16 xuống 8
                     child: LandingNavBar(),
                   ),
                   const SizedBox(height: 32),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 8), // Giảm từ 16 xuống 8
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [

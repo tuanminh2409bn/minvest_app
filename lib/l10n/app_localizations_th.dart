@@ -516,6 +516,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get price12Months => '\$460';
 
   @override
+  String get price12MonthsOld => '\$920';
+
+  @override
   String get foreignTraderSupport =>
       'สำหรับเทรดเดอร์ต่างชาติ โปรดติดต่อเราผ่าน WhatsApp (+84969.15.6969) เพื่อขอความช่วยเหลือ';
 

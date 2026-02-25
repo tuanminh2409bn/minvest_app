@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:minvest_forex_app/core/services/purchase_service.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 class UpgradeScreen extends StatefulWidget {
@@ -14,25 +15,30 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
   bool isMonthly = true;
   int selectedCategoryIndex = 0; // 0: GOLD, 1: FOREX, 2: CRYPTO
 
-  final List<Map<String, String>> categories = [
-    {'name': 'GOLD', 'price': '\$78'},
-    {'name': 'FOREX', 'price': '\$78'},
-    {'name': 'CRYPTO', 'price': '\$78'},
-  ];
-
-  final List<String> features = [
-    'Entry, SL, TP included',
-    'Detailed signal analysis',
-    'Performance statistics',
-    'Real-time email alerts',
-    '24/7 market updates',
-    'Best real-time signals',
-  ];
+  List<String> _getFeatures(AppLocalizations l10n) {
+    return [
+      l10n.includesEntrySlTp,
+      l10n.detailedAnalysis,
+      l10n.signalPerformanceStats,
+      l10n.realTimeNotifications,
+      l10n.continuouslyUpdating,
+      l10n.providingBestSignals,
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final purchaseService = context.watch<PurchaseService>();
     final isPurchasing = purchaseService.isPurchasePending;
+    final l10n = AppLocalizations.of(context)!;
+
+    final List<Map<String, String>> categories = [
+      {'name': 'GOLD', 'price': isMonthly ? l10n.price1Month : l10n.price12Months},
+      {'name': 'FOREX', 'price': isMonthly ? l10n.price1Month : l10n.price12Months},
+      {'name': 'CRYPTO', 'price': isMonthly ? l10n.price1Month : l10n.price12Months},
+    ];
+
+    final features = _getFeatures(l10n);
 
     return Stack(
       children: [
@@ -45,9 +51,9 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
               icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text(
-              'Upgrade To Pro',
-              style: TextStyle(
+            title: Text(
+              l10n.upgradeAccount,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 22,
                 fontWeight: FontWeight.w500,
@@ -74,15 +80,15 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Choose Your Plan',
-                              style: TextStyle(
+                            Text(
+                              l10n.choosePlanSubtitle,
+                              style: const TextStyle(
                                 color: Color(0xFF636363),
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            _buildPlanToggle(),
+                            _buildPlanToggle(l10n),
                           ],
                         ),
                         
@@ -90,11 +96,11 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                         
                         // Category Selection
                         ...List.generate(categories.length, (index) {
-                          final price = isMonthly ? '\$78' : '\$460';
                           return _buildCategoryItem(
                             index,
                             categories[index]['name']!,
-                            price,
+                            categories[index]['price']!,
+                            l10n,
                           );
                         }),
                       ],
@@ -117,9 +123,9 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
-                        'Buy Now',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.upgradeNow,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -160,8 +166,9 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
       await purchaseService.buyProduct(product);
     } catch (e) {
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          SnackBar(content: Text(l10n.errorWithMessage(e.toString()))),
         );
       }
     }
@@ -186,23 +193,23 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
             ),
           ),
           const SizedBox(width: 14),
-          Text(
+          Expanded(child: Text(
             text,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w400,
             ),
-          ),
+          )),
         ],
       ),
     );
   }
 
-  Widget _buildPlanToggle() {
+  Widget _buildPlanToggle(AppLocalizations l10n) {
     return Container(
-      width: 161,
-      height: 32,
+      width: 180,
+      height: 36,
       decoration: BoxDecoration(
         color: Colors.black,
         borderRadius: BorderRadius.circular(23),
@@ -222,10 +229,10 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  'Monthly',
+                  l10n.monthly,
                   style: TextStyle(
                     color: isMonthly ? Colors.white : const Color(0xFF636363),
-                    fontSize: 14,
+                    fontSize: 13,
                   ),
                 ),
               ),
@@ -243,10 +250,10 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  'Annually',
+                  l10n.annually,
                   style: TextStyle(
                     color: !isMonthly ? Colors.white : const Color(0xFF636363),
-                    fontSize: 14,
+                    fontSize: 13,
                   ),
                 ),
               ),
@@ -257,7 +264,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
     );
   }
 
-  Widget _buildCategoryItem(int index, String name, String price) {
+  Widget _buildCategoryItem(int index, String name, String price, AppLocalizations l10n) {
     final isSelected = selectedCategoryIndex == index;
     
     return GestureDetector(
@@ -318,9 +325,9 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                const Text(
-                  'Upgrade To Pro',
-                  style: TextStyle(
+                Text(
+                  l10n.upgradeToSeeMore,
+                  style: const TextStyle(
                     color: Color(0xFF636363),
                     fontSize: 14,
                   ),
@@ -332,7 +339,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
               price,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w400,
               ),
             ),

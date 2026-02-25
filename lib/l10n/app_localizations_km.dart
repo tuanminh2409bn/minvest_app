@@ -517,6 +517,9 @@ class AppLocalizationsKm extends AppLocalizations {
   String get price12Months => '\$460';
 
   @override
+  String get price12MonthsOld => '\$920';
+
+  @override
   String get foreignTraderSupport =>
       'សម្រាប់ពាណិជ្ជករបរទេស សូមទាក់ទងមកយើងខ្ញុំតាមរយៈ WhatsApp (+84969.15.6969) សម្រាប់ការគាំទ្រ';
 

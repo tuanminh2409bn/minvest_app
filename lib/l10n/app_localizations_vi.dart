@@ -522,6 +522,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get price12Months => '12.652.789đ';
 
   @override
+  String get price12MonthsOld => '25.305.578đ';
+
+  @override
   String get foreignTraderSupport =>
       'Đối với nhà giao dịch nước ngoài, vui lòng liên hệ chúng tôi qua WhatsApp (+84969.15.6969) để được hỗ trợ';
 

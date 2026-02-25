@@ -521,6 +521,9 @@ class AppLocalizationsFi extends AppLocalizations {
   String get price12Months => '\$460';
 
   @override
+  String get price12MonthsOld => '\$920';
+
+  @override
   String get foreignTraderSupport =>
       'Ulkomaisille kauppiaille, ota yhteyttä WhatsAppilla (+84969.15.6969) tukea varten';
 
