@@ -508,6 +508,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get price12Months => '\$460';
 
   @override
+  String get price12MonthsOld => '\$920';
+
+  @override
   String get foreignTraderSupport =>
       '외국인 트레이더의 경우 WhatsApp(+84969.15.6969)으로 지원 문의를 해주세요';
 

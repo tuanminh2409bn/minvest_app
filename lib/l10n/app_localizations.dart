@@ -1094,6 +1094,12 @@ abstract class AppLocalizations {
   /// **'\$460'**
   String get price12Months;
 
+  /// No description provided for @price12MonthsOld.
+  ///
+  /// In en, this message translates to:
+  /// **'\$920'**
+  String get price12MonthsOld;
+
   /// No description provided for @foreignTraderSupport.
   ///
   /// In en, this message translates to:

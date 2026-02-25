@@ -159,6 +159,7 @@
     "signalEntry": "Entry",
     "price1Month": "$78",
     "price12Months": "$460",
+    "price12MonthsOld": "$920",
     "foreignTraderSupport": "For foreign traders, please contact us via WhatsApp (+84969.15.6969) for support",
     "signalSl": "SL",
     "upgradeToSeeDetails": "Upgrade to see signal details...",

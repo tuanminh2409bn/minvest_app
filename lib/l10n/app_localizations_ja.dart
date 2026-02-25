@@ -507,6 +507,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get price12Months => '\$460';
 
   @override
+  String get price12MonthsOld => '\$920';
+
+  @override
   String get foreignTraderSupport =>
       '外国人トレーダーの方は、サポートのためにWhatsApp（+84969.15.6969）でお問い合わせください';
 

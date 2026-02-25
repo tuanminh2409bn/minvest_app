@@ -526,6 +526,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get price12Months => '460 \$';
 
   @override
+  String get price12MonthsOld => '\$920';
+
+  @override
   String get foreignTraderSupport =>
       'Pour les traders étrangers, veuillez nous contacter via WhatsApp (+84969.15.6969) pour obtenir de l\'aide';
 

@@ -17,7 +17,7 @@ class PricingPage extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 8), // Giảm từ 16 xuống 8
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

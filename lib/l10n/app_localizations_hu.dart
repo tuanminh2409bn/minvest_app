@@ -522,6 +522,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get price12Months => '\$460';
 
   @override
+  String get price12MonthsOld => '\$920';
+
+  @override
   String get foreignTraderSupport =>
       'Külföldi kereskedők számára kérjük, lépjen kapcsolatba velünk WhatsApp-on (+84969.15.6969) támogatásért';
 

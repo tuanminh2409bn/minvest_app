@@ -507,6 +507,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get price12Months => '\$460';
 
   @override
+  String get price12MonthsOld => '\$920';
+
+  @override
   String get foreignTraderSupport =>
       '对于外国交易者，请通过 WhatsApp (+84969.15.6969) 联系我们以获得支持';
 

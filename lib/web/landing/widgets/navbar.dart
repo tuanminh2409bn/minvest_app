@@ -408,19 +408,24 @@ class LandingNavBar extends StatelessWidget {
                 ? (isCompact ? 32.0 : 64.0) 
                 : (isCompact ? 64.0 : 110.0);
 
-            final navLinks = Wrap(
-              spacing: navSpacing,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                ...navItems.map(
-                  (item) => _NavBarItem(
-                    title: item['title']!,
-                    route: item['route']!,
-                    fontSize: fontSize,
+            final navLinks = SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const NeverScrollableScrollPhysics(), // Không cho cuộn tay, chỉ để ép Row không wrap
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...navItems.asMap().entries.map(
+                    (entry) => Padding(
+                      padding: EdgeInsets.only(right: entry.key == navItems.length - 1 ? 0 : navSpacing),
+                      child: _NavBarItem(
+                        title: entry.value['title']!,
+                        route: entry.value['route']!,
+                        fontSize: fontSize,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
 
             final verticalNavLinks = Column(
@@ -485,17 +490,20 @@ class LandingNavBar extends StatelessWidget {
                           onTap: () => Navigator.of(context).pushNamed('/'),
                           child: Image.asset('assets/mockups/logo.png', height: 50, fit: BoxFit.contain),
                         ),
-                        const SizedBox(width: 40), // Giảm khoảng cách cố định để nhường chỗ cho Center
+                        const SizedBox(width: 20), // Giảm gap cố định sau logo
                         Expanded(
                           child: Center(
-                            child: navLinks, // Tự động căn giữa trong khoảng trống còn lại
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown, // Tự động thu nhỏ nhẹ nếu quá dài
+                              child: navLinks,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 40), // Khoảng cách an toàn trước actions
+                        const SizedBox(width: 20), // Giảm gap cố định trước actions
                         actions,
-                        const SizedBox(width: AppSpacing.sm),
+                        const SizedBox(width: 8),
                         const _LanguageSelector(),
-                        const SizedBox(width: AppSpacing.sm),
+                        const SizedBox(width: 8),
                         const _NotificationBell(),
                       ],
                     ),
@@ -1128,23 +1136,20 @@ class _NavBarItemState extends State<_NavBarItem> {
         onTap: () {
           Navigator.of(context).pushNamed(widget.route);
         },
-        child: Container(
-          // Giới hạn chiều rộng để ép xuống dòng nếu chữ quá dài, tránh đè lên nút
-          constraints: const BoxConstraints(maxWidth: 120),
-          child: Text(
-            widget.title,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.visible,
-            style: const TextStyle(
-              fontSize: 18, // Base size, can be overridden by widget.fontSize if passed correctly
-              fontWeight: FontWeight.w600, // Figma: w600
-              color: Colors.white, // Will be overridden by color variable
-              fontFamily: 'Be Vietnam Pro',
-              letterSpacing: -0.90, // Figma: -0.90
-              height: 1.2,
-            ).copyWith(color: color, fontSize: widget.fontSize),
-          ),
+        child: Text(
+          widget.title,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          softWrap: false, // Ngăn tuyệt đối việc xuống dòng
+          overflow: TextOverflow.visible,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            fontFamily: 'Be Vietnam Pro',
+            letterSpacing: -0.90,
+            height: 1.2,
+          ).copyWith(color: color, fontSize: widget.fontSize),
         ),
       ),
     ));

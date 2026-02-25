@@ -1745,7 +1745,7 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _chip(context),
+          _chip(context, isMobile),
           const SizedBox(height: AppSpacing.lg),
           _buildTypingTitle(isMobile),
           const SizedBox(height: AppSpacing.sm),
@@ -1780,35 +1780,40 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
 
   Widget _buildTypingTitle(bool isMobile) {
     final showCursor = (_typeController.value % 0.6) > 0.3; // blink chậm
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: _typedText),
-          TextSpan(text: showCursor ? ' |' : '  '),
-        ],
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: _typedText),
+            TextSpan(text: showCursor ? ' |' : '  '),
+          ],
+        ),
+        maxLines: 1,
+        softWrap: false,
+        // Figma: 36px, w700, -1.8 spacing
+        style: AppTextStyles.h2.copyWith(
+            color: Colors.white,
+            fontSize: isMobile ? 20.0 : 36, 
+            fontWeight: FontWeight.w700, // Figma: w700
+            letterSpacing: isMobile ? -0.78 : -1.08, // Figma: -1.80
+            height: 1.2,
+        ),
       ),
-      // Figma: 36px, w700, -1.8 spacing
-      style: AppTextStyles.h2.copyWith(
-          color: Colors.white,
-          fontSize: isMobile ? 20.0 : 36, 
-          fontWeight: FontWeight.w700, // Figma: w700
-          letterSpacing: isMobile ? -0.78 : -1.08, // Figma: -1.80
-          height: 1.2,
-      ),
-      softWrap: true,
     );
   }
 
-  Widget _chip(BuildContext context) {
+  Widget _chip(BuildContext context, bool isMobile) {
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed('/ai-signals'),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            height: 28, // Match Live Signals
+            height: isMobile ? 28 : 35, // Figma: Fixed height 35
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(isMobile ? 2 : 6), // Figma: Radius 6
               gradient: const LinearGradient(
                 colors: [
                   Color(0xFF04B3E9),
@@ -1821,9 +1826,9 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
             ),
             padding: const EdgeInsets.all(1.0),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 14),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(1.5),
+                borderRadius: BorderRadius.circular(isMobile ? 1.5 : 5),
                 color: Colors.black,
               ),
               alignment: Alignment.center,
@@ -1831,9 +1836,9 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
                 AppLocalizations.of(context)!.aiSignal,
                 style: AppTextStyles.bodyBold.copyWith(
                   color: Colors.white,
-                  fontSize: 14, // Match Live Signals
+                  fontSize: isMobile ? 14 : 18, // Figma: 18
                   fontWeight: FontWeight.w600, // Figma: w600
-                  letterSpacing: -0.54, // Figma: -0.90
+                  letterSpacing: isMobile ? -0.5 : -0.54, // Figma: -0.90
                   height: 1.1,
                 ),
               ),
@@ -1969,7 +1974,7 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _TransparentCard()._chip(context),
+                    _TransparentCard()._chip(context, isMobile),
                     const SizedBox(height: AppSpacing.lg),
                     _buildTypingTitle(isMobile),
                     const SizedBox(height: AppSpacing.sm),
@@ -2710,16 +2715,16 @@ class _TransparentCard extends StatelessWidget {
     );
   }
 
-  Widget _chip(BuildContext context) {
+  Widget _chip(BuildContext context, bool isMobile) {
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed('/ai-signals'),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            height: 28, // Match Live Signals
+            height: isMobile ? 28 : 35, // Figma: Fixed height 35
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(isMobile ? 2 : 6), // Figma: Radius 6
               gradient: const LinearGradient(
                 colors: [
                   Color(0xFF04B3E9),
@@ -2732,9 +2737,9 @@ class _TransparentCard extends StatelessWidget {
             ),
             padding: const EdgeInsets.all(1.0),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 14),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(1.5),
+                borderRadius: BorderRadius.circular(isMobile ? 1.5 : 5),
                 color: Colors.black,
               ),
               alignment: Alignment.center,
@@ -2742,9 +2747,9 @@ class _TransparentCard extends StatelessWidget {
                 AppLocalizations.of(context)!.aiSignal,
                 style: AppTextStyles.bodyBold.copyWith(
                   color: Colors.white,
-                  fontSize: 14, // Match Live Signals
+                  fontSize: isMobile ? 14 : 18, // Figma: 18
                   fontWeight: FontWeight.w600, // Figma: w600
-                  letterSpacing: -0.54, // Figma: -0.90
+                  letterSpacing: isMobile ? -0.5 : -0.54, // Figma: -0.90
                   height: 1.1,
                 ),
               ),
