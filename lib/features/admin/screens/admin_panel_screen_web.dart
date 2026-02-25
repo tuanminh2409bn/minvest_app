@@ -18,6 +18,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   final List<Widget> _screens = [
     const UserManagementView(),
     const AdminNewsScreen(),
+    const AppConfigView(),
   ];
 
   @override
@@ -44,14 +45,144 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 selectedIcon: Icon(Icons.article),
                 label: Text('News'),
               ),
+              NavigationRailDestination(
+                icon: Icon(Icons.settings),
+                selectedIcon: Icon(Icons.settings_applications),
+                label: Text('Settings'),
+              ),
             ],
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(
-            child: _screens[_selectedIndex],
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: _screens,
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class AppConfigView extends StatefulWidget {
+  const AppConfigView({super.key});
+
+  @override
+  State<AppConfigView> createState() => _AppConfigViewState();
+}
+
+class _AppConfigViewState extends State<AppConfigView> {
+  final _winRateAdjustmentController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConfig();
+  }
+
+  Future<void> _loadConfig() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+    try {
+      final doc = await FirebaseFirestore.instance.collection('settings').doc('app_config').get();
+      if (doc.exists) {
+        final data = doc.data()!;
+        _winRateAdjustmentController.text = (data['winRateAdjustment'] ?? 8).toString();
+      } else {
+        _winRateAdjustmentController.text = '8';
+      }
+    } catch (e) {
+      debugPrint('Error loading config: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không thể tải cấu hình: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _saveConfig() async {
+    final adjustment = double.tryParse(_winRateAdjustmentController.text);
+    if (adjustment == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng nhập số hợp lệ.')));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await FirebaseFirestore.instance.collection('settings').doc('app_config').set({
+        'winRateAdjustment': adjustment,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã cập nhật cấu hình!')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi khi lưu: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Cấu hình ứng dụng')),
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Cấu hình Tỷ lệ Thắng (Win Rate)',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Giá trị phần trăm cộng thêm vào tỷ lệ thắng thực tế khi hiển thị cho người dùng.',
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: 300,
+                  child: TextField(
+                    controller: _winRateAdjustmentController,
+                    decoration: const InputDecoration(
+                      labelText: 'Phần trăm cộng thêm (%)',
+                      border: OutlineInputBorder(),
+                      suffixText: '%',
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                FilledButton.icon(
+                  onPressed: _saveConfig,
+                  icon: const Icon(Icons.save),
+                  label: const Text('Lưu cấu hình'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
     );
   }
 }
@@ -66,6 +197,42 @@ class UserManagementView extends StatefulWidget {
 class _UserManagementViewState extends State<UserManagementView> {
   final AdminService _adminService = AdminService();
   final Set<String> _selectedUserIds = {};
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _horizontalController = ScrollController();
+  final ScrollController _verticalController = ScrollController();
+  String _searchQuery = '';
+  late Stream<QuerySnapshot> _usersStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateStream();
+  }
+
+  void _updateStream() {
+    if (_searchQuery.isEmpty) {
+      _usersStream = FirebaseFirestore.instance
+          .collection('users')
+          .orderBy('createdAt', descending: true)
+          .limit(200)
+          .snapshots();
+    } else {
+      _usersStream = FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isGreaterThanOrEqualTo: _searchQuery)
+          .where('email', isLessThanOrEqualTo: _searchQuery + '\uf8ff')
+          .limit(100)
+          .snapshots();
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _horizontalController.dispose();
+    _verticalController.dispose();
+    super.dispose();
+  }
 
   // Helper to format dates
   String _formatDate(dynamic date) {
@@ -74,7 +241,7 @@ class _UserManagementViewState extends State<UserManagementView> {
     return '---';
   }
 
-  // Helper to get map value ignoring case (e.g. finds 'Gold' when asking for 'gold')
+  // Helper to get map value ignoring case
   dynamic _getMapValueCaseInsensitive(Map<String, dynamic> map, String key) {
     if (map.isEmpty) return null;
     final lowerKey = key.toLowerCase();
@@ -84,30 +251,21 @@ class _UserManagementViewState extends State<UserManagementView> {
     return null;
   }
 
-  // Robust helper to get package date (handles both nested Map and dot-notation keys)
+  // Robust helper to get package date
   dynamic _getPackageDate(Map<String, dynamic> userData, String fieldPrefix, String packageKey) {
-    // 1. Try nested map (Standard)
     final nested = userData[fieldPrefix];
     if (nested is Map<String, dynamic>) {
       final val = _getMapValueCaseInsensitive(nested, packageKey);
       if (val != null) return val;
     }
-
-    // 2. Try flat dot-notation key (Legacy/Bug fallback)
-    // Looks for keys like "subscriptionsExpiry.gold"
     final targetKey = '$fieldPrefix.$packageKey'.toLowerCase();
     for (final k in userData.keys) {
-      if (k.toLowerCase() == targetKey) {
-        return userData[k];
-      }
+      if (k.toLowerCase() == targetKey) return userData[k];
     }
-    
     return null;
   }
 
   // --- UPDATE LOGIC ---
-
-  // 1. Update Token Balance
   Future<void> _updateTokenBalance(String userId, int currentBalance) async {
     final controller = TextEditingController(text: currentBalance.toString());
     final newBalance = await showDialog<int>(
@@ -131,17 +289,13 @@ class _UserManagementViewState extends State<UserManagementView> {
     );
 
     if (newBalance != null && newBalance != currentBalance) {
-      await FirebaseFirestore.instance.collection('users').doc(userId).update({
-        'tokenBalance': newBalance,
-      });
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({'tokenBalance': newBalance});
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã cập nhật token!')));
     }
   }
 
-  // 2. Update Subscription Package (Gold, Forex, Crypto)
   Future<void> _updatePackageDates(String userId, String packageKey, Timestamp? currentStart, Timestamp? currentExpiry) async {
-    // Pick Start Date
     final DateTime? startDate = await showDatePicker(
       context: context,
       initialDate: currentStart?.toDate() ?? DateTime.now(),
@@ -154,7 +308,6 @@ class _UserManagementViewState extends State<UserManagementView> {
     if (!mounted) return;
 
     if (startDate != null) {
-      // Pick Expiry Date
       final DateTime? expiryDate = await showDatePicker(
         context: context,
         initialDate: currentExpiry?.toDate() ?? startDate.add(const Duration(days: 30)),
@@ -175,7 +328,6 @@ class _UserManagementViewState extends State<UserManagementView> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Đã cập nhật ngày cho gói ${packageKey.toUpperCase()}!')));
       }
     } else {
-      // Logic xóa gói nếu bấm Cancel ở bước chọn ngày bắt đầu
       if (currentStart != null || currentExpiry != null) {
         final confirmDelete = await showDialog<bool>(
           context: context,
@@ -202,7 +354,6 @@ class _UserManagementViewState extends State<UserManagementView> {
     }
   }
 
-  // 3. Update Role (Tier)
   void _handleSingleUserTierUpdate(String userId, String currentTier) {
     showDialog(
       context: context,
@@ -215,7 +366,6 @@ class _UserManagementViewState extends State<UserManagementView> {
             reason: reason,
           );
           if (!mounted) return;
-          // ignore: use_build_context_synchronously
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
         },
       ),
@@ -226,7 +376,45 @@ class _UserManagementViewState extends State<UserManagementView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quản lý User & Gói Dịch Vụ (${_selectedUserIds.length} chọn)'),
+        title: Row(
+          children: [
+            Text('User Management (${_selectedUserIds.length})'),
+            const SizedBox(width: 24),
+            Expanded(
+              child: SizedBox(
+                height: 40,
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Tìm theo Email...',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    suffixIcon: _searchQuery.isNotEmpty 
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 20),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchQuery = '';
+                              _updateStream();
+                            });
+                          },
+                        )
+                      : null,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value.trim().toLowerCase();
+                      _updateStream();
+                    });
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(width: 24),
+          ],
+        ),
         actions: [
           if (_selectedUserIds.isNotEmpty)
             IconButton(
@@ -236,155 +424,190 @@ class _UserManagementViewState extends State<UserManagementView> {
             ),
         ],
       ),
-      body: SizedBox.expand( // Đảm bảo chiếm full chiều rộng
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('users').orderBy('createdAt', descending: true).snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text('Không có người dùng nào.'));
-            }
-            final userDocs = snapshot.data!.docs;
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _usersStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('Không có người dùng nào.'));
+          }
+          final userDocs = snapshot.data!.docs;
 
-            return SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 72), // Trừ đi Rail width
-                  child: DataTable(
-                    showCheckboxColumn: true,
-                    columnSpacing: 20,
-                    dataRowMinHeight: 70,
-                    dataRowMaxHeight: 90,
-                    headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
-                    columns: [
-                      const DataColumn(label: Text('User Info', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
-                      const DataColumn(label: Text('Role (Tier)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
-                      const DataColumn(label: Text('Tokens', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
-                      DataColumn(label: Text('Gold (Start/Exp)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade900))),
-                      DataColumn(label: Text('Forex (Start/Exp)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue.shade900))),
-                      DataColumn(label: Text('Crypto (Start/Exp)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900))),
-                      const DataColumn(label: Text('Registered', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
-                    ],
-                    rows: userDocs.map((doc) {
-                      final userData = doc.data() as Map<String, dynamic>;
-                      final userId = doc.id;
-                      final isSelected = _selectedUserIds.contains(userId);
-
-                      // Extract Data
-                      final tier = (userData['subscriptionTier'] as String?)?.toLowerCase() ?? 'free';
-                      final tokens = userData['tokenBalance'] ?? 0;
-                      final activeSubs = List<String>.from(userData['activeSubscriptions'] ?? []);
-
-                      return DataRow(
-                        selected: isSelected,
-                        onSelectChanged: (selected) {
-                          setState(() {
-                            if (selected == true) {
-                              _selectedUserIds.add(userId);
-                            } else {
-                              _selectedUserIds.remove(userId);
-                            }
-                          });
-                        },
-                        cells: [
-                          // 1. User Info (No ID)
-                          DataCell(
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(userData['displayName'] ?? 'No Name', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  Text(userData['email'] ?? 'No Email', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          
-                          // 2. Role (Free / Elite only)
-                          DataCell(
-                            InkWell(
-                              onTap: () => _handleSingleUserTierUpdate(userId, tier),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: _getTierColor(tier).withValues(alpha: 0.2),
-                                  border: Border.all(color: _getTierColor(tier)),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(tier.toUpperCase(), style: TextStyle(color: _getTierColor(tier), fontWeight: FontWeight.bold)),
-                                    const SizedBox(width: 4),
-                                    Icon(Icons.edit, size: 14, color: _getTierColor(tier)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // 3. Tokens
-                          DataCell(
-                            InkWell(
-                              onTap: () => _updateTokenBalance(userId, tokens is int ? tokens : 0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('$tokens', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                  const SizedBox(width: 4),
-                                  const Icon(Icons.edit, size: 14, color: Colors.grey),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          // 4-6. Packages (Start & Expiry)
-                          DataCell(_buildPackageCell(userId, 'gold', 
-                            _getPackageDate(userData, 'subscriptionsStart', 'gold'), 
-                            _getPackageDate(userData, 'subscriptionsExpiry', 'gold'), 
-                            activeSubs)),
-                          DataCell(_buildPackageCell(userId, 'forex', 
-                            _getPackageDate(userData, 'subscriptionsStart', 'forex'), 
-                            _getPackageDate(userData, 'subscriptionsExpiry', 'forex'), 
-                            activeSubs)),
-                          DataCell(_buildPackageCell(userId, 'crypto', 
-                            _getPackageDate(userData, 'subscriptionsStart', 'crypto'), 
-                            _getPackageDate(userData, 'subscriptionsExpiry', 'crypto'), 
-                            activeSubs)),
-
-                          // 7. Created At
-                          DataCell(Text(_formatDate(userData['createdAt']))),
+          return Scrollbar(
+            controller: _horizontalController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: _horizontalController,
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: 1400,
+                child: Column(
+                  children: [
+                    // Table Header
+                    Container(
+                      color: Colors.grey.shade200,
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      child: const Row(
+                        children: [
+                          SizedBox(width: 48, child: Text('Select')),
+                          Expanded(flex: 3, child: Text('User Info', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
+                          Expanded(flex: 2, child: Text('Role (Tier)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
+                          Expanded(flex: 1, child: Text('Tokens', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
+                          Expanded(flex: 2, child: Text('Gold', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
+                          Expanded(flex: 2, child: Text('Forex', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
+                          Expanded(flex: 2, child: Text('Crypto', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
+                          Expanded(flex: 2, child: Text('Registered', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
                         ],
-                      );
-                    }).toList(),
-                  ),
+                      ),
+                    ),
+                    // Table Content
+                    Expanded(
+                      child: Scrollbar(
+                        controller: _verticalController,
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                          controller: _verticalController,
+                          itemCount: userDocs.length,
+                          itemExtent: 80,
+                          itemBuilder: (context, index) {
+                            final doc = userDocs[index];
+                            final userData = doc.data() as Map<String, dynamic>;
+                            final userId = doc.id;
+                            final isSelected = _selectedUserIds.contains(userId);
+
+                            final tier = (userData['subscriptionTier'] as String?)?.toLowerCase() ?? 'free';
+                            final tokens = userData['tokenBalance'] ?? 0;
+                            final activeSubs = List<String>.from(userData['activeSubscriptions'] ?? []);
+
+                            return Container(
+                              decoration: BoxDecoration(
+                                border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+                                color: isSelected ? Colors.blue.withValues(alpha: 0.05) : null,
+                              ),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 48,
+                                    child: Checkbox(
+                                      value: isSelected,
+                                      onChanged: (selected) {
+                                        setState(() {
+                                          if (selected == true) {
+                                            _selectedUserIds.add(userId);
+                                          } else {
+                                            _selectedUserIds.remove(userId);
+                                          }
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(userData['displayName'] ?? 'No Name', 
+                                            style: const TextStyle(fontWeight: FontWeight.bold),
+                                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                                          Text(userData['email'] ?? 'No Email', 
+                                            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Center(
+                                      child: InkWell(
+                                        onTap: () => _handleSingleUserTierUpdate(userId, tier),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: _getTierColor(tier).withValues(alpha: 0.2),
+                                            border: Border.all(color: _getTierColor(tier)),
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(tier.toUpperCase(), style: TextStyle(color: _getTierColor(tier), fontWeight: FontWeight.bold, fontSize: 12)),
+                                              const SizedBox(width: 4),
+                                              Icon(Icons.edit, size: 12, color: _getTierColor(tier)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Center(
+                                      child: InkWell(
+                                        onTap: () => _updateTokenBalance(userId, tokens is int ? tokens : 0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text('$tokens', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                            const SizedBox(width: 4),
+                                            const Icon(Icons.edit, size: 12, color: Colors.grey),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildPackageCell(userId, 'gold', 
+                                      _getPackageDate(userData, 'subscriptionsStart', 'gold'), 
+                                      _getPackageDate(userData, 'subscriptionsExpiry', 'gold'), 
+                                      activeSubs),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildPackageCell(userId, 'forex', 
+                                      _getPackageDate(userData, 'subscriptionsStart', 'forex'), 
+                                      _getPackageDate(userData, 'subscriptionsExpiry', 'forex'), 
+                                      activeSubs),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildPackageCell(userId, 'crypto', 
+                                      _getPackageDate(userData, 'subscriptionsStart', 'crypto'), 
+                                      _getPackageDate(userData, 'subscriptionsExpiry', 'crypto'), 
+                                      activeSubs),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Center(child: Text(_formatDate(userData['createdAt']), style: const TextStyle(fontSize: 12))),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildPackageCell(String userId, String packageKey, dynamic start, dynamic expiry, List<String> activeSubs) {
-    // Case-insensitive check
     final bool isActive = activeSubs.any((s) => s.toLowerCase() == packageKey.toLowerCase());
-    
-    // Formatting
     String startStr = _formatDate(start);
     final String expiryStr = _formatDate(expiry);
-
-    // If active but missing start date (legacy data), show placeholder
-    if (isActive && start == null) {
-      startStr = '???';
-    }
+    if (isActive && start == null) startStr = '???';
 
     return InkWell(
       onTap: () => _updatePackageDates(userId, packageKey, start as Timestamp?, expiry as Timestamp?),
@@ -405,22 +628,14 @@ class _UserManagementViewState extends State<UserManagementView> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text('S: ', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                Text(startStr, style: TextStyle(
-                  fontSize: 11,
-                  color: isActive ? Colors.black : Colors.grey,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                )),
+                Text(startStr, style: TextStyle(fontSize: 11, color: isActive ? Colors.black : Colors.grey, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
               ],
             ),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text('E: ', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                Text(expiryStr, style: TextStyle(
-                  fontSize: 11,
-                  color: isActive ? Colors.red.shade700 : Colors.grey,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                )),
+                Text(expiryStr, style: TextStyle(fontSize: 11, color: isActive ? Colors.red.shade700 : Colors.grey, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
               ],
             ),
           ],
@@ -457,10 +672,7 @@ class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
   void initState() {
     super.initState();
     _selectedTier = widget.initialTier ?? 'free';
-    // Đảm bảo chỉ chọn free hoặc elite. Nếu đang là demo/vip thì cũng cho phép đổi sang 1 trong 2 cái này
-    if (!['free', 'elite'].contains(_selectedTier)) {
-      _selectedTier = 'free';
-    }
+    if (!['free', 'elite'].contains(_selectedTier)) _selectedTier = 'free';
   }
 
   @override
@@ -480,29 +692,14 @@ class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
           children: [
             DropdownButtonFormField<String>(
               value: _selectedTier,
-              decoration: const InputDecoration(
-                labelText: 'Chọn vai trò mới',
-                border: OutlineInputBorder(),
-              ),
-              items: ['free', 'elite']
-                  .map((tier) => DropdownMenuItem(
-                        value: tier,
-                        child: Text(tier.toUpperCase()),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedTier = value);
-                }
-              },
+              decoration: const InputDecoration(labelText: 'Chọn vai trò mới', border: OutlineInputBorder()),
+              items: ['free', 'elite'].map((tier) => DropdownMenuItem(value: tier, child: Text(tier.toUpperCase()))).toList(),
+              onChanged: (value) { if (value != null) setState(() => _selectedTier = value); },
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _reasonController,
-              decoration: const InputDecoration(
-                hintText: 'Nhập lý do thay đổi (bắt buộc)...',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(hintText: 'Nhập lý do thay đổi (bắt buộc)...', border: OutlineInputBorder()),
               autofocus: true,
               maxLines: null,
             ),
@@ -510,17 +707,12 @@ class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Hủy'),
-        ),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Hủy')),
         FilledButton(
           onPressed: () {
             final reason = _reasonController.text.trim();
             if (reason.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Lý do không được để trống.')),
-              );
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lý do không được để trống.')));
               return;
             }
             Navigator.of(context).pop();

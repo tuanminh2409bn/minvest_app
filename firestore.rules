@@ -83,5 +83,22 @@ service cloud.firestore {
         allow update, delete: if false;
       }
     }
+
+    // --- RULES CHO MÃ XÁC MINH ---
+    match /signup_verification_codes/{email} {
+      allow read: if true; // Cho phép đọc để kiểm tra mã khi đăng ký
+      allow write: if false;
+    }
+
+    match /password_reset_codes/{email} {
+      allow read: if true; // Cho phép đọc để kiểm tra mã khi quên mật khẩu
+      allow write: if false;
+    }
+
+    // --- RULES CHO CẤU HÌNH HỆ THỐNG ---
+    match /settings/{docId} {
+      allow read: if true; // Cho phép người dùng đọc cấu hình (ví dụ winRateAdjustment)
+      allow write: if isAdmin(); // Chỉ Admin mới có quyền sửa
+    }
   }
 }

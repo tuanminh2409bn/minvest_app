@@ -1493,13 +1493,9 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
   }
 
   Widget _outlinedChip(String text, bool isMobile, {double? width}) {
-    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     return Container(
-      width: isMobile ? null : ((isEnglish) ? width : null), 
       height: isMobile ? 28 : 35, 
-      padding: isMobile 
-          ? const EdgeInsets.symmetric(horizontal: 16)
-          : ((!isEnglish) ? const EdgeInsets.symmetric(horizontal: 16) : EdgeInsets.zero),
+      padding: const EdgeInsets.symmetric(horizontal: 16), 
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(isMobile ? 2 : 6), 
         border: Border.all(color: Colors.white, width: isMobile ? 0.8 : 1),
@@ -1849,13 +1845,9 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
   }
 
   Widget _pill(BuildContext context, String text, bool isMobile, {double? width}) {
-    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     return Container(
-      width: isMobile ? null : ((isEnglish && !isMobile) ? width : null), 
       height: isMobile ? 28 : 35, 
-      padding: isMobile 
-          ? const EdgeInsets.symmetric(horizontal: 16)
-          : ((!isMobile && !isEnglish) ? const EdgeInsets.symmetric(horizontal: 16) : EdgeInsets.zero),
+      padding: const EdgeInsets.symmetric(horizontal: 16), 
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(isMobile ? 2 : 6),
         border: Border.all(color: Colors.white, width: isMobile ? 0.8 : 1),
@@ -2764,13 +2756,9 @@ class _TransparentCard extends StatelessWidget {
   }
 
   Widget _pill(BuildContext context, String text, bool isMobile, {double? width}) {
-    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     return Container(
-      width: isMobile ? null : ((isEnglish && !isMobile) ? width : null), 
       height: isMobile ? 28 : 35, 
-      padding: isMobile 
-          ? const EdgeInsets.symmetric(horizontal: 16)
-          : ((!isMobile && !isEnglish) ? const EdgeInsets.symmetric(horizontal: 16) : EdgeInsets.zero),
+      padding: const EdgeInsets.symmetric(horizontal: 16), 
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(isMobile ? 2 : 6),
         border: Border.all(color: Colors.white, width: isMobile ? 0.8 : 1),
