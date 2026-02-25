@@ -694,7 +694,7 @@ async function triggerNotifications(payload: any) {
       return;
   }
 
-  type UserNotificationData = { id: string; token?: string; lang: string; tier: string; };
+  type UserNotificationData = { id: string; tokens: string[]; lang: string; tier: string; };
 
   const usersData = allEligibleUsersDocs
       .map((doc): UserNotificationData | null => {
@@ -702,24 +702,37 @@ async function triggerNotifications(payload: any) {
           if (!data) return null;
           
           let langCode = (data.languageCode || 'en').toLowerCase();
-          // Normalize language codes
-          if (langCode.startsWith('zh')) langCode = 'zh';
-          // Add other specific normalizations if needed, otherwise rely on 'en', 'vi', 'fr', 'ja', 'ko' match
           const supportedLangs = ['vi', 'en', 'zh', 'fr', 'ja', 'ko'];
           if (!supportedLangs.includes(langCode)) {
-              langCode = 'en'; // Default fallback
+              langCode = 'en';
           }
+
+          const tokens: string[] = [];
+          if (data.activeSessionWeb?.fcmToken) tokens.push(data.activeSessionWeb.fcmToken);
+          if (data.activeSessionMobile?.fcmToken) tokens.push(data.activeSessionMobile.fcmToken);
+          // Fallback cho activeSession cũ
+          if (tokens.length === 0 && data.activeSession?.fcmToken) tokens.push(data.activeSession.fcmToken);
+
+          if (tokens.length === 0) return null;
 
           return {
               id: doc.id,
-              token: data.activeSession?.fcmToken,
+              tokens: tokens,
               lang: langCode,
               tier: data.subscriptionTier,
           };
       })
-      .filter((user): user is UserNotificationData => user !== null && typeof user.token === 'string' && user.token.length > 0);
+      .filter((user): user is UserNotificationData => user !== null);
 
-  await sendAndStoreNotifications(usersData, payload);
+  // Flatten usersData to send notifications per token
+  const notificationEntries: { id: string; token: string; lang: string }[] = [];
+  usersData.forEach(user => {
+    user.tokens.forEach(token => {
+      notificationEntries.push({ id: user.id, token, lang: user.lang });
+    });
+  });
+
+  await sendAndStoreNotifications(notificationEntries, payload);
 
   const demoUsersToUpdate = usersData
       .filter((user) => user.tier === "demo")
@@ -908,6 +921,7 @@ export const manageUserSession = onCall({ region: "asia-southeast1" }, async (re
   const uid = request.auth.uid;
   const newDeviceId = request.data.deviceId;
   const newFcmToken = request.data.fcmToken;
+  const platform = request.data.platform || "mobile"; // "web" or "mobile"
 
   if (!newDeviceId) {
     throw new functions.https.HttpsError("invalid-argument", "The function must be called with a 'deviceId' argument.");
@@ -925,7 +939,11 @@ export const manageUserSession = onCall({ region: "asia-southeast1" }, async (re
       }
 
       const userData = userDoc.data();
-      const currentSession = userData?.activeSession;
+      // Determine which session field to use
+      const sessionField = platform === "web" ? "activeSessionWeb" : "activeSessionMobile";
+      const logoutTargetField = platform === "web" ? "logoutTargetDeviceIdWeb" : "logoutTargetDeviceIdMobile";
+      
+      const currentSession = userData?.[sessionField];
       let updateData: { [key: string]: any } = {};
 
       // Tạo session mới cho thiết bị đang đăng nhập
@@ -933,21 +951,22 @@ export const manageUserSession = onCall({ region: "asia-southeast1" }, async (re
         deviceId: newDeviceId,
         fcmToken: newFcmToken,
         loginAt: admin.firestore.FieldValue.serverTimestamp(),
+        platform: platform,
       };
+      updateData[sessionField] = newSessionData;
+      
+      // Để tương thích ngược với các hàm gửi thông báo cũ dùng activeSession
+      // Chúng ta sẽ cập nhật activeSession là phiên mới nhất bất kể platform
       updateData.activeSession = newSessionData;
 
-      // Nếu có session cũ và deviceId khác với session mới
+      // Nếu có session cũ trên cùng platform và deviceId khác với session mới
       if (currentSession && currentSession.deviceId && currentSession.deviceId !== newDeviceId) {
-        functions.logger.log(`Phát hiện đăng nhập mới. Thiết bị cũ ${currentSession.deviceId} sẽ bị đăng xuất.`);
-        // Ghi lại ID của thiết bị cần bị đăng xuất.
-        // Client sẽ đọc trường này và tự xử lý.
-        updateData.logoutTargetDeviceId = currentSession.deviceId;
+        functions.logger.log(`Phát hiện đăng nhập mới trên ${platform}. Thiết bị cũ ${currentSession.deviceId} sẽ bị đăng xuất.`);
+        updateData[logoutTargetField] = currentSession.deviceId;
       } else {
-        // Nếu không có session cũ, đảm bảo trường mục tiêu đăng xuất bị xóa
-        updateData.logoutTargetDeviceId = admin.firestore.FieldValue.delete();
+        updateData[logoutTargetField] = admin.firestore.FieldValue.delete();
       }
 
-      // Cập nhật tất cả trong một lần
       transaction.update(userDocRef, updateData);
     });
 

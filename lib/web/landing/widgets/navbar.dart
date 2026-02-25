@@ -1161,16 +1161,29 @@ class _NotificationBell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey buttonKey = GlobalKey();
+
     return Consumer<NotificationProvider>(
       builder: (context, provider, _) {
         final count = provider.unreadCount;
         return Stack(
+          key: buttonKey,
           clipBehavior: Clip.none,
           children: [
             IconButton(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                final RenderBox renderBox = buttonKey.currentContext!.findRenderObject() as RenderBox;
+                final offset = renderBox.localToGlobal(Offset.zero);
+                final size = renderBox.size;
+
+                showDialog(
+                  context: context,
+                  barrierColor: Colors.transparent,
+                  builder: (context) => _NotificationPopup(
+                    provider: provider,
+                    buttonPosition: offset,
+                    buttonSize: size,
+                  ),
                 );
               },
               icon: const FaIcon(FontAwesomeIcons.bell, color: Colors.white, size: 24),
@@ -1205,5 +1218,202 @@ class _NotificationBell extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class _NotificationPopup extends StatelessWidget {
+  final NotificationProvider provider;
+  final Offset buttonPosition;
+  final Size buttonSize;
+
+  const _NotificationPopup({
+    required this.provider,
+    required this.buttonPosition,
+    required this.buttonSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final l10n = AppLocalizations.of(context)!;
+    
+    // Figma Dimensions
+    final double popupWidth = 397;
+    final double popupHeight = 450;
+
+    // Calculate Position
+    double right = size.width - (buttonPosition.dx + buttonSize.width);
+    if (right < 16) right = 16;
+    double top = buttonPosition.dy + buttonSize.height + 8;
+
+    final notifications = provider.notifications;
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            behavior: HitTestBehavior.translucent,
+            child: Container(color: Colors.transparent),
+          ),
+        ),
+        Positioned(
+          top: top,
+          right: right,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: popupWidth,
+              height: popupHeight,
+              decoration: ShapeDecoration(
+                color: const Color(0xFF171717),
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(width: 1, color: Color(0xFF3D3D3D)),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  )
+                ],
+              ),
+              child: Column(
+                children: [
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          l10n.notifications,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (notifications.isNotEmpty)
+                          TextButton(
+                            onPressed: () {
+                              provider.markAllAsRead();
+                            },
+                            child: Text(
+                              l10n.markAllRead,
+                              style: const TextStyle(color: Color(0xFF289EFF), fontSize: 14),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const Divider(color: Color(0xFF3D3D3D), height: 1),
+                  // List
+                  Expanded(
+                    child: notifications.isEmpty
+                        ? Center(
+                            child: Text(
+                              l10n.noNotificationsYet,
+                              style: const TextStyle(color: Color(0xFF797979)),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            itemCount: notifications.length,
+                            itemBuilder: (context, index) {
+                              final notif = notifications[index];
+                              final lang = Localizations.localeOf(context).languageCode;
+                              final title = notif.titleLoc[lang] ?? notif.titleLoc['en'] ?? 'Notification';
+                              final body = notif.bodyLoc[lang] ?? notif.bodyLoc['en'] ?? '';
+                              
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: InkWell(
+                                  onTap: () {
+                                    provider.markAsRead(notif.id);
+                                    // Handle navigation based on type if needed
+                                    if (notif.type == 'new_signal' || notif.type.contains('hit') || notif.type == 'signal_matched') {
+                                      Navigator.pop(context);
+                                      Navigator.pushNamed(context, '/ai-signals');
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: ShapeDecoration(
+                                      color: notif.isRead ? Colors.transparent : const Color(0xFF212121),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            if (!notif.isRead)
+                                              Container(
+                                                width: 8,
+                                                height: 8,
+                                                margin: const EdgeInsets.only(right: 8),
+                                                decoration: const BoxDecoration(
+                                                  color: Color(0xFF289EFF),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                              ),
+                                            Expanded(
+                                              child: Text(
+                                                title,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: -0.8,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          body,
+                                          style: const TextStyle(
+                                            color: Color(0xFF797979),
+                                            fontSize: 14,
+                                            letterSpacing: -0.7,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          _getTimeAgo(notif.timestamp.toDate(), l10n),
+                                          style: const TextStyle(
+                                            color: Color(0xFF9A9A9A),
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getTimeAgo(DateTime dateTime, AppLocalizations l10n) {
+    final diff = DateTime.now().difference(dateTime);
+    if (diff.inDays > 0) return l10n.daysAgo(diff.inDays);
+    if (diff.inHours > 0) return l10n.hoursAgo(diff.inHours);
+    if (diff.inMinutes > 0) return l10n.minutesAgo(diff.inMinutes);
+    return l10n.justNow;
   }
 }

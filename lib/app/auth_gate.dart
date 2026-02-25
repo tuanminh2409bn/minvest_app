@@ -101,20 +101,6 @@ class _AuthGateState extends State<AuthGate> {
 
         // Nếu đã xác thực
         if (state.status == AuthStatus.authenticated) {
-          if (kIsWeb) {
-            if (!_hasRedirectedToLanding) {
-              _hasRedirectedToLanding = true;
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                Navigator.of(context).pushReplacementNamed('/');
-              });
-            }
-            return const Scaffold(
-              backgroundColor: Colors.black,
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          // Mobile Authenticated
           return Consumer<UserProvider>(
             builder: (context, userProvider, child) {
               if (userProvider.requiresSessionReset) {
@@ -122,6 +108,21 @@ class _AuthGateState extends State<AuthGate> {
                   _showSessionResetDialog(context, userProvider);
                 });
               }
+
+              if (kIsWeb) {
+                if (!_hasRedirectedToLanding) {
+                  _hasRedirectedToLanding = true;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Navigator.of(context).pushReplacementNamed('/');
+                  });
+                }
+                return const Scaffold(
+                  backgroundColor: Colors.black,
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              // Mobile Authenticated
               return MainScreen(key: mainScreenKey);
             },
           );
