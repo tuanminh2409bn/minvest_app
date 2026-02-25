@@ -31,40 +31,6 @@ class FooterSection extends StatelessWidget {
               onTap: () => Navigator.of(context).pushNamed('/'),
               child: Image.asset('assets/mockups/logo.png', height: 85, fit: BoxFit.contain),
             ),
-            const SizedBox(height: AppSpacing.md),
-            // Company info always left-aligned
-            SizedBox(
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.companyName,
-                    style: AppTextStyles.body.copyWith(
-                      color: Colors.white, 
-                      fontSize: isMobileLayout ? 18 : 15, 
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    AppLocalizations.of(context)!.addressDetails,
-                    style: AppTextStyles.body.copyWith(
-                      color: Colors.white70, 
-                      fontSize: isMobileLayout ? 16 : 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    AppLocalizations.of(context)!.enterpriseCodeDetails,
-                    style: AppTextStyles.body.copyWith(
-                      color: Colors.white70, 
-                      fontSize: isMobileLayout ? 16 : 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         );
 
@@ -111,8 +77,6 @@ class FooterSection extends StatelessWidget {
                 }
               },
             ),
-            const SizedBox(height: 8),
-            _ContactItem(icon: Icons.email, text: 'contact@minvest.vn', isMobile: isMobileLayout),
           ],
         );
 
@@ -129,64 +93,95 @@ class FooterSection extends StatelessWidget {
           ],
         );
 
+        final disclaimerWidget = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.disclaimer,
+              style: AppTextStyles.body.copyWith(
+                color: Colors.white,
+                fontSize: isMobileLayout ? 22 : 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              AppLocalizations.of(context)!.disclaimerContent,
+              style: AppTextStyles.body.copyWith(
+                color: Colors.white70,
+                fontSize: isMobileLayout ? 18 : 16,
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Divider(color: Colors.white12, height: 1),
+            const SizedBox(height: 32),
+          ],
+        );
+
         return Container(
           padding: EdgeInsets.symmetric(horizontal: padH, vertical: 64),
           color: Colors.black, // Đảm bảo nền đen nếu cần
-          child: isMobileLayout
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    logoCol,
-                    const SizedBox(height: 40),
-                    // Row for 3 columns on mobile
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              disclaimerWidget,
+              isMobileLayout
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(flex: 4, child: pagesCol),
-                        const SizedBox(width: 4),
-                        Expanded(flex: 5, child: legalCol),
-                        const SizedBox(width: 4),
-                        Expanded(flex: 4, child: contactCol),
+                        logoCol,
+                        const SizedBox(height: 40),
+                        // Row for 3 columns on mobile
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(flex: 4, child: pagesCol),
+                            const SizedBox(width: 4),
+                            Expanded(flex: 5, child: legalCol),
+                            const SizedBox(width: 4),
+                            Expanded(flex: 4, child: contactCol),
+                          ],
+                        ),
+                        const SizedBox(height: 40),
+                        Center(child: socialIcons),
+                      ],
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Cột 1: Logo & Info (Giảm flex xuống 3)
+                        Expanded(
+                          flex: 5,
+                          child: logoCol,
+                        ),
+                        const SizedBox(width: 40),
+                        // Cột 2: Pages (Giữ nguyên flex 2)
+                        Expanded(
+                          flex: 2,
+                          child: pagesCol,
+                        ),
+                        // Cột 3: Legal (Tăng flex lên 4 để chứa chữ dài)
+                        Expanded(
+                          flex: 3,
+                          child: legalCol,
+                        ),
+                        // Cột 4: Contact (Flex 3)
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              contactCol,
+                              const SizedBox(height: AppSpacing.lg),
+                              socialIcons,
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 40),
-                    Center(child: socialIcons),
-                  ],
-                )
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Cột 1: Logo & Info (Giảm flex xuống 3)
-                    Expanded(
-                      flex: 5,
-                      child: logoCol,
-                    ),
-                    const SizedBox(width: 40),
-                    // Cột 2: Pages (Giữ nguyên flex 2)
-                    Expanded(
-                      flex: 2,
-                      child: pagesCol,
-                    ),
-                    // Cột 3: Legal (Tăng flex lên 4 để chứa chữ dài)
-                    Expanded(
-                      flex: 3,
-                      child: legalCol,
-                    ),
-                    // Cột 4: Contact (Flex 3)
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          contactCol,
-                          const SizedBox(height: AppSpacing.lg),
-                          socialIcons,
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+            ],
+          ),
         );
       }),
     ));

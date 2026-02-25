@@ -524,5 +524,7 @@
     "registerExnessViaSignalGPT": "Đăng ký Exness qua Signal GPT",
     "followSignalGPT": "Theo dõi Signal GPT"
     ,"markAllRead": "Mark all as read"
-    ,"aiSignalGPT": "Phân Tích AI GPT"
+    ,"aiSignalGPT": "Phân Tích AI GPT",
+    "disclaimer": "Miễn trừ trách nhiệm",
+    "disclaimerContent": "Thông tin trên signalgpt.ai nhằm mục đích tham khảo và chia sẻ kiến thức, không phải lời khuyên đầu tư. Người dùng tự chịu trách nhiệm với mọi quyết định giao dịch của mình."
 }

@@ -1496,4 +1496,11 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get popupLoginExplore =>
       'Đăng nhập để khám phá bản tin giao dịch này!';
+
+  @override
+  String get disclaimer => 'Miễn trừ trách nhiệm';
+
+  @override
+  String get disclaimerContent =>
+      'Thông tin trên signalgpt.ai nhằm mục đích tham khảo và chia sẻ kiến thức, không phải lời khuyên đầu tư. Người dùng tự chịu trách nhiệm với mọi quyết định giao dịch của mình.';
 }

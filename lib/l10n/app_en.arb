@@ -521,5 +521,7 @@
     "filterStatusCancelled": "CANCELLED",
     "filterStatusExitByAdmin": "EXIT BY ADMIN",
     "popupMasterMarket": "Do you want to master the market?",
-    "popupLoginExplore": "Log in to explore this trading bulletin!"
+    "popupLoginExplore": "Log in to explore this trading bulletin!",
+    "disclaimer": "Disclaimer",
+    "disclaimerContent": "The information on signalgpt.ai is for reference and knowledge-sharing purposes only, and does not constitute investment advice. Users are solely responsible for their own trading decisions."
 }
