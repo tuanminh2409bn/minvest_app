@@ -440,24 +440,36 @@ class LandingNavBar extends StatelessWidget {
             );
 
             final actions = Row(
-              mainAxisSize: MainAxisSize.min, // Đảm bảo cụm actions không chiếm quá nhiều chỗ
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (user == null) ...[
-                  _ctaButton(context, l10n.getSignalsNow, isMobile: isMobile),
-                  const SizedBox(width: AppSpacing.sm),
-                  _outlineButton(
-                    context,
-                    l10n.signIn,
-                    isMobile: isMobile,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: _ctaButton(context, l10n.getSignalsNow, isMobile: isMobile),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: _outlineButton(
+                        context,
+                        l10n.signIn,
+                        isMobile: isMobile,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                        ),
+                      ),
                     ),
                   ),
                 ] else ...[
-                  _userNameChip(
-                    context,
-                    user,
-                    onTap: () => Navigator.of(context).pushNamed('/profile'),
+                  Flexible(
+                    child: _userNameChip(
+                      context,
+                      user,
+                      onTap: () => Navigator.of(context).pushNamed('/profile'),
+                    ),
                   ),
                 ],
               ],

@@ -1153,16 +1153,32 @@ export const submitContactMessage = onCall({ region: "asia-southeast1" }, async 
     }
 
     try {
-        await firestore.collection("contact_messages").add({
+        const contactData = {
             firstName,
             lastName,
             email,
             phone,
             message,
+        };
+
+        // 1. Lưu vào Firestore
+        await firestore.collection("contact_messages").add({
+            ...contactData,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             uid: request.auth?.uid ?? null,
             source: "landing_contact_form",
         });
+
+        // 2. Gửi sang Google Sheet thông qua Apps Script
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzUjKujRLwsVd5mJTDPgRP7AUwjeT9RfziWamxoNYUiDHUXy8rVCn1zl2Z7mUWhmS8/exec";
+        try {
+            await axios.post(GOOGLE_SHEET_URL, contactData);
+            functions.logger.log("Đã gửi thông tin liên hệ sang Google Sheet thành công.");
+        } catch (sheetError) {
+            // Không throw lỗi ở đây để khách hàng vẫn thấy thông báo thành công dù Google Sheet gặp lỗi
+            functions.logger.error("Lỗi khi gửi sang Google Sheet:", sheetError);
+        }
+
         return { status: "success" };
     } catch (error) {
         functions.logger.error("Lỗi lưu contact_messages:", error);
@@ -1361,7 +1377,7 @@ export const generateAndSendResetCode = onCall({ region: "asia-southeast1" }, as
         await firestore.collection("mail").add({
             to: email,
             message: {
-                subject: "Mã xác nhận đặt lại mật khẩu - mInvest",
+                subject: "Mã xác nhận đặt lại mật khẩu - SignalGPT",
                 html: `Mã xác nhận của bạn là: <b>${code}</b>. Mã này có hiệu lực trong 15 phút.`,
             },
         });
@@ -1448,7 +1464,7 @@ export const generateAndSendSignupCode = onCall({ region: "asia-southeast1" }, a
         await firestore.collection("mail").add({
             to: email,
             message: {
-                subject: "Mã xác minh đăng ký tài khoản - mInvest",
+                subject: "Mã xác minh đăng ký tài khoản - SignalGPT",
                 html: `Mã xác minh của bạn là: <b>${code}</b>. Mã này có hiệu lực trong 15 phút.`,
             },
         });

@@ -520,4 +520,7 @@
     "filterStatusExitByAdmin": "EXIT BY ADMIN",
     "popupMasterMarket": "Do you want to master the market?",
     "popupLoginExplore": "Log in to explore this trading bulletin!"
+    ,"popupMasterMarket": "Do you want to master the market?",
+    "popupLoginExplore": "Log in to explore this trading bulletin!"
+    ,"markAllRead": "Mark all as read"
 }

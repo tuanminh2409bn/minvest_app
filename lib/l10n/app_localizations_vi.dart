@@ -128,11 +128,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get reuploadImage => 'Tải lại ảnh';
 
   @override
-  String get accountNotLinked => 'Tài khoản chưa liên kết với Signal GPT';
+  String get accountNotLinked => 'Tài khoản chưa liên kết với Minvest';
 
   @override
   String get accountNotLinkedDesc =>
-      'Để nhận tín hiệu độc quyền, tài khoản Exness của bạn phải được đăng ký qua liên kết đối tác của Signal GPT. Vui lòng tạo tài khoản mới bằng liên kết bên dưới.';
+      'Để nhận tín hiệu độc quyền, tài khoản Exness của bạn phải được đăng ký qua liên kết đối tác của Minvest. Vui lòng tạo tài khoản mới bằng liên kết bên dưới.';
 
   @override
   String get registerExnessViaSignalGPT => 'Đăng ký Exness qua Signal GPT';
@@ -210,7 +210,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get symbol => 'CẶP TIỀN';
 
   @override
-  String get aiSignal => 'Tín hiệu AI';
+  String get aiSignal => 'Phân Tích AI';
 
   @override
   String get ruleSignal => 'TÍN HIỆU RULE';
@@ -295,7 +295,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get accountVerificationPrompt =>
-      'Vui lòng tải lên ảnh chụp màn hình tài khoản Exness của bạn để được cấp quyền (tài khoản của bạn phải được mở dưới liên kết của Signal GPT)';
+      'Vui lòng tải lên ảnh chụp màn hình tài khoản Exness của bạn để được cấp quyền (tài khoản của bạn phải được mở dưới liên kết của Minvest)';
 
   @override
   String get selectPhotoFromLibrary => 'Chọn ảnh từ thư viện';
@@ -322,7 +322,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get package => 'GÓI DỊCH VỤ';
 
   @override
-  String get startNow => 'Nhận Tín Hiệu Ngay';
+  String get startNow => 'Nhận Phân Tích AI Ngay';
 
   @override
   String get bankTransfer => 'CHUYỂN KHOẢN';
@@ -468,7 +468,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get exnessUpgradeNoteForIos =>
-      'Đối với khách hàng đã đăng ký tài khoản Exness qua Signal GPT thì vui lòng bấm liên hệ chúng tôi để được nâng cấp tài khoản.';
+      'Đối với khách hàng đã đăng ký tài khoản Exness qua Minvest thì vui lòng bấm liên hệ chúng tôi để được nâng cấp tài khoản.';
 
   @override
   String get chatWelcomeTitle => '👋 Chào mừng bạn đến với Signal GPT!';
@@ -554,7 +554,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get noNotificationsYet => 'Chưa có thông báo nào.';
 
   @override
-  String get markAllRead => 'Đánh dấu tất cả đã đọc';
+  String get markAllRead => 'Mark all as read';
 
   @override
   String daysAgo(int count) {
@@ -575,33 +575,32 @@ class AppLocalizationsVi extends AppLocalizations {
   String get justNow => 'Vừa xong';
 
   @override
-  String get getSignalsNow => 'Nhận Tín Hiệu Ngay';
+  String get getSignalsNow => 'Trải Nghiệm AI Ngay';
 
   @override
   String get freeTrial => 'Dùng Thử Miễn Phí';
 
   @override
-  String get heroTitle => 'Dẫn Lối Nhà Giao Dịch & Phát Triển Danh Mục Đầu Tư';
+  String get heroTitle => 'Định Hướng Giao Dịch & Gia Tăng Giá Trị Đầu Tư';
 
   @override
   String get heroSubtitle =>
-      'Công Nghệ AI Tối Ưu – Được Thiết Kế Bởi Các Chuyên Gia Giao Dịch';
+      'AI Giao Dịch Thế Hệ Mới – Xây Dựng Từ Kinh Nghiệm Thực Chiến';
 
   @override
   String get globalAiInnovationTitle =>
-      'Đổi Mới AI Toàn Cầu Cho Thế Hệ Trí Tuệ Giao Dịch Tiếp Theo';
+      ' Kỷ Nguyên AI Mới Định Hình Chuẩn Giao Dịch Tương Lai';
 
   @override
   String get globalAiInnovationDesc =>
-      'Chuyển đổi giao dịch truyền thống bằng tín hiệu AI hỗ trợ đám mây — thích ứng với tin tức và xu hướng thị trường theo thời gian thực để có hiệu suất nhanh hơn, chính xác hơn và không cảm xúc.';
+      'Nâng cấp giao dịch truyền thống bằng AI, phân tích thị trường \ntheo thời gian thực, thích ứng nhanh với tin tức và xu hướng – chính xác hơn, hiệu quả hơn và loại bỏ cảm xúc.';
 
   @override
-  String get liveTradingSignalsTitle =>
-      'TRỰC TIẾP – Tín Hiệu Giao Dịch AI 24/7';
+  String get liveTradingSignalsTitle => 'LIVE - Chiến Lược Đầu Tư 24/7';
 
   @override
   String get liveTradingSignalsDesc =>
-      'Phân tích đám mây theo thời gian thực cung cấp các chiến lược theo xu hướng, xác suất cao với độ chính xác thích ứng và thực hiện không cảm xúc.';
+      'AI phân tích dữ liệu thị trường theo thời gian thực, \nxây dựng chiến lược theo xu hướng với độ chính xác cao, \nloại bỏ hoàn toàn yếu tố cảm xúc.';
 
   @override
   String get trendFollowing => 'Theo Xu Hướng';
@@ -610,27 +609,28 @@ class AppLocalizationsVi extends AppLocalizations {
   String get realtime => 'Thời Gian Thực';
 
   @override
-  String get orderExplanationEngineTitle => 'Công Cụ Giải Thích Lệnh';
+  String get orderExplanationEngineTitle =>
+      'Hệ Thống Phân Tích & Giải Thích Lệnh';
 
   @override
   String get orderExplanationEngineDesc =>
-      'Giải thích các thiết lập giao dịch một cách đơn giản — chỉ ra cách các điểm hội tụ hình thành, lý do vào lệnh và giúp nhà giao dịch học hỏi từ mỗi quyết định.';
+      'Diễn giải rõ ràng vì sao một lệnh được hình thành, \ncác yếu tố hỗ trợ ra sao, lý do chọn điểm vào và \ngiúp người dùng nâng cao tư duy qua từng chiến lược.';
 
   @override
   String get transparent => 'Minh Bạch';
 
   @override
-  String get educational => 'Mang Tính Giáo Dục';
+  String get educational => 'Hợp Lý';
 
   @override
-  String get logical => 'Hợp Lý';
+  String get logical => 'Nâng Cao Tư Duy';
 
   @override
   String get transparentRealPerformanceTitle => 'Minh Bạch - Hiệu Suất Thực';
 
   @override
   String get transparentRealPerformanceDesc =>
-      'Xem dữ liệu thực về độ chính xác của tín hiệu, tỷ lệ thành công và khả năng sinh lời — được xác minh và có thể theo dõi trong mọi giao dịch';
+      'Dữ liệu thực về độ chính xác, tỷ lệ thành công và \nhiệu quả — minh bạch cho từng lệnh. ';
 
   @override
   String get results => 'Kết Quả';
@@ -651,7 +651,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get improvedRiskManagement => 'Quản Lý Rủi Ro Nâng Cao';
 
   @override
-  String get signalsPerformanceTitle => 'Hiệu Suất Tín Hiệu';
+  String get signalsPerformanceTitle => 'Hiệu Quả Mô Hình AI';
 
   @override
   String get riskToRewardRatio => 'Tỷ Lệ Rủi Ro/Lợi Nhuận';
@@ -666,7 +666,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get netGainVsLoss => 'Lãi Ròng so với Lỗ';
 
   @override
-  String get winRate => 'Tỷ Lệ Thắng';
+  String get winRate => 'Tỷ Lệ Chiến Thắng';
 
   @override
   String get percentageOfWinningTrades => 'Tỷ Lệ Giao Dịch Thắng';
@@ -678,11 +678,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get howPreciseOurSignalsAre => 'Độ Chính Xác Của Tín Hiệu';
 
   @override
-  String get realtimeMarketAnalysis => 'Phân Tích Thị Trường Thời Gian Thực';
+  String get realtimeMarketAnalysis =>
+      'Phân Tích Thị Trường Theo Thời Gian Thực';
 
   @override
   String get realtimeMarketAnalysisDesc =>
-      'AI của chúng tôi liên tục theo dõi thị trường, xác định các vùng hội tụ kỹ thuật và điểm đột phá đáng tin cậy để bạn có thể vào lệnh đúng thời điểm.';
+      'AI giám sát thị trường liên tục, hỗ trợ nhận diện các vùng \nkỹ thuật và thời điểm phù hợp để đưa ra quyết định.';
 
   @override
   String get saveTimeOnAnalysis => 'Tiết Kiệm Thời Gian Phân Tích';
@@ -692,18 +693,18 @@ class AppLocalizationsVi extends AppLocalizations {
       'Không còn tốn hàng giờ đọc biểu đồ. Nhận các chiến lược đầu tư phù hợp chỉ trong vài phút mỗi ngày.';
 
   @override
-  String get minimizeEmotionalTrading => 'Giảm Thiểu Giao Dịch Cảm Tính';
+  String get minimizeEmotionalTrading => 'Giảm Thiểu Quyết Định Theo Cảm Xúc';
 
   @override
   String get minimizeEmotionalTradingDesc =>
-      'Với các cảnh báo thông minh, phát hiện rủi ro và tín hiệu dựa trên dữ liệu chứ không phải cảm xúc, bạn luôn kỷ luật và kiểm soát mọi quyết định.';
+      'Với cảnh báo thông minh, phát hiện rủi ro và phân tích dựa trên \ndữ liệu — không phải cảm xúc — bạn luôn giữ kỷ luật và \nkiểm soát mọi quyết định.';
 
   @override
   String get seizeEveryOpportunity => 'Nắm Bắt Mọi Cơ Hội';
 
   @override
   String get seizeEveryOpportunityDesc =>
-      'Các cập nhật chiến lược kịp thời được gửi thẳng vào hộp thư đến của bạn đảm bảo bạn nắm bắt xu hướng thị trường vào thời điểm hoàn hảo.';
+      'Các cập nhật chiến lược kịp thời được thông báo trực tiếp cho bạn, \ngiúp bạn bắt kịp xu hướng thị trường đúng thời điểm.';
 
   @override
   String get minvestAiCoreValueTitle => 'Signal GPT - Giá Trị Cốt Lõi';
@@ -721,7 +722,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get maximizeResultsTitle =>
-      'Tối đa hóa kết quả của bạn với Signal GPT\nphân tích thị trường nâng cao và tín hiệu được lọc chính xác';
+      'Tối đa hóa lợi nhuận đầu tư của bạn với Signal GPT\nPhân tích thị trường chuyên sâu và chỉ báo được chọn lọc chính xác.';
 
   @override
   String get elevateTradingWithAiStrategies =>
@@ -729,11 +730,11 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get winMoreWithAiSignalsTitle =>
-      'Chiến Thắng Nhiều Hơn Với Tín Hiệu AI\nTrên Mọi Thị Trường';
+      'Tối Đa Hóa Lợi Nhuận Với Phân Tích AI\nHỗ Trợ Ở Mọi Thị Trường';
 
   @override
   String get winMoreWithAiSignalsDesc =>
-      'AI đa thị trường của chúng tôi quét Forex, Tiền điện tử và Kim loại theo thời gian thực,\ncung cấp các tín hiệu giao dịch được chuyên gia xác nhận —\nvới các mức vào lệnh, dừng lỗ và chốt lời rõ ràng';
+      'Hệ thống AI theo dõi nhiều thị trường theo thời gian thực, hỗ trợ xác định các chỉ báo đã được kiểm chứng cùng các mức vào lệnh, quản lý rủi ro và mục tiêu.';
 
   @override
   String get buyLimit => 'Lệnh Mua Giới Hạn';
@@ -742,7 +743,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get sellLimit => 'Lệnh Bán Giới Hạn';
 
   @override
-  String get smarterToolsTitle => 'Công Cụ Thông Minh Hơn - Đầu Tư Tốt Hơn';
+  String get smarterToolsTitle =>
+      'Công Cụ Thông Minh - Hỗ Trợ Quyết Định Đầu Tư';
 
   @override
   String get smarterToolsDesc =>
@@ -753,28 +755,28 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get performanceOverviewDesc =>
-      'AI đa thị trường của chúng tôi quét Forex, Tiền điện tử và Kim loại theo thời gian thực, cung cấp các tín hiệu giao dịch được chuyên gia xác nhận - với các mức vào lệnh, dừng lỗ và chốt lời rõ ràng';
+      'Hệ thống AI của chúng tôi phân tích thị trường Ngoại Hối, Crypto và Vàng theo thời gian thực,\ncung cấp các gợi ý giao dịch đã được xác nhận với điểm vào rõ ràng,\nkiểm soát rủi ro với mục tiêu minh bạch.';
 
   @override
   String get totalProfit => 'Tổng Lợi Nhuận';
 
   @override
-  String get completionSignal => 'Tín Hiệu Hoàn Thành';
+  String get completionSignal => 'Phân tích đã hoàn thành';
 
   @override
   String get onDemandFinancialExpertTitle =>
-      'Chuyên Gia Tài Chính Theo Yêu Cầu Của Bạn';
+      'Trợ Lý Tài Chính Cá Nhân, Thiết Kế Riêng Cho Bạn';
 
   @override
   String get onDemandFinancialExpertDesc =>
-      'Nền tảng AI gợi ý các tín hiệu giao dịch - tự học, phân tích thị trường 24/7, không bị ảnh hưởng bởi cảm xúc. Signal GPT đã hỗ trợ hơn 10.000 nhà phân tích tài chính\ntrong hành trình tìm kiếm các tín hiệu chính xác, ổn định và dễ áp dụng';
+      'Nền tảng AI đưa ra các gợi ý dựa trên phân tích thị trường — tự học, theo dõi thị trường 24/7 và không bị chi phối bởi cảm xúc. \nSignal GPT đã đồng hành cùng hơn 10.000 nhà phân tích tài chính trong hành trình tìm kiếm các chỉ báo chính xác, ổn định và dễ áp dụng.';
 
   @override
-  String get aiPoweredSignalPlatform => 'Nền Tảng Tín Hiệu Giao Dịch Hỗ Trợ AI';
+  String get aiPoweredSignalPlatform => 'Nền Tảng Phân Tích Bằng AI';
 
   @override
   String get selfLearningSystems =>
-      'Hệ Thống Tự Học, Thông Tin Chi Tiết Sắc Bén, Giao Dịch Mạnh Mẽ Hơn';
+      'Hệ Thống Tự Học, Thông Tin Chi Tiết Giúp Bạn Hiểu Thị Trường, Giao Dịch Hiệu Quả Hơn';
 
   @override
   String get emotionlessExecution =>
@@ -785,11 +787,11 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get maximizeResultsFeaturesTitle =>
-      'Tối Đa Hóa Kết Quả Với Phân Tích Thị Trường Nâng Cao Và Tín Hiệu Lọc Chính Xác Của Signal GPT';
+      'Tối Đa Hóa Kết Quả Với Phân Tích Thị Trường Chuyên Sâu Và Chỉ Báo Được Chọn Lọc Chính Xác.';
 
   @override
   String get minvestAiRegistrationDesc =>
-      'Đăng ký Signal GPT hiện đã mở — số lượng có hạn, có thể đóng sớm khi chúng tôi xem xét và chấp thuận thành viên mới.';
+      'Đăng ký Signal GPT ngay - số lượng có hạn.';
 
   @override
   String get currencyPairs => 'Sản phẩm';
@@ -820,7 +822,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get tokenLimitReachedDesc =>
-      'Bạn đã dùng hết 10 tokens miễn phí hôm nay. Nâng cấp gói để xem thêm tín hiệu.';
+      'Bạn đã dùng hết 10 tokens miễn phí hôm nay. Nâng cấp gói để xem thêm Phân Tích AI.';
 
   @override
   String get later => 'Để sau';
@@ -847,7 +849,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get errorLoadingHistory => 'Lỗi tải lịch sử';
 
   @override
-  String get noHistoryAvailable => 'Chưa có lịch sử tín hiệu';
+  String get noHistoryAvailable => 'Chưa có lịch sử Phân Tích AI';
 
   @override
   String get previous => 'Trước';
@@ -891,7 +893,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get financialNewsHubDesc =>
-      'Cập nhật quan trọng. Phản ứng thị trường. Không nhiễu loạn – chỉ những gì nhà đầu tư cần biết.';
+      'Cập nhật thông tin thị trường nhanh chóng, chính xác và đáng tin cậy';
 
   @override
   String get newsTabAllArticles => 'Tất cả bài viết';
@@ -959,35 +961,35 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get faqQuestion1 =>
-      'Các tín hiệu có đảm bảo tỷ lệ thành công 100% không?';
+      'Các Phân Tích AI có đảm bảo tỷ lệ thành công 100% không?';
 
   @override
   String get faqAnswer1 =>
-      'Mặc dù không có tín hiệu nào có thể đảm bảo 100%, Signal GPT cố gắng duy trì tỷ lệ thành công ổn định từ 60–80%, được hỗ trợ bởi phân tích chi tiết và quản lý rủi ro để bạn có thể đưa ra quyết định cuối cùng với sự tự tin cao hơn.';
+      'Mặc dù không có Phân Tích AI nào có thể đảm bảo 100%, Signal GPT cố gắng duy trì tỷ lệ thành công ổn định từ 60–80%, được hỗ trợ bởi phân tích chi tiết và quản lý rủi ro để bạn có thể đưa ra quyết định cuối cùng với sự tự tin cao hơn.';
 
   @override
   String get faqQuestion2 =>
-      'Nếu tôi không muốn nạp tiền ngay, tôi có thể nhận gợi ý tín hiệu không?';
+      'Nếu tôi không muốn nạp tiền ngay, tôi có thể nhận gợi ý từ AI không?';
 
   @override
   String get faqAnswer2 =>
-      'Khi mở tài khoản, hệ thống sẽ tặng bạn 10 token miễn phí, tương đương 10 lần xem tín hiệu chi tiết. Sau đó, mỗi ngày bạn tiếp tục nhận thêm 1 token để sử dụng. Nếu nâng cấp lên tài khoản VIP, bạn sẽ được mở khóa nhiều tính năng nâng cao và theo dõi không giới hạn số lệnh.';
+      'Khi mở tài khoản, hệ thống sẽ tặng bạn 10 token miễn phí, tương đương 10 lần xem Phân Tích AI chi tiết. Sau đó, mỗi ngày bạn tiếp tục nhận thêm 1 token để sử dụng. Nếu nâng cấp lên tài khoản VIP, bạn sẽ được mở khóa nhiều tính năng nâng cao và theo dõi không giới hạn số lệnh.';
 
   @override
   String get faqQuestion3 =>
-      'Nếu tôi đã đăng ký nhưng chưa nhận được bất kỳ tín hiệu nào, tôi nên làm gì?';
+      'Nếu tôi đã đăng ký nhưng chưa nhận được bất kỳ Phân Tích AI nào, tôi nên làm gì?';
 
   @override
   String get faqAnswer3 =>
-      'Quá trình xử lý thường tự động. Nếu bạn vẫn không thấy bất kỳ gợi ý tín hiệu nào, vui lòng liên hệ với chúng tôi qua Whatsapp để được hỗ trợ ngay lập tức.';
+      'Quá trình xử lý thường tự động. Nếu bạn vẫn không thấy bất kỳ gợi ý Phân Tích nào, vui lòng liên hệ với chúng tôi qua Whatsapp để được hỗ trợ ngay lập tức.';
 
   @override
   String get faqQuestion4 =>
-      'Khi nâng cấp lên tài khoản VIP, tôi sẽ nhận được bao nhiêu tín hiệu mỗi ngày?';
+      'Khi nâng cấp lên tài khoản VIP, tôi sẽ nhận được bao nhiêu Phân Tích AI mỗi ngày?';
 
   @override
   String get faqAnswer4 =>
-      'Khi nâng cấp lên tài khoản VIP, bạn sẽ được nhận tín hiệu giao dịch không giới hạn mỗi ngày. Số lượng tín hiệu không cố định, mà phụ thuộc hoàn toàn vào phân tích thị trường. Bất cứ khi nào xuất hiện điểm vào lệnh chất lượng, xác suất cao, đội ngũ phân tích sẽ gửi tín hiệu ngay cho bạn.';
+      'Khi nâng cấp lên tài khoản VIP, bạn sẽ được nhận Phân Tích AI giao dịch không giới hạn mỗi ngày. Số lượng Phân Tích AI không cố định, mà phụ thuộc hoàn toàn vào thị trường. Bất cứ khi nào xuất hiện điểm vào lệnh chất lượng, xác suất cao, đội ngũ phân tích sẽ gửi tín hiệu ngay cho bạn.';
 
   @override
   String get priceLevels => 'Mức giá';
@@ -1018,19 +1020,20 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get providingBestSignals =>
-      'Cung cấp tín hiệu tốt nhất theo thời gian thực';
+      'Cung cấp Phân Tích AI tốt nhất theo thời gian thực';
 
   @override
   String get includesEntrySlTp => 'Bao gồm Điểm vào, SL, TP';
 
   @override
-  String get detailedAnalysis => 'Phân tích và đánh giá chi tiết từng tín hiệu';
+  String get detailedAnalysis =>
+      'Phân tích và đánh giá chi tiết từng nhận định';
 
   @override
   String get realTimeNotifications => 'Thông báo thời gian thực qua email';
 
   @override
-  String get signalPerformanceStats => 'Thống kê hiệu suất tín hiệu';
+  String get signalPerformanceStats => 'Thống kê hiệu suất Phân Tích AI';
 
   @override
   String get companyName => 'CÔNG TY TNHH ĐẦU TƯ CÔNG NGHỆ EZTRADE';
@@ -1104,11 +1107,11 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get bestPricesForPremiumAccess =>
-      'Giá tốt nhất cho Quyền truy cập Cao cấp';
+      'Giải Pháp Đầu Tư Với AI Tốt Nhất Với Mức Giá Hợp Lý Nhất';
 
   @override
   String get choosePlanFitsNeeds =>
-      'Chọn một gói phù hợp với nhu cầu doanh nghiệp của bạn và bắt đầu tự động hóa với AI';
+      'Chọn gói phù hợp với nhu cầu đầu tư của bạn và bắt đầu tự động hóa bằng AI';
 
   @override
   String get save50Percent => 'TIẾT KIỆM 50%';
@@ -1206,7 +1209,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get signalsPlan => 'Gói tín hiệu';
 
   @override
-  String get aiSignalGPT => 'AI Signal GPT';
+  String get aiSignalGPT => 'Phân Tích AI GPT';
 
   @override
   String get yourTokens => 'Token của bạn';
@@ -1274,7 +1277,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get performance => 'Hiệu suất';
 
   @override
-  String get minvestSupport => 'Signal GPT Support';
+  String get minvestSupport => 'SignalGpt Support';
 
   @override
   String get leaveMessagePart1 =>
@@ -1375,7 +1378,7 @@ class AppLocalizationsVi extends AppLocalizations {
       'Đăng nhập để khám phá tín hiệu giao dịch này!';
 
   @override
-  String get activeMember => 'Thành viên hoạt động';
+  String get activeMember => 'Thành Viên Hoạt Động';
 
   @override
   String get last7Days => '7 ngày qua';
@@ -1458,7 +1461,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get pageOf => 'của';
 
   @override
-  String get keyFindings => 'Kết quả chính';
+  String get keyFindings => 'Kết quả nổi bật';
 
   @override
   String get filterStatusLabel => 'Trạng thái';

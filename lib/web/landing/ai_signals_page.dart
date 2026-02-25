@@ -2696,12 +2696,12 @@ class _PerformanceSection extends StatefulWidget {
 class _PerformanceSectionState extends State<_PerformanceSection> {
   int _selectedFilterIndex = 0; // 0: All Time, 1: 7D, 2: 14D, 3: 30D, 4: 90D
 
-  Map<String, dynamic> _processStats(List<QueryDocumentSnapshot> docs) {
+  Map<String, dynamic> _processStats(List<QueryDocumentSnapshot> docs, double winRateAdjustment) {
     if (docs.isEmpty) {
       return {
         'totalPips': 0.0,
         'count': 0,
-        'winRate': 0.0,
+        'winRate': (0.0 + winRateAdjustment).clamp(0.0, 100.0),
         'chartData': <_ChartPoint>[],
         'distribution': <_DistributionBarData>[],
       };
@@ -2788,7 +2788,8 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
     // Win Rate Calculation
     // Use TP vs SL only for simplicity as Exit is neutral
     int totalOutcomes = totalTp + totalSl;
-    double winRate = totalOutcomes > 0 ? (totalTp / totalOutcomes) * 100 : 0.0;
+    double baseWinRate = totalOutcomes > 0 ? (totalTp / totalOutcomes) * 100 : 0.0;
+    double winRate = (baseWinRate + winRateAdjustment).clamp(0.0, 100.0);
 
     // Distribution Data
     List<_DistributionBarData> distribution = [];
@@ -2798,7 +2799,9 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
         
         // 1. Gold (Lấy từ dữ liệu XAU đã tổng hợp)
         int goldTotal = goldTp + goldSl;
-        double goldWinRate = goldTotal > 0 ? goldTp / goldTotal : 0.0;
+        double goldBaseWinRate = goldTotal > 0 ? goldTp / goldTotal : 0.0;
+        double goldWinRate = (goldBaseWinRate + (winRateAdjustment / 100)).clamp(0.0, 1.0);
+        
         distribution.add(_DistributionBarData(
             label: 'Gold', 
             value: goldTotal > 0 ? goldTotal.toDouble() : 0.1, // Để 0.1 để cột hiện 1 chút nếu 0
@@ -2827,10 +2830,11 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
         
     } else if (widget.assetFilter == AssetFilter.gold) {
          if (totalOutcomes > 0) {
+             double goldWinRate = (winRate / 100).clamp(0.0, 1.0);
              distribution.add(_DistributionBarData(
                 label: 'Gold', 
                 value: totalOutcomes.toDouble(), 
-                winRate: winRate / 100, 
+                winRate: goldWinRate, 
                 wins: totalTp, 
                 losses: totalSl
             ));
@@ -2857,159 +2861,166 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
       l10n.last90Days,
     ];
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('profit_stats').orderBy('date').snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-           return const SizedBox(
-             height: 400, 
-             child: Center(child: CircularProgressIndicator())
-           );
-        }
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('settings').doc('app_config').snapshots(),
+      builder: (context, configSnapshot) {
+        final configData = configSnapshot.data?.data() as Map<String, dynamic>?;
+        final double adjustment = (configData?['winRateAdjustment'] ?? 8.0).toDouble();
 
-        if (snapshot.hasError) {
-          return SizedBox(
-             height: 400, 
-             child: Center(child: Text('Error loading stats: ${snapshot.error}', style: const TextStyle(color: Colors.white)))
-           );
-        }
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance.collection('profit_stats').orderBy('date').snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+               return const SizedBox(
+                 height: 400, 
+                 child: Center(child: CircularProgressIndicator())
+               );
+            }
 
-        final stats = _processStats(snapshot.data?.docs ?? []);
+            if (snapshot.hasError) {
+              return SizedBox(
+                 height: 400, 
+                 child: Center(child: Text('Error loading stats: ${snapshot.error}', style: const TextStyle(color: Colors.white)))
+               );
+            }
 
-        final totalPips = stats['totalPips'] as double;
-        final count = stats['count'] as int;
-        final winRate = stats['winRate'] as double;
-        final chartData = stats['chartData'] as List<_ChartPoint>;
-        final distribution = stats['distribution'] as List<_DistributionBarData>;
+            final stats = _processStats(snapshot.data?.docs ?? [], adjustment);
 
-        final pipsFormatter = NumberFormat('#,##0.0', 'en_US');
+            final totalPips = stats['totalPips'] as double;
+            final count = stats['count'] as int;
+            final winRate = stats['winRate'] as double;
+            final distribution = stats['distribution'] as List<_DistributionBarData>;
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final isDesktop = constraints.maxWidth > 900;
-            final gap = 32.0;
-            final columnWidth = isDesktop 
-                ? (constraints.maxWidth - gap) / 2 
-                : constraints.maxWidth;
-            
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            final pipsFormatter = NumberFormat('#,##0.0', 'en_US');
+
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final isDesktop = constraints.maxWidth > 900;
+                final gap = 32.0;
+                final columnWidth = isDesktop 
+                    ? (constraints.maxWidth - gap) / 2 
+                    : constraints.maxWidth;
+                
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      l10n.performanceOverview,
-                      style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          l10n.performanceOverview,
+                          style: AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                        ),
+                        if (widget.dateRange == null)
+                          _buildTimeFilterDropdown(timeFilters),
+                      ],
                     ),
-                    if (widget.dateRange == null)
-                      _buildTimeFilterDropdown(timeFilters),
+                    const SizedBox(height: 24),
+                    if (isDesktop)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: columnWidth,
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _MetricCard(
+                                        title: l10n.totalProfitPips,
+                                        value: pipsFormatter.format(totalPips),
+                                        valueColor: totalPips >= 0 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _MetricCard(
+                                        title: l10n.completionSignal,
+                                        value: count.toString(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                _ProfitChart(docs: snapshot.data?.docs ?? [], assetFilter: widget.assetFilter),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: gap),
+                          SizedBox(
+                            width: columnWidth,
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _MetricCard(
+                                        title: l10n.winRatePercent,
+                                        value: '${winRate.toStringAsFixed(1)}%',
+                                        valueColor: winRate >= 50 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _MetricCard(
+                                        title: l10n.activeMember,
+                                        value: '+10,500',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                _DistributionChart(data: distribution),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Column(
+                        children: [
+                           Row(
+                            children: [
+                              Expanded(
+                                child: _MetricCard(
+                                  title: l10n.totalProfitPips, 
+                                  value: pipsFormatter.format(totalPips),
+                                  valueColor: totalPips >= 0 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
+                                )
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(child: _MetricCard(title: l10n.completionSignal, value: count.toString())),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                           Row(
+                            children: [
+                              Expanded(
+                                child: _MetricCard(
+                                  title: l10n.winRatePercent, 
+                                  value: '${winRate.toStringAsFixed(1)}%',
+                                  valueColor: winRate >= 50 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
+                                )
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(child: _MetricCard(title: l10n.activeMember, value: '+10,500')),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _ProfitChart(docs: snapshot.data?.docs ?? [], assetFilter: widget.assetFilter),
+                          const SizedBox(height: 24),
+                          _DistributionChart(data: distribution),
+                        ],
+                      ),
                   ],
-                ),
-                const SizedBox(height: 24),
-                if (isDesktop)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: columnWidth,
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _MetricCard(
-                                    title: l10n.totalProfitPips,
-                                    value: pipsFormatter.format(totalPips),
-                                    valueColor: totalPips >= 0 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _MetricCard(
-                                    title: l10n.completionSignal,
-                                    value: count.toString(),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            _ProfitChart(docs: snapshot.data?.docs ?? [], assetFilter: widget.assetFilter),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: gap),
-                      SizedBox(
-                        width: columnWidth,
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _MetricCard(
-                                    title: l10n.winRatePercent,
-                                    value: '${winRate.toStringAsFixed(1)}%',
-                                    valueColor: winRate >= 50 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _MetricCard(
-                                    title: l10n.activeMember,
-                                    value: '+10,500',
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            _DistributionChart(data: distribution),
-                          ],
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  Column(
-                    children: [
-                       Row(
-                        children: [
-                          Expanded(
-                            child: _MetricCard(
-                              title: l10n.totalProfitPips, 
-                              value: pipsFormatter.format(totalPips),
-                              valueColor: totalPips >= 0 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
-                            )
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(child: _MetricCard(title: l10n.completionSignal, value: count.toString())),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                       Row(
-                        children: [
-                          Expanded(
-                            child: _MetricCard(
-                              title: l10n.winRatePercent, 
-                              value: '${winRate.toStringAsFixed(1)}%',
-                              valueColor: winRate >= 50 ? const Color(0xFF3DCC5C) : const Color(0xFFE54747),
-                            )
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(child: _MetricCard(title: l10n.activeMember, value: '+10,500')),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      _ProfitChart(docs: snapshot.data?.docs ?? [], assetFilter: widget.assetFilter),
-                      const SizedBox(height: 24),
-                      _DistributionChart(data: distribution),
-                    ],
-                  ),
-              ],
+                );
+              },
             );
           },
         );
-      }
+      },
     );
   }
 

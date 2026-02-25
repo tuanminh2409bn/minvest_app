@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
@@ -393,6 +394,10 @@ class _PasswordStep extends StatelessWidget {
                     TextSpan(
                       text: 'Terms & Conditions', 
                       style: const TextStyle(color: Color(0xFF289EFF), fontSize: 14),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.of(context).pushNamed('/terms-conditions');
+                        },
                     ),
                   ],
                 ),

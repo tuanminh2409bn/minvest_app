@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 import 'package:minvest_forex_app/web/landing/widgets/navbar.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
@@ -165,6 +166,38 @@ class _OtpStepState extends State<_OtpStep> {
   final List<TextEditingController> _controllers = List.generate(6, (_) => TextEditingController());
   bool _isLoading = false;
 
+  Future<void> _verifyOtp() async {
+    String code = _controllers.map((c) => c.text).join();
+    if (code.length < 6) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final doc = await firestore.collection('password_reset_codes').doc(widget.email).get();
+      
+      if (doc.exists) {
+        final data = doc.data()!;
+        final expiresAt = (data['expiresAt'] as Timestamp).toDate();
+        if (DateTime.now().isAfter(expiresAt)) {
+          throw Exception('Mã xác nhận đã hết hạn.');
+        }
+        if (data['code'] == code) {
+          widget.onVerified(code);
+        } else {
+          throw Exception('Mã xác nhận không chính xác.');
+        }
+      } else {
+        throw Exception('Mã xác nhận không tồn tại.');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return _BaseFormContainer(
@@ -174,7 +207,7 @@ class _OtpStepState extends State<_OtpStep> {
         const SizedBox(height: 40),
         Text(
           'Enter the 6-digit code sent to ${widget.email}',
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
+          style: const TextStyle(color: Colors.white70, fontSize: 14, fontFamily: 'Be Vietnam Pro'),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -186,12 +219,7 @@ class _OtpStepState extends State<_OtpStep> {
         _PrimaryButton(
           text: 'Verify Code',
           loading: _isLoading,
-          onPressed: () async {
-            String code = _controllers.map((c) => c.text).join();
-            if (code.length < 6) return;
-            // Xác thực code đơn giản bằng cách chuyển sang bước mật khẩu (thực tế sẽ reset ở bước cuối)
-            widget.onVerified(code);
-          },
+          onPressed: _verifyOtp,
         ),
         const SizedBox(height: 24),
         _FooterLink(
@@ -204,7 +232,7 @@ class _OtpStepState extends State<_OtpStep> {
   }
 }
 
-// --- Bước 3: Nhập Mật khẩu mới (Figma Group 472) ---
+// --- Bước 3: Nhập Mật khẩu mới ---
 class _NewPasswordStep extends StatefulWidget {
   final String email;
   final String code;
@@ -223,7 +251,7 @@ class _NewPasswordStepState extends State<_NewPasswordStep> {
   @override
   Widget build(BuildContext context) {
     return _BaseFormContainer(
-      title: 'Reset Password', // Figma Group 472
+      title: 'Reset Password',
       subtitle: 'Please enter your new password below',
       children: [
         const SizedBox(height: 32),
@@ -242,7 +270,7 @@ class _NewPasswordStepState extends State<_NewPasswordStep> {
         ),
         const SizedBox(height: 32),
         _PrimaryButton(
-          text: 'Reset Password', // Figma Group 472
+          text: 'Reset Password',
           loading: _isLoading,
           onPressed: () async {
             final pass = _passController.text;
@@ -321,11 +349,11 @@ class _BaseFormContainer extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 45, vertical: 40),
           decoration: BoxDecoration(
-            color: Colors.black,
+            color: const Color(0xFF0B0B0B),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF595959), width: 1),
+            border: Border.all(color: const Color(0xFF1E1E1E), width: 1),
             boxShadow: const [
-              BoxShadow(color: Color(0x7FB49CFF), blurRadius: 12),
+              BoxShadow(color: Colors.black54, blurRadius: 12),
             ],
           ),
           child: Column(
@@ -334,7 +362,7 @@ class _BaseFormContainer extends StatelessWidget {
             children: [
               Text(title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: Colors.white, fontFamily: 'Be Vietnam Pro', letterSpacing: -1.5)),
               const SizedBox(height: 8),
-              Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF9A9A9A), fontSize: 15, fontWeight: FontWeight.w400, letterSpacing: -0.5)),
+              Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF9A9A9A), fontSize: 15, fontWeight: FontWeight.w400, letterSpacing: -0.5, fontFamily: 'Be Vietnam Pro')),
               ...children,
             ],
           ),
@@ -353,22 +381,26 @@ class _OtpBox extends StatelessWidget {
     return SizedBox(
       width: 50,
       height: 55,
-      child: TextField(
-        controller: controller,
-        textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
-        maxLength: 1,
-        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-        decoration: InputDecoration(
-          counterText: '',
-          filled: true,
-          fillColor: const Color(0xFF111111),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Color(0xFF424242))),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Color(0xFF289EFF))),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
         ),
-        onChanged: (value) {
-          if (value.length == 1) FocusScope.of(context).nextFocus();
-        },
+        child: TextField(
+          controller: controller,
+          textAlign: TextAlign.center,
+          keyboardType: TextInputType.number,
+          maxLength: 1,
+          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          decoration: const InputDecoration(
+            counterText: '',
+            border: InputBorder.none,
+          ),
+          onChanged: (value) {
+            if (value.length == 1) FocusScope.of(context).nextFocus();
+          },
+        ),
       ),
     );
   }
@@ -386,22 +418,40 @@ class _TextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w400)),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w400, fontFamily: 'Be Vietnam Pro')),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 48,
-          child: TextField(
-            controller: controller,
-            obscureText: obscure,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: const TextStyle(color: Color(0xFF9A9A9A), fontSize: 15),
-              filled: true,
-              fillColor: const Color(0xFF111111),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Color(0xFF424242))),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Color(0xFF289EFF))),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            gradient: LinearGradient(
+              begin: const Alignment(-1.0, -2.0),
+              end: const Alignment(1.0, 2.0),
+              colors: [
+                Colors.white.withValues(alpha: 0.6),
+                Colors.white.withValues(alpha: 0),
+                Colors.white.withValues(alpha: 0),
+                Colors.white.withValues(alpha: 0.8),
+              ],
+              stops: const [0.0, 0.07, 0.88, 1.0],
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF161616),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: TextField(
+              controller: controller,
+              obscureText: obscure,
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Be Vietnam Pro'),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: const TextStyle(color: Color(0xFF636363), fontSize: 15, fontFamily: 'Be Vietnam Pro'),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                border: InputBorder.none,
+              ),
             ),
           ),
         ),
@@ -425,26 +475,44 @@ class _TextFieldWithRequiredLabel extends StatelessWidget {
         Text.rich(
           TextSpan(
             children: [
-              TextSpan(text: label, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w400)),
+              TextSpan(text: label, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w400, fontFamily: 'Be Vietnam Pro')),
               const TextSpan(text: ' *', style: TextStyle(color: Colors.red, fontSize: 15)),
             ],
           ),
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 48,
-          child: TextField(
-            controller: controller,
-            obscureText: obscure,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: const TextStyle(color: Color(0xFF9A9A9A), fontSize: 15),
-              filled: true,
-              fillColor: const Color(0xFF111111),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Color(0xFF424242))),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Color(0xFF289EFF))),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            gradient: LinearGradient(
+              begin: const Alignment(-1.0, -2.0),
+              end: const Alignment(1.0, 2.0),
+              colors: [
+                Colors.white.withValues(alpha: 0.6),
+                Colors.white.withValues(alpha: 0),
+                Colors.white.withValues(alpha: 0),
+                Colors.white.withValues(alpha: 0.8),
+              ],
+              stops: const [0.0, 0.07, 0.88, 1.0],
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF161616),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: TextField(
+              controller: controller,
+              obscureText: obscure,
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Be Vietnam Pro'),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: const TextStyle(color: Color(0xFF636363), fontSize: 15, fontFamily: 'Be Vietnam Pro'),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                border: InputBorder.none,
+              ),
             ),
           ),
         ),
@@ -461,20 +529,23 @@ class _PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: loading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF289EFF),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-          elevation: 0,
+    return GestureDetector(
+      onTap: loading ? null : onPressed,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
+          ),
+          borderRadius: BorderRadius.circular(6),
         ),
+        alignment: Alignment.center,
         child: loading
             ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16)),
+            : Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 18, fontFamily: 'Be Vietnam Pro')),
       ),
     );
   }
@@ -494,8 +565,8 @@ class _FooterLink extends StatelessWidget {
         child: Text.rich(
           TextSpan(
             children: [
-              TextSpan(text: text, style: const TextStyle(color: Colors.white, fontSize: 15)),
-              TextSpan(text: linkText, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
+              TextSpan(text: text, style: const TextStyle(color: Colors.white, fontSize: 15, fontFamily: 'Be Vietnam Pro')),
+              TextSpan(text: linkText, style: const TextStyle(color: Color(0xFF0094FF), fontWeight: FontWeight.w700, fontSize: 15, fontFamily: 'Be Vietnam Pro')),
             ],
           ),
         ),
