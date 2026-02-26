@@ -86,7 +86,7 @@ class NotificationService {
     );
 
     await _flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
         debugPrint("⚫️ [FCM_SERVICE] Local notification tapped with payload: ${response.payload}");
         if (response.payload != null && response.payload!.isNotEmpty) {
@@ -147,10 +147,10 @@ class NotificationService {
     }
 
     _flutterLocalNotificationsPlugin.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      title,
-      body,
-      NotificationDetails(
+      id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title: title,
+      body: body,
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           channel.id,
           channel.name,

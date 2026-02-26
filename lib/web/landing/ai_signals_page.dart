@@ -1625,15 +1625,24 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
   }
 
   Widget _buildSampleData(double columnWidth, bool stacked) {
-    final now = Timestamp.now();
+    final now = DateTime.now();
+    final random = math.Random();
+
+    Timestamp randomTime(int daysAgo) {
+      final date = now.subtract(Duration(days: daysAgo));
+      final hour = random.nextInt(24);
+      final minute = random.nextInt(60);
+      return Timestamp.fromDate(DateTime(date.year, date.month, date.day, hour, minute));
+    }
+
     final sampleGoldSignals = [
-      Signal(id: 's1', symbol: 'XAU/USD', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
-      Signal(id: 's2', symbol: 'XAU/USD', type: 'sell', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
-      Signal(id: 's3', symbol: 'XAU/USD', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
+      Signal(id: 's1', symbol: 'XAU/USD', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: randomTime(0), matchStatus: 'NOT MATCHED', isMatched: false),
+      Signal(id: 's2', symbol: 'XAU/USD', type: 'sell', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: randomTime(1), matchStatus: 'NOT MATCHED', isMatched: false),
+      Signal(id: 's3', symbol: 'XAU/USD', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: randomTime(2), matchStatus: 'NOT MATCHED', isMatched: false),
     ];
     final sampleCryptoSignals = [
-      Signal(id: 'c1', symbol: 'BTC/USDT', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
-      Signal(id: 'c2', symbol: 'ETH/USDT', type: 'sell', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: now, matchStatus: 'NOT MATCHED', isMatched: false),
+      Signal(id: 'c1', symbol: 'BTC/USDT', type: 'buy', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: randomTime(0), matchStatus: 'NOT MATCHED', isMatched: false),
+      Signal(id: 'c2', symbol: 'ETH/USDT', type: 'sell', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: randomTime(1), matchStatus: 'NOT MATCHED', isMatched: false),
     ];
 
     final goldPaged = _paginate(sampleGoldSignals, _goldPage, _pageSizeAll);
