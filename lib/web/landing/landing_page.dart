@@ -1319,19 +1319,29 @@ class _LiveSignalsSectionState extends State<LiveSignalsSection>
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
     _typeController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 4500))
+        vsync: this, duration: const Duration(milliseconds: 6000))
       ..addListener(() {
-        final phase = _typeController.value;
-        final typingPortion =
-            phase <= 0.8 ? (phase / 0.8) : 1.0; // 0-0.8 gõ, 0.8-1.0 giữ ở cuối
-        final progress = (typingPortion * _fullText.length)
-            .clamp(0, _fullText.length)
-            .floor();
+        final val = _typeController.value;
+        double progress;
+        
+        // 0.0 -> 0.6: Đánh chữ (60% thời gian)
+        // 0.6 -> 0.8: Giữ nguyên chữ (20% thời gian để đọc)
+        // 0.8 -> 1.0: Xóa chữ (20% thời gian - Xóa nhanh)
+        
+        if (val <= 0.6) {
+          progress = val / 0.6;
+        } else if (val <= 0.8) {
+          progress = 1.0;
+        } else {
+          progress = 1.0 - (val - 0.8) / 0.2;
+        }
+
+        final charCount = (progress * _fullText.length).round(); // Dùng round thay vì floor
         setState(() {
-          _typedText = _fullText.substring(0, progress);
+          _typedText = _fullText.substring(0, charCount.clamp(0, _fullText.length));
         });
       })
-      ..repeat(reverse: false);
+      ..repeat();
   }
 
   @override
@@ -1704,16 +1714,26 @@ class _OrderCardState extends State<_OrderCard> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _typeController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 4500))
+        vsync: this, duration: const Duration(milliseconds: 6000))
       ..addListener(() {
-        final phase = _typeController.value;
-        final typingPortion =
-            phase <= 0.8 ? (phase / 0.8) : 1.0; // 0-0.8 gõ, 0.8-1.0 giữ ở cuối
-        final progress = (typingPortion * _fullText.length)
-            .clamp(0, _fullText.length)
-            .floor();
+        final val = _typeController.value;
+        double progress;
+        
+        // 0.0 -> 0.6: Đánh chữ (60% thời gian)
+        // 0.6 -> 0.8: Giữ nguyên chữ (20% thời gian để đọc)
+        // 0.8 -> 1.0: Xóa chữ (20% thời gian - Xóa nhanh)
+        
+        if (val <= 0.6) {
+          progress = val / 0.6;
+        } else if (val <= 0.8) {
+          progress = 1.0;
+        } else {
+          progress = 1.0 - (val - 0.8) / 0.2;
+        }
+
+        final charCount = (progress * _fullText.length).round(); // Dùng round thay vì floor
         setState(() {
-          _typedText = _fullText.substring(0, progress);
+          _typedText = _fullText.substring(0, charCount.clamp(0, _fullText.length));
         });
       })
       ..repeat();
@@ -1913,15 +1933,22 @@ class _TransparentCardAnimatedState extends State<_TransparentCardAnimated>
     _fadeIn = Tween(begin: 0.0, end: 1.0)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _typeController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 4500))
+        vsync: this, duration: const Duration(milliseconds: 6000))
       ..addListener(() {
-        final phase = _typeController.value;
-        final typingPortion = phase <= 0.8 ? (phase / 0.8) : 1.0;
-        final progress = (typingPortion * _fullText.length)
-            .clamp(0, _fullText.length)
-            .floor();
+        final val = _typeController.value;
+        double progress;
+        
+        if (val <= 0.6) {
+          progress = val / 0.6;
+        } else if (val <= 0.8) {
+          progress = 1.0;
+        } else {
+          progress = 1.0 - (val - 0.8) / 0.2;
+        }
+
+        final charCount = (progress * _fullText.length).round();
         setState(() {
-          _typedText = _fullText.substring(0, progress);
+          _typedText = _fullText.substring(0, charCount.clamp(0, _fullText.length));
         });
       });
   }
