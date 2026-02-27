@@ -299,7 +299,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Container(
                       width: double.infinity,
-                      height: 168,
+                      height: 180, // Fixed height to prevent pushing elements down
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         image: DecorationImage(
@@ -311,7 +311,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     : 'assets/mockups/month.png')
                                 : 'assets/mockups/free.png',
                           ),
-                          fit: BoxFit.cover,
+                          fit: BoxFit.fill, // Force image to fill the container perfectly
                         ),
                         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                       ),
@@ -319,20 +319,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Positioned(
                             left: 16,
-                            top: 21,
+                            top: 20,
                             child: Text(userEmail, style: const TextStyle(color: Colors.white, fontSize: 18)),
                           ),
                           Positioned(
                             left: 16,
-                            top: 84,
-                            child: const Text('Your Tokens', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w300)),
+                            bottom: 50,
+                            child: const Text('Your Tokens', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w300)),
                           ),
                           Positioned(
                             left: 16,
-                            top: 112,
+                            bottom: 16,
                             child: Text(
                               userTier.toLowerCase() == 'elite' ? 'Unlimited' : '$tokenBalance left',
-                              style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w600),
+                              style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600),
                             ),
                           ),
                         ],
@@ -340,7 +340,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 24),
 
                   // Exchange Section
                   Padding(
@@ -372,7 +372,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 50),
 
                   // Menu Items
                   Padding(
@@ -454,24 +454,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Container(
         width: double.infinity,
         height: 50,
-        decoration: ShapeDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: const Alignment(0.00, 1.00),
-            end: const Alignment(1.00, 0.12),
-            colors: [const Color(0xFF1E1E1E).withValues(alpha: 0.9), const Color(0xFF0D0D0D).withValues(alpha: 0.6)],
+            begin: const Alignment(-1.0, -2.0),
+            end: const Alignment(1.0, 2.0),
+            colors: [
+              Colors.white.withValues(alpha: 0.6),
+              Colors.white.withValues(alpha: 0.1),
+              Colors.white.withValues(alpha: 0.1),
+              Colors.white.withValues(alpha: 0.8),
+            ],
+            stops: const [0.0, 0.07, 0.88, 1.0],
           ),
-          shape: RoundedRectangleBorder(
-            side: BorderSide(width: 1, color: Colors.white.withValues(alpha: 0.1)),
-            borderRadius: BorderRadius.circular(6),
-          ),
+          borderRadius: BorderRadius.circular(6),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white70, size: 24),
-            const SizedBox(width: 16),
-            Text(label, style: const TextStyle(color: Colors.white, fontSize: 18)),
-          ],
+        padding: const EdgeInsets.all(1), // Border width
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF161616),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Icon(icon, color: Colors.white, size: 22),
+              const SizedBox(width: 16),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontFamily: 'Be Vietnam Pro',
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              const Spacer(),
+              const Icon(Icons.chevron_right, color: Colors.white54, size: 20),
+            ],
+          ),
         ),
       ),
     );

@@ -7,6 +7,8 @@ import 'package:minvest_forex_app/features/notifications/providers/notification_
 import 'package:minvest_forex_app/features/auth/screens/change_password_screen.dart';
 import 'package:minvest_forex_app/features/auth/screens/notification_settings_screen.dart';
 import 'package:minvest_forex_app/features/auth/screens/terms_of_use_screen.dart';
+import 'package:minvest_forex_app/app/widgets/liquid_glass_nav_bar.dart';
+import 'package:minvest_forex_app/main.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
@@ -278,6 +280,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -297,98 +301,124 @@ class SettingsScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              
-              // --- Subscriptions Section ---
-              const Text(
-                'Subscriptions',
-                style: TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 16),
-              _buildMenuButton(
-                label: 'Open A Trading Account',
-                icon: Icons.account_balance_wallet_outlined,
-                onTap: () => _launchURL('https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1'),
-              ),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  
+                  // --- Subscriptions Section ---
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'Subscriptions',
+                      style: TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildMenuButton(
+                    label: 'Open A Trading Account',
+                    icon: Icons.account_balance_wallet_outlined,
+                    onTap: () => _launchURL('https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1'),
+                  ),
 
-              const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-              // --- Support Us Section ---
-              const Text(
-                'Support Us',
-                style: TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 16),
-              _buildMenuButton(
-                label: 'Rate App',
-                icon: Icons.star_border,
-                onTap: _rateApp,
-              ),
-              const SizedBox(height: 8),
-              _buildMenuButton(
-                label: 'Share App',
-                icon: Icons.share_outlined,
-                onTap: _shareApp,
-              ),
+                  // --- Support Us Section ---
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'Support Us',
+                      style: TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildMenuButton(
+                    label: 'Rate App',
+                    icon: Icons.star_border,
+                    onTap: _rateApp,
+                  ),
+                  _buildMenuButton(
+                    label: 'Share App',
+                    icon: Icons.share_outlined,
+                    onTap: _shareApp,
+                  ),
 
-              const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-              // --- Account Details Section ---
-              const Text(
-                'Account Details',
-                style: TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 16),
-              _buildMenuButton(
-                label: 'Change Password',
-                icon: Icons.lock_outline,
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ChangePasswordScreen()));
-                },
-              ),
-              const SizedBox(height: 8),
-              _buildMenuButton(
-                label: 'Language',
-                icon: Icons.language,
-                onTap: () => _showLanguageSelection(context),
-              ),
-              const SizedBox(height: 8),
-              _buildMenuButton(
-                label: 'Log out',
-                icon: Icons.logout,
-                onTap: () => _handleLogout(context),
-              ),
-              const SizedBox(height: 8),
-              _buildMenuButton(
-                label: 'Notifications',
-                icon: Icons.notifications_none,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const NotificationSettingsScreen()),
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-              _buildMenuButton(
-                label: 'Terms Of Use',
-                icon: Icons.description_outlined,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TermsOfUseScreen()),
-                ),
-              ),
+                  // --- Account Details Section ---
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'Account Details',
+                      style: TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildMenuButton(
+                    label: 'Change Password',
+                    icon: Icons.lock_outline,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ChangePasswordScreen()));
+                    },
+                  ),
+                  _buildMenuButton(
+                    label: 'Language',
+                    icon: Icons.language,
+                    onTap: () => _showLanguageSelection(context),
+                  ),
+                  _buildMenuButton(
+                    label: 'Log out',
+                    icon: Icons.logout,
+                    onTap: () => _handleLogout(context),
+                  ),
+                  _buildMenuButton(
+                    label: 'Notifications',
+                    icon: Icons.notifications_none,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationSettingsScreen()),
+                      );
+                    },
+                  ),
+                  _buildMenuButton(
+                    label: 'Terms Of Use',
+                    icon: Icons.description_outlined,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const TermsOfUseScreen()),
+                    ),
+                  ),
 
-              const SizedBox(height: 40),
-            ],
+                  const SizedBox(height: 40), // Compact space for Bottom Nav
+                ],
+              ),
+            ),
           ),
-        ),
+
+          // Menu lơ lửng Liquid Glass
+          Positioned(
+            bottom: bottomPadding > 0 ? bottomPadding : 20,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: LiquidGlassNavBar(
+                selectedIndex: 3, // Settings belongs to Profile/Account section
+                onTap: (index) {
+                  Navigator.pop(context); // Pop Settings
+                  if (index != 3) {
+                    mainScreenKey.currentState?.switchToTab(index);
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -403,37 +433,38 @@ class SettingsScreen extends StatelessWidget {
       child: Container(
         width: double.infinity,
         height: 50,
-        decoration: ShapeDecoration(
-          color: const Color(0xFF161616), // Màu xám đen đặc thay cho gradient trắng
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              width: 1,
-              color: Colors.white.withValues(alpha: 0.05), // Viền rất mờ
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: const Alignment(0.00, 1.00),
+            end: const Alignment(1.00, 0.12),
+            colors: [
+              Colors.white.withValues(alpha: 0.10),
+              Colors.white.withValues(alpha: 0.04),
+            ],
+          ),
+          border: Border(
+            bottom: BorderSide(
+              width: 0.8,
+              color: Colors.white.withValues(alpha: 0.08),
             ),
-            borderRadius: BorderRadius.circular(6),
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Row(
           children: [
-            Container(
-              width: 31,
-              height: 31,
-              decoration: BoxDecoration(
-                color: const Color(0xFF276EFB),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Icon(icon, color: Colors.white, size: 20),
-            ),
+            Icon(icon, color: Colors.white, size: 22),
             const SizedBox(width: 16),
             Text(
               label,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
+                fontFamily: 'Be Vietnam Pro',
                 fontWeight: FontWeight.w400,
               ),
             ),
+            const Spacer(),
+            const Icon(Icons.chevron_right, color: Colors.white54, size: 20),
           ],
         ),
       ),
