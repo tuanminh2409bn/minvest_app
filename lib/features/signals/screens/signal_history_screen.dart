@@ -36,7 +36,8 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
 
   final List<String> _statusOptions = ['ALL', 'TP1', 'TP2', 'TP3', 'SL', 'CANCELLED', 'EXIT'];
   final List<String> _timezones = [
-    'GMT+0', 'GMT+7', 'GMT+8'
+    'GMT-12', 'GMT-11', 'GMT-10', 'GMT-9', 'GMT-8', 'GMT-7', 'GMT-6', 'GMT-5', 'GMT-4', 'GMT-3', 'GMT-2', 'GMT-1',
+    'GMT+0', 'GMT+1', 'GMT+2', 'GMT+3', 'GMT+4', 'GMT+5', 'GMT+6', 'GMT+7', 'GMT+8', 'GMT+9', 'GMT+10', 'GMT+11', 'GMT+12'
   ];
 
   @override
@@ -169,9 +170,9 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
                   }
 
                   return ListView.builder(
-                    padding: EdgeInsets.zero,
+                    padding: const EdgeInsets.only(bottom: 100),
                     itemCount: filteredSignals.length,
-                    itemExtent: 55,
+                    itemExtent: 70,
                     itemBuilder: (context, index) {
                       return _buildHistoryItem(filteredSignals[index], index, l10n);
                     },
@@ -179,7 +180,6 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
                 },
               ),
             ),
-            const SizedBox(height: 90),
           ],
         ),
       ),
@@ -253,24 +253,32 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
       isScrollControlled: true,
       builder: (context) {
         return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
           child: Container(
             height: 483,
-            decoration: ShapeDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: const Alignment(0.00, 0.78),
-                end: const Alignment(1.00, 0.20),
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFF1E1E1E).withValues(alpha: 0.9),
-                  const Color(0xFF0D0D0D).withValues(alpha: 0.8)
+                  Colors.white.withValues(alpha: 0.12),
+                  Colors.white.withValues(alpha: 0.04),
                 ],
               ),
-              shape: RoundedRectangleBorder(
-                side: BorderSide(width: 1, color: Colors.white.withValues(alpha: 0.1)),
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
               ),
-              shadows: const [
-                BoxShadow(color: Colors.black54, blurRadius: 22.97, offset: Offset(0, -6)),
+              border: Border.all(
+                width: 1.5,
+                color: Colors.white.withValues(alpha: 0.2),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 20,
+                  offset: const Offset(0, -6),
+                ),
               ],
             ),
             child: Theme(
@@ -323,15 +331,15 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
         gradient: LinearGradient(
-          begin: const Alignment(-1.0, -2.0),
-          end: const Alignment(1.0, 2.0),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [
             Colors.white.withValues(alpha: 0.6),
             Colors.white.withValues(alpha: 0),
             Colors.white.withValues(alpha: 0),
-            Colors.white.withValues(alpha: 0.8),
+            Colors.white.withValues(alpha: 0.7),
           ],
-          stops: const [0.0, 0.07, 0.88, 1.0],
+          stops: const [0.0, 0.12, 0.88, 1.0],
         ),
       ),
       child: Container(
@@ -372,7 +380,7 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
       },
       child: Container(
         width: double.infinity,
-        height: 55,
+        height: 70,
         decoration: BoxDecoration(color: isEven ? const Color(0xFF161616) : const Color(0xFF080808)),
         padding: const EdgeInsets.symmetric(horizontal: 15),
         child: Row(
@@ -383,32 +391,58 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(signal.symbol.replaceAll('/', ''), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w400)),
-                  Text(formattedDate, style: const TextStyle(color: Color(0xFF636363), fontSize: 12)),
+                  Text(
+                    signal.symbol.replaceAll('/', ''),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w400),
+                  ),
+                  Text(
+                    formattedDate,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Color(0xFF636363), fontSize: 12),
+                  ),
                 ],
               ),
             ),
             Expanded(
               flex: 2,
-              child: Text(signal.getTranslatedResult(l10n), textAlign: TextAlign.center, style: TextStyle(color: signal.getStatusColor(), fontSize: 14)),
+              child: Text(
+                signal.getTranslatedResult(l10n),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: signal.getStatusColor(), fontSize: 14),
+              ),
             ),
             Expanded(
               flex: 1,
               child: Text(
                 signal.closedPips != null ? (signal.closedPips! >= 0 ? '+${signal.closedPips!.toStringAsFixed(0)}' : '${signal.closedPips!.toStringAsFixed(0)}') : '-',
                 textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: (signal.closedPips ?? 0) >= 0 ? const Color(0xFF00BB32) : const Color(0xFFE3001E), fontSize: 14),
               ),
             ),
             Expanded(
               flex: 2,
-              child: Text(signal.closedPrice?.toStringAsFixed(2) ?? '-', textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF636363), fontSize: 14)),
+              child: Text(
+                signal.closedPrice?.toStringAsFixed(2) ?? '-',
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Color(0xFF636363), fontSize: 14),
+              ),
             ),
             Expanded(
               flex: 1,
               child: Text(
                 signal.type.toUpperCase(),
                 textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: signal.type.toLowerCase() == 'buy' ? const Color(0xFF00BB32) : const Color(0xFFE3001E), fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),

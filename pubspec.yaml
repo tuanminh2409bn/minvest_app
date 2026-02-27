@@ -76,6 +76,11 @@ flutter_native_splash:
   android: true
   ios: true
   web: false
+  fullscreen: true
+  android_gravity: center
+  android_12:
+    image: "assets/images/logo_signalgpt.png"
+    color: "#000000"
 
 flutter:
   generate: true

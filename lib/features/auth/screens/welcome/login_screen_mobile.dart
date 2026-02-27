@@ -190,30 +190,32 @@ class _LoginScreenMobileState extends State<LoginScreenMobile> {
                   const SizedBox(height: 180),
                   
                   // Don't have an account?
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      const Text(
-                        'Don’t have an account? ',
-                        style: TextStyle(color: Color(0xFF636363), fontSize: 16),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (context) => const SignupScreenMobile()),
-                          );
-                        },
-                        child: const Text(
-                          'Create Account',
-                          style: TextStyle(
-                            color: Color(0xFF0094FF),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Don’t have an account? ',
+                          style: TextStyle(color: Color(0xFF636363), fontSize: 16),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) => const SignupScreenMobile()),
+                            );
+                          },
+                          child: const Text(
+                            'Create Account',
+                            style: TextStyle(
+                              color: Color(0xFF0094FF),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   
                   const SizedBox(height: 16),

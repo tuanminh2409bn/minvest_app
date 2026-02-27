@@ -41,7 +41,8 @@ class _SignalScreenState extends State<SignalScreen> {
   String _selectedAppUrl = '';
 
   final List<String> _timezones = [
-    'GMT+0', 'GMT+7', 'GMT+8'
+    'GMT-12', 'GMT-11', 'GMT-10', 'GMT-9', 'GMT-8', 'GMT-7', 'GMT-6', 'GMT-5', 'GMT-4', 'GMT-3', 'GMT-2', 'GMT-1',
+    'GMT+0', 'GMT+1', 'GMT+2', 'GMT+3', 'GMT+4', 'GMT+5', 'GMT+6', 'GMT+7', 'GMT+8', 'GMT+9', 'GMT+10', 'GMT+11', 'GMT+12'
   ];
 
   @override
@@ -79,27 +80,25 @@ class _SignalScreenState extends State<SignalScreen> {
       isScrollControlled: true,
       builder: (context) {
         return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
           child: Container(
             height: MediaQuery.of(context).size.height * 0.6,
-            decoration: ShapeDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: const Alignment(0.00, 0.78),
-                end: const Alignment(1.00, 0.20),
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFF1E1E1E).withValues(alpha: 0.9),
-                  const Color(0xFF0D0D0D).withValues(alpha: 0.8)
+                  Colors.white.withValues(alpha: 0.12),
+                  Colors.white.withValues(alpha: 0.04),
                 ],
               ),
-              shape: const RoundedRectangleBorder(
-                side: BorderSide(
-                  width: 1,
-                  color: Colors.white10,
-                ),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
+              border: Border.all(
+                width: 1.5,
+                color: Colors.white.withValues(alpha: 0.2),
               ),
             ),
             child: SafeArea(
@@ -516,7 +515,7 @@ class _SignalScreenState extends State<SignalScreen> {
             });
           },
           child: Container(
-            height: 55,
+            height: 65,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: const BoxDecoration(
               color: Colors.black,
@@ -821,102 +820,148 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
   }
 
   Widget _buildBlurredOverlay(BuildContext context, Signal signal, UserProvider userProvider, bool isFreeUnlock) {
-    return Container(
-      width: double.infinity,
-      height: 210,
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 12.0),
-                        child: Text(
-                          'Use Token to view Signal',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: 'Be Vietnam Pro',
-                          ),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (signal.id == 'placeholder') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Waiting for new signals...')),
-                            );
-                            return;
-                          }
-                          if (isFreeUnlock) {
-                            await userProvider.unlockSignal(signal.id, freeUnlock: true);
-                          } else {
-                            if (userProvider.tokenBalance > 0) {
-                              final success = await userProvider.unlockSignal(signal.id, freeUnlock: false);
-                              if (!success && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Failed to unlock signal')),
-                                );
-                              }
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Not enough tokens')),
-                              );
-                            }
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF276EFB),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                        ),
-                        child: const Text(
-                          'View Now',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Be Vietnam Pro'),
-                        ),
-                      ),
+    return Positioned.fill(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            // Dark base layer to kill text contrast while keeping it "glassy"
+            Container(
+              color: Colors.black.withValues(alpha: 0.7),
+            ),
+            // Brighter liquid blobs for visual distortion and aesthetics
+            Positioned(
+              top: -15,
+              left: -15,
+              child: Container(
+                width: 160,
+                height: 160,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFF276EFB).withValues(alpha: 0.25),
+                      const Color(0xFF276EFB).withValues(alpha: 0),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
-          IgnorePointer(
-            child: CustomPaint(
-              size: const Size(double.infinity, 210),
-              painter: GradientPainter(
-                strokeWidth: 1.5,
-                radius: 12,
-                gradient: LinearGradient(
-                  begin: const Alignment(-1.0, 1.0),
-                  end: const Alignment(1.0, -1.0),
-                  colors: [
-                    Colors.white,
-                    Colors.white.withValues(alpha: 0),
-                    Colors.white.withValues(alpha: 0),
-                    Colors.white.withValues(alpha: 0.9),
-                  ],
-                  stops: const [0.0, 0.12, 0.88, 1.0],
+            Positioned(
+              bottom: -20,
+              right: -20,
+              child: Container(
+                width: 180,
+                height: 180,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFF00D2FF).withValues(alpha: 0.2),
+                      const Color(0xFF00D2FF).withValues(alpha: 0),
+                    ],
+                  ),
                 ),
               ),
-              child: Container(),
             ),
-          ),
-        ],
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.12),
+                      Colors.white.withValues(alpha: 0.04),
+                    ],
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 12.0),
+                      child: Text(
+                        'Use Token to view Signal',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Be Vietnam Pro',
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (signal.id == 'placeholder') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Waiting for new signals...')),
+                          );
+                          return;
+                        }
+                        if (isFreeUnlock) {
+                          await userProvider.unlockSignal(signal.id, freeUnlock: true);
+                        } else {
+                          if (userProvider.tokenBalance > 0) {
+                            final success = await userProvider.unlockSignal(signal.id, freeUnlock: false);
+                            if (!success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Failed to unlock signal')),
+                              );
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Not enough tokens')),
+                            );
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF276EFB),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                        elevation: 12,
+                        shadowColor: const Color(0xFF276EFB).withValues(alpha: 0.6),
+                      ),
+                      child: const Text(
+                        'View Now',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Be Vietnam Pro'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Premium border detail
+            IgnorePointer(
+              child: CustomPaint(
+                size: Size.infinite,
+                painter: GradientPainter(
+                  strokeWidth: 1.2,
+                  radius: 12,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.5),
+                      Colors.white.withValues(alpha: 0.05),
+                      Colors.white.withValues(alpha: 0.05),
+                      Colors.white.withValues(alpha: 0.4),
+                    ],
+                    stops: const [0.0, 0.2, 0.8, 1.0],
+                  ),
+                ),
+                child: Container(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -939,35 +984,46 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
           ),
         ),
         const SizedBox(height: 4),
-        Container(
+        SizedBox(
           width: 107,
           height: 41,
-          alignment: Alignment.center,
-          decoration: ShapeDecoration(
-            gradient: LinearGradient(
-              begin: const Alignment(0.00, 1.00),
-              end: const Alignment(1.00, 0.12),
-              colors: [
-                const Color(0xFF1E1E1E).withValues(alpha: 0.9),
-                const Color(0xFF1E1E1E).withValues(alpha: 0.6),
-              ],
-            ),
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                width: 1,
-                color: Colors.white.withValues(alpha: 0.15),
-              ),
+          child: Container(
+            padding: const EdgeInsets.all(1), // Độ dày viền 1px
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: 0.6),
+                  Colors.white.withValues(alpha: 0),
+                  Colors.white.withValues(alpha: 0),
+                  Colors.white.withValues(alpha: 0.7),
+                ],
+                stops: const [0.0, 0.12, 0.88, 1.0],
+              ),
             ),
-          ),
-          child: Text(
-            value,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: valueColor,
-              fontSize: 15,
-              fontWeight: FontWeight.w400,
-              fontFamily: 'Be Vietnam Pro',
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF161616),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  value,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: valueColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Be Vietnam Pro',
+                  ),
+                ),
+              ),
             ),
           ),
         ),
