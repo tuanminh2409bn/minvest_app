@@ -111,13 +111,18 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
                               ),
                             ),
                             const SizedBox(height: 30),
-                            const Text(
-                              'Create your account',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w600,
+                            const FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Create your account',
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 30),

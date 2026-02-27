@@ -84,24 +84,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.7,
-                decoration: ShapeDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: const Alignment(0.00, 0.78),
-                    end: const Alignment(1.00, 0.20),
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
-                      const Color(0xFF1E1E1E).withValues(alpha: 0.4),
-                      const Color(0xFF0D0D0D).withValues(alpha: 0.2)
+                      Colors.white.withValues(alpha: 0.12),
+                      Colors.white.withValues(alpha: 0.04),
                     ],
                   ),
-                  shape: const RoundedRectangleBorder(
-                    side: BorderSide(width: 1, color: Colors.white10),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                  border: Border.all(
+                    width: 1.5,
+                    color: Colors.white.withValues(alpha: 0.2),
                   ),
                 ),
                 child: SafeArea(

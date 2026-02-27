@@ -260,18 +260,18 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                             children: [
                               _SocialCircleSmallButton(
                                 iconPath: 'assets/images/facebook_logo.png',
-                                color: const Color(0xFF1877F2),
-                                size: 35,
-                                padding: 8,
+                                color: Colors.transparent,
+                                size: 62,
+                                padding: 0,
                                 onPressed: () => context.read<AuthBloc>().add(SignInWithFacebookRequested()),
                               ),
                               const SizedBox(width: 30),
                               if (Platform.isIOS) ...[
                                 _SocialCircleSmallButton(
                                   iconPath: 'assets/images/apple_logo.png',
-                                  color: Colors.black,
-                                  size: 35,
-                                  padding: 8,
+                                  color: Colors.transparent,
+                                  size: 45,
+                                  padding: 5,
                                   iconColor: Colors.white,
                                   onPressed: () => context.read<AuthBloc>().add(SignInWithAppleRequested()),
                                 ),
@@ -280,8 +280,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                               _SocialCircleSmallButton(
                                 iconPath: 'assets/images/google_logo.png',
                                 color: Colors.white,
-                                size: 35,
-                                padding: 8,
+                                size: 45,
+                                padding: 5,
                                 onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
                               ),
                             ],
@@ -349,8 +349,8 @@ class _SocialCircleSmallButton extends StatelessWidget {
     required this.iconPath,
     required this.color,
     required this.onPressed,
-    this.padding = 8,
-    this.size = 35,
+    this.padding = 10,
+    this.size = 45,
     this.iconColor,
   });
 
@@ -364,6 +364,15 @@ class _SocialCircleSmallButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
+          boxShadow: (color == Colors.transparent || color == Colors.black)
+            ? null 
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
         ),
         padding: EdgeInsets.all(padding),
         child: Image.asset(

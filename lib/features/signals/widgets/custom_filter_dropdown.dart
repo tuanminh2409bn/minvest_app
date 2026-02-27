@@ -122,30 +122,42 @@ class _CustomFilterDropdownState<T> extends State<CustomFilterDropdown<T>> {
                           ),
                         ),
                       ),
-                      ...widget.items.where((item) => item.value != widget.value).map((item) {
-                        return GestureDetector(
-                          onTap: () {
-                            widget.onChanged(item.value);
-                            _closeDropdown();
-                          },
-                          child: Container(
-                            width: size.width,
-                            height: 40,
-                            padding: const EdgeInsets.only(left: 11),
-                            alignment: Alignment.centerLeft,
-                            color: Colors.transparent,
-                            child: Text(
-                              item.label,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontFamily: 'Be Vietnam Pro',
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.4,
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ...widget.items.where((item) => item.value != widget.value).map((item) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    widget.onChanged(item.value);
+                                    _closeDropdown();
+                                  },
+                                  child: Container(
+                                    width: size.width,
+                                    height: 40,
+                                    padding: const EdgeInsets.only(left: 11),
+                                    alignment: Alignment.centerLeft,
+                                    color: Colors.transparent,
+                                    child: Text(
+                                      item.label,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontFamily: 'Be Vietnam Pro',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ],
                           ),
-                        );
-                      }),
+                        ),
+                      ),
                       const SizedBox(height: 5),
                     ],
                   ),
@@ -178,15 +190,15 @@ class _CustomFilterDropdownState<T> extends State<CustomFilterDropdown<T>> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
             gradient: LinearGradient(
-              begin: const Alignment(-1.0, -2.0),
-              end: const Alignment(1.0, 2.0),
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
               colors: [
                 Colors.white.withValues(alpha: 0.6),
                 Colors.white.withValues(alpha: 0),
                 Colors.white.withValues(alpha: 0),
-                Colors.white.withValues(alpha: 0.8),
+                Colors.white.withValues(alpha: 0.7),
               ],
-              stops: const [0.0, 0.07, 0.88, 1.0],
+              stops: const [0.0, 0.12, 0.88, 1.0],
             ),
           ),
           child: Container(
