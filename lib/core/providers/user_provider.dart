@@ -14,6 +14,7 @@ class UserProvider with ChangeNotifier {
   final AuthService _authService;
 
   String? _uid;
+  String? _email;
   String? _userTier;
   String? _verificationStatus;
   String? _verificationError;
@@ -34,6 +35,7 @@ class UserProvider with ChangeNotifier {
   Map<String, DateTime> _subscriptionsExpiry = {};
 
   String? get uid => _uid;
+  String? get email => _email;
   String? get userTier => _userTier;
   String? get verificationStatus => _verificationStatus;
   String? get verificationError => _verificationError;
@@ -84,6 +86,7 @@ class UserProvider with ChangeNotifier {
       if (snapshot.exists) {
         final data = snapshot.data() as Map<String, dynamic>;
         
+        _email = data['email'];
         _userTier = data['subscriptionTier'];
         _verificationStatus = data['verificationStatus'];
         _verificationError = data['verificationError'];

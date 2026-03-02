@@ -292,7 +292,7 @@
     "history": "Lịch sử",
     "signalsWillAppearHere": "Tín hiệu sẽ xuất hiện ở đây khi có sẵn",
     "pricing": "Bảng giá",
-    "choosePlanSubtitle": "Chọn gói phù hợp với bạn",
+    "choosePlanSubtitle": "Chọn gói",
     "financialNewsHub": "Trung tâm Tin tức Tài chính",
     "financialNewsHubDesc": "Cập nhật thông tin thị trường nhanh chóng, chính xác và đáng tin cậy",
     "newsTabAllArticles": "Tất cả bài viết",
@@ -526,5 +526,62 @@
     ,"markAllRead": "Mark all as read"
     ,"aiSignalGPT": "Phân Tích AI GPT",
     "disclaimer": "Miễn trừ trách nhiệm",
-    "disclaimerContent": "Thông tin trên signalgpt.ai nhằm mục đích tham khảo và chia sẻ kiến thức, không phải lời khuyên đầu tư. Người dùng tự chịu trách nhiệm với mọi quyết định giao dịch của mình."
+    "disclaimerContent": "Thông tin trên signalgpt.ai nhằm mục đích tham khảo và chia sẻ kiến thức, không phải lời khuyên đầu tư. Người dùng tự chịu trách nhiệm với mọi quyết định giao dịch của mình.",
+    "openTradingAccount": "Mở tài khoản giao dịch",
+    "supportUs": "Hỗ trợ chúng tôi",
+    "rateApp": "Đánh giá ứng dụng",
+    "shareApp": "Chia sẻ ứng dụng",
+    "accountDetails": "Chi tiết tài khoản",
+    "language": "Ngôn ngữ",
+    "termsOfUse": "Điều khoản sử dụng",
+    "accounts": "Tài khoản",
+    "accessExchange": "Truy cập sàn giao dịch",
+    "onlineSupport": "Hỗ trợ trực tuyến",
+    "selectLanguage": "Chọn ngôn ngữ",
+    "left": "còn lại",
+    "upgradeToPro": "Nâng cấp Pro",
+    "assetGold": "Vàng",
+    "assetCrypto": "Crypto",
+    "assetForex": "Ngoại hối",
+    "tokens": "Token",
+    "noForexAssets": "Không có tài sản Ngoại hối khả dụng",
+    "openApp": "Mở {appName}",
+    "@openApp": {
+        "placeholders": {
+            "appName": {
+                "type": "String"
+            }
+        }
+    },
+    "signalStatus": "Trạng thái",
+    "signalEntryLabel": "VÀO LỆNH",
+    "signalSlLabel": "SL",
+    "signalTp1Label": "TP1",
+    "signalTp2Label": "TP2",
+    "signalTp3Label": "TP3",
+    "analyze": "Phân tích",
+    "useTokenToView": "Dùng Token để xem Tín hiệu",
+    "viewNow": "Xem ngay",
+    "waitingNewSignals": "Đang chờ tín hiệu mới...",
+    "failedUnlockSignal": "Mở khóa tín hiệu thất bại",
+    "notEnoughTokens": "Không đủ token",
+    "newSignalUploaded": "Tín hiệu mới đã được tải lên",
+    "newSymbolSignalUploaded": "Tín hiệu {symbol} mới đã sẵn sàng!",
+    "@newSymbolSignalUploaded": {
+        "placeholders": {
+            "symbol": {
+                "type": "String"
+            }
+        }
+    },
+    "upgradeToViewSignalBanner": "Nâng cấp để xem tín hiệu",
+    "signalHistory": "Lịch sử Tín hiệu",
+    "allAssets": "Tất cả tài sản",
+    "allStatus": "TẤT CẢ",
+    "selectDate": "Chọn ngày",
+    "noHistoryFound": "Không tìm thấy lịch sử",
+    "filterDate": "Ngày",
+    "marketChart": "BIỂU ĐỒ THỊ TRƯỜNG",
+    "analysisExplanation": "Phân tích & Giải thích",
+    "noDetailedAnalysis": "Không có phân tích chi tiết cho tín hiệu này."
 }

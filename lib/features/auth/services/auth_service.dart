@@ -13,6 +13,8 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:minvest_forex_app/core/exceptions/auth_exceptions.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:minvest_forex_app/services/device_info_service.dart';
+import 'package:minvest_forex_app/services/notification_service.dart';
+import 'package:minvest_forex_app/core/services/affiliate_tracker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:math';
@@ -289,6 +291,29 @@ class AuthService {
             });
           }
         } else {
+          // Nếu người dùng đã tồn tại nhưng thiếu displayName, tự động cập nhật
+          final data = userDoc.data() as Map<String, dynamic>;
+          final Map<String, dynamic> updates = {};
+          
+          if (data['displayName'] == null || data['displayName'].toString().isEmpty) {
+            final newName = manualDisplayName ?? appleFullName ?? facebookUserData?['name'] ?? user.displayName;
+            if (newName != null && newName.isNotEmpty) {
+              updates['displayName'] = newName;
+            }
+          }
+
+          // Tự động bổ sung email nếu Firestore bị thiếu
+          if (data['email'] == null || data['email'].toString().isEmpty) {
+            final newEmail = googleEmail ?? appleEmail ?? facebookUserData?['email'] ?? user.email;
+            if (newEmail != null && newEmail.isNotEmpty) {
+              updates['email'] = newEmail;
+            }
+          }
+
+          if (updates.isNotEmpty) {
+            transaction.update(userDocRef, updates);
+          }
+
           if (userDoc.data()?['isSuspended'] == true) {
             throw SuspendedAccountException(
                 userDoc.data()?['suspensionReason'] ??
@@ -302,6 +327,11 @@ class AuthService {
     }
 
     if (!isAnonymous) {
+      // Gán Affiliate nếu có (Chỉ thực hiện trên Web)
+      if (kIsWeb) {
+        _attachAffiliateIfAvailable(user.uid);
+      }
+
       // Không dùng await ở đây để tránh treo màn hình Login nếu Cloud Function chậm
       SessionService().updateUserSession().catchError((e) {
         print('Lỗi cập nhật session (không chặn login): $e');
@@ -309,6 +339,27 @@ class AuthService {
       listenForSessionChanges();
     }
     return user;
+  }
+
+  /// Gán mã giới thiệu cho người dùng nếu có dữ liệu lưu trữ (Web only)
+  Future<void> _attachAffiliateIfAvailable(String uid) async {
+    try {
+      final tracker = AffiliateTracker();
+      final refCode = tracker.getStoredRef();
+      final refTs = tracker.getStoredRefTimestamp();
+
+      if (refCode != null && refCode.isNotEmpty) {
+        final callable = _functions.httpsCallable('affiliate-attach');
+        await callable.call({
+          'uid': uid,
+          'ref_code': refCode,
+          'ref_ts': refTs ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        });
+        print('✅ Affiliate attached for user: $uid with code: $refCode');
+      }
+    } catch (e) {
+      print('❌ Lỗi gán affiliate (không chặn đăng nhập): $e');
+    }
   }
 
   Future<User?> signInAnonymously() async {
@@ -326,6 +377,8 @@ class AuthService {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return null;
       final String googleEmail = googleUser.email;
+      final String? googleDisplayName = googleUser.displayName; // Lấy tên hiển thị từ Google
+      
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
       final OAuthCredential credential = GoogleAuthProvider.credential(
@@ -334,8 +387,11 @@ class AuthService {
       );
       final userCredential =
           await _firebaseAuth.signInWithCredential(credential);
-      return await _handleSuccessfulSignIn(userCredential,
-          googleEmail: googleEmail);
+      return await _handleSuccessfulSignIn(
+        userCredential,
+        googleEmail: googleEmail,
+        manualDisplayName: googleDisplayName, // Truyền tên hiển thị vào xử lý
+      );
     } catch (e) {
       print('Lỗi đăng nhập Google: $e');
       rethrow;
@@ -363,8 +419,10 @@ class AuthService {
             FacebookAuthProvider.credential(result.accessToken!.tokenString);
         userCredential = await _firebaseAuth.signInWithCredential(credential);
       }
-      return await _handleSuccessfulSignIn(userCredential,
-          facebookUserData: facebookUserData);
+      return await _handleSuccessfulSignIn(
+        userCredential,
+        facebookUserData: facebookUserData,
+      );
     } catch (e) {
       print('Lỗi đăng nhập Facebook: $e');
       rethrow;
@@ -409,8 +467,11 @@ class AuthService {
         throw UnsupportedError(
             'Đăng nhập Apple không được hỗ trợ trên thiết bị này.');
       }
-      return await _handleSuccessfulSignIn(userCredential,
-          appleEmail: appleEmail, appleFullName: appleFullName);
+      return await _handleSuccessfulSignIn(
+        userCredential,
+        appleEmail: appleEmail,
+        appleFullName: appleFullName,
+      );
     } catch (e) {
       print('Lỗi đăng nhập Apple: $e');
       rethrow;
@@ -418,17 +479,41 @@ class AuthService {
   }
 
   Future<void> signOut() async {
+    final user = _firebaseAuth.currentUser;
     stopListeningForSessionChanges();
+    
     try {
+      if (user != null) {
+        // 1. Xóa FCM token trong Firestore để server ngừng gửi thông báo cho thiết bị này
+        final deviceId = await DeviceInfoService.getDeviceId();
+        final userDocRef = _firestore.collection('users').doc(user.uid);
+        
+        // Kiểm tra xem session hiện tại có khớp với thiết bị này không trước khi xóa
+        final doc = await userDocRef.get();
+        if (doc.exists) {
+          final data = doc.data()!;
+          final sessionKey = kIsWeb ? 'activeSessionWeb' : 'activeSessionMobile';
+          final sessionData = data[sessionKey] as Map<String, dynamic>?;
+          
+          if (sessionData != null && sessionData['deviceId'] == deviceId) {
+            await userDocRef.update({sessionKey: FieldValue.delete()});
+            print("Đã xóa session thông báo trên Firestore");
+          }
+        }
+      }
+
+      // 2. Dọn dẹp token và hủy đăng ký topics trên thiết bị
+      await NotificationService().cleanupNotificationData();
+
       if (!kIsWeb) {
         await FacebookAuth.instance.logOut();
       }
       await GoogleSignIn().signOut();
     } catch (e) {
-      print("Lỗi khi đăng xuất khỏi các nhà cung cấp: $e");
+      print("Lỗi khi đăng xuất dọn dẹp dữ liệu: $e");
     } finally {
       await _firebaseAuth.signOut();
-      print("Đã đăng xuất khỏi Firebase");
+      print("Đã đăng xuất khỏi Firebase hoàn tất");
     }
   }
 

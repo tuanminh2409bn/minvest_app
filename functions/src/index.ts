@@ -1206,6 +1206,65 @@ export const submitContactMessage = onCall({ region: "asia-southeast1" }, async 
 });
 
 // =================================================================
+// === HỆ THỐNG AFFILIATE ===
+// =================================================================
+
+/**
+ * Gán Affiliate cho người dùng khi đăng ký hoặc đăng nhập lần đầu trên Web.
+ */
+export const affiliateAttach = onCall({ region: "asia-southeast1" }, async (request) => {
+    const { uid, ref_code, ref_ts } = request.data;
+    
+    if (!uid || !ref_code) {
+        throw new HttpsError("invalid-argument", "Thiếu uid hoặc ref_code.");
+    }
+
+    try {
+        const userRef = firestore.collection("users").doc(uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            throw new HttpsError("not-found", "Không tìm thấy người dùng.");
+        }
+
+        const userData = userDoc.data();
+        
+        // Kiểm tra nếu đã bị khóa affiliate (đã thanh toán rồi)
+        if (userData?.affiliate_locked_at) {
+            functions.logger.log(`User ${uid} đã bị khóa affiliate, không thể ghi đè.`);
+            return { status: "ignored", reason: "affiliate_locked" };
+        }
+
+        // Tìm affiliate theo mã code
+        const affiliateQuery = await firestore.collection("affiliates")
+            .where("code", "==", ref_code)
+            .limit(1)
+            .get();
+
+        if (affiliateQuery.empty) {
+            functions.logger.warn(`Mã giới thiệu không tồn tại: ${ref_code}`);
+            return { status: "failed", reason: "invalid_ref_code" };
+        }
+
+        const affiliateId = affiliateQuery.docs[0].id;
+
+        // Cập nhật người dùng với thông tin affiliate (LAST CLICK WINS - ghi đè nếu chưa locked)
+        await userRef.update({
+            referred_by_affiliate_id: affiliateId,
+            affiliate_ref_code: ref_code,
+            affiliate_ref_ts: ref_ts || admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        functions.logger.log(`✅ Đã gán affiliate ${affiliateId} cho user ${uid}`);
+        return { status: "success" };
+    } catch (error) {
+        functions.logger.error("Lỗi khi gán affiliate:", error);
+        throw new HttpsError("internal", "Lỗi xử lý gán affiliate.");
+    }
+});
+
+// =================================================================
 // === FUNCTION CỘNG TOKEN HÀNG NGÀY CHO FREE USER ===
 // =================================================================
 export const grantDailyFreeTokens = onSchedule(

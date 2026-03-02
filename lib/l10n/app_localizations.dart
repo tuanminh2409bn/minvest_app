@@ -1757,7 +1757,7 @@ abstract class AppLocalizations {
   /// No description provided for @choosePlanSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Choose a plan that works for you'**
+  /// **'Choose a plan'**
   String get choosePlanSubtitle;
 
   /// No description provided for @financialNewsHub.
@@ -2887,6 +2887,258 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The information on signalgpt.ai is for reference and knowledge-sharing purposes only, and does not constitute investment advice. Users are solely responsible for their own trading decisions.'**
   String get disclaimerContent;
+
+  /// No description provided for @openTradingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Open A Trading Account'**
+  String get openTradingAccount;
+
+  /// No description provided for @supportUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Support Us'**
+  String get supportUs;
+
+  /// No description provided for @rateApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate App'**
+  String get rateApp;
+
+  /// No description provided for @shareApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Share App'**
+  String get shareApp;
+
+  /// No description provided for @accountDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Details'**
+  String get accountDetails;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @termsOfUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms Of Use'**
+  String get termsOfUse;
+
+  /// No description provided for @accounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get accounts;
+
+  /// No description provided for @accessExchange.
+  ///
+  /// In en, this message translates to:
+  /// **'Access The Exchange'**
+  String get accessExchange;
+
+  /// No description provided for @onlineSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Support'**
+  String get onlineSupport;
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get selectLanguage;
+
+  /// No description provided for @left.
+  ///
+  /// In en, this message translates to:
+  /// **'left'**
+  String get left;
+
+  /// No description provided for @upgradeToPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade To Pro'**
+  String get upgradeToPro;
+
+  /// No description provided for @assetGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold'**
+  String get assetGold;
+
+  /// No description provided for @assetCrypto.
+  ///
+  /// In en, this message translates to:
+  /// **'Crypto'**
+  String get assetCrypto;
+
+  /// No description provided for @assetForex.
+  ///
+  /// In en, this message translates to:
+  /// **'Forex'**
+  String get assetForex;
+
+  /// No description provided for @tokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens'**
+  String get tokens;
+
+  /// No description provided for @noForexAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'No Forex assets available'**
+  String get noForexAssets;
+
+  /// No description provided for @openApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {appName}'**
+  String openApp(String appName);
+
+  /// No description provided for @signalStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get signalStatus;
+
+  /// No description provided for @signalEntryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ENTRY'**
+  String get signalEntryLabel;
+
+  /// No description provided for @signalSlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SL'**
+  String get signalSlLabel;
+
+  /// No description provided for @signalTp1Label.
+  ///
+  /// In en, this message translates to:
+  /// **'TP1'**
+  String get signalTp1Label;
+
+  /// No description provided for @signalTp2Label.
+  ///
+  /// In en, this message translates to:
+  /// **'TP2'**
+  String get signalTp2Label;
+
+  /// No description provided for @signalTp3Label.
+  ///
+  /// In en, this message translates to:
+  /// **'TP3'**
+  String get signalTp3Label;
+
+  /// No description provided for @analyze.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze'**
+  String get analyze;
+
+  /// No description provided for @useTokenToView.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Token to view Signal'**
+  String get useTokenToView;
+
+  /// No description provided for @viewNow.
+  ///
+  /// In en, this message translates to:
+  /// **'View Now'**
+  String get viewNow;
+
+  /// No description provided for @waitingNewSignals.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for new signals...'**
+  String get waitingNewSignals;
+
+  /// No description provided for @failedUnlockSignal.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to unlock signal'**
+  String get failedUnlockSignal;
+
+  /// No description provided for @notEnoughTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough tokens'**
+  String get notEnoughTokens;
+
+  /// No description provided for @newSignalUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'New Signal uploaded'**
+  String get newSignalUploaded;
+
+  /// No description provided for @newSymbolSignalUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'New {symbol} signal is now uploaded!'**
+  String newSymbolSignalUploaded(String symbol);
+
+  /// No description provided for @upgradeToViewSignalBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to View Signal'**
+  String get upgradeToViewSignalBanner;
+
+  /// No description provided for @signalHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Signal History'**
+  String get signalHistory;
+
+  /// No description provided for @allStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'ALL'**
+  String get allStatus;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get selectDate;
+
+  /// No description provided for @noHistoryFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No history found'**
+  String get noHistoryFound;
+
+  /// No description provided for @filterDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get filterDate;
+
+  /// No description provided for @marketChart.
+  ///
+  /// In en, this message translates to:
+  /// **'MARKET CHART'**
+  String get marketChart;
+
+  /// No description provided for @analysisExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis & Explanation'**
+  String get analysisExplanation;
+
+  /// No description provided for @noDetailedAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'No detailed analysis available for this signal.'**
+  String get noDetailedAnalysis;
 }
 
 class _AppLocalizationsDelegate

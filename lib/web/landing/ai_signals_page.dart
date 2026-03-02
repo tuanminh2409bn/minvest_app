@@ -196,6 +196,7 @@ class _AISignalsPageState extends State<AISignalsPage> {
                         ] else ...const [
                           PricingTab(),
                         ],
+                        _DisclaimerSection(isMobile: isMobile),
                       ],
                     ),
                   ),
@@ -205,6 +206,45 @@ class _AISignalsPageState extends State<AISignalsPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DisclaimerSection extends StatelessWidget {
+  final bool isMobile;
+  const _DisclaimerSection({required this.isMobile});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 0, vertical: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(color: Colors.white12),
+          const SizedBox(height: 32),
+          Text(
+            l10n.disclaimer,
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white,
+              fontSize: isMobile ? 16 : 18,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.left,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.disclaimerContent,
+            style: AppTextStyles.body.copyWith(
+              color: Colors.white70,
+              fontSize: isMobile ? 13 : 15,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.left,
+          ),
+        ],
       ),
     );
   }

@@ -27,7 +27,6 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
   final SignalService _signalService = SignalService();
   
   AssetCategory _assetCategory = AssetCategory.all;
-  String _selectedPair = 'All';
   String _selectedGMT = 'GMT+7';
   String _selectedStatus = 'ALL';
   DateTime? _selectedDate;
@@ -61,7 +60,6 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final userProvider = context.watch<UserProvider>();
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -79,9 +77,9 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
             );
           },
         ),
-        title: const Text(
-          'Signal History',
-          style: TextStyle(
+        title: Text(
+          l10n.signalHistory,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 22,
             fontWeight: FontWeight.w500,
@@ -132,7 +130,7 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Expanded(child: _buildAssetDropdown()),
+                  Expanded(child: _buildAssetDropdown(l10n)),
                   const SizedBox(width: 12),
                   Expanded(child: _buildGMTDropdown()),
                 ],
@@ -143,9 +141,9 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Expanded(child: _buildDatePicker()),
+                  Expanded(child: _buildDatePicker(l10n)),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildStatusDropdown()),
+                  Expanded(child: _buildStatusDropdown(l10n)),
                 ],
               ),
             ),
@@ -160,13 +158,13 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
                     return const Center(child: CircularProgressIndicator(color: Color(0xFF276EFB)));
                   }
                   if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading history', style: TextStyle(color: Colors.redAccent)));
+                    return Center(child: Text(l10n.errorLoadingHistory, style: const TextStyle(color: Colors.redAccent)));
                   }
                   
                   final filteredSignals = _applyFilters(snapshot.data ?? []);
 
                   if (filteredSignals.isEmpty) {
-                    return const Center(child: Text('No history found', style: TextStyle(color: Colors.white54)));
+                    return Center(child: Text(l10n.noHistoryFound, style: const TextStyle(color: Colors.white54)));
                   }
 
                   return ListView.builder(
@@ -197,27 +195,27 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
         if (date.day != _selectedDate!.day || date.month != _selectedDate!.month || date.year != _selectedDate!.year) return false;
       }
 
-      if (_selectedStatus != 'ALL') {
+      if (_selectedStatus != 'ALL' && _selectedStatus != 'TẤT CẢ') {
         if (_selectedStatus == 'TP1') return s.hitTps.contains(1) && !s.hitTps.contains(2);
         if (_selectedStatus == 'TP2') return s.hitTps.contains(2) && !s.hitTps.contains(3);
         if (_selectedStatus == 'TP3') return s.hitTps.contains(3);
         if (_selectedStatus == 'SL') return (s.result ?? '').toUpperCase().contains('SL');
-        if (_selectedStatus == 'CANCELLED') return s.status == 'cancelled' || (s.result ?? '').toLowerCase().contains('cancel');
-        if (_selectedStatus == 'EXIT') return (s.result ?? '').toLowerCase().contains('exit');
+        if (_selectedStatus == 'CANCELLED' || _selectedStatus == 'ĐÃ HỦY') return s.status == 'cancelled' || (s.result ?? '').toLowerCase().contains('cancel');
+        if (_selectedStatus == 'EXIT' || _selectedStatus == 'ADMIN ĐÓNG') return (s.result ?? '').toLowerCase().contains('exit');
       }
 
       return true;
     }).toList();
   }
 
-  Widget _buildAssetDropdown() {
+  Widget _buildAssetDropdown(AppLocalizations l10n) {
     return CustomFilterDropdown<AssetCategory>(
       value: _assetCategory,
       items: [
-        CustomDropdownItem(value: AssetCategory.all, label: 'All Assets'),
-        CustomDropdownItem(value: AssetCategory.gold, label: 'Gold'),
-        CustomDropdownItem(value: AssetCategory.crypto, label: 'Crypto'),
-        CustomDropdownItem(value: AssetCategory.forex, label: 'Forex'),
+        CustomDropdownItem(value: AssetCategory.all, label: l10n.allAssets),
+        CustomDropdownItem(value: AssetCategory.gold, label: l10n.assetGold),
+        CustomDropdownItem(value: AssetCategory.crypto, label: l10n.assetCrypto),
+        CustomDropdownItem(value: AssetCategory.forex, label: l10n.assetForex),
       ],
       onChanged: (v) => setState(() => _assetCategory = v as AssetCategory),
     );
@@ -231,18 +229,28 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
     );
   }
 
-  Widget _buildStatusDropdown() {
+  Widget _buildStatusDropdown(AppLocalizations l10n) {
+    final statusMap = {
+      'ALL': l10n.allStatus,
+      'TP1': 'TP1',
+      'TP2': 'TP2',
+      'TP3': 'TP3',
+      'SL': 'SL',
+      'CANCELLED': l10n.cancelled,
+      'EXIT': l10n.signalClosed,
+    };
+
     return CustomFilterDropdown<String>(
       value: _selectedStatus,
-      items: _statusOptions.map((st) => CustomDropdownItem(value: st, label: st)).toList(),
+      items: _statusOptions.map((st) => CustomDropdownItem(value: st, label: statusMap[st] ?? st)).toList(),
       onChanged: (v) => setState(() => _selectedStatus = v as String),
     );
   }
 
-  Widget _buildDatePicker() {
+  Widget _buildDatePicker(AppLocalizations l10n) {
     return GestureDetector(
       onTap: _showCustomDatePicker,
-      child: _buildFilterBox('Date', _selectedDate != null ? DateFormat('dd MMM').format(_selectedDate!) : 'Select Date'),
+      child: _buildFilterBox(l10n.filterDate, _selectedDate != null ? DateFormat('dd MMM').format(_selectedDate!) : l10n.selectDate),
     );
   }
 

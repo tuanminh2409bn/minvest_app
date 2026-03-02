@@ -50,7 +50,7 @@ class LiquidGlassNavBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildNavItem(0, Icons.grid_view_rounded, 'Signals'),
-                _buildNavItem(1, Icons.show_chart_rounded, 'Charts'),
+                _buildNavItem(1, Icons.bar_chart_rounded, 'Charts'),
                 _buildNavItem(2, Icons.history_rounded, 'History'),
                 _buildNavItem(3, Icons.person_rounded, 'Profile'),
               ],
@@ -67,7 +67,7 @@ class LiquidGlassNavBar extends StatelessWidget {
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 65,
+        width: 65, // Back to 65 for 4-item layout
         height: 68,
         color: Colors.transparent,
         child: Icon(

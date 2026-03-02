@@ -80,14 +80,17 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              l10n.choosePlanSubtitle,
-                              style: const TextStyle(
-                                color: Color(0xFF636363),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
+                            Expanded(
+                              child: Text(
+                                l10n.choosePlanSubtitle,
+                                style: const TextStyle(
+                                  color: Color(0xFF636363),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
+                            const SizedBox(width: 8),
                             _buildPlanToggle(l10n),
                           ],
                         ),
@@ -273,45 +276,53 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         width: double.infinity,
         height: 60,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: isSelected
-                ? [const Color(0xFF0CA3ED).withOpacity(0.3), const Color(0xFF276EFB).withOpacity(0.3)]
-                : [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.05)],
-          ),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF289EFF) : Colors.white.withOpacity(0.2),
-          ),
-        ),
+        decoration: isSelected 
+          ? ShapeDecoration(
+              gradient: LinearGradient(
+                begin: const Alignment(0.00, 1.00),
+                end: const Alignment(1.00, 0.12),
+                colors: [
+                  const Color(0xFF276EFB).withValues(alpha: 0.1), 
+                  Colors.white.withValues(alpha: 0.02)
+                ],
+              ),
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(
+                  width: 1,
+                  color: Color(0xFF276EFB),
+                ),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            )
+          : BoxDecoration(
+              color: const Color(0xFF161616),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
         child: Row(
           children: [
             const SizedBox(width: 16),
-            Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? const Color(0xFF289EFF) : const Color(0xFF636363),
-                  width: 1.5,
+            if (isSelected)
+              Image.asset(
+                'assets/icons/tick.png',
+                width: 18,
+                height: 18,
+                fit: BoxFit.contain,
+              )
+            else
+              Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFF636363),
+                    width: 1.5,
+                  ),
                 ),
               ),
-              child: isSelected
-                  ? Center(
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF289EFF),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
             const SizedBox(width: 12),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -319,16 +330,16 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.white70,
                     fontSize: 18,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
                 Text(
                   l10n.upgradeToSeeMore,
-                  style: const TextStyle(
-                    color: Color(0xFF636363),
+                  style: TextStyle(
+                    color: isSelected ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF636363),
                     fontSize: 14,
                   ),
                 ),
@@ -337,10 +348,10 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
             const Spacer(),
             Text(
               price,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.white,
                 fontSize: 16,
-                fontWeight: FontWeight.w400,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
             const SizedBox(width: 16),
