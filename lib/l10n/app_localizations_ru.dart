@@ -1503,4 +1503,135 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get disclaimerContent =>
       'The information on signalgpt.ai is for reference and knowledge-sharing purposes only, and does not constitute investment advice. Users are solely responsible for their own trading decisions.';
+
+  @override
+  String get openTradingAccount => 'Open A Trading Account';
+
+  @override
+  String get supportUs => 'Support Us';
+
+  @override
+  String get rateApp => 'Rate App';
+
+  @override
+  String get shareApp => 'Share App';
+
+  @override
+  String get accountDetails => 'Account Details';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get termsOfUse => 'Terms Of Use';
+
+  @override
+  String get accounts => 'Accounts';
+
+  @override
+  String get accessExchange => 'Access The Exchange';
+
+  @override
+  String get onlineSupport => 'Online Support';
+
+  @override
+  String get selectLanguage => 'Select Language';
+
+  @override
+  String get left => 'left';
+
+  @override
+  String get upgradeToPro => 'Upgrade To Pro';
+
+  @override
+  String get assetGold => 'Gold';
+
+  @override
+  String get assetCrypto => 'Crypto';
+
+  @override
+  String get assetForex => 'Forex';
+
+  @override
+  String get tokens => 'Tokens';
+
+  @override
+  String get noForexAssets => 'No Forex assets available';
+
+  @override
+  String openApp(String appName) {
+    return 'Open $appName';
+  }
+
+  @override
+  String get signalStatus => 'Status';
+
+  @override
+  String get signalEntryLabel => 'ENTRY';
+
+  @override
+  String get signalSlLabel => 'SL';
+
+  @override
+  String get signalTp1Label => 'TP1';
+
+  @override
+  String get signalTp2Label => 'TP2';
+
+  @override
+  String get signalTp3Label => 'TP3';
+
+  @override
+  String get analyze => 'Analyze';
+
+  @override
+  String get useTokenToView => 'Use Token to view Signal';
+
+  @override
+  String get viewNow => 'View Now';
+
+  @override
+  String get waitingNewSignals => 'Waiting for new signals...';
+
+  @override
+  String get failedUnlockSignal => 'Failed to unlock signal';
+
+  @override
+  String get notEnoughTokens => 'Not enough tokens';
+
+  @override
+  String get newSignalUploaded => 'New Signal uploaded';
+
+  @override
+  String newSymbolSignalUploaded(String symbol) {
+    return 'New $symbol signal is now uploaded!';
+  }
+
+  @override
+  String get upgradeToViewSignalBanner => 'Upgrade to View Signal';
+
+  @override
+  String get signalHistory => 'Signal History';
+
+  @override
+  String get allStatus => 'ALL';
+
+  @override
+  String get selectDate => 'Select Date';
+
+  @override
+  String get noHistoryFound => 'No history found';
+
+  @override
+  String get filterDate => 'Date';
+
+  @override
+  String get marketChart => 'MARKET CHART';
+
+  @override
+  String get analysisExplanation => 'Analysis & Explanation';
+
+  @override
+  String get noDetailedAnalysis =>
+      'No detailed analysis available for this signal.';
 }

@@ -7,6 +7,7 @@ import 'package:minvest_forex_app/features/notifications/providers/notification_
 import 'package:minvest_forex_app/features/auth/screens/change_password_screen.dart';
 import 'package:minvest_forex_app/features/auth/screens/notification_settings_screen.dart';
 import 'package:minvest_forex_app/features/auth/screens/terms_of_use_screen.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/app/widgets/liquid_glass_nav_bar.dart';
 import 'package:minvest_forex_app/main.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -42,6 +43,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _handleLogout(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => Center(
@@ -80,12 +82,12 @@ class SettingsScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min, // Auto size height based on content
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(24, 30, 24, 20),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 30, 24, 20),
                     child: Text(
-                      'Are you sure you want to log out?',
+                      l10n.confirmLogoutMessage,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontFamily: 'Be Vietnam Pro',
@@ -118,10 +120,10 @@ class SettingsScreen extends StatelessWidget {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
-                        'Log out',
+                      child: Text(
+                        l10n.logout,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontFamily: 'Be Vietnam Pro',
@@ -161,6 +163,7 @@ class SettingsScreen extends StatelessWidget {
         return Consumer<LanguageProvider>(
           builder: (context, langProvider, child) {
             final currentLocale = langProvider.locale?.languageCode ?? 'en';
+            final l10n = AppLocalizations.of(context)!;
             
             return BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
@@ -168,15 +171,15 @@ class SettingsScreen extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.7,
                 decoration: ShapeDecoration(
                   gradient: LinearGradient(
-                    begin: const Alignment(0.00, 0.78),
-                    end: const Alignment(1.00, 0.20),
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
-                      const Color(0xFF1E1E1E).withValues(alpha: 0.8),
-                      const Color(0xFF0D0D0D).withValues(alpha: 0.6)
+                      Colors.white.withValues(alpha: 0.12),
+                      Colors.white.withValues(alpha: 0.04),
                     ],
                   ),
                   shape: const RoundedRectangleBorder(
-                    side: BorderSide(width: 1, color: Colors.white10),
+                    side: BorderSide(width: 1.5, color: Colors.white10),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(30),
                       topRight: Radius.circular(30),
@@ -195,13 +198,14 @@ class SettingsScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Text(
-                          'Select Language',
-                          style: TextStyle(
+                          l10n.selectLanguage,
+                          style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 22,
+                            fontSize: 20,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -213,6 +217,8 @@ class SettingsScreen extends StatelessWidget {
                           itemBuilder: (context, index) {
                             final lang = languages[index];
                             final isSelected = currentLocale == lang['code'];
+                            final bool isTop = index == 0;
+                            final bool isBottom = index == languages.length - 1;
                             
                             return GestureDetector(
                               onTap: () {
@@ -220,13 +226,14 @@ class SettingsScreen extends StatelessWidget {
                                 Navigator.pop(context);
                               },
                               child: Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: isSelected ? const Color(0xFF276EFB) : Colors.white10,
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(isTop ? 12 : 0),
+                                    topRight: Radius.circular(isTop ? 12 : 0),
+                                    bottomLeft: Radius.circular(isBottom ? 12 : 0),
+                                    bottomRight: Radius.circular(isBottom ? 12 : 0),
                                   ),
                                 ),
                                 child: Row(
@@ -247,6 +254,7 @@ class SettingsScreen extends StatelessWidget {
                                         color: Colors.white,
                                         fontSize: 18,
                                         fontWeight: FontWeight.w400,
+                                        fontFamily: 'Be Vietnam Pro',
                                       ),
                                     ),
                                     const Spacer(),
@@ -254,11 +262,13 @@ class SettingsScreen extends StatelessWidget {
                                       const Icon(
                                         Icons.check_circle,
                                         color: Color(0xFF276EFB),
+                                        size: 24,
                                       )
                                     else
                                       const Icon(
                                         Icons.radio_button_unchecked,
-                                        color: Colors.white24,
+                                        color: Colors.white10, // Very subtle unselected icon
+                                        size: 24,
                                       ),
                                   ],
                                 ),
@@ -281,6 +291,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -291,9 +302,9 @@ class SettingsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Settings',
-          style: TextStyle(
+        title: Text(
+          l10n.setting,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 22,
             fontWeight: FontWeight.w500,
@@ -312,16 +323,16 @@ class SettingsScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   
                   // --- Subscriptions Section ---
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      'Subscriptions',
-                      style: TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
+                      l10n.subscriptions,
+                      style: const TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                   ),
                   const SizedBox(height: 16),
                   _buildMenuButton(
-                    label: 'Open A Trading Account',
+                    label: l10n.openTradingAccount,
                     icon: Icons.account_balance_wallet_outlined,
                     onTap: () => _launchURL('https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1'),
                   ),
@@ -329,21 +340,21 @@ class SettingsScreen extends StatelessWidget {
                   const SizedBox(height: 32),
 
                   // --- Support Us Section ---
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      'Support Us',
-                      style: TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
+                      l10n.supportUs,
+                      style: const TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                   ),
                   const SizedBox(height: 16),
                   _buildMenuButton(
-                    label: 'Rate App',
+                    label: l10n.rateApp,
                     icon: Icons.star_border,
                     onTap: _rateApp,
                   ),
                   _buildMenuButton(
-                    label: 'Share App',
+                    label: l10n.shareApp,
                     icon: Icons.share_outlined,
                     onTap: _shareApp,
                   ),
@@ -351,33 +362,33 @@ class SettingsScreen extends StatelessWidget {
                   const SizedBox(height: 32),
 
                   // --- Account Details Section ---
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      'Account Details',
-                      style: TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
+                      l10n.accountDetails,
+                      style: const TextStyle(color: Color(0xFF636363), fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                   ),
                   const SizedBox(height: 16),
                   _buildMenuButton(
-                    label: 'Change Password',
+                    label: l10n.changePassword,
                     icon: Icons.lock_outline,
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const ChangePasswordScreen()));
                     },
                   ),
                   _buildMenuButton(
-                    label: 'Language',
+                    label: l10n.language,
                     icon: Icons.language,
                     onTap: () => _showLanguageSelection(context),
                   ),
                   _buildMenuButton(
-                    label: 'Log out',
+                    label: l10n.logout,
                     icon: Icons.logout,
                     onTap: () => _handleLogout(context),
                   ),
                   _buildMenuButton(
-                    label: 'Notifications',
+                    label: l10n.notifications,
                     icon: Icons.notifications_none,
                     onTap: () {
                       Navigator.push(
@@ -387,7 +398,7 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
                   _buildMenuButton(
-                    label: 'Terms Of Use',
+                    label: l10n.termsOfUse,
                     icon: Icons.description_outlined,
                     onTap: () => Navigator.push(
                       context,
@@ -408,7 +419,7 @@ class SettingsScreen extends StatelessWidget {
             right: 0,
             child: Center(
               child: LiquidGlassNavBar(
-                selectedIndex: 3, // Settings belongs to Profile/Account section
+                selectedIndex: 3, // Settings belongs to Profile section (now index 3)
                 onTap: (index) {
                   Navigator.pop(context); // Pop Settings
                   if (index != 3) {

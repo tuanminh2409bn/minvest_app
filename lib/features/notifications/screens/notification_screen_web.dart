@@ -5,7 +5,7 @@ import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/features/notifications/models/notification_model.dart';
 import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
-import 'package:minvest_forex_app/features/signals/screens/signal_detail_screen.dart';
+import 'package:minvest_forex_app/features/signals/screens/signal_detail_screen_web.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

@@ -889,7 +889,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get pricing => 'Bảng giá';
 
   @override
-  String get choosePlanSubtitle => 'Chọn gói phù hợp với bạn';
+  String get choosePlanSubtitle => 'Chọn gói';
 
   @override
   String get financialNewsHub => 'Trung tâm Tin tức Tài chính';
@@ -1503,4 +1503,135 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get disclaimerContent =>
       'Thông tin trên signalgpt.ai nhằm mục đích tham khảo và chia sẻ kiến thức, không phải lời khuyên đầu tư. Người dùng tự chịu trách nhiệm với mọi quyết định giao dịch của mình.';
+
+  @override
+  String get openTradingAccount => 'Mở tài khoản giao dịch';
+
+  @override
+  String get supportUs => 'Hỗ trợ chúng tôi';
+
+  @override
+  String get rateApp => 'Đánh giá ứng dụng';
+
+  @override
+  String get shareApp => 'Chia sẻ ứng dụng';
+
+  @override
+  String get accountDetails => 'Chi tiết tài khoản';
+
+  @override
+  String get language => 'Ngôn ngữ';
+
+  @override
+  String get termsOfUse => 'Điều khoản sử dụng';
+
+  @override
+  String get accounts => 'Tài khoản';
+
+  @override
+  String get accessExchange => 'Truy cập sàn giao dịch';
+
+  @override
+  String get onlineSupport => 'Hỗ trợ trực tuyến';
+
+  @override
+  String get selectLanguage => 'Chọn ngôn ngữ';
+
+  @override
+  String get left => 'còn lại';
+
+  @override
+  String get upgradeToPro => 'Nâng cấp Pro';
+
+  @override
+  String get assetGold => 'Vàng';
+
+  @override
+  String get assetCrypto => 'Crypto';
+
+  @override
+  String get assetForex => 'Ngoại hối';
+
+  @override
+  String get tokens => 'Token';
+
+  @override
+  String get noForexAssets => 'Không có tài sản Ngoại hối khả dụng';
+
+  @override
+  String openApp(String appName) {
+    return 'Mở $appName';
+  }
+
+  @override
+  String get signalStatus => 'Trạng thái';
+
+  @override
+  String get signalEntryLabel => 'VÀO LỆNH';
+
+  @override
+  String get signalSlLabel => 'SL';
+
+  @override
+  String get signalTp1Label => 'TP1';
+
+  @override
+  String get signalTp2Label => 'TP2';
+
+  @override
+  String get signalTp3Label => 'TP3';
+
+  @override
+  String get analyze => 'Phân tích';
+
+  @override
+  String get useTokenToView => 'Dùng Token để xem Tín hiệu';
+
+  @override
+  String get viewNow => 'Xem ngay';
+
+  @override
+  String get waitingNewSignals => 'Đang chờ tín hiệu mới...';
+
+  @override
+  String get failedUnlockSignal => 'Mở khóa tín hiệu thất bại';
+
+  @override
+  String get notEnoughTokens => 'Không đủ token';
+
+  @override
+  String get newSignalUploaded => 'Tín hiệu mới đã được tải lên';
+
+  @override
+  String newSymbolSignalUploaded(String symbol) {
+    return 'Tín hiệu $symbol mới đã sẵn sàng!';
+  }
+
+  @override
+  String get upgradeToViewSignalBanner => 'Nâng cấp để xem tín hiệu';
+
+  @override
+  String get signalHistory => 'Lịch sử Tín hiệu';
+
+  @override
+  String get allStatus => 'TẤT CẢ';
+
+  @override
+  String get selectDate => 'Chọn ngày';
+
+  @override
+  String get noHistoryFound => 'Không tìm thấy lịch sử';
+
+  @override
+  String get filterDate => 'Ngày';
+
+  @override
+  String get marketChart => 'BIỂU ĐỒ THỊ TRƯỜNG';
+
+  @override
+  String get analysisExplanation => 'Phân tích & Giải thích';
+
+  @override
+  String get noDetailedAnalysis =>
+      'Không có phân tích chi tiết cho tín hiệu này.';
 }

@@ -184,8 +184,25 @@ class NotificationService {
       debugPrint("🔑 [FCM_SERVICE] FCM Token: $token");
       return token;
     } catch (e) {
-      debugPrint("🚨 [FCM_SERVICE] Lỗi khi lấy FCM Token: $e");
-      return null;
-    }
-  }
-}
+            debugPrint("🚨 [FCM_SERVICE] Lỗi khi lấy FCM Token: $e");
+            return null;
+          }
+        }
+      
+        Future<void> cleanupNotificationData() async {
+          try {
+            debugPrint("🧹 [FCM_SERVICE] Đang dọn dẹp dữ liệu thông báo...");
+            // 1. Hủy đăng ký khỏi các chủ đề chung
+            await _firebaseMessaging.unsubscribeFromTopic('signals_free');
+            await _firebaseMessaging.unsubscribeFromTopic('signals_vip');
+            await _firebaseMessaging.unsubscribeFromTopic('signals_elite');
+            
+            // 2. Xóa token trên thiết bị này
+            await _firebaseMessaging.deleteToken();
+            debugPrint("✅ [FCM_SERVICE] Dọn dẹp dữ liệu thông báo hoàn tất.");
+          } catch (e) {
+            debugPrint("🚨 [FCM_SERVICE] Lỗi khi dọn dẹp dữ liệu thông báo: $e");
+          }
+        }
+      }
+      

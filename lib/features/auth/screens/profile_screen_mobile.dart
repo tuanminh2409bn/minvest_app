@@ -10,6 +10,8 @@ import 'package:minvest_forex_app/features/notifications/screens/notification_sc
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:minvest_forex_app/features/auth/screens/settings_screen.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/features/payment_history/screens/payment_history_screen.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -117,13 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Text(
-                          'Select up to 4 Apps for Profile',
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
-                        ),
-                      ),
+                      const SizedBox(height: 20), // Removed title text
                       Expanded(
                         child: ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -131,9 +127,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           itemBuilder: (context, index) {
                             final app = allApps[index];
                             final isSelected = selectedAppNames.contains(app.name);
-                            return _buildAppOptionTile(
-                              app: app,
-                              isSelected: isSelected,
+                            final bool isTop = index == 0;
+                            final bool isBottom = index == allApps.length - 1;
+
+                            return GestureDetector(
                               onTap: () {
                                 setModalState(() {
                                   if (isSelected) {
@@ -149,6 +146,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 setState(() {}); // Update Profile Screen
                                 _saveSelectedApps();
                               },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(isTop ? 12 : 0),
+                                    topRight: Radius.circular(isTop ? 12 : 0),
+                                    bottomLeft: Radius.circular(isBottom ? 12 : 0),
+                                    bottomRight: Radius.circular(isBottom ? 12 : 0),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Image.asset(app.iconPath, width: 32, height: 32),
+                                    const SizedBox(width: 16),
+                                    Text(
+                                      app.name, 
+                                      style: const TextStyle(
+                                        color: Colors.white, 
+                                        fontSize: 18,
+                                        fontFamily: 'Be Vietnam Pro',
+                                        fontWeight: FontWeight.w400,
+                                      )
+                                    ),
+                                    const Spacer(),
+                                    Icon(
+                                      isSelected ? Icons.check_circle : Icons.add_circle_outline,
+                                      color: isSelected ? const Color(0xFF276EFB) : Colors.white10, // Subtle unselected icon
+                                      size: 24,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         ),
@@ -164,44 +194,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildAppOptionTile({
-    required ExchangeApp app,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? const Color(0xFF276EFB) : Colors.white10),
-        ),
-        child: Row(
-          children: [
-            Image.asset(app.iconPath, width: 32, height: 32),
-            const SizedBox(width: 16),
-            Text(app.name, style: const TextStyle(color: Colors.white, fontSize: 18)),
-            const Spacer(),
-            Icon(
-              isSelected ? Icons.check_circle : Icons.add_circle_outline,
-              color: isSelected ? const Color(0xFF276EFB) : Colors.white38,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final currentUser = FirebaseAuth.instance.currentUser;
-    final userTier = userProvider.userTier ?? 'free';
+    final userTier = userProvider.userTier?.toLowerCase() ?? 'free';
     final tokenBalance = userProvider.tokenBalance;
-    final userEmail = currentUser?.email ?? 'user@gmail.com';
+    final userEmail = userProvider.email ?? currentUser?.email ?? 'user@gmail.com';
+    final displayName = userProvider.displayName ?? currentUser?.displayName ?? userEmail;
+    final l10n = AppLocalizations.of(context)!;
+
+    // Helper logic to determine the correct card image
+    String getCardImage() {
+      if (userTier == 'elite' || userTier == 'vip') {
+        final expiryDate = userProvider.subscriptionExpiryDate;
+        if (expiryDate != null) {
+          final daysLeft = expiryDate.difference(DateTime.now()).inDays;
+          // Logic: Yearly plans usually have > 300 days, 
+          // but we check > 45 days to safely identify extended plans.
+          if (daysLeft > 45) return 'assets/mockups/year.png';
+        }
+        return 'assets/mockups/month.png';
+      } else if (userTier == 'demo') {
+        return 'assets/mockups/month.png'; // Show month card for demo users
+      }
+      return 'assets/mockups/free.png';
+    }
 
     // Get selected app objects
     final displayApps = allApps.where((app) => selectedAppNames.contains(app.name)).take(4).toList();
@@ -221,9 +239,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           },
         ),
-        title: const Text(
-          'Accounts',
-          style: TextStyle(
+        title: Text(
+          l10n.accounts,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 22,
             fontWeight: FontWeight.w500,
@@ -299,40 +317,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Container(
                       width: double.infinity,
-                      height: 180, // Fixed height to prevent pushing elements down
+                      height: 180,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         image: DecorationImage(
-                          image: AssetImage(
-                            userTier.toLowerCase() == 'elite' || userTier.toLowerCase() == 'vip'
-                                ? (userProvider.subscriptionExpiryDate != null && 
-                                   userProvider.subscriptionExpiryDate!.difference(DateTime.now()).inDays > 40
-                                    ? 'assets/mockups/year.png' 
-                                    : 'assets/mockups/month.png')
-                                : 'assets/mockups/free.png',
-                          ),
-                          fit: BoxFit.fill, // Force image to fill the container perfectly
+                          image: AssetImage(getCardImage()),
+                          fit: BoxFit.fill,
                         ),
                         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                       ),
                       child: Stack(
                         children: [
                           Positioned(
-                            left: 16,
-                            top: 20,
-                            child: Text(userEmail, style: const TextStyle(color: Colors.white, fontSize: 18)),
-                          ),
-                          Positioned(
-                            left: 16,
-                            bottom: 50,
-                            child: const Text('Your Tokens', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w300)),
-                          ),
-                          Positioned(
-                            left: 16,
-                            bottom: 16,
+                            left: 18,
+                            top: 18,
                             child: Text(
-                              userTier.toLowerCase() == 'elite' ? 'Unlimited' : '$tokenBalance left',
-                              style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600),
+                              userEmail, 
+                              style: const TextStyle(
+                                color: Colors.white, 
+                                fontSize: 14, 
+                                fontWeight: FontWeight.w400,
+                                fontFamily: 'Be Vietnam Pro',
+                              )
+                            ),
+                          ),
+                          Positioned(
+                            left: 18,
+                            bottom: 52,
+                            child: Text(
+                              l10n.yourTokens, 
+                              style: const TextStyle(
+                                color: Colors.white, 
+                                fontSize: 18, 
+                                fontWeight: FontWeight.w300,
+                                fontFamily: 'Be Vietnam Pro',
+                              )
+                            ),
+                          ),
+                          Positioned(
+                            left: 18,
+                            bottom: 14,
+                            child: Text(
+                              userTier == 'elite' ? l10n.unlimited : '$tokenBalance ${l10n.left}',
+                              style: const TextStyle(
+                                color: Colors.white, 
+                                fontSize: 32, 
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Be Vietnam Pro',
+                              ),
                             ),
                           ),
                         ],
@@ -351,7 +383,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Access The Exchange', style: TextStyle(color: Color(0xFF686868), fontSize: 16)),
+                            Text(l10n.accessExchange, style: const TextStyle(color: Color(0xFF686868), fontSize: 16)),
                             GestureDetector(
                               onTap: () => _showAppSelection(context),
                               child: Container(
@@ -380,28 +412,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       children: [
                         _buildMenuButton(
-                          label: 'Upgrade To Pro',
+                          label: l10n.upgradeToPro,
                           icon: Icons.workspace_premium_outlined,
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UpgradeScreen())),
                         ),
                         const SizedBox(height: 8),
                         _buildMenuButton(
-                          label: 'Settings',
+                          label: l10n.setting,
                           icon: Icons.settings_outlined,
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen())),
                         ),
                         const SizedBox(height: 8),
                         _buildMenuButton(
-                          label: 'Online Support',
+                          label: l10n.onlineSupport,
                           icon: Icons.support_agent_outlined,
-                          onTap: () => _launchURL('https://zalo.me/0969156969'),
+                          onTap: () => _launchURL('https://www.tidio.com/talk/4z2xqtu7ftageaykiq3k7b6vcb55cotv'),
                         ),
                         const SizedBox(height: 8),
-                        _buildMenuButton(label: 'Payment History', icon: Icons.history_outlined, onTap: () {}),
+                        _buildMenuButton(
+                          label: l10n.paymentHistory, 
+                          icon: Icons.history_outlined, 
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaymentHistoryScreen())),
+                        ),
                         const SizedBox(height: 8),
                         if (userProvider.role == 'admin')
                           _buildMenuButton(
-                            label: 'Admin Panel',
+                            label: l10n.adminPanel,
                             icon: Icons.admin_panel_settings_outlined,
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminPanelScreen())),
                           ),

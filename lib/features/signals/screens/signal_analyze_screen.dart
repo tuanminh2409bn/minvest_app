@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
 
@@ -12,6 +13,7 @@ class SignalAnalyzeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
     final locale = languageProvider.locale?.languageCode ?? 'en';
+    final l10n = AppLocalizations.of(context)!;
 
     String reasonText = '';
     if (signal.reason is Map) {
@@ -41,9 +43,9 @@ class SignalAnalyzeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                const Text(
-                  'Capital Management',
-                  style: TextStyle(
+                Text(
+                  l10n.capitalManagement,
+                  style: const TextStyle(
                     color: Color(0xFF636363),
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
@@ -54,8 +56,8 @@ class SignalAnalyzeScreen extends StatelessWidget {
                 // Hiển thị nội dung phân tích từ Backend
                 // Sử dụng tiêu đề chung nếu không parse được các mục con
                 _buildAnalysisSection(
-                  'Analysis & Explanation', 
-                  reasonText.isEmpty ? 'No detailed analysis available for this signal.' : reasonText
+                  l10n.analysisExplanation, 
+                  reasonText.isEmpty ? l10n.noDetailedAnalysis : reasonText
                 ),
               ],
             ),

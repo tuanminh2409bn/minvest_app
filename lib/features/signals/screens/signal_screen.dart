@@ -287,9 +287,9 @@ class _SignalScreenState extends State<SignalScreen> {
                       value: _assetFilter,
                       items: [
                         CustomDropdownItem(value: AssetFilter.all, label: l10n.allAssets),
-                        CustomDropdownItem(value: AssetFilter.gold, label: 'Gold'),
-                        CustomDropdownItem(value: AssetFilter.crypto, label: 'Crypto'),
-                        CustomDropdownItem(value: AssetFilter.forex, label: 'Forex'),
+                        CustomDropdownItem(value: AssetFilter.gold, label: l10n.assetGold),
+                        CustomDropdownItem(value: AssetFilter.crypto, label: l10n.assetCrypto),
+                        CustomDropdownItem(value: AssetFilter.forex, label: l10n.assetForex),
                       ],
                       onChanged: (value) {
                         if (value != null) setState(() => _assetFilter = value);
@@ -341,9 +341,9 @@ class _SignalScreenState extends State<SignalScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Tokens',
-                        style: TextStyle(
+                      Text(
+                        l10n.tokens,
+                        style: const TextStyle(
                           color: Color(0xFF686868),
                           fontSize: 16,
                           fontFamily: 'Be Vietnam Pro',
@@ -414,10 +414,10 @@ class _SignalScreenState extends State<SignalScreen> {
                   
                   // Forex is empty for now as no symbols are being streamed
                   if (_assetFilter == AssetFilter.forex && assetWidgets.isEmpty) {
-                    assetWidgets.add(const Center(
+                    assetWidgets.add(Center(
                       child: Padding(
-                        padding: EdgeInsets.only(top: 40),
-                        child: Text('No Forex assets available', style: TextStyle(color: Colors.white54)),
+                        padding: const EdgeInsets.only(top: 40),
+                        child: Text(l10n.noForexAssets, style: const TextStyle(color: Colors.white54)),
                       ),
                     ));
                   }
@@ -432,7 +432,7 @@ class _SignalScreenState extends State<SignalScreen> {
 
             // Open SELECTED APP Button
             Padding(
-              padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 100.0),
+              padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 80.0),
               child: Container(
                 height: 50,
                 decoration: BoxDecoration(
@@ -450,7 +450,7 @@ class _SignalScreenState extends State<SignalScreen> {
                         behavior: HitTestBehavior.opaque,
                         child: Center(
                           child: Text(
-                            'Open ${_selectedAppName.toUpperCase()}',
+                            l10n.openApp(_selectedAppName.toUpperCase()),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -729,17 +729,17 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildSignalInfoBox(
-                label: 'Status',
+                label: l10n.signalStatus,
                 value: isPlaceholder ? '-' : signal.getTranslatedResult(l10n),
                 valueColor: isPlaceholder ? Colors.white54 : statusColor,
               ),
               _buildSignalInfoBox(
-                label: 'ENTRY',
+                label: l10n.signalEntryLabel,
                 value: isPlaceholder ? '-' : signal.entryPrice.toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
                 valueColor: const Color(0xFF00BB32),
               ),
               _buildSignalInfoBox(
-                label: 'SL',
+                label: l10n.signalSlLabel,
                 value: isPlaceholder ? '-' : signal.stopLoss.toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
                 valueColor: const Color(0xFFE3001E),
               ),
@@ -750,17 +750,17 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildSignalInfoBox(
-                label: 'TP1',
+                label: l10n.signalTp1Label,
                 value: !isPlaceholder && signal.takeProfits.isNotEmpty ? signal.takeProfits[0].toString() : '-',
                 valueColor: Colors.white,
               ),
               _buildSignalInfoBox(
-                label: 'TP2',
+                label: l10n.signalTp2Label,
                 value: !isPlaceholder && signal.takeProfits.length > 1 ? signal.takeProfits[1].toString() : '-',
                 valueColor: Colors.white,
               ),
               _buildSignalInfoBox(
-                label: 'TP3',
+                label: l10n.signalTp3Label,
                 value: !isPlaceholder && signal.takeProfits.length > 2 ? signal.takeProfits[2].toString() : '-',
                 valueColor: Colors.white,
               ),
@@ -794,9 +794,9 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      const Text(
-                        'Analyze',
-                        style: TextStyle(
+                      Text(
+                        l10n.analyze,
+                        style: const TextStyle(
                           color: Color(0xFF636363),
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -820,6 +820,7 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
   }
 
   Widget _buildBlurredOverlay(BuildContext context, Signal signal, UserProvider userProvider, bool isFreeUnlock) {
+    final l10n = AppLocalizations.of(context)!;
     return Positioned.fill(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
@@ -883,11 +884,11 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 12.0),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
                       child: Text(
-                        'Use Token to view Signal',
-                        style: TextStyle(
+                        l10n.useTokenToView,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
@@ -900,7 +901,7 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
                       onPressed: () async {
                         if (signal.id == 'placeholder') {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Waiting for new signals...')),
+                            SnackBar(content: Text(l10n.waitingNewSignals)),
                           );
                           return;
                         }
@@ -911,12 +912,12 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
                             final success = await userProvider.unlockSignal(signal.id, freeUnlock: false);
                             if (!success && context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Failed to unlock signal')),
+                                SnackBar(content: Text(l10n.failedUnlockSignal)),
                               );
                             }
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Not enough tokens')),
+                                SnackBar(content: Text(l10n.notEnoughTokens)),
                             );
                           }
                         }
@@ -929,9 +930,9 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
                         elevation: 12,
                         shadowColor: const Color(0xFF276EFB).withValues(alpha: 0.6),
                       ),
-                      child: const Text(
-                        'View Now',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Be Vietnam Pro'),
+                      child: Text(
+                        l10n.viewNow,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Be Vietnam Pro'),
                       ),
                     ),
                   ],

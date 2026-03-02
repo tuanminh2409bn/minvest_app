@@ -12,7 +12,7 @@ import 'package:minvest_forex_app/core/services/purchase_service.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
-import 'package:minvest_forex_app/features/signals/screens/signal_detail_screen.dart';
+import 'package:minvest_forex_app/features/signals/screens/signal_analyze_screen.dart';
 import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
 import 'package:minvest_forex_app/firebase_options.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
@@ -25,7 +25,9 @@ import 'package:minvest_forex_app/features/chat/screens/support_chat_screen.dart
 import 'package:minvest_forex_app/features/chat/screens/chat_screen.dart';
 import 'package:minvest_forex_app/features/chat/services/chat_service.dart';
 import 'package:minvest_forex_app/app/main_screen.dart';
+import 'package:minvest_forex_app/features/payment_history/providers/payment_history_provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:minvest_forex_app/core/services/affiliate_tracker.dart';
 import 'package:minvest_forex_app/app/routes/web_routes_stub.dart' if (dart.library.js_interop) 'package:minvest_forex_app/app/routes/web_routes.dart';
 import 'features/auth/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -40,6 +42,8 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    // Khởi tạo Affiliate Tracking (chỉ chạy trên Web)
+    AffiliateTracker().initialize();
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -81,6 +85,7 @@ Future<void> main() async {
           ChangeNotifierProvider(create: (context) => NotificationProvider()),
           ChangeNotifierProvider(create: (context) => PurchaseService()),
           ChangeNotifierProvider(create: (context) => ChatProvider(context.read<AuthService>())),
+          ChangeNotifierProvider(create: (context) => PaymentHistoryProvider()),
         ],
         child: const MyApp(),
       ),
@@ -174,12 +179,11 @@ class _MyAppState extends State<MyApp> {
           if (signalId == null) return;
           
           final signal = await SignalService().getSignalById(signalId);
-          final userTier = userProvider.userTier ?? 'free';
           
           if (signal != null && navigatorKey.currentState != null) {
             navigatorKey.currentState!.push(
               MaterialPageRoute(
-                builder: (_) => SignalDetailScreen(signal: signal, userTier: userTier),
+                builder: (_) => SignalAnalyzeScreen(signal: signal),
               ),
             );
           } else {

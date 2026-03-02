@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/features/admin/services/admin_service.dart';
 import 'package:minvest_forex_app/features/admin/screens/admin_news_screen.dart';
+import 'package:minvest_forex_app/features/admin/screens/affiliate_management_view.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -18,6 +19,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   final List<Widget> _screens = [
     const UserManagementView(),
     const AdminNewsScreen(),
+    const AffiliateManagementView(),
     const AppConfigView(),
   ];
 
@@ -44,6 +46,11 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 icon: Icon(Icons.newspaper),
                 selectedIcon: Icon(Icons.article),
                 label: Text('News'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.share),
+                selectedIcon: Icon(Icons.share_arrival_time),
+                label: Text('Affiliate'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.settings),

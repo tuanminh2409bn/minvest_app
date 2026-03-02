@@ -5,7 +5,8 @@ import 'package:minvest_forex_app/core/providers/language_provider.dart'; // TH�
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/features/notifications/models/notification_model.dart';
 import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
-import 'package:minvest_forex_app/features/signals/screens/signal_detail_screen.dart';
+import 'package:minvest_forex_app/features/signals/screens/signal_analyze_screen.dart';
+import 'package:minvest_forex_app/features/verification/screens/upgrade_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,16 +32,26 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void _onNotificationTap(NotificationModel notification) async {
     if (notification.signalId == null) return;
 
+    final userProvider = context.read<UserProvider>();
+    final userTier = userProvider.userTier?.toLowerCase() ?? 'free';
+    final isFree = userTier != 'elite' && userTier != 'vip';
+
+    if (isFree && notification.type.contains('signal')) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UpgradeScreen()),
+      );
+      return;
+    }
+
     final signal = await SignalService().getSignalById(notification.signalId!);
-    final userTier = context.read<UserProvider>().userTier ?? 'free';
 
     if (signal != null && mounted) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => SignalDetailScreen(
+          builder: (_) => SignalAnalyzeScreen(
             signal: signal,
-            userTier: userTier,
           ),
         ),
       );
@@ -81,18 +92,28 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Lấy mã ngôn ngữ hiện tại từ provider
     final langCode = context.watch<LanguageProvider>().locale?.languageCode ?? 'vi';
+    final userProvider = context.watch<UserProvider>();
+    final userTier = userProvider.userTier?.toLowerCase() ?? 'free';
+    final isFree = userTier != 'elite' && userTier != 'vip';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(l10n.notifications, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: const Color(0xFF161B22),
+        title: Text(
+          l10n.notifications, 
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontFamily: 'Be Vietnam Pro',
+            fontWeight: FontWeight.w500,
+          )
+        ),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -102,40 +123,161 @@ class _NotificationScreenState extends State<NotificationScreen> {
             return Center(
               child: Text(
                 l10n.noNotificationsYet,
-                style: const TextStyle(color: Colors.grey),
+                style: const TextStyle(color: Colors.grey, fontFamily: 'Be Vietnam Pro'),
               ),
             );
           }
 
           return ListView.builder(
-            itemCount: provider.notifications.length,
+            padding: const EdgeInsets.only(bottom: 40),
+            itemCount: provider.notifications.length + (isFree ? 1 : 0),
             itemBuilder: (context, index) {
+              if (isFree && index == provider.notifications.length) {
+                return _buildUpgradeBanner(context, l10n);
+              }
+
               final notification = provider.notifications[index];
               final timeAgo = _formatTimestamp(notification.timestamp, l10n);
+              
+              String title = notification.getTitle(langCode);
+              String body = notification.getBody(langCode);
 
-              return ListTile(
+              // If user is free and it's a signal notification, use generic text
+              if (isFree && notification.type.contains('signal')) {
+                title = l10n.newSignalUploaded;
+                final symbol = _extractSymbolFromTitle(notification.getTitle('en')) ?? 'XAUUSD';
+                body = l10n.newSymbolSignalUploaded(symbol.replaceAll('/', ''));
+              }
+
+              return GestureDetector(
                 onTap: () => _onNotificationTap(notification),
-                leading: _buildLeadingIcon(notification),
-                // --- THAY ĐỔI 1: SỬ DỤNG HÀM getTitle() ---
-                title: Text(
-                  notification.getTitle(langCode),
-                  style: TextStyle(
-                    fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
-                    color: Colors.white,
+                child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 1),
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: notification.isRead ? Colors.transparent : const Color(0xFF212121),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontFamily: 'Be Vietnam Pro',
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: -0.90,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        body,
+                        style: const TextStyle(
+                          color: Color(0xFF797979),
+                          fontSize: 16,
+                          fontFamily: 'Be Vietnam Pro',
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: -0.80,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        timeAgo,
+                        style: const TextStyle(
+                          color: Color(0xFF9A9A9A),
+                          fontSize: 12,
+                          fontFamily: 'Be Vietnam Pro',
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: -0.60,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                // --- THAY ĐỔI 2: SỬ DỤNG HÀM getBody() ---
-                subtitle: Text(
-                  '${notification.getBody(langCode)}\n$timeAgo',
-                  style: TextStyle(
-                    color: notification.isRead ? Colors.grey.shade500 : Colors.grey.shade300,
-                  ),
-                ),
-                isThreeLine: true,
               );
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildUpgradeBanner(BuildContext context, AppLocalizations l10n) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      width: double.infinity,
+      height: 174,
+      decoration: ShapeDecoration(
+        gradient: LinearGradient(
+          begin: const Alignment(0.00, 1.00),
+          end: const Alignment(1.09, -0.05),
+          colors: [
+            Colors.white.withValues(alpha: 0.15),
+            Colors.white.withValues(alpha: 0.05),
+          ],
+        ),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            width: 1,
+            color: Colors.white.withValues(alpha: 0.20),
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        shadows: const [
+          BoxShadow(
+            color: Color(0x4C797979),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+            spreadRadius: 0,
+          )
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            l10n.upgradeToViewSignalBanner,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontFamily: 'Be Vietnam Pro',
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => const UpgradeScreen())
+              );
+            },
+            child: Container(
+              width: 142,
+              height: 37,
+              decoration: ShapeDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment(0.00, 0.50),
+                  end: Alignment(1.00, 0.50),
+                  colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
+                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                l10n.upgradeNow,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontFamily: 'Be Vietnam Pro',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

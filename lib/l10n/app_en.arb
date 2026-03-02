@@ -293,7 +293,7 @@
     "history": "History",
     "signalsWillAppearHere": "Signals will appear here when available",
     "pricing": "Pricing",
-    "choosePlanSubtitle": "Choose a plan that works for you",
+    "choosePlanSubtitle": "Choose a plan",
     "financialNewsHub": "Financial News Hub",
     "financialNewsHubDesc": "Critical updates. Market reactions. No noise – just what investors need to know.",
     "newsTabAllArticles": "All Articles",
@@ -523,5 +523,62 @@
     "popupMasterMarket": "Do you want to master the market?",
     "popupLoginExplore": "Log in to explore this trading bulletin!",
     "disclaimer": "Disclaimer",
-    "disclaimerContent": "The information on signalgpt.ai is for reference and knowledge-sharing purposes only, and does not constitute investment advice. Users are solely responsible for their own trading decisions."
+    "disclaimerContent": "The information on signalgpt.ai is for reference and knowledge-sharing purposes only, and does not constitute investment advice. Users are solely responsible for their own trading decisions.",
+    "openTradingAccount": "Open A Trading Account",
+    "supportUs": "Support Us",
+    "rateApp": "Rate App",
+    "shareApp": "Share App",
+    "accountDetails": "Account Details",
+    "language": "Language",
+    "termsOfUse": "Terms Of Use",
+    "accounts": "Accounts",
+    "accessExchange": "Access The Exchange",
+    "onlineSupport": "Online Support",
+    "selectLanguage": "Select Language",
+    "left": "left",
+    "upgradeToPro": "Upgrade To Pro",
+    "assetGold": "Gold",
+    "assetCrypto": "Crypto",
+    "assetForex": "Forex",
+    "tokens": "Tokens",
+    "noForexAssets": "No Forex assets available",
+    "openApp": "Open {appName}",
+    "@openApp": {
+        "placeholders": {
+            "appName": {
+                "type": "String"
+            }
+        }
+    },
+    "signalStatus": "Status",
+    "signalEntryLabel": "ENTRY",
+    "signalSlLabel": "SL",
+    "signalTp1Label": "TP1",
+    "signalTp2Label": "TP2",
+    "signalTp3Label": "TP3",
+    "analyze": "Analyze",
+    "useTokenToView": "Use Token to view Signal",
+    "viewNow": "View Now",
+    "waitingNewSignals": "Waiting for new signals...",
+    "failedUnlockSignal": "Failed to unlock signal",
+    "notEnoughTokens": "Not enough tokens",
+    "newSignalUploaded": "New Signal uploaded",
+    "newSymbolSignalUploaded": "New {symbol} signal is now uploaded!",
+    "@newSymbolSignalUploaded": {
+        "placeholders": {
+            "symbol": {
+                "type": "String"
+            }
+        }
+    },
+    "upgradeToViewSignalBanner": "Upgrade to View Signal",
+    "signalHistory": "Signal History",
+    "allAssets": "All Assets",
+    "allStatus": "ALL",
+    "selectDate": "Select Date",
+    "noHistoryFound": "No history found",
+    "filterDate": "Date",
+    "marketChart": "MARKET CHART",
+    "analysisExplanation": "Analysis & Explanation",
+    "noDetailedAnalysis": "No detailed analysis available for this signal."
 }
