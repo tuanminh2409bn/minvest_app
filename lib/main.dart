@@ -28,6 +28,7 @@ import 'package:minvest_forex_app/app/main_screen.dart';
 import 'package:minvest_forex_app/features/payment_history/providers/payment_history_provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:minvest_forex_app/core/services/affiliate_tracker.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:minvest_forex_app/app/routes/web_routes_stub.dart' if (dart.library.js_interop) 'package:minvest_forex_app/app/routes/web_routes.dart';
 import 'features/auth/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -39,6 +40,9 @@ final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
 Future<void> main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    // Loại bỏ dấu # trên URL Web
+    usePathUrlStrategy();
+    
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );

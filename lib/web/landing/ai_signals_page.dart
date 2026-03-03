@@ -1447,28 +1447,26 @@ class _SignalGridLive extends StatefulWidget {
 class _SignalGridLiveState extends State<_SignalGridLive> {
   final SignalService _signalService = SignalService();
   static const int _pageSizeAll = 5;
-  static const int _pageSizeSpecific = 15;
   
   int _goldPage = 0;
   int _cryptoPage = 0;
   int _forexPage = 0;
-  int _specificPage = 0;
 
-  @override
-  void didUpdateWidget(covariant _SignalGridLive oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.assetFilter != widget.assetFilter || 
-        oldWidget.dateRange != widget.dateRange ||
-        oldWidget.selectedPair != widget.selectedPair ||
-        oldWidget.selectedStatus != widget.selectedStatus ||
-        oldWidget.selectedTimezone != widget.selectedTimezone) {
-      _goldPage = 0;
-      _cryptoPage = 0;
-      _forexPage = 0;
-      _specificPage = 0;
-    }
+  List<Signal> _paginate(List<Signal> list, int page, int pageSize) {
+    final start = page * pageSize;
+    return list.skip(start).take(pageSize).toList();
   }
 
+  int _normalizePage(int page, int totalItems, int pageSize) {
+    if (totalItems <= 0 || pageSize <= 0) return 0;
+    final totalPages = (totalItems / pageSize).ceil();
+    if (totalPages <= 0) return 0;
+    final maxPage = totalPages - 1;
+    if (page > maxPage) return maxPage;
+    if (page < 0) return 0;
+    return page;
+  }
+  
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
@@ -1483,7 +1481,7 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       }
 
       return StreamBuilder<List<Signal>>(
-        stream: _signalService.getSignals(isLive: true, userTier: 'web'),
+        stream: _signalService.getAllSignals(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -1498,19 +1496,24 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
           }
           
           final allSignals = _filteredSignals(snapshot.data ?? []);
+          // Chỉ lấy các tín hiệu đang "running" để hiển thị ở phần Live
+          final liveSignals = allSignals.where((s) => s.status.toLowerCase() == 'running').toList();
 
           if (widget.assetFilter != AssetFilter.all) {
-             return _buildSpecificAssetView(allSignals, itemWidthSpecific, stacked);
+             return _buildSpecificAssetView(liveSignals, itemWidthSpecific, stacked);
           }
 
-          return _buildAllAssetsView(allSignals, columnWidthAll, stacked);
+          return _buildAllAssetsView(liveSignals, columnWidthAll, stacked);
         },
       );
     });
   }
 
   Widget _buildSpecificAssetView(List<Signal> signals, double itemWidth, bool stacked) {
-    if (signals.isEmpty) {
+    // Chỉ lấy 1 tín hiệu mới nhất khi chọn Asset cụ thể
+    final latest = signals.isNotEmpty ? [signals.first] : <Signal>[];
+
+    if (latest.isEmpty) {
       return Center(
         child: Container(
           width: double.infinity,
@@ -1536,70 +1539,23 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       );
     }
 
-    final totalItems = signals.length;
-    final totalPages = (totalItems / _pageSizeSpecific).ceil();
-    final currentPage = _specificPage.clamp(0, totalPages > 0 ? totalPages - 1 : 0);
-    final pagedSignals = signals.skip(currentPage * _pageSizeSpecific).take(_pageSizeSpecific).toList();
-
-    return Column(
-      children: [
-        Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: pagedSignals.map((signal) {
-            return SizedBox(
-              width: itemWidth,
-              child: _SignalWebCard(signal: signal, timeZone: widget.selectedTimezone),
-            );
-          }).toList(),
-        ),
-        if (totalPages > 1) ...[
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _NavButton(
-                enabled: currentPage > 0,
-                icon: Icons.arrow_back_ios_new,
-                onTap: () => setState(() => _specificPage = currentPage - 1),
-              ),
-              const SizedBox(width: 24),
-              Text(
-                '${AppLocalizations.of(context)!.page} ${currentPage + 1} / $totalPages',
-                style: AppTextStyles.caption.copyWith(color: Colors.white70, fontSize: 14),
-              ),
-              const SizedBox(width: 24),
-              _NavButton(
-                enabled: currentPage < totalPages - 1,
-                icon: Icons.arrow_forward_ios,
-                onTap: () => setState(() => _specificPage = currentPage + 1),
-              ),
-            ],
-          ),
-        ],
-      ],
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      children: latest.map((signal) {
+        return SizedBox(
+          width: itemWidth,
+          child: _SignalWebCard(signal: signal, timeZone: widget.selectedTimezone),
+        );
+      }).toList(),
     );
   }
 
   Widget _buildAllAssetsView(List<Signal> signals, double columnWidth, bool stacked) {
-    final goldAll = signals.where(_isGold).toList();
-    final cryptoAll = signals.where(_isCrypto).toList();
-    final forexAll = signals.where(_isForex).toList();
-
-    final goldPage = _normalizePage(_goldPage, goldAll.length, _pageSizeAll);
-    final cryptoPage = _normalizePage(_cryptoPage, cryptoAll.length, _pageSizeAll);
-    final forexPage = _normalizePage(_forexPage, forexAll.length, _pageSizeAll);
-
-    final goldPaged = _paginate(goldAll, goldPage, _pageSizeAll);
-    final cryptoPaged = _paginate(cryptoAll, cryptoPage, _pageSizeAll);
-    final forexPaged = _paginate(forexAll, forexPage, _pageSizeAll);
-
-    final hasPrevGold = goldPage > 0;
-    final hasPrevCrypto = cryptoPage > 0;
-    final hasPrevForex = forexPage > 0;
-    final hasNextGold = goldAll.length > (goldPage + 1) * _pageSizeAll;
-    final hasNextCrypto = cryptoAll.length > (cryptoPage + 1) * _pageSizeAll;
-    final hasNextForex = forexAll.length > (forexPage + 1) * _pageSizeAll;
+    // Chỉ lấy 1 tín hiệu mới nhất cho mỗi loại (đã sort sẵn từ service)
+    final goldLatest = signals.where(_isGold).take(1).toList();
+    final cryptoLatest = signals.where(_isCrypto).take(1).toList();
+    final forexLatest = signals.where(_isForex).take(1).toList();
 
     final liveColumns = [
       SizedBox(
@@ -1607,11 +1563,11 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
         child: _SignalColumnLive(
           title: 'GOLD',
           icon: Icons.emoji_events_outlined,
-          signals: goldPaged,
-          page: goldPage,
-          onPageChanged: (p) => setState(() => _goldPage = p),
-          hasPrev: hasPrevGold,
-          hasNext: hasNextGold,
+          signals: goldLatest,
+          page: 0,
+          onPageChanged: (p) {},
+          hasPrev: false,
+          hasNext: false,
           timezone: widget.selectedTimezone,
         ),
       ),
@@ -1619,16 +1575,16 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       if (stacked) const SizedBox(height: 16),
       SizedBox(
         width: columnWidth,
-        child: cryptoPaged.isEmpty
+        child: cryptoLatest.isEmpty
             ? const _EmptyColumn(title: 'CRYPTO', icon: Icons.workspace_premium_outlined)
             : _SignalColumnLive(
                 title: 'CRYPTO',
                 icon: Icons.workspace_premium_outlined,
-                signals: cryptoPaged,
-                page: cryptoPage,
-                onPageChanged: (p) => setState(() => _cryptoPage = p),
-                hasPrev: hasPrevCrypto,
-                hasNext: hasNextCrypto,
+                signals: cryptoLatest,
+                page: 0,
+                onPageChanged: (p) {},
+                hasPrev: false,
+                hasNext: false,
                 timezone: widget.selectedTimezone,
               ),
       ),
@@ -1636,16 +1592,16 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       if (stacked) const SizedBox(height: 16),
       SizedBox(
         width: columnWidth,
-        child: forexPaged.isEmpty
+        child: forexLatest.isEmpty
             ? const _EmptyColumn(title: 'FOREX', icon: Icons.verified)
             : _SignalColumnLive(
                 title: 'FOREX',
                 icon: Icons.verified,
-                signals: forexPaged,
-                page: forexPage,
-                onPageChanged: (p) => setState(() => _forexPage = p),
-                hasPrev: hasPrevForex,
-                hasNext: hasNextForex,
+                signals: forexLatest,
+                page: 0,
+                onPageChanged: (p) {},
+                hasPrev: false,
+                hasNext: false,
                 timezone: widget.selectedTimezone,
               ),
       ),
@@ -1685,13 +1641,16 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       Signal(id: 'c2', symbol: 'ETH/USDT', type: 'sell', status: 'running', entryPrice: 0, stopLoss: 0, takeProfits: const [], createdAt: randomTime(1), matchStatus: 'NOT MATCHED', isMatched: false),
     ];
 
-    final goldPaged = _paginate(sampleGoldSignals, _goldPage, _pageSizeAll);
-    final cryptoPaged = _paginate(sampleCryptoSignals, _cryptoPage, _pageSizeAll);
+    final goldPage = _normalizePage(_goldPage, sampleGoldSignals.length, _pageSizeAll);
+    final cryptoPage = _normalizePage(_cryptoPage, sampleCryptoSignals.length, _pageSizeAll);
 
-    final hasPrevGold = _goldPage > 0;
-    final hasNextGold = sampleGoldSignals.length > (_goldPage + 1) * _pageSizeAll;
-    final hasPrevCrypto = _cryptoPage > 0;
-    final hasNextCrypto = sampleCryptoSignals.length > (_cryptoPage + 1) * _pageSizeAll;
+    final goldPaged = _paginate(sampleGoldSignals, goldPage, _pageSizeAll);
+    final cryptoPaged = _paginate(sampleCryptoSignals, cryptoPage, _pageSizeAll);
+
+    final hasPrevGold = goldPage > 0;
+    final hasNextGold = sampleGoldSignals.length > (goldPage + 1) * _pageSizeAll;
+    final hasPrevCrypto = cryptoPage > 0;
+    final hasNextCrypto = sampleCryptoSignals.length > (cryptoPage + 1) * _pageSizeAll;
     
     final sampleColumns = [
       SizedBox(
@@ -1700,7 +1659,7 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
           title: 'GOLD',
           icon: Icons.emoji_events_outlined,
           signals: goldPaged,
-          page: _goldPage,
+          page: goldPage,
           onPageChanged: (p) => setState(() => _goldPage = p),
           hasPrev: hasPrevGold,
           hasNext: hasNextGold,
@@ -1716,7 +1675,7 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
           title: 'CRYPTO',
           icon: Icons.workspace_premium_outlined,
           signals: cryptoPaged,
-          page: _cryptoPage,
+          page: cryptoPage,
           onPageChanged: (p) => setState(() => _cryptoPage = p),
           hasPrev: hasPrevCrypto,
           hasNext: hasNextCrypto,
@@ -1736,21 +1695,6 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       return Column(crossAxisAlignment: CrossAxisAlignment.start, children: sampleColumns);
     }
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: sampleColumns);
-  }
-
-  List<Signal> _paginate(List<Signal> list, int page, int pageSize) {
-    final start = page * pageSize;
-    return list.skip(start).take(pageSize).toList();
-  }
-
-  int _normalizePage(int page, int totalItems, int pageSize) {
-    if (totalItems <= 0 || pageSize <= 0) return 0;
-    final totalPages = (totalItems / pageSize).ceil();
-    if (totalPages <= 0) return 0;
-    final maxPage = totalPages - 1;
-    if (page > maxPage) return maxPage;
-    if (page < 0) return 0;
-    return page;
   }
 
   bool _isGold(Signal s) => s.symbol.toUpperCase().contains('XAU');
@@ -4122,7 +4066,7 @@ class _HistorySectionState extends State<_HistorySection> {
         ),
         const SizedBox(height: 16),
         StreamBuilder<List<Signal>>(
-          stream: SignalService().getSignals(isLive: false, userTier: 'web', allowUnauthenticated: true),
+          stream: SignalService().getAllSignals(),
           builder: (context, snapshot) {
             final rows = <HistoryRow>[];
             final waiting = snapshot.connectionState == ConnectionState.waiting;
@@ -4137,7 +4081,19 @@ class _HistorySectionState extends State<_HistorySection> {
             }
             
             final filtered = _filteredSignals(signals);
-            rows.addAll(filtered.map((s) => _mapSignalToRow(s, widget.selectedTimezone, context)));
+            
+            // Logic tách Lịch sử: 
+            // 1. Lấy 1 cái mới nhất đang chạy của mỗi loại để loại bỏ khỏi lịch sử (vì đã hiện ở Live)
+            final goldLatestId = filtered.where(_isGold).where((s) => s.status.toLowerCase() == 'running').take(1).map((e) => e.id).firstOrNull;
+            final cryptoLatestId = filtered.where(_isCrypto).where((s) => s.status.toLowerCase() == 'running').take(1).map((e) => e.id).firstOrNull;
+            final forexLatestId = filtered.where(_isForex).where((s) => s.status.toLowerCase() == 'running').take(1).map((e) => e.id).firstOrNull;
+            
+            final latestIds = {goldLatestId, cryptoLatestId, forexLatestId}.whereType<String>().toSet();
+
+            // 2. Các tín hiệu còn lại đưa vào lịch sử
+            final historySignals = filtered.where((s) => !latestIds.contains(s.id)).toList();
+
+            rows.addAll(historySignals.map((s) => _mapSignalToRow(s, widget.selectedTimezone, context)));
             
             if (rows.isEmpty) {
               return Padding(

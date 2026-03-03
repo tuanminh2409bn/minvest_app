@@ -38,23 +38,23 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             labelType: NavigationRailLabelType.all,
             destinations: const [
               NavigationRailDestination(
-                icon: Icon(Icons.people),
-                selectedIcon: Icon(Icons.people_alt),
+                icon: Icon(Icons.people_outline),
+                selectedIcon: Icon(Icons.people),
                 label: Text('Users'),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.newspaper),
-                selectedIcon: Icon(Icons.article),
+                icon: Icon(Icons.newspaper_outlined),
+                selectedIcon: Icon(Icons.newspaper),
                 label: Text('News'),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.share),
-                selectedIcon: Icon(Icons.share_arrival_time),
+                icon: Icon(Icons.share_outlined),
+                selectedIcon: Icon(Icons.share),
                 label: Text('Affiliate'),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.settings),
-                selectedIcon: Icon(Icons.settings_applications),
+                icon: Icon(Icons.settings_outlined),
+                selectedIcon: Icon(Icons.settings),
                 label: Text('Settings'),
               ),
             ],
