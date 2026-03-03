@@ -539,13 +539,16 @@ class _SignalScreenState extends State<SignalScreen> {
                 ),
                 const SizedBox(width: 16),
                 // Tên Symbol
-                Text(
-                  symbol,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: 'Be Vietnam Pro',
+                Flexible(
+                  child: Text(
+                    symbol,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Be Vietnam Pro',
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
