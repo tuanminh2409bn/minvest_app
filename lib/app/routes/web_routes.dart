@@ -5,6 +5,7 @@ import 'package:minvest_forex_app/web/landing/ai_signals_page.dart';
 import 'package:minvest_forex_app/web/landing/pricing_page.dart';
 import 'package:minvest_forex_app/web/landing/news_page.dart';
 import 'package:minvest_forex_app/web/landing/contact_page.dart';
+import 'package:minvest_forex_app/web/landing/affiliate_dashboard_page.dart';
 import 'package:minvest_forex_app/web/landing/legal/terms_of_registration_page.dart';
 import 'package:minvest_forex_app/web/landing/legal/operating_principles_page.dart';
 import 'package:minvest_forex_app/web/landing/legal/terms_conditions_page.dart';
@@ -21,6 +22,7 @@ Map<String, WidgetBuilder> getWebRoutes() {
     '/pricing': (context) => const PricingPage(),
     '/news': (context) => const NewsPage(),
     '/contact-us': (context) => const ContactPage(),
+    '/affiliate-dashboard': (context) => const AffiliateDashboardPage(),
     '/signin': (context) => const AuthGate(),
     '/signup': (context) => const SignupScreenWeb(),
     '/profile': (context) => const ProfileScreen(),

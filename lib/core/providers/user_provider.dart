@@ -40,6 +40,7 @@ class UserProvider with ChangeNotifier {
   String? get verificationStatus => _verificationStatus;
   String? get verificationError => _verificationError;
   String? get role => _role;
+  String? get userRole => _role; // Alias cho tương thích với Navbar
   String? get displayName => _displayName;
   UserDataStatus get status => _status;
 

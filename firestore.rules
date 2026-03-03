@@ -36,9 +36,12 @@ service cloud.firestore {
 
     // Collection `users`
     match /users/{userId} {
-      // ▼▼▼ BẮT ĐẦU SỬA LỖI: THÊM `isSupport()` VÀO QUY TẮC ĐỌC ▼▼▼
-      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin() || isSupport());
-      // ▲▲▲ KẾT THÚC SỬA LỖI ▲▲▲
+      allow read: if isSignedIn() && (
+        request.auth.uid == userId || 
+        isAdmin() || 
+        isSupport() || 
+        (resource != null && resource.data.referred_by_affiliate_id == request.auth.uid)
+      );
       
       allow create: if isSignedIn() && request.auth.uid == userId;
       allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
@@ -99,6 +102,25 @@ service cloud.firestore {
     match /settings/{docId} {
       allow read: if true; // Cho phép người dùng đọc cấu hình (ví dụ winRateAdjustment)
       allow write: if isAdmin(); // Chỉ Admin mới có quyền sửa
+    }
+
+    // --- RULES CHO HỆ THỐNG AFFILIATE ---
+    match /affiliates/{docId} {
+      // Admin có toàn quyền, Affiliate có quyền xem dữ liệu của chính mình
+      allow read: if isSignedIn() && (isAdmin() || resource.data.uid == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /commissions/{docId} {
+      // Admin có toàn quyền, Affiliate có quyền xem hoa hồng của mình dựa trên mã affiliateCode
+      // Lưu ý: resource.data.affiliateId cần được lưu vào bản ghi hoa hồng để kiểm tra quyền
+      allow read: if isSignedIn() && (isAdmin() || resource.data.affiliateUid == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /payouts/{docId} {
+      allow read: if isSignedIn() && (isAdmin() || resource.data.uid == request.auth.uid);
+      allow create, update, delete: if isAdmin();
     }
   }
 }
