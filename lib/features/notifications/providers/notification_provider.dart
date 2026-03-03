@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:minvest_forex_app/features/notifications/models/notification_model.dart';
 import 'package:minvest_forex_app/features/notifications/services/notification_service.dart' as feat_service;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,10 +49,12 @@ class NotificationProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notif_all', value);
     
-    if (value) {
-      await FirebaseMessaging.instance.subscribeToTopic('all_signals');
-    } else {
-      await FirebaseMessaging.instance.unsubscribeFromTopic('all_signals');
+    if (!kIsWeb) {
+      if (value) {
+        await FirebaseMessaging.instance.subscribeToTopic('all_signals');
+      } else {
+        await FirebaseMessaging.instance.unsubscribeFromTopic('all_signals');
+      }
     }
     notifyListeners();
   }
@@ -61,10 +64,12 @@ class NotificationProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notif_gold', value);
     
-    if (value) {
-      await FirebaseMessaging.instance.subscribeToTopic('gold_signals');
-    } else {
-      await FirebaseMessaging.instance.unsubscribeFromTopic('gold_signals');
+    if (!kIsWeb) {
+      if (value) {
+        await FirebaseMessaging.instance.subscribeToTopic('gold_signals');
+      } else {
+        await FirebaseMessaging.instance.unsubscribeFromTopic('gold_signals');
+      }
     }
     notifyListeners();
   }
@@ -74,10 +79,12 @@ class NotificationProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notif_crypto', value);
     
-    if (value) {
-      await FirebaseMessaging.instance.subscribeToTopic('crypto_signals');
-    } else {
-      await FirebaseMessaging.instance.unsubscribeFromTopic('crypto_signals');
+    if (!kIsWeb) {
+      if (value) {
+        await FirebaseMessaging.instance.subscribeToTopic('crypto_signals');
+      } else {
+        await FirebaseMessaging.instance.unsubscribeFromTopic('crypto_signals');
+      }
     }
     notifyListeners();
   }
@@ -87,10 +94,12 @@ class NotificationProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notif_forex', value);
     
-    if (value) {
-      await FirebaseMessaging.instance.subscribeToTopic('forex_signals');
-    } else {
-      await FirebaseMessaging.instance.unsubscribeFromTopic('forex_signals');
+    if (!kIsWeb) {
+      if (value) {
+        await FirebaseMessaging.instance.subscribeToTopic('forex_signals');
+      } else {
+        await FirebaseMessaging.instance.unsubscribeFromTopic('forex_signals');
+      }
     }
     notifyListeners();
   }

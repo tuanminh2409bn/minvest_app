@@ -192,10 +192,12 @@ class NotificationService {
         Future<void> cleanupNotificationData() async {
           try {
             debugPrint("🧹 [FCM_SERVICE] Đang dọn dẹp dữ liệu thông báo...");
-            // 1. Hủy đăng ký khỏi các chủ đề chung
-            await _firebaseMessaging.unsubscribeFromTopic('signals_free');
-            await _firebaseMessaging.unsubscribeFromTopic('signals_vip');
-            await _firebaseMessaging.unsubscribeFromTopic('signals_elite');
+            // 1. Hủy đăng ký khỏi các chủ đề chung (Chỉ dành cho Mobile)
+            if (!kIsWeb) {
+              await _firebaseMessaging.unsubscribeFromTopic('signals_free');
+              await _firebaseMessaging.unsubscribeFromTopic('signals_vip');
+              await _firebaseMessaging.unsubscribeFromTopic('signals_elite');
+            }
             
             // 2. Xóa token trên thiết bị này
             await _firebaseMessaging.deleteToken();

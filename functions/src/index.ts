@@ -994,7 +994,7 @@ export const updateUserSubscriptionTier = onCall({ region: "asia-southeast1" }, 
     if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
         throw new HttpsError("invalid-argument", "Dữ liệu 'userIds' gửi lên không hợp lệ.");
     }
-    const validTiers = ['free', 'demo', 'vip', 'elite'];
+    const validTiers = ['free', 'elite', 'affiliate'];
     if (!tier || typeof tier !== 'string' || !validTiers.includes(tier)) {
         throw new HttpsError("invalid-argument", `Gói '${tier}' không hợp lệ. Các gói hợp lệ là: ${validTiers.join(', ')}.`);
     }
@@ -1004,8 +1004,8 @@ export const updateUserSubscriptionTier = onCall({ region: "asia-southeast1" }, 
 
     // 3. Chuẩn bị nội dung thông báo cho người dùng
     const reasonForNotification = {
-        vi: `Your account has been updated to the ${tier.toUpperCase()} plan by an administrator. Reason: ${reason}. Please log in again.`,
-        en: `Your account has been updated to the ${tier.toUpperCase()} plan by an administrator. Reason: ${reason}. Please log in again.`,
+        vi: `Tài khoản của bạn đã được cập nhật thành gói ${tier.toUpperCase()}. Vui lòng đăng nhập lại.`,
+        en: `Your account has been updated to the ${tier.toUpperCase()} plan. Please log in again.`,
     };
 
     const batch = firestore.batch();
@@ -1017,17 +1017,26 @@ export const updateUserSubscriptionTier = onCall({ region: "asia-southeast1" }, 
 
         const userRef = firestore.collection("users").doc(userId);
 
-        // ▼▼▼ BẮT ĐẦU THAY ĐỔI ▼▼▼
-        const updateData = {
-            subscriptionTier: tier,
-            requiresSessionReset: true, // Thêm cờ hiệu để client bắt sự kiện
-            sessionResetReason: `Cập nhật thành ${tier.toUpperCase()}. Lý do: ${reason}`, // Lưu lý do vào trường mới
+        // Chuẩn bị dữ liệu cập nhật cơ bản
+        const updateData: any = {
+            requiresSessionReset: true,
             // Xóa các trường cũ không còn dùng
             updateReason: admin.firestore.FieldValue.delete(),
             requiresDowngradeAcknowledgement: admin.firestore.FieldValue.delete(),
             downgradeReason: admin.firestore.FieldValue.delete(),
         };
-        // ▲▲▲ KẾT THÚC THAY ĐỔI ▲▲▲
+
+        if (tier === 'affiliate') {
+            // Nếu chọn affiliate: Chỉ cập nhật role, giữ nguyên gói cước (free/elite)
+            updateData.role = 'affiliate';
+            updateData.sessionResetReason = "Tài khoản của bạn đã được cấp quyền Đối tác (Affiliate).";
+        } else {
+            // Nếu chọn free hoặc elite: Cập nhật gói cước, và trả role về user
+            updateData.subscriptionTier = tier;
+            updateData.role = 'user';
+            updateData.sessionResetReason = `Gói cước của bạn đã được cập nhật thành ${tier.toUpperCase()}.`;
+        }
+
         batch.update(userRef, updateData);
 
         // ▼▼▼ THÊM THÔNG BÁO CẬP NHẬT GÓI (ADMIN) ▼▼▼

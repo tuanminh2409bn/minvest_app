@@ -190,7 +190,12 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               final doc = users[index];
               final userData = doc.data() as Map<String, dynamic>;
               final userId = doc.id;
+              final role = userData['role'] ?? 'user';
               final tier = (userData['subscriptionTier'] as String?)?.toLowerCase() ?? 'free';
+              
+              // Ưu tiên hiển thị Affiliate nếu role là affiliate
+              final displayStatus = role == 'affiliate' ? 'affiliate' : tier;
+              
               final tokens = userData['tokenBalance'] ?? 0;
               final activeSubs = List<String>.from(userData['activeSubscriptions'] ?? []);
 
@@ -199,8 +204,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 color: const Color(0xFF161616),
                 child: ExpansionTile(
                   leading: CircleAvatar(
-                    backgroundColor: _getTierColor(tier).withOpacity(0.2),
-                    child: Text(tier[0].toUpperCase(), style: TextStyle(color: _getTierColor(tier))),
+                    backgroundColor: _getTierColor(displayStatus).withOpacity(0.2),
+                    child: Text(displayStatus[0].toUpperCase(), style: TextStyle(color: _getTierColor(displayStatus))),
                   ),
                   title: Text(userData['displayName'] ?? 'No Name', style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(userData['email'] ?? 'No Email', style: const TextStyle(fontSize: 12, color: Colors.grey)),
@@ -209,7 +214,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         children: [
-                          _buildActionRow('Tier (Role)', tier.toUpperCase(), _getTierColor(tier), () => _handleTierUpdate(userId, tier)),
+                          _buildActionRow('Tier (Role)', displayStatus.toUpperCase(), _getTierColor(displayStatus), () => _handleTierUpdate(userId, displayStatus)),
                           const Divider(height: 24),
                           _buildActionRow('Token Balance', tokens.toString(), Colors.blue, () => _updateTokenBalance(userId, tokens is int ? tokens : 0)),
                           const Divider(height: 24),
@@ -296,8 +301,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   Color _getTierColor(String tier) {
     switch (tier) {
       case 'elite': return Colors.purple;
-      case 'vip': return Colors.amber.shade800;
-      case 'demo': return Colors.blue;
+      case 'affiliate': return Colors.green;
+      case 'free': return Colors.grey;
       default: return Colors.grey;
     }
   }
@@ -314,14 +319,13 @@ class _UpdateUserTierDialog extends StatefulWidget {
 }
 
 class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
-  final _reasonController = TextEditingController();
   late String _selectedTier;
 
   @override
   void initState() {
     super.initState();
     _selectedTier = widget.initialTier ?? 'free';
-    if (!['free', 'demo', 'vip', 'elite'].contains(_selectedTier)) _selectedTier = 'free';
+    if (!['free', 'elite', 'affiliate'].contains(_selectedTier)) _selectedTier = 'free';
   }
 
   @override
@@ -334,23 +338,16 @@ class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
           DropdownButtonFormField<String>(
             value: _selectedTier,
             decoration: const InputDecoration(labelText: 'Chọn Role', border: OutlineInputBorder()),
-            items: ['free', 'demo', 'vip', 'elite'].map((t) => DropdownMenuItem(value: t, child: Text(t.toUpperCase()))).toList(),
+            items: ['free', 'elite', 'affiliate'].map((t) => DropdownMenuItem(value: t, child: Text(t.toUpperCase()))).toList(),
             onChanged: (v) => setState(() => _selectedTier = v!),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _reasonController,
-            decoration: const InputDecoration(hintText: 'Lý do thay đổi...', border: OutlineInputBorder()),
-            maxLines: 2,
           ),
         ],
       ),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Hủy')),
         FilledButton(onPressed: () {
-          if (_reasonController.text.isEmpty) return;
+          widget.onConfirm(_selectedTier, "Admin Update");
           Navigator.pop(context);
-          widget.onConfirm(_selectedTier, _reasonController.text);
         }, child: const Text('Xác nhận')),
       ],
     );

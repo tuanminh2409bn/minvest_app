@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/features/admin/services/admin_service.dart';
 import 'package:minvest_forex_app/features/admin/screens/admin_news_screen.dart';
 import 'package:minvest_forex_app/features/admin/screens/affiliate_management_view.dart';
+import 'package:minvest_forex_app/core/utils/messenger_key.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -372,8 +373,7 @@ class _UserManagementViewState extends State<UserManagementView> {
             tier: tier,
             reason: reason,
           );
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+          scaffoldMessengerKey.currentState?.showSnackBar(SnackBar(content: Text(message)));
         },
       ),
     );
@@ -485,6 +485,9 @@ class _UserManagementViewState extends State<UserManagementView> {
                             final isSelected = _selectedUserIds.contains(userId);
 
                             final tier = (userData['subscriptionTier'] as String?)?.toLowerCase() ?? 'free';
+                            final role = userData['role'] ?? 'user';
+                            final displayStatus = role == 'affiliate' ? 'affiliate' : tier;
+                            
                             final tokens = userData['tokenBalance'] ?? 0;
                             final activeSubs = List<String>.from(userData['activeSubscriptions'] ?? []);
 
@@ -532,20 +535,20 @@ class _UserManagementViewState extends State<UserManagementView> {
                                     flex: 2,
                                     child: Center(
                                       child: InkWell(
-                                        onTap: () => _handleSingleUserTierUpdate(userId, tier),
+                                        onTap: () => _handleSingleUserTierUpdate(userId, displayStatus),
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                           decoration: BoxDecoration(
-                                            color: _getTierColor(tier).withValues(alpha: 0.2),
-                                            border: Border.all(color: _getTierColor(tier)),
+                                            color: _getTierColor(displayStatus).withValues(alpha: 0.2),
+                                            border: Border.all(color: _getTierColor(displayStatus)),
                                             borderRadius: BorderRadius.circular(20),
                                           ),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text(tier.toUpperCase(), style: TextStyle(color: _getTierColor(tier), fontWeight: FontWeight.bold, fontSize: 12)),
+                                              Text(displayStatus.toUpperCase(), style: TextStyle(color: _getTierColor(displayStatus), fontWeight: FontWeight.bold, fontSize: 12)),
                                               const SizedBox(width: 4),
-                                              Icon(Icons.edit, size: 12, color: _getTierColor(tier)),
+                                              Icon(Icons.edit, size: 12, color: _getTierColor(displayStatus)),
                                             ],
                                           ),
                                         ),
@@ -654,8 +657,8 @@ class _UserManagementViewState extends State<UserManagementView> {
   Color _getTierColor(String tier) {
     switch (tier) {
       case 'elite': return Colors.purple;
-      case 'vip': return Colors.amber.shade800;
-      case 'demo': return Colors.blue;
+      case 'affiliate': return Colors.green;
+      case 'free': return Colors.grey;
       default: return Colors.grey;
     }
   }
@@ -672,20 +675,16 @@ class _UpdateUserTierDialog extends StatefulWidget {
 }
 
 class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
-  final _reasonController = TextEditingController();
   late String _selectedTier;
 
   @override
   void initState() {
     super.initState();
     _selectedTier = widget.initialTier ?? 'free';
-    if (!['free', 'elite'].contains(_selectedTier)) _selectedTier = 'free';
-  }
-
-  @override
-  void dispose() {
-    _reasonController.dispose();
-    super.dispose();
+    // Chỉ cho phép các vai trò: free, elite, affiliate
+    if (!['free', 'elite', 'affiliate'].contains(_selectedTier)) {
+      _selectedTier = 'free';
+    }
   }
 
   @override
@@ -700,15 +699,11 @@ class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
             DropdownButtonFormField<String>(
               value: _selectedTier,
               decoration: const InputDecoration(labelText: 'Chọn vai trò mới', border: OutlineInputBorder()),
-              items: ['free', 'elite'].map((tier) => DropdownMenuItem(value: tier, child: Text(tier.toUpperCase()))).toList(),
+              items: ['free', 'elite', 'affiliate'].map((tier) => DropdownMenuItem(
+                value: tier, 
+                child: Text(tier.toUpperCase())
+              )).toList(),
               onChanged: (value) { if (value != null) setState(() => _selectedTier = value); },
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _reasonController,
-              decoration: const InputDecoration(hintText: 'Nhập lý do thay đổi (bắt buộc)...', border: OutlineInputBorder()),
-              autofocus: true,
-              maxLines: null,
             ),
           ],
         ),
@@ -717,13 +712,8 @@ class __UpdateUserTierDialogState extends State<_UpdateUserTierDialog> {
         TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Hủy')),
         FilledButton(
           onPressed: () {
-            final reason = _reasonController.text.trim();
-            if (reason.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lý do không được để trống.')));
-              return;
-            }
-            Navigator.of(context).pop();
-            widget.onConfirm(_selectedTier, reason);
+            widget.onConfirm(_selectedTier, "Admin Update");
+            if (context.mounted) Navigator.of(context).pop();
           },
           child: const Text('Xác nhận'),
         ),

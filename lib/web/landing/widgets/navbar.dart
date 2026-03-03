@@ -14,6 +14,7 @@ import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:minvest_forex_app/features/notifications/screens/notification_screen_web.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
+import 'package:minvest_forex_app/core/utils/navigator_key.dart';
 
 class _ProfilePopup extends StatelessWidget {
   final User user;
@@ -32,9 +33,12 @@ class _ProfilePopup extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final String name = (userProvider.displayName ?? user.displayName ?? user.email ?? 'User').trim();
+    final String role = userProvider.userRole ?? 'user';
+    final bool isPartner = role == 'admin' || role == 'affiliate';
 
-    // Popup dimensions from Figma logic
+    // Popup dimensions
     final double popupWidth = 250;
+    final double popupHeight = isPartner ? 263 : 226;
     
     // Position the popup so it's aligned with the button
     double right = size.width - (buttonPosition.dx + buttonSize.width);
@@ -56,7 +60,7 @@ class _ProfilePopup extends StatelessWidget {
             color: Colors.transparent,
             child: Container(
               width: popupWidth,
-              height: 226,
+              height: popupHeight,
               child: Stack(
                 children: [
                   // User Info Header (Top part)
@@ -101,8 +105,18 @@ class _ProfilePopup extends StatelessWidget {
                       Navigator.of(context).pushNamed('/profile', arguments: 0);
                     }
                   ),
+                  if (isPartner)
+                    _buildMenuItem(context, 
+                      top: 107, 
+                      title: 'Affiliate Dashboard', 
+                      borderRadius: BorderRadius.zero,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).pushNamed('/affiliate-dashboard');
+                      }
+                    ),
                   _buildMenuItem(context, 
-                    top: 107, 
+                    top: isPartner ? 144 : 107, 
                     title: 'Email preferences', 
                     borderRadius: BorderRadius.zero, // Middle item
                     hasBottomBorder: true,
@@ -112,7 +126,7 @@ class _ProfilePopup extends StatelessWidget {
                     }
                   ),
                   _buildMenuItem(context, 
-                    top: 144, 
+                    top: isPartner ? 181 : 144, 
                     title: 'Log out', 
                     borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(6), bottomRight: Radius.circular(6)),
                     onTap: () {
@@ -293,12 +307,19 @@ class _LogoutDialog extends StatelessWidget {
               bottom: 15,
               child: InkWell(
                 onTap: () {
+                  final authBloc = context.read<AuthBloc>();
+                  final userProvider = context.read<UserProvider>();
+                  final notificationProvider = context.read<NotificationProvider>();
+                  
                   Navigator.pop(context);
-                  context.read<AuthBloc>().add(SignOutRequested(providersToReset: [
-                    context.read<UserProvider>(),
-                    context.read<NotificationProvider>(),
+                  
+                  authBloc.add(SignOutRequested(providersToReset: [
+                    userProvider,
+                    notificationProvider,
                   ]));
-                  Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                  
+                  // Sử dụng navigatorKey từ main.dart để điều hướng an toàn
+                  navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
                 },
                 child: Container(
                   width: 114,
@@ -1035,6 +1056,8 @@ class _MobileNavBarState extends State<_MobileNavBar> {
     final user = widget.user!;
     final userProvider = Provider.of<UserProvider>(context);
     final String name = (userProvider.displayName ?? user.displayName ?? user.email ?? 'User').trim();
+    final String role = userProvider.userRole ?? 'user';
+    final bool isPartner = role == 'admin' || role == 'affiliate';
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1056,6 +1079,11 @@ class _MobileNavBarState extends State<_MobileNavBar> {
           title: 'Profile', 
           onTap: () => Navigator.of(context).pushNamed('/profile', arguments: 0)
         ),
+        if (isPartner)
+          _profileLink(
+            title: 'Affiliate Dashboard', 
+            onTap: () => Navigator.of(context).pushNamed('/affiliate-dashboard')
+          ),
         _profileLink(
           title: 'Email preferences', 
           onTap: () => Navigator.of(context).pushNamed('/profile', arguments: 1)

@@ -33,15 +33,17 @@ import 'package:minvest_forex_app/app/routes/web_routes_stub.dart' if (dart.libr
 import 'features/auth/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:minvest_forex_app/core/utils/navigator_key.dart';
+import 'package:minvest_forex_app/core/utils/messenger_key.dart';
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
 
 Future<void> main() async {
+  // Loại bỏ dấu # trên URL Web (Cần gọi trước WidgetsFlutterBinding)
+  usePathUrlStrategy();
+
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    // Loại bỏ dấu # trên URL Web
-    usePathUrlStrategy();
     
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -273,6 +275,7 @@ class _MyAppState extends State<MyApp> {
         if (kIsWeb) {
           return MaterialApp(
             navigatorKey: navigatorKey,
+            scaffoldMessengerKey: scaffoldMessengerKey,
             debugShowCheckedModeBanner: false,
             title: 'Signal GPT',
             theme: _buildAppTheme(),
@@ -304,6 +307,7 @@ class _MyAppState extends State<MyApp> {
 
         return MaterialApp(
           navigatorKey: navigatorKey,
+          scaffoldMessengerKey: scaffoldMessengerKey,
           debugShowCheckedModeBanner: false,
           title: 'Signal GPT',
           theme: _buildAppTheme(),
