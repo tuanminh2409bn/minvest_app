@@ -14,6 +14,9 @@ import 'package:minvest_forex_app/features/auth/screens/welcome/signup_screen_we
 import 'package:minvest_forex_app/features/auth/screens/profile_screen.dart';
 import 'package:minvest_forex_app/app/auth_gate.dart';
 
+import 'package:minvest_forex_app/web/landing/payment_method_page.dart';
+import 'package:minvest_forex_app/web/landing/purchase_plan_page.dart';
+
 Map<String, WidgetBuilder> getWebRoutes() {
   return {
     '/': (context) => const LandingPage(),
@@ -29,6 +32,17 @@ Map<String, WidgetBuilder> getWebRoutes() {
     '/terms-of-registration': (context) => const TermsOfRegistrationPage(),
     '/operating-principles': (context) => const OperatingPrinciplesPage(),
     '/terms-conditions': (context) => const TermsConditionsPage(),
+    '/purchase-plan': (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      return PurchasePlanPage(initialPlan: args?['plan']);
+    },
+    '/payment-method': (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      return PaymentMethodPage(
+        totalAmount: args?['totalAmount'] ?? 0.0,
+        selectedPlans: List<String>.from(args?['selectedPlans'] ?? []),
+      );
+    },
     '/payment/success': (context) => const PaymentCallbackScreen(isSuccess: true),
     '/payment/cancel': (context) => const PaymentCallbackScreen(isSuccess: false),
   };

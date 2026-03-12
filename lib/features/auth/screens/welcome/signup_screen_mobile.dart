@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 import 'package:minvest_forex_app/features/auth/screens/welcome/email_verification_screen.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/core/services/affiliate_tracker.dart';
+import 'package:minvest_forex_app/core/services/affiliate_tracker_stub.dart';
 
 class SignupScreenMobile extends StatefulWidget {
   const SignupScreenMobile({super.key});
@@ -16,6 +19,7 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _referralController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -26,7 +30,33 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _referralController.dispose();
     super.dispose();
+  }
+
+  void _showAccountExistsDialog(String email) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF161616),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Colors.white10),
+        ),
+        title: const Text('Tài khoản đã tồn tại', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: Text(
+          'Email $email đã được đăng ký trong hệ thống. Vui lòng đăng nhập hoặc sử dụng tính năng quên mật khẩu.',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Đóng', style: TextStyle(color: Color(0xFF276EFB))),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleSignup() async {
@@ -36,6 +66,13 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
 
     try {
       final email = _emailController.text.trim();
+      final referralCode = _referralController.text.trim();
+
+      // Nếu có mã giới thiệu, lưu vào AffiliateTracker trước khi đăng ký
+      if (referralCode.isNotEmpty) {
+        await AffiliateTracker().saveRef(referralCode);
+      }
+
       debugPrint('Attempting to send code to: $email');
       
       // Gọi Cloud Function gửi mã
@@ -56,14 +93,17 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
     } catch (e) {
       debugPrint('Error sending code: $e');
       if (mounted) {
-        // Hiển thị thông báo lỗi rõ ràng hơn để người dùng biết cần deploy function
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi hệ thống: $e. Hãy đảm bảo bạn đã deploy Cloud Functions.'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        final errorString = e.toString().toLowerCase();
+        if (errorString.contains('already-exists') || errorString.contains('đã được đăng ký')) {
+          _showAccountExistsDialog(_emailController.text.trim());
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi hệ thống: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } finally {
       if (mounted) setState(() => _isLocalLoading = false);
@@ -82,9 +122,14 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
             }
           } else if (state.status == AuthStatus.unauthenticated && state.errorMessage != null) {
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.errorMessage!), backgroundColor: Colors.red),
-              );
+              final error = state.errorMessage!.toLowerCase();
+              if (error.contains('already-exists') || error.contains('email-already-in-use')) {
+                _showAccountExistsDialog('này');
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.errorMessage!), backgroundColor: Colors.red),
+                );
+              }
             }
           }
         },
@@ -183,6 +228,15 @@ class _SignupScreenMobileState extends State<SignupScreenMobile> {
                                 if (value != _passwordController.text) return 'Passwords do not match';
                                 return null;
                               },
+                            ),
+                            
+                            const SizedBox(height: 16),
+                            
+                            // Referral Code Field (Optional)
+                            _buildGlassTextField(
+                              controller: _referralController,
+                              hintText: 'Referral Code (Optional)',
+                              icon: Icons.card_giftcard_outlined,
                             ),
                             
                             const SizedBox(height: 30),

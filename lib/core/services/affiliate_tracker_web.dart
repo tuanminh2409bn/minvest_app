@@ -8,31 +8,50 @@ class WebAffiliateTracker implements AffiliateTracker {
   @override
   void initialize() {
     try {
+      // 1. Kiểm tra từ Uri.base (cách của Flutter)
       final uri = Uri.base;
-      final ref = uri.queryParameters['ref'];
+      String? ref = uri.queryParameters['ref'];
+
+      // 2. Nếu không thấy, kiểm tra trực tiếp từ window.location.href (đảm bảo bắt được cả khi có dấu # hoặc redirect)
+      if (ref == null || ref.isEmpty) {
+        final fullUrl = html.window.location.href;
+        if (fullUrl.contains('ref=')) {
+          final uriTemp = Uri.parse(fullUrl.replaceFirst('#/', ''));
+          ref = uriTemp.queryParameters['ref'];
+        }
+      }
 
       if (ref != null && ref.isNotEmpty) {
+        print('🌐 [Affiliate] Bắt được mã từ URL: $ref');
         _saveRef(ref);
+      } else {
+        final stored = getStoredRef();
+        if (stored != null) {
+          print('🌐 [Affiliate] Đang sử dụng mã đã lưu trong máy: $stored');
+        } else {
+          print('🌐 [Affiliate] Không tìm thấy mã giới thiệu nào.');
+        }
       }
     } catch (e) {
-      if (kDebugMode) print('Affiliate tracking error: $e');
+      print('🌐 [Affiliate] Lỗi initialize: $e');
     }
   }
 
   void _saveRef(String refCode) {
     try {
+      final nowTs = DateTime.now().millisecondsSinceEpoch.toString();
       // 1. Lưu vào LocalStorage
       html.window.localStorage['sg_ref'] = refCode;
-      html.window.localStorage['sg_ref_ts'] = DateTime.now().millisecondsSinceEpoch.toString();
+      html.window.localStorage['sg_ref_ts'] = nowTs;
       
-      // 2. Lưu vào Cookie (hạn 90 ngày)
+      // 2. Lưu vào Cookie (hạn 90 ngày) để bền vững hơn qua các subdomain
       final expiry = DateTime.now().add(const Duration(days: 90));
       final cookieString = "sg_ref=$refCode; expires=${expiry.toUtc().toIso8601String()}; path=/; SameSite=Lax";
       html.document.cookie = cookieString;
       
-      if (kDebugMode) print('✅ Affiliate Ref Captured (Web): $refCode');
+      print('🌐 [Affiliate] Đã lưu mã thành công: $refCode');
     } catch (e) {
-      if (kDebugMode) print('❌ Error saving affiliate ref: $e');
+      print('🌐 [Affiliate] Lỗi khi lưu mã: $e');
     }
   }
 
@@ -65,6 +84,11 @@ class WebAffiliateTracker implements AffiliateTracker {
     html.window.localStorage.remove('sg_ref');
     html.window.localStorage.remove('sg_ref_ts');
     html.document.cookie = "sg_ref=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+  }
+
+  @override
+  void saveRef(String refCode) {
+    _saveRef(refCode);
   }
 }
 

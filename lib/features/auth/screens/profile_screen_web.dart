@@ -12,6 +12,7 @@ import 'package:minvest_forex_app/features/notifications/providers/notification_
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/features/admin/screens/admin_panel_screen_web.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class ProfileScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -579,6 +580,86 @@ class _SettingContentState extends State<_SettingContent> {
     }
   }
 
+  void _showReferralCodeDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController();
+    bool isLoadingInDialog = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: const Color(0xFF161616),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Colors.white10),
+          ),
+          title: Text(l10n.enterReferralCode, style: const TextStyle(color: Colors.white)),
+          content: Container(
+            width: 400,
+            child: TextField(
+              controller: controller,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: l10n.referralCode,
+                hintStyle: const TextStyle(color: Colors.white38),
+                enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF276EFB))),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.cancel, style: const TextStyle(color: Colors.white54)),
+            ),
+            ElevatedButton(
+              onPressed: isLoadingInDialog ? null : () async {
+                final code = controller.text.trim();
+                if (code.isEmpty) return;
+
+                setState(() => isLoadingInDialog = true);
+                try {
+                  final userProvider = Provider.of<UserProvider>(context, listen: false);
+                  final functions = FirebaseFunctions.instanceFor(region: 'asia-southeast1');
+                  final callable = functions.httpsCallable('affiliateAttach');
+                  
+                  await callable.call({
+                    'uid': userProvider.uid,
+                    'ref_code': code,
+                    'ref_ts': DateTime.now().millisecondsSinceEpoch.toString(),
+                  });
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.referralCodeApplied), backgroundColor: Colors.green),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    setState(() => isLoadingInDialog = false);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.invalidReferralCode), backgroundColor: Colors.red),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF276EFB),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              ),
+              child: isLoadingInDialog 
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : Text(l10n.submit, style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final appLocalizations = AppLocalizations.of(context)!;
@@ -683,6 +764,52 @@ class _SettingContentState extends State<_SettingContent> {
           ),
         ],
         const SizedBox(height: 24),
+        // Referral Code Entry (Web)
+        if (userProvider.referredByAffiliateId == null) ...[
+          Container(
+            width: double.infinity,
+            height: 90,
+            padding: const EdgeInsets.symmetric(horizontal: 25),
+            decoration: BoxDecoration(
+              color: const Color(0xFF111111),
+              borderRadius: BorderRadius.circular(3),
+              border: Border.all(color: const Color(0xFF3F3F3F), width: 2),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        appLocalizations.enterReferralCode,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Nhập mã giới thiệu để nhận ưu đãi từ đối tác của chúng tôi.',
+                        style: TextStyle(color: Color(0xFFAAAAAA), fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: _showReferralCodeDialog,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF289EFF),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: Text(appLocalizations.submit),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
         // Update Password Box
         Container(
           width: double.infinity,

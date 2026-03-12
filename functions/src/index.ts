@@ -20,16 +20,18 @@ admin.initializeApp();
 const firestore = admin.firestore();
 
 const PRODUCT_PRICES: { [key: string]: number } = {
-  'elite_1_month': 78,
-  'elite_12_months': 460,
   'gold_1_month': 78,
   'gold_12_months': 460,
   'forex_1_month': 78,
   'forex_12_months': 460,
   'crypto_1_month': 78,
   'crypto_12_months': 460,
-  'minvest.01': 78,
-  'minvest.12': 460,
+  'gold.1.month': 78,
+  'gold.12.months': 460,
+  'forex.1.month': 78,
+  'forex.12.months': 460,
+  'crypto.1.month': 78,
+  'crypto.12.months': 460,
 };
 
 const APPLE_VERIFY_RECEIPT_URL_PRODUCTION = "https://buy.itunes.apple.com/verifyReceipt";
@@ -467,11 +469,67 @@ export const verifyPurchase = onCall(
                     }
                     const amountPaid = PRODUCT_PRICES[verifiedProductId] ?? 0;
                     const userTransactionRef = userRef.collection("transactions").doc(transactionId!);
-                    transaction.set(userRef, {
-                        subscriptionTier: "elite",
-                        subscriptionExpiryDate: admin.firestore.Timestamp.fromDate(expiryDate!),
+                    
+                    // 1. Lấy dữ liệu user để kiểm tra affiliate
+                    const userDoc = await transaction.get(userRef);
+                    const userData = userDoc.data();
+                    const affiliateId = userData?.referred_by_affiliate_id;
+
+                    // Xác định loại gói dựa trên productId
+                    let packageType: string | null = null;
+                    if (verifiedProductId.includes('gold')) packageType = 'gold';
+                    else if (verifiedProductId.includes('forex')) packageType = 'forex';
+                    else if (verifiedProductId.includes('crypto')) packageType = 'crypto';
+
+                    const updateData: any = {
                         totalPaidAmount: admin.firestore.FieldValue.increment(amountPaid),
-                    }, { merge: true });
+                    };
+
+                    if (packageType) {
+                        // Thêm vào mảng activeSubscriptions
+                        updateData.activeSubscriptions = admin.firestore.FieldValue.arrayUnion(packageType);
+                        // Cập nhật ngày hết hạn cho gói cụ thể
+                        updateData[`subscriptionsExpiry.${packageType}`] = admin.firestore.Timestamp.fromDate(expiryDate!);
+                        updateData[`subscriptionsStart.${packageType}`] = admin.firestore.FieldValue.serverTimestamp();
+                    }
+
+                    transaction.set(userRef, updateData, { merge: true });
+                    
+                    // 2. Xử lý hoa hồng nếu có Affiliate
+                    if (affiliateId && amountPaid > 0) {
+                        const affiliateRef = firestore.collection("affiliates").doc(affiliateId);
+                        const affiliateDoc = await transaction.get(affiliateRef);
+                        
+                        if (affiliateDoc.exists) {
+                            const affData = affiliateDoc.data();
+                            const rate = affData?.commissionRate || 40;
+                            const commissionAmount = Math.round(amountPaid * (rate / 100) * 100) / 100;
+
+                            // Tạo bản ghi hoa hồng
+                            const commissionRef = firestore.collection("commissions").doc();
+                            transaction.set(commissionRef, {
+                                affiliateId: affiliateId,
+                                affiliateCode: affData?.code || '---',
+                                userId: userId,
+                                userEmail: userData?.email || '---',
+                                productId: verifiedProductId,
+                                invoiceAmount: amountPaid,
+                                commissionRate: rate,
+                                commissionAmount: commissionAmount,
+                                status: 'pending',
+                                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                                transactionId: transactionId
+                            });
+
+                            // Cập nhật thu nhập cho đối tác (chưa cộng vào totalEarnings cho đến khi paid, hoặc cộng ngay tùy business model)
+                            // Ở đây ta cộng vào totalEarnings để đối tác thấy con số tăng lên
+                            transaction.update(affiliateRef, {
+                                totalEarnings: admin.firestore.FieldValue.increment(commissionAmount),
+                                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                    }
+
                     transaction.set(userTransactionRef, {
                         amount: amountPaid,
                         productId: verifiedProductId,
@@ -1228,12 +1286,24 @@ export const affiliateAttach = onCall({ region: "asia-southeast1" }, async (requ
         throw new HttpsError("invalid-argument", "Thiếu uid hoặc ref_code.");
     }
 
+    const upperRefCode = ref_code.toString().trim().toUpperCase();
+
     try {
         const userRef = firestore.collection("users").doc(uid);
-        const userDoc = await userRef.get();
+        let userDoc = await userRef.get();
+
+        // Thêm vòng lặp thử lại (retry) để đợi user document được tạo (trong trường hợp đăng ký mới)
+        let retries = 0;
+        while (!userDoc.exists && retries < 5) {
+            functions.logger.log(`User ${uid} chưa tồn tại, đang thử lại lần ${retries + 1}...`);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Đợi 1 giây
+            userDoc = await userRef.get();
+            retries++;
+        }
 
         if (!userDoc.exists) {
-            throw new HttpsError("not-found", "Không tìm thấy người dùng.");
+            functions.logger.error(`Không tìm thấy người dùng ${uid} sau 5 lần thử.`);
+            throw new HttpsError("not-found", "Không tìm thấy người dùng sau khi thử lại.");
         }
 
         const userData = userDoc.data();
@@ -1246,26 +1316,35 @@ export const affiliateAttach = onCall({ region: "asia-southeast1" }, async (requ
 
         // Tìm affiliate theo mã code
         const affiliateQuery = await firestore.collection("affiliates")
-            .where("code", "==", ref_code)
+            .where("code", "==", upperRefCode)
             .limit(1)
             .get();
 
         if (affiliateQuery.empty) {
-            functions.logger.warn(`Mã giới thiệu không tồn tại: ${ref_code}`);
+            functions.logger.warn(`Mã giới thiệu không tồn tại: ${upperRefCode}`);
             return { status: "failed", reason: "invalid_ref_code" };
         }
 
         const affiliateId = affiliateQuery.docs[0].id;
+        const affiliateRef = firestore.collection("affiliates").doc(affiliateId);
 
-        // Cập nhật người dùng với thông tin affiliate (LAST CLICK WINS - ghi đè nếu chưa locked)
-        await userRef.update({
-            referred_by_affiliate_id: affiliateId,
-            affiliate_ref_code: ref_code,
-            affiliate_ref_ts: ref_ts || admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        // Sử dụng Transaction để đảm bảo tính nhất quán của dữ liệu
+        await firestore.runTransaction(async (transaction) => {
+            // 1. Cập nhật người dùng
+            transaction.update(userRef, {
+                referred_by_affiliate_id: affiliateId,
+                affiliate_ref_code: upperRefCode,
+                affiliate_ref_ts: ref_ts || admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            // 2. Tăng số lượng referral cho đối tác
+            transaction.update(affiliateRef, {
+                referralCount: admin.firestore.FieldValue.increment(1)
+            });
         });
 
-        functions.logger.log(`✅ Đã gán affiliate ${affiliateId} cho user ${uid}`);
+        functions.logger.log(`✅ Đã gán affiliate ${affiliateId} (mã: ${upperRefCode}) cho user ${uid} và tăng referralCount.`);
         return { status: "success" };
     } catch (error) {
         functions.logger.error("Lỗi khi gán affiliate:", error);

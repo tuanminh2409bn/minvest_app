@@ -327,10 +327,9 @@ class AuthService {
     }
 
     if (!isAnonymous) {
-      // Gán Affiliate nếu có (Chỉ thực hiện trên Web)
-      if (kIsWeb) {
-        _attachAffiliateIfAvailable(user.uid);
-      }
+      // Gán Affiliate nếu có (Thực hiện trên cả Web và Mobile)
+      // Sử dụng await để đảm bảo gán xong trước khi hoàn tất đăng nhập
+      await _attachAffiliateIfAvailable(user.uid);
 
       // Không dùng await ở đây để tránh treo màn hình Login nếu Cloud Function chậm
       SessionService().updateUserSession().catchError((e) {
@@ -341,24 +340,40 @@ class AuthService {
     return user;
   }
 
-  /// Gán mã giới thiệu cho người dùng nếu có dữ liệu lưu trữ (Web only)
+  /// Gán mã giới thiệu cho người dùng nếu có dữ liệu lưu trữ
   Future<void> _attachAffiliateIfAvailable(String uid) async {
     try {
       final tracker = AffiliateTracker();
-      final refCode = tracker.getStoredRef();
-      final refTs = tracker.getStoredRefTimestamp();
+      final refCode = await tracker.getStoredRef();
+      final refTs = await tracker.getStoredRefTimestamp();
+
+      print('DEBUG: Checking for stored affiliate ref... Found: $refCode');
 
       if (refCode != null && refCode.isNotEmpty) {
-        final callable = _functions.httpsCallable('affiliate-attach');
-        await callable.call({
+        // Đảm bảo dùng đúng region và đúng tên function (camelCase)
+        final functions = FirebaseFunctions.instanceFor(region: 'asia-southeast1');
+        final callable = functions.httpsCallable('affiliateAttach');
+        
+        final result = await callable.call({
           'uid': uid,
           'ref_code': refCode,
           'ref_ts': refTs ?? DateTime.now().millisecondsSinceEpoch.toString(),
         });
-        print('✅ Affiliate attached for user: $uid with code: $refCode');
+        
+        print('DEBUG: affiliate-attach result: ${result.data}');
+
+        if (result.data['status'] == 'success') {
+          print('✅ Affiliate attached successfully for user: $uid with code: $refCode');
+          // Sau khi đã attach thành công trên server, xóa ở local để tránh gọi lại lần sau
+          await tracker.clearRef();
+        } else {
+          print('⚠️ Affiliate attach failed/ignored: ${result.data['reason']}');
+        }
+      } else {
+        print('DEBUG: No stored affiliate ref found.');
       }
     } catch (e) {
-      print('❌ Lỗi gán affiliate (không chặn đăng nhập): $e');
+      print('❌ Lỗi gán affiliate: $e');
     }
   }
 

@@ -461,7 +461,10 @@ class _PricingCardContentState extends State<_PricingCardContent> {
                           if (FirebaseAuth.instance.currentUser == null) {
                             Navigator.of(context).pushNamed('/signup');
                           } else {
-                            // Logic cho người dùng đã đăng nhập (nếu có)
+                            Navigator.of(context).pushNamed(
+                              '/purchase-plan',
+                              arguments: {'plan': widget.plan.title.toLowerCase()},
+                            );
                           }
                         }, 
                         child: Text(

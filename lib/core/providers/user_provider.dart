@@ -20,6 +20,7 @@ class UserProvider with ChangeNotifier {
   String? _verificationError;
   String? _role;
   String? _displayName;
+  String? _referredByAffiliateId;
   UserDataStatus _status = UserDataStatus.initial;
   String? _currentDeviceId;
 
@@ -42,6 +43,7 @@ class UserProvider with ChangeNotifier {
   String? get role => _role;
   String? get userRole => _role; // Alias cho tương thích với Navbar
   String? get displayName => _displayName;
+  String? get referredByAffiliateId => _referredByAffiliateId;
   UserDataStatus get status => _status;
 
   bool get requiresSessionReset => _requiresSessionReset;
@@ -93,6 +95,7 @@ class UserProvider with ChangeNotifier {
         _verificationError = data['verificationError'];
         _role = data['role'] ?? 'user';
         _displayName = data['displayName'];
+        _referredByAffiliateId = data['referred_by_affiliate_id'];
 
         // Logic quản lý phiên mới: Kiểm tra theo platform
         final logoutTargetWeb = data['logoutTargetDeviceIdWeb'];
@@ -174,6 +177,7 @@ class UserProvider with ChangeNotifier {
     _verificationError = null;
     _role = null;
     _displayName = null; // Reset displayName
+    _referredByAffiliateId = null;
     // --- THAY ĐỔI 5: Reset các trường mới ---
     _requiresSessionReset = false;
     _sessionResetReason = null;

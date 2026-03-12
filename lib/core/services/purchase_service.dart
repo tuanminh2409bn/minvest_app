@@ -11,8 +11,18 @@ class PurchaseService extends ChangeNotifier {
   FirebaseFunctions get _functions => FirebaseFunctions.instanceFor(region: 'asia-southeast1');
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
-  final Set<String> _androidIds = {'elite_1_month', 'elite_12_months'};
-  final Set<String> _iosIds = {'minvest.01', 'minvest.12'};
+  final Set<String> _androidIds = {
+    'gold_1_month', 'gold_12_months',
+    'forex_1_month', 'forex_12_months',
+    'crypto_1_month', 'crypto_12_months',
+  };
+  
+  // Các ID iOS mới khớp với Android (thay _ bằng .)
+  final Set<String> _iosIds = {
+    'gold.1.month', 'gold.12.months',
+    'forex.1.month', 'forex.12.months',
+    'crypto.1.month', 'crypto.12.months',
+  };
 
   List<ProductDetails> _products = [];
   List<ProductDetails> get products => _products;
