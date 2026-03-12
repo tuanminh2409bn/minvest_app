@@ -30,21 +30,21 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hệ thống Affiliate'),
+        title: const Text('Affiliate'),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'Danh sách Đối tác', icon: Icon(Icons.people_outline)),
-            Tab(text: 'Quản lý Hoa hồng', icon: Icon(Icons.account_balance_wallet_outlined)),
+            Tab(text: 'Đối tác', icon: Icon(Icons.people_outline)),
+            Tab(text: 'Hoa hồng', icon: Icon(Icons.account_balance_wallet_outlined)),
           ],
         ),
         actions: [
-          TextButton.icon(
+          IconButton(
             onPressed: _showCreateAffiliateDialog,
             icon: const Icon(Icons.person_add_alt_1),
-            label: const Text('Tạo Affiliate Mới'),
+            tooltip: 'Tạo Affiliate Mới',
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 8),
         ],
       ),
       body: TabBarView(
@@ -61,16 +61,19 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
   // === TAB 1: DANH SÁCH ĐỐI TÁC ===
   // =================================================================
   Widget _buildAffiliatesTab() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSummaryCards(),
-          const SizedBox(height: 32),
-          const Text('Danh sách Affiliate đang hoạt động', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 24),
+          const Text('Danh sách Affiliate', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          Expanded(child: _buildAffiliateList()),
+          SizedBox(
+            height: 500, // Fixed height or use another approach for scrollable list
+            child: _buildAffiliateList()
+          ),
         ],
       ),
     );
@@ -81,18 +84,18 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
       stream: _firestore.collection('affiliates').snapshots(),
       builder: (context, snapshot) {
         int totalAffiliates = snapshot.data?.docs.length ?? 0;
-        return Row(
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
           children: [
             _StatCard(title: 'Tổng Affiliate', value: '$totalAffiliates', icon: Icons.people, color: Colors.blue),
-            const SizedBox(width: 16),
             _StatCard(
-              title: 'Hoa hồng Chờ duyệt', 
-              value: '---', // Sẽ cập nhật khi có collection commissions
+              title: 'Hoa hồng Chờ', 
+              value: '---', 
               icon: Icons.pending_actions, 
               color: Colors.orange
             ),
-            const SizedBox(width: 16),
-            _StatCard(title: 'Tổng đã chi trả', value: '---', icon: Icons.payments, color: Colors.green),
+            _StatCard(title: 'Đã chi trả', value: '---', icon: Icons.payments, color: Colors.green),
           ],
         );
       },
@@ -148,18 +151,21 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
   // =================================================================
   Widget _buildCommissionsTab() {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              const Text('Lịch sử phát sinh Hoa hồng', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text('Lịch sử Hoa hồng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               FilledButton.icon(
                 onPressed: () {}, // Chức năng xuất CSV
-                icon: const Icon(Icons.download),
-                label: const Text('Xuất báo cáo CSV'),
+                icon: const Icon(Icons.download, size: 18),
+                label: const Text('Xuất CSV', style: TextStyle(fontSize: 12)),
               ),
             ],
           ),
@@ -333,22 +339,63 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
   void _showEditAffiliateDialog(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final rateController = TextEditingController(text: (data['commissionRate'] ?? 40).toString());
+    final codeController = TextEditingController(text: data['code'] ?? '');
+    final nameController = TextEditingController(text: data['name'] ?? '');
     bool isActive = data['isActive'] ?? true;
+    
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: Text('Chỉnh sửa Affiliate: ${data['code']}'),
-          content: Column(mainAxisSize: MainAxisSize.min, children: [
-            TextField(controller: rateController, decoration: const InputDecoration(labelText: 'Tỷ lệ hoa hồng (%)')),
-            SwitchListTile(title: const Text('Hoạt động'), value: isActive, onChanged: (val) => setDialogState(() => isActive = val)),
-          ]),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min, 
+              children: [
+                TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Tên đối tác')),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: codeController, 
+                  decoration: const InputDecoration(labelText: 'Mã giới thiệu (Sửa thủ công)'),
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                ),
+                const SizedBox(height: 16),
+                TextField(controller: rateController, decoration: const InputDecoration(labelText: 'Tỷ lệ hoa hồng (%)')),
+                const SizedBox(height: 8),
+                SwitchListTile(title: const Text('Hoạt động'), value: isActive, onChanged: (val) => setDialogState(() => isActive = val)),
+              ],
+            ),
+          ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(context), child: const Text('Hủy')),
-            FilledButton(onPressed: () async {
-              await doc.reference.update({'commissionRate': int.tryParse(rateController.text) ?? 40, 'isActive': isActive});
-              if (context.mounted) Navigator.pop(context);
-            }, child: const Text('Cập nhật')),
+            FilledButton(
+              onPressed: () async {
+                final newCode = codeController.text.trim().toUpperCase();
+                final oldCode = data['code'];
+                
+                if (newCode.isEmpty) return;
+
+                // Nếu đổi mã mới, kiểm tra trùng lặp
+                if (newCode != oldCode) {
+                  final codeQuery = await _firestore.collection('affiliates').where('code', isEqualTo: newCode).get();
+                  if (codeQuery.docs.isNotEmpty) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mã giới thiệu này đã được sử dụng bởi người khác!'), backgroundColor: Colors.red));
+                    }
+                    return;
+                  }
+                }
+
+                await doc.reference.update({
+                  'name': nameController.text.trim(),
+                  'code': newCode,
+                  'commissionRate': int.tryParse(rateController.text) ?? 40, 
+                  'isActive': isActive
+                });
+                if (context.mounted) Navigator.pop(context);
+              }, 
+              child: const Text('Cập nhật'),
+            ),
           ],
         ),
       ),
@@ -372,18 +419,48 @@ class _StatCard extends StatelessWidget {
   const _StatCard({required this.title, required this.value, required this.icon, required this.color});
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: color.withOpacity(0.3))),
-        child: Row(children: [
-          CircleAvatar(backgroundColor: color.withOpacity(0.2), child: Icon(icon, color: color)),
-          const SizedBox(width: 16),
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-            Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          ]),
-        ]),
+    // Calculate width to fit 2 cards per row on mobile
+    final width = (MediaQuery.of(context).size.width - 44) / 2;
+    
+    return Container(
+      width: width,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1), 
+        borderRadius: BorderRadius.circular(12), 
+        border: Border.all(color: color.withOpacity(0.3))
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: color.withOpacity(0.2), 
+            child: Icon(icon, color: color, size: 20)
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, 
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title, 
+                  style: const TextStyle(color: Colors.grey, fontSize: 11),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value, 
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ]
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -13,7 +13,7 @@ class UpgradeScreen extends StatefulWidget {
 
 class _UpgradeScreenState extends State<UpgradeScreen> {
   bool isMonthly = true;
-  int selectedCategoryIndex = 0; // 0: GOLD, 1: FOREX, 2: CRYPTO
+  final Set<int> selectedCategoryIndices = {0}; // 0: GOLD, 1: FOREX, 2: CRYPTO
 
   List<String> _getFeatures(AppLocalizations l10n) {
     return [
@@ -115,19 +115,25 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                 Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: GestureDetector(
-                    onTap: isPurchasing ? null : () => _handleBuyNow(context, purchaseService),
+                    onTap: isPurchasing || selectedCategoryIndices.isEmpty 
+                      ? null 
+                      : () => _handleBuyNow(context, purchaseService),
                     child: Container(
                       width: double.infinity,
                       height: 50,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
-                        ),
+                        gradient: selectedCategoryIndices.isEmpty
+                          ? const LinearGradient(colors: [Color(0xFF333333), Color(0xFF444444)])
+                          : const LinearGradient(
+                              colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
+                            ),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        l10n.upgradeNow,
+                        selectedCategoryIndices.length > 1 
+                          ? '${l10n.upgradeNow} (${selectedCategoryIndices.length})'
+                          : l10n.upgradeNow,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -153,26 +159,39 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
   }
 
   Future<void> _handleBuyNow(BuildContext context, PurchaseService purchaseService) async {
-    final String productId;
-    if (Platform.isIOS) {
-      productId = isMonthly ? 'minvest.01' : 'minvest.12';
-    } else {
-      productId = isMonthly ? 'elite_1_month' : 'elite_12_months';
-    }
+    final l10n = AppLocalizations.of(context)!;
+    
+    // In-App Purchase doesn't support a "cart". We have to process them one by one.
+    // If multiple packages are selected, we will process them sequentially.
+    
+    for (int index in selectedCategoryIndices) {
+      String categoryName = '';
+      if (index == 0) categoryName = 'gold';
+      else if (index == 1) categoryName = 'forex';
+      else if (index == 2) categoryName = 'crypto';
 
-    final product = purchaseService.products.firstWhere(
-      (p) => p.id == productId,
-      orElse: () => throw Exception('Product not found'),
-    );
+      final String productId;
+      if (Platform.isIOS) {
+        productId = isMonthly ? '$categoryName.1.month' : '$categoryName.12.months';
+      } else {
+        productId = isMonthly ? '${categoryName}_1_month' : '${categoryName}_12_months';
+      }
 
-    try {
-      await purchaseService.buyProduct(product);
-    } catch (e) {
-      if (context.mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.errorWithMessage(e.toString()))),
-        );
+      final product = purchaseService.products.firstWhere(
+        (p) => p.id == productId,
+        orElse: () => throw Exception('Product not found: $productId'),
+      );
+
+      try {
+        await purchaseService.buyProduct(product);
+        // Note: the actual update to user data happens in PurchaseService via verifyPurchase Cloud Function.
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.errorWithMessage(e.toString()))),
+          );
+        }
+        break; // Stop if one fails to prevent messy flow
       }
     }
   }
@@ -268,10 +287,20 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
   }
 
   Widget _buildCategoryItem(int index, String name, String price, AppLocalizations l10n) {
-    final isSelected = selectedCategoryIndex == index;
+    final isSelected = selectedCategoryIndices.contains(index);
     
     return GestureDetector(
-      onTap: () => setState(() => selectedCategoryIndex = index),
+      onTap: () {
+        setState(() {
+          if (isSelected) {
+            if (selectedCategoryIndices.length > 1) {
+              selectedCategoryIndices.remove(index);
+            }
+          } else {
+            selectedCategoryIndices.add(index);
+          }
+        });
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         width: double.infinity,

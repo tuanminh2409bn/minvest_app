@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/features/admin/services/admin_service.dart';
+import 'package:minvest_forex_app/features/admin/screens/affiliate_management_view.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -146,6 +147,17 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quản lý Người dùng'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.people_alt_outlined, color: Colors.blue),
+            tooltip: 'Quản lý Affiliate',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AffiliateManagementView()),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/app/main_screen.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
+import 'package:minvest_forex_app/core/services/affiliate_tracker.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:minvest_forex_app/features/auth/screens/welcome/intro_screen.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
@@ -72,6 +73,13 @@ class _AuthGateState extends State<AuthGate> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Khởi tạo Affiliate Tracking (Đảm bảo bắt được mã trên mọi trang)
+    AffiliateTracker().initialize();
   }
 
   @override

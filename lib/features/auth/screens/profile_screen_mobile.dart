@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:minvest_forex_app/features/auth/screens/settings_screen.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/features/payment_history/screens/payment_history_screen.dart';
+import 'package:minvest_forex_app/features/affiliate/screens/affiliate_dashboard_screen.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -201,7 +202,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userTier = userProvider.userTier?.toLowerCase() ?? 'free';
     final tokenBalance = userProvider.tokenBalance;
     final userEmail = userProvider.email ?? currentUser?.email ?? 'user@gmail.com';
-    final displayName = userProvider.displayName ?? currentUser?.displayName ?? userEmail;
     final l10n = AppLocalizations.of(context)!;
 
     // Helper logic to determine the correct card image
@@ -434,6 +434,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           icon: Icons.history_outlined, 
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaymentHistoryScreen())),
                         ),
+                        const SizedBox(height: 8),
+                        if (userProvider.userRole == 'affiliate' || userProvider.userRole == 'admin')
+                          _buildMenuButton(
+                            label: l10n.affiliateDashboard,
+                            icon: Icons.people_outline,
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AffiliateDashboardScreen())),
+                          ),
                         const SizedBox(height: 8),
                         if (userProvider.role == 'admin')
                           _buildMenuButton(

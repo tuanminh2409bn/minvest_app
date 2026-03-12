@@ -67,97 +67,105 @@ class _AffiliateDashboardPageState extends State<AffiliateDashboardPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (!hasAffiliateRole) {
-      return const Scaffold(body: Center(child: Text('Bạn chưa được cấp quyền Affiliate. Vui lòng liên hệ Admin.')));
-    }
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore.collection('affiliates').where('uid', isEqualTo: _currentUser?.uid).limit(1).snapshots(),
+      builder: (context, affSnapshot) {
+        if (!hasAffiliateRole) {
+          return const Scaffold(body: Center(child: Text('Bạn chưa được cấp quyền Affiliate. Vui lòng liên hệ Admin.')));
+        }
 
-    if (_affiliateData == null) {
-      final bool isAdmin = userRole == 'admin';
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(isAdmin ? Icons.admin_panel_settings : Icons.info_outline, 
-                         color: isAdmin ? Colors.blue : Colors.orange, size: 64),
-                    const SizedBox(height: 24),
-                    Text(
-                      isAdmin ? 'Xin chào Quản trị viên!' : 'Tài khoản của bạn đã có quyền Affiliate!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white, fontSize: isMobile ? 20 : 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      isAdmin 
-                        ? 'Để bắt đầu sử dụng các tính năng của đối tác, hãy tự cấp cho mình một Mã giới thiệu (Ref Code) trong phần Quản lý Affiliate của Admin.'
-                        : 'Tuy nhiên, Admin chưa cấp Mã giới thiệu cho bạn.\nVui lòng liên hệ Admin để hoàn tất thiết lập.',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white70, fontSize: 16),
-                    ),
-                    const SizedBox(height: 32),
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pushNamed(isAdmin ? '/profile' : '/'),
-                      child: Text(isAdmin ? 'Đi đến Quản lý Admin' : 'Quay lại Trang chủ'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              top: 20,
-              left: 20,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 24),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final String refCode = _affiliateData!['code'] ?? '';
-    final String refLink = 'https://signalgpt.ai/?ref=$refCode';
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
+        if (!affSnapshot.hasData || affSnapshot.data!.docs.isEmpty) {
+          final bool isAdmin = userRole == 'admin';
+          return Scaffold(
+            backgroundColor: Colors.black,
+            body: Stack(
               children: [
-                const SizedBox(height: 60), // Khoảng trống cho nút back
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 40),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(refLink, refCode, isMobile),
-                      const SizedBox(height: 40),
-                      _buildStatsRow(isMobile),
-                      const SizedBox(height: 40),
-                      _buildDetailsSection(isMobile),
-                    ],
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(isAdmin ? Icons.admin_panel_settings : Icons.info_outline, 
+                             color: isAdmin ? Colors.blue : Colors.orange, size: 64),
+                        const SizedBox(height: 24),
+                        Text(
+                          isAdmin ? 'Xin chào Quản trị viên!' : 'Tài khoản của bạn đã có quyền Affiliate!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white, fontSize: isMobile ? 20 : 24, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          isAdmin 
+                            ? 'Để bắt đầu sử dụng các tính năng của đối tác, hãy tự cấp cho mình một Mã giới thiệu (Ref Code) trong phần Quản lý Affiliate của Admin.'
+                            : 'Tuy nhiên, Admin chưa cấp Mã giới thiệu cho bạn.\nVui lòng liên hệ Admin để hoàn tất thiết lập.',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white70, fontSize: 16),
+                        ),
+                        const SizedBox(height: 32),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pushNamed(isAdmin ? '/profile' : '/'),
+                          child: Text(isAdmin ? 'Đi đến Quản lý Admin' : 'Quay lại Trang chủ'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 24),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
               ],
             ),
+          );
+        }
+
+        final affDoc = affSnapshot.data!.docs.first;
+        final affData = affDoc.data() as Map<String, dynamic>;
+        final affDocId = affDoc.id;
+        final String refCode = affData['code'] ?? '';
+        final String refLink = 'https://signalgpt.ai/?ref=$refCode';
+
+        return Scaffold(
+          backgroundColor: Colors.black,
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 60),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 40),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(refLink, refCode, isMobile),
+                          const SizedBox(height: 40),
+                          _buildStatsRow(affDocId, affData, isMobile),
+                          const SizedBox(height: 40),
+                          _buildDetailsSection(affDocId, isMobile),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 20,
+                left: 20,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 24),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
           ),
-          Positioned(
-            top: 20,
-            left: 20,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 24),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-        ],
-      ),
+        );
+      }
     );
   }
 
@@ -172,97 +180,190 @@ class _AffiliateDashboardPageState extends State<AffiliateDashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Link giới thiệu của bạn', style: TextStyle(color: Colors.white, fontSize: isMobile ? 20 : 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          const Text('Sử dụng link này để giới thiệu người dùng và nhận hoa hồng 40% trọn đời.', style: TextStyle(color: Colors.white70, fontSize: 16)),
-          const SizedBox(height: 24),
-          if (isMobile) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.withOpacity(0.5)),
-              ),
-              child: SelectableText(link, style: const TextStyle(color: Colors.blue, fontSize: 14)),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: link));
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã copy link giới thiệu!')));
-                },
-                icon: const Icon(Icons.copy, size: 18),
-                label: const Text('Copy Link'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: isMobile ? 1 : 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Link giới thiệu của bạn', style: TextStyle(color: Colors.white, fontSize: isMobile ? 20 : 24, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    const Text('Sử dụng link này để giới thiệu người dùng và nhận hoa hồng 40% trọn đời.', style: TextStyle(color: Colors.white70, fontSize: 16)),
+                    const SizedBox(height: 24),
+                    if (isMobile) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blue.withOpacity(0.5)),
+                        ),
+                        child: SelectableText(link, style: const TextStyle(color: Colors.blue, fontSize: 14)),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: link));
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã copy link giới thiệu!')));
+                          },
+                          icon: const Icon(Icons.copy, size: 18),
+                          label: const Text('Copy Link'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 18),
+                          ),
+                        ),
+                      ),
+                    ] else
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.blue.withOpacity(0.5)),
+                              ),
+                              child: Text(link, style: const TextStyle(color: Colors.blue, fontSize: 16)),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: link));
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã copy link giới thiệu!')));
+                            },
+                            icon: const Icon(Icons.copy, size: 18),
+                            label: const Text('Copy Link'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
                 ),
               ),
-            ),
-          ] else
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.blue.withOpacity(0.5)),
+              if (!isMobile) ...[
+                const SizedBox(width: 40),
+                Container(
+                  width: 280,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blue.withOpacity(0.1), Colors.purple.withOpacity(0.1)],
                     ),
-                    child: Text(link, style: const TextStyle(color: Colors.blue, fontSize: 16)),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white10),
                   ),
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: link));
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã copy link giới thiệu!')));
-                  },
-                  icon: const Icon(Icons.copy, size: 18),
-                  label: const Text('Copy Link'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                  child: Column(
+                    children: [
+                      const Text('Mã giới thiệu', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                      const SizedBox(height: 8),
+                      Text(code, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: code));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã copy mã giới thiệu!')));
+                        },
+                        icon: const Icon(Icons.copy, size: 16),
+                        label: const Text('Copy Mã'),
+                        style: OutlinedButton.styleFrom(foregroundColor: Colors.white70, side: const BorderSide(color: Colors.white24)),
+                      ),
+                    ],
                   ),
                 ),
               ],
+            ],
+          ),
+          if (isMobile) ...[
+            const SizedBox(height: 24),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue.withOpacity(0.1), Colors.purple.withOpacity(0.1)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Mã giới thiệu', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text(code, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    ],
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: code));
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã copy mã giới thiệu!')));
+                    },
+                    icon: const Icon(Icons.copy, color: Colors.white70),
+                  ),
+                ],
+              ),
             ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildStatsRow(bool isMobile) {
-    if (isMobile) {
-      return Column(
-        children: [
-          _StatBox(title: 'Người giới thiệu', value: '${_affiliateData!['referralCount'] ?? 0}', icon: Icons.people_outline, color: Colors.blue),
-          const SizedBox(height: 16),
-          const _StatBox(title: 'Hoa hồng chờ duyệt', value: '\$0', icon: Icons.timer_outlined, color: Colors.orange),
-          const SizedBox(height: 16),
-          _StatBox(title: 'Tổng thu nhập', value: '\$${_affiliateData!['totalEarnings'] ?? 0}', icon: Icons.account_balance_wallet_outlined, color: Colors.green),
-        ],
-      );
-    }
-    return Row(
-      children: [
-        Expanded(child: _StatBox(title: 'Người giới thiệu', value: '${_affiliateData!['referralCount'] ?? 0}', icon: Icons.people_outline, color: Colors.blue)),
-        const SizedBox(width: 20),
-        const Expanded(child: _StatBox(title: 'Hoa hồng chờ duyệt', value: '\$0', icon: Icons.timer_outlined, color: Colors.orange)),
-        const SizedBox(width: 20),
-        Expanded(child: _StatBox(title: 'Tổng thu nhập', value: '\$${_affiliateData!['totalEarnings'] ?? 0}', icon: Icons.account_balance_wallet_outlined, color: Colors.green)),
-      ],
+  Widget _buildStatsRow(String affDocId, Map<String, dynamic> affData, bool isMobile) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore.collection('commissions')
+          .where('affiliateId', isEqualTo: affDocId)
+          .where('status', isEqualTo: 'pending')
+          .snapshots(),
+      builder: (context, commSnapshot) {
+        double pendingAmount = 0;
+        if (commSnapshot.hasData) {
+          for (var doc in commSnapshot.data!.docs) {
+            pendingAmount += (doc.data() as Map<String, dynamic>)['commissionAmount'] ?? 0;
+          }
+        }
+
+        if (isMobile) {
+          return Column(
+            children: [
+              _StatBox(title: 'Người giới thiệu', value: '${affData['referralCount'] ?? 0}', icon: Icons.people_outline, color: Colors.blue),
+              const SizedBox(height: 16),
+              _StatBox(title: 'Hoa hồng chờ duyệt', value: '\$${pendingAmount.toStringAsFixed(2)}', icon: Icons.timer_outlined, color: Colors.orange),
+              const SizedBox(height: 16),
+              _StatBox(title: 'Tổng thu nhập', value: '\$${(affData['totalEarnings'] ?? 0).toStringAsFixed(2)}', icon: Icons.account_balance_wallet_outlined, color: Colors.green),
+            ],
+          );
+        }
+        
+        return Row(
+          children: [
+            Expanded(child: _StatBox(title: 'Người giới thiệu', value: '${affData['referralCount'] ?? 0}', icon: Icons.people_outline, color: Colors.blue)),
+            const SizedBox(width: 20),
+            Expanded(child: _StatBox(title: 'Hoa hồng chờ duyệt', value: '\$${pendingAmount.toStringAsFixed(2)}', icon: Icons.timer_outlined, color: Colors.orange)),
+            const SizedBox(width: 20),
+            Expanded(child: _StatBox(title: 'Tổng thu nhập', value: '\$${(affData['totalEarnings'] ?? 0).toStringAsFixed(2)}', icon: Icons.account_balance_wallet_outlined, color: Colors.green)),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildDetailsSection(bool isMobile) {
+  Widget _buildDetailsSection(String affDocId, bool isMobile) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 20 : 32),
@@ -276,17 +377,17 @@ class _AffiliateDashboardPageState extends State<AffiliateDashboardPage> {
         children: [
           Text('Danh sách giới thiệu mới nhất', style: TextStyle(color: Colors.white, fontSize: isMobile ? 18 : 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 24),
-          _buildReferralTable(isMobile),
+          _buildReferralTable(affDocId, isMobile),
         ],
       ),
     );
   }
 
-  Widget _buildReferralTable(bool isMobile) {
+  Widget _buildReferralTable(String affDocId, bool isMobile) {
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore
           .collection('users')
-          .where('referred_by_affiliate_id', isEqualTo: _currentUser?.uid)
+          .where('referred_by_affiliate_id', isEqualTo: affDocId)
           .orderBy('createdAt', descending: true)
           .limit(10)
           .snapshots(),

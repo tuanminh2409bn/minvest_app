@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import 'dart:ui';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -35,6 +36,83 @@ class SettingsScreen extends StatelessWidget {
         ? 'market://details?id=com.minvest.aisignals'
         : 'https://apps.apple.com/app/id6749299894?action=write-review';
     _launchURL(url);
+  }
+
+  void _showReferralCodeDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        bool isLoading = false;
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            backgroundColor: const Color(0xFF161616),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Colors.white10),
+            ),
+            title: Text(l10n.enterReferralCode, style: const TextStyle(color: Colors.white)),
+            content: TextField(
+              controller: controller,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: l10n.referralCode,
+                hintStyle: const TextStyle(color: Colors.white38),
+                enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF276EFB))),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.cancel, style: const TextStyle(color: Colors.white54)),
+              ),
+              ElevatedButton(
+                onPressed: isLoading ? null : () async {
+                  final code = controller.text.trim();
+                  if (code.isEmpty) return;
+
+                  setState(() => isLoading = true);
+                  try {
+                    final userProvider = Provider.of<UserProvider>(context, listen: false);
+                    final functions = FirebaseFunctions.instanceFor(region: 'asia-southeast1');
+                    final callable = functions.httpsCallable('affiliateAttach');
+
+                    await callable.call({
+                      'uid': userProvider.uid,
+                      'ref_code': code,
+                      'ref_ts': DateTime.now().millisecondsSinceEpoch.toString(),
+                    });
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.referralCodeApplied), backgroundColor: Colors.green),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      setState(() => isLoading = false);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.invalidReferralCode), backgroundColor: Colors.red),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF276EFB),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: isLoading 
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : Text(l10n.submit, style: const TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
+      }
+    );
   }
 
   void _shareApp() {
@@ -370,6 +448,18 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  Consumer<UserProvider>(
+                    builder: (context, userProvider, child) {
+                      if (userProvider.referredByAffiliateId == null) {
+                        return _buildMenuButton(
+                          label: l10n.enterReferralCode,
+                          icon: Icons.card_giftcard_outlined,
+                          onTap: () => _showReferralCodeDialog(context),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                   _buildMenuButton(
                     label: l10n.changePassword,
                     icon: Icons.lock_outline,
