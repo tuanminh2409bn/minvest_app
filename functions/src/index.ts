@@ -102,30 +102,6 @@ export const processVerificationImage = onObjectFinalized(
       const exnessId = idMatch[1];
       functions.logger.log(`Tìm thấy - Số dư: ${balance}, ID Exness: ${exnessId}`);
 
-      const affiliateCheckUrl = `https://chcke.minvest.vn/api/users/check-allocation?mt4Account=${exnessId}`;
-      let affiliateData: any;
-
-      try {
-        const response = await axios.get(affiliateCheckUrl);
-        functions.logger.log("Dữ liệu thô từ mInvest API:", response.data);
-
-        const firstAccountObject = response.data?.data?.[0];
-        const finalData = firstAccountObject?.data?.[0];
-
-        if (!finalData || !finalData.client_uid) {
-            throw new Error("API không trả về dữ liệu hợp lệ hoặc không tìm thấy client_uid.");
-        }
-
-        affiliateData = {
-          client_uid: finalData.client_uid,
-          client_account: finalData.partner_account,
-        };
-        functions.logger.log("Kiểm tra affiliate thành công, kết quả:", affiliateData);
-      } catch (apiError) {
-        functions.logger.error("Lỗi khi kiểm tra affiliate:", apiError);
-        throw new Error(`Tài khoản ${exnessId} không thuộc affiliate của mInvest.`);
-      }
-
       const idDoc = await firestore
         .collection("verifiedExnessIds")
         .doc(exnessId).get();
@@ -146,8 +122,10 @@ export const processVerificationImage = onObjectFinalized(
       const updateData = {
         subscriptionTier: tier,
         verificationStatus: "success",
-        exnessClientUid: affiliateData.client_uid,
         exnessClientAccount: exnessId,
+        exnessBalance: balance,
+        verifiedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
         notificationCount: 0,
       };
 
@@ -1097,6 +1075,48 @@ export const updateUserSubscriptionTier = onCall({ region: "asia-southeast1" }, 
 
         batch.update(userRef, updateData);
 
+        // ▼▼▼ THÊM LOGIC TÍNH HOA HỒNG AFFILIATE (KHI ADMIN NÂNG GÓI THỦ CÔNG) ▼▼▼
+        if (tier === 'elite') {
+            const userDoc = await userRef.get();
+            const userData = userDoc.data();
+            const affiliateId = userData?.referred_by_affiliate_id;
+
+            if (affiliateId) {
+                const affiliateRef = firestore.collection("affiliates").doc(affiliateId);
+                const affiliateDoc = await affiliateRef.get();
+
+                if (affiliateDoc.exists) {
+                    const affData = affiliateDoc.data();
+                    const rate = affData?.commissionRate || 40;
+                    const amountPaid = 78; // Mức giá mặc định cho gói Elite nạp thủ công
+                    const commissionAmount = Math.round(amountPaid * (rate / 100) * 100) / 100;
+
+                    // 1. Tạo bản ghi hoa hồng (Trạng thái approved vì admin đã xác nhận tiền)
+                    const commissionRef = firestore.collection("commissions").doc();
+                    batch.set(commissionRef, {
+                        affiliateId: affiliateId,
+                        affiliateCode: affData?.code || '---',
+                        userId: userId,
+                        userEmail: userData?.email || '---',
+                        productId: 'manual_upgrade_elite',
+                        invoiceAmount: amountPaid,
+                        commissionRate: rate,
+                        commissionAmount: commissionAmount,
+                        status: 'approved',
+                        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                        transactionId: `manual_${Date.now()}_${userId.substring(0, 5)}`
+                    });
+
+                    // 2. Cập nhật thu nhập tổng cộng cho đối tác
+                    batch.update(affiliateRef, {
+                        totalEarnings: admin.firestore.FieldValue.increment(commissionAmount),
+                        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            }
+        }
+        // ▲▲▲ KẾT THÚC THÊM ▼▼▼
+
         // ▼▼▼ THÊM THÔNG BÁO CẬP NHẬT GÓI (ADMIN) ▼▼▼
         const notifRef = userRef.collection("notifications").doc();
         batch.set(notifRef, {
@@ -1150,6 +1170,103 @@ export const updateUserSubscriptionTier = onCall({ region: "asia-southeast1" }, 
     // 7. Trả về kết quả thành công (giữ nguyên)
     return { status: "success", message: `Đã cập nhật thành công ${userIds.length} tài khoản thành gói ${tier.toUpperCase()}.` };
 });
+
+// =================================================================
+// === TRIGGER TỰ ĐỘNG TÍNH HOA HỒNG KHI ADMIN NÂNG GÓI THỦ CÔNG ===
+// =================================================================
+export const onUserSubscriptionUpdated = onDocumentUpdated(
+    { region: "asia-southeast1", document: "users/{userId}" },
+    async (event) => {
+        const beforeData = event.data?.before.data();
+        const afterData = event.data?.after.data();
+        const userId = event.params.userId;
+
+        if (!beforeData || !afterData) return;
+
+        const packages = ["gold", "forex", "crypto"];
+        
+        for (const pkg of packages) {
+            const beforeExpiry = beforeData.subscriptionsExpiry?.[pkg] as admin.firestore.Timestamp | undefined;
+            const afterExpiry = afterData.subscriptionsExpiry?.[pkg] as admin.firestore.Timestamp | undefined;
+
+            // Nếu ngày hết hạn được cập nhật và mới hơn ngày cũ
+            if (afterExpiry && (!beforeExpiry || afterExpiry.toMillis() > beforeExpiry.toMillis())) {
+                const affiliateId = afterData.referred_by_affiliate_id;
+                
+                // Chỉ xử lý nếu user có người giới thiệu
+                if (affiliateId) {
+                    // Tính toán khoảng thời gian được cộng thêm (millisecond)
+                    const baseDate = beforeExpiry && beforeExpiry.toMillis() > Date.now() 
+                        ? beforeExpiry.toMillis() 
+                        : Date.now();
+                    
+                    const diffMs = afterExpiry.toMillis() - baseDate;
+                    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+                    // Nếu chênh lệch quá nhỏ (ví dụ dưới 1 ngày do lỗi thao tác) thì bỏ qua
+                    if (diffDays < 1) continue;
+
+                    // Xác định mức giá dựa trên số ngày
+                    // > 31 ngày coi là gói năm ($460), <= 31 ngày coi là gói tháng ($78)
+                    const amountPaid = diffDays > 31 ? 460 : 78;
+                    const packageDuration = diffDays > 31 ? "12_months" : "1_month";
+
+                    const affiliateRef = firestore.collection("affiliates").doc(affiliateId);
+                    const affiliateDoc = await affiliateRef.get();
+
+                    if (affiliateDoc.exists) {
+                        const affData = affiliateDoc.data();
+                        const rate = affData?.commissionRate || 40;
+                        const commissionAmount = Math.round(amountPaid * (rate / 100) * 100) / 100;
+
+                        // Kiểm tra xem giao dịch này đã được ghi nhận chưa (tránh duplicate trong cùng 1 phút)
+                        const recentCommQuery = await firestore.collection("commissions")
+                            .where("affiliateId", "==", affiliateId)
+                            .where("userId", "==", userId)
+                            .where("productId", "==", `manual_${pkg}_${packageDuration}`)
+                            .orderBy("createdAt", "desc")
+                            .limit(1)
+                            .get();
+
+                        if (!recentCommQuery.empty) {
+                            const lastCommDate = (recentCommQuery.docs[0].data().createdAt as admin.firestore.Timestamp).toMillis();
+                            if (Date.now() - lastCommDate < 60000) { // Nếu vừa mới tạo trong vòng 1 phút thì bỏ qua
+                                functions.logger.log(`Bỏ qua ghi nhận hoa hồng trùng lặp cho user ${userId} gói ${pkg}`);
+                                continue;
+                            }
+                        }
+
+                        // Tạo bản ghi hoa hồng
+                        await firestore.runTransaction(async (transaction) => {
+                            const commissionRef = firestore.collection("commissions").doc();
+                            transaction.set(commissionRef, {
+                                affiliateId: affiliateId,
+                                affiliateCode: affData?.code || '---',
+                                userId: userId,
+                                userEmail: afterData.email || '---',
+                                productId: `manual_${pkg}_${packageDuration}`,
+                                invoiceAmount: amountPaid,
+                                commissionRate: rate,
+                                commissionAmount: commissionAmount,
+                                status: 'approved',
+                                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                                transactionId: `admin_manual_${Date.now()}_${pkg}`
+                            });
+
+                            // Cập nhật thu nhập cho đối tác
+                            transaction.update(affiliateRef, {
+                                totalEarnings: admin.firestore.FieldValue.increment(commissionAmount),
+                                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                            });
+                        });
+
+                        functions.logger.log(`✅ Đã ghi nhận hoa hồng thủ công cho ${affData?.code}: \$${commissionAmount} (Gói ${pkg} ${packageDuration})`);
+                    }
+                }
+            }
+        }
+    }
+);
 
 export const resetDemoNotificationCounters = onSchedule({ schedule: "1 0 * * *", timeZone: "Asia/Ho_Chi_Minh", region: "asia-southeast1" }, async () => {
     const demoUsersSnapshot = await firestore.collection("users").where("subscriptionTier", "==", "demo").get();

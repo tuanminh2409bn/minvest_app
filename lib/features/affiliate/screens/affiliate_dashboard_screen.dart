@@ -188,36 +188,63 @@ class _AffiliateDashboardScreenState extends State<AffiliateDashboardScreen> {
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore.collection('commissions')
           .where('affiliateId', isEqualTo: affDocId)
-          .where('status', isEqualTo: 'pending')
           .snapshots(),
       builder: (context, commSnapshot) {
         double pendingAmount = 0;
+        double totalRevenue = 0;
+        double totalEarnings = (affData['totalEarnings'] ?? 0).toDouble();
+
         if (commSnapshot.hasData) {
           for (var doc in commSnapshot.data!.docs) {
-            pendingAmount += (doc.data() as Map<String, dynamic>)['commissionAmount'] ?? 0;
+            final data = doc.data() as Map<String, dynamic>;
+            final status = data['status'] ?? 'pending';
+            final amount = (data['invoiceAmount'] ?? 0).toDouble();
+            final comm = (data['commissionAmount'] ?? 0).toDouble();
+
+            totalRevenue += amount;
+            if (status == 'pending' || status == 'approved') {
+              pendingAmount += comm;
+            }
           }
         }
 
         return Column(
           children: [
-            _StatBox(
-              title: l10n.referralCount,
-              value: '${affData['referralCount'] ?? 0}',
-              icon: Icons.people_outline,
-              color: Colors.blue,
+            Row(
+              children: [
+                Expanded(
+                  child: _StatBox(
+                    title: l10n.referralCount,
+                    value: '${affData['referralCount'] ?? 0}',
+                    icon: Icons.people_outline,
+                    color: Colors.blue,
+                    isSmall: true,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _StatBox(
+                    title: "Doanh thu",
+                    value: '\$${totalRevenue.toStringAsFixed(1)}',
+                    icon: Icons.trending_up,
+                    color: Colors.purple,
+                    isSmall: true,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             _StatBox(
-              title: l10n.pendingCommission,
+              title: "Hoa hồng khả dụng",
               value: '\$${pendingAmount.toStringAsFixed(2)}',
-              icon: Icons.timer_outlined,
+              icon: Icons.account_balance_wallet_outlined,
               color: Colors.orange,
             ),
             const SizedBox(height: 12),
             _StatBox(
-              title: l10n.totalEarnings,
-              value: '\$${(affData['totalEarnings'] ?? 0).toStringAsFixed(2)}',
-              icon: Icons.account_balance_wallet_outlined,
+              title: "Tổng thu nhập đã nhận",
+              value: '\$${totalEarnings.toStringAsFixed(2)}',
+              icon: Icons.check_circle_outline,
               color: Colors.green,
             ),
           ],
@@ -232,7 +259,7 @@ class _AffiliateDashboardScreenState extends State<AffiliateDashboardScreen> {
           .collection('users')
           .where('referred_by_affiliate_id', isEqualTo: affDocId)
           .orderBy('createdAt', descending: true)
-          .limit(20)
+          .limit(50)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -258,45 +285,75 @@ class _AffiliateDashboardScreenState extends State<AffiliateDashboardScreen> {
           itemCount: snapshot.data!.docs.length,
           separatorBuilder: (context, index) => const Divider(color: Colors.white10),
           itemBuilder: (context, index) {
-            final data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+            final userDoc = snapshot.data!.docs[index];
+            final data = userDoc.data() as Map<String, dynamic>;
             final date = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
             final email = data['email'] ?? '---';
-            final maskedEmail = email.length > 8 
-                ? '${email.substring(0, 4)}***${email.substring(email.indexOf('@'))}' 
+            final maskedEmail = email.length > 10 
+                ? '${email.substring(0, 6)}***${email.substring(email.indexOf('@'))}' 
                 : email;
             final tier = (data['subscriptionTier'] ?? 'free').toString().toUpperCase();
             
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            return FutureBuilder<QuerySnapshot>(
+              future: _firestore.collection('commissions')
+                  .where('affiliateId', isEqualTo: affDocId)
+                  .where('userId', isEqualTo: userDoc.id)
+                  .get(),
+              builder: (context, commSnapshot) {
+                double userRevenue = 0;
+                if (commSnapshot.hasData) {
+                  for (var doc in commSnapshot.data!.docs) {
+                    userRevenue += (doc.data() as Map<String, dynamic>)['invoiceAmount'] ?? 0;
+                  }
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(maskedEmail, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 4),
-                      Text(DateFormat('dd/MM/yyyy HH:mm').format(date), style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(maskedEmail, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+                            const SizedBox(height: 4),
+                            Text(DateFormat('dd/MM/yyyy HH:mm').format(date), style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: tier == 'ELITE' ? Colors.green.withOpacity(0.1) : Colors.white10,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: tier == 'ELITE' ? Colors.green.withOpacity(0.3) : Colors.white24),
+                            ),
+                            child: Text(
+                              tier,
+                              style: TextStyle(
+                                color: tier == 'ELITE' ? Colors.green : Colors.white70,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          if (userRevenue > 0) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Nạp: \$${userRevenue.toStringAsFixed(1)}',
+                              style: const TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: tier == 'ELITE' ? Colors.green.withOpacity(0.1) : Colors.white10,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: tier == 'ELITE' ? Colors.green.withOpacity(0.3) : Colors.white24),
-                    ),
-                    child: Text(
-                      tier,
-                      style: TextStyle(
-                        color: tier == 'ELITE' ? Colors.green : Colors.white70,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
@@ -310,13 +367,20 @@ class _StatBox extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
+  final bool isSmall;
 
-  const _StatBox({required this.title, required this.value, required this.icon, required this.color});
+  const _StatBox({
+    required this.title, 
+    required this.value, 
+    required this.icon, 
+    required this.color,
+    this.isSmall = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isSmall ? 16 : 20),
       decoration: BoxDecoration(
         color: color.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
@@ -325,21 +389,35 @@ class _StatBox extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(isSmall ? 8 : 12),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: isSmall ? 20 : 24),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: isSmall ? 12 : 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                Text(
+                  title, 
+                  style: TextStyle(color: Colors.white70, fontSize: isSmall ? 11 : 13),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 4),
-                Text(value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                FittedBox(
+                  child: Text(
+                    value, 
+                    style: TextStyle(
+                      color: Colors.white, 
+                      fontSize: isSmall ? 20 : 24, 
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
+                ),
               ],
             ),
           ),

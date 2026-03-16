@@ -73,9 +73,6 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
                             if (_selectedMethod == 'usdt') ...[
                               const SizedBox(height: 64),
                               _buildUSDTDetail(isMobile),
-                            ] else if (_selectedMethod == 'qr') ...[
-                              const SizedBox(height: 64),
-                              _buildBankQRDetail(isMobile),
                             ],
                           ],
                         ),
@@ -111,30 +108,12 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
   Widget _buildPaymentMethods(bool isMobile) {
     final List<Widget> methods = [
       _paymentMethodCard(
-        'Stripe Payment',
-        'assets/images/stripe.png',
-        fontSize: 18,
-        letterSpacing: -0.90,
-        isSelected: _selectedMethod == 'stripe',
-        onTap: () => setState(() => _selectedMethod = 'stripe'),
-      ),
-      if (isMobile) const SizedBox(height: 16) else const SizedBox(width: 10),
-      _paymentMethodCard(
         'USDT Wallet Address',
         'assets/images/usdt.png',
         fontSize: 16,
         letterSpacing: -0.80,
         isSelected: _selectedMethod == 'usdt',
         onTap: () => setState(() => _selectedMethod = 'usdt'),
-      ),
-      if (isMobile) const SizedBox(height: 16) else const SizedBox(width: 10),
-      _paymentMethodCard(
-        'QR Code ( Vietnamese only)',
-        'assets/images/qr.png',
-        fontSize: 18,
-        letterSpacing: -0.90,
-        isSelected: _selectedMethod == 'qr',
-        onTap: () => setState(() => _selectedMethod = 'qr'),
       ),
     ];
 
@@ -149,7 +128,7 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
       spacing: 10,
       runSpacing: 16,
       alignment: WrapAlignment.center,
-      children: methods.where((w) => w is! SizedBox).toList(),
+      children: methods,
     );
   }
 
@@ -362,69 +341,6 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
           }
         },
         child: Image.asset(assetPath, width: size, height: size, fit: BoxFit.contain),
-      ),
-    );
-  }
-
-  Widget _buildBankQRDetail(bool isMobile) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 800),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 45, vertical: 32),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF595959), width: 1),
-          boxShadow: const [
-            BoxShadow(color: Color(0x7FB49CFF), blurRadius: 12),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'SCAN QR CODE',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontFamily: 'Be Vietnam Pro',
-                fontWeight: FontWeight.w600,
-                letterSpacing: -1.20,
-              ),
-            ),
-            const SizedBox(height: 12), // Reduced spacing
-            Image.asset(
-              'assets/images/qrcodenganhang.png',
-              width: 350,
-              height: 350,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(height: 20), // Reduced spacing
-            SizedBox(
-              width: 477,
-              child: Text(
-                'After completing the payment, \nplease contact us via Whatsapp / Zalo (+84 0969 15 6969) for confirmation and signal usage.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontFamily: 'Be Vietnam Pro',
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: -0.90,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16), // Reduced spacing
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _socialButton('assets/images/zalo.png', size: 40, url: 'https://zalo.me/84969156969'),
-                const SizedBox(width: 6),
-                _socialButton('assets/images/whatsapp.png', size: 55, url: 'https://wa.me/84969156969'),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }

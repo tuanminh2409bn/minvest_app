@@ -23,7 +23,6 @@ class _AccountVerificationScreenState extends State<AccountVerificationScreen> {
   VerificationState _currentState = VerificationState.initial;
   String _errorMessage = '';
   String _successTier = '';
-  final String _exnessSignUpUrl = 'https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1';
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -255,12 +254,6 @@ class _AccountVerificationScreenState extends State<AccountVerificationScreen> {
   }
 
   Widget _buildFailureView(AppLocalizations l10n) {
-    final bool isAffiliateError = _errorMessage.toLowerCase().contains("not under minvest's affiliate link");
-
-    if (isAffiliateError) {
-      return _buildAffiliateErrorView(l10n);
-    }
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -284,44 +277,6 @@ class _AccountVerificationScreenState extends State<AccountVerificationScreen> {
             });
           },
           isPrimary: true,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAffiliateErrorView(AppLocalizations l10n) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Image.asset('assets/mockups/logo.png', height: 60),
-        const SizedBox(height: 24),
-        Text(
-          l10n.accountNotLinked,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          l10n.accountNotLinkedDesc,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white70, height: 1.5, fontSize: 14),
-        ),
-        const SizedBox(height: 32),
-        _buildActionButton(
-          text: l10n.registerExnessViaSignalGPT,
-          onPressed: () => _launchURL(_exnessSignUpUrl),
-          isPrimary: true,
-        ),
-        const SizedBox(height: 16),
-        _buildActionButton(
-          text: l10n.iHaveRegisteredReupload,
-          onPressed: () {
-            setState(() {
-              _pickedImageFile = null;
-              _currentState = VerificationState.initial;
-            });
-          },
-          isPrimary: false,
         ),
       ],
     );

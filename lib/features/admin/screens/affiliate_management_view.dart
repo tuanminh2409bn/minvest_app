@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:minvest_forex_app/features/admin/screens/affiliate_detail_screen.dart';
 
 class AffiliateManagementView extends StatefulWidget {
   const AffiliateManagementView({super.key});
@@ -81,22 +82,44 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
 
   Widget _buildSummaryCards() {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('affiliates').snapshots(),
+      stream: _firestore.collection('commissions').snapshots(),
       builder: (context, snapshot) {
-        int totalAffiliates = snapshot.data?.docs.length ?? 0;
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            _StatCard(title: 'Tổng Affiliate', value: '$totalAffiliates', icon: Icons.people, color: Colors.blue),
-            _StatCard(
-              title: 'Hoa hồng Chờ', 
-              value: '---', 
-              icon: Icons.pending_actions, 
-              color: Colors.orange
-            ),
-            _StatCard(title: 'Đã chi trả', value: '---', icon: Icons.payments, color: Colors.green),
-          ],
+        double pending = 0;
+        double paid = 0;
+        
+        if (snapshot.hasData) {
+          for (var doc in snapshot.data!.docs) {
+            final data = doc.data() as Map<String, dynamic>;
+            final status = data['status'] ?? 'pending';
+            final amount = (data['commissionAmount'] ?? 0).toDouble();
+            
+            if (status == 'paid') {
+              paid += amount;
+            } else if (status == 'pending' || status == 'approved') {
+              pending += amount;
+            }
+          }
+        }
+
+        return StreamBuilder<QuerySnapshot>(
+          stream: _firestore.collection('affiliates').snapshots(),
+          builder: (context, affSnapshot) {
+            int totalAffiliates = affSnapshot.data?.docs.length ?? 0;
+            return Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                _StatCard(title: 'Tổng Affiliate', value: '$totalAffiliates', icon: Icons.people, color: Colors.blue),
+                _StatCard(
+                  title: 'Hoa hồng Chờ', 
+                  value: '\$${pending.toStringAsFixed(1)}', 
+                  icon: Icons.pending_actions, 
+                  color: Colors.orange
+                ),
+                _StatCard(title: 'Đã chi trả', value: '\$${paid.toStringAsFixed(1)}', icon: Icons.payments, color: Colors.green),
+              ],
+            );
+          }
         );
       },
     );
@@ -117,9 +140,9 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
               columns: const [
                 DataColumn(label: Text('Mã Code')),
                 DataColumn(label: Text('Tên Affiliate')),
-                DataColumn(label: Text('Email')),
                 DataColumn(label: Text('Số Ref')),
                 DataColumn(label: Text('Hoa hồng (%)')),
+                DataColumn(label: Text('Đã nhận')),
                 DataColumn(label: Text('Trạng thái')),
                 DataColumn(label: Text('Thao tác')),
               ],
@@ -128,12 +151,27 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
                 return DataRow(cells: [
                   DataCell(Text(data['code'] ?? '---', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue))),
                   DataCell(Text(data['name'] ?? 'No Name')),
-                  DataCell(Text(data['email'] ?? '---')),
                   DataCell(Text('${data['referralCount'] ?? 0}')),
                   DataCell(Text('${data['commissionRate'] ?? 40}%')),
+                  DataCell(Text('\$${(data['totalEarnings'] ?? 0).toStringAsFixed(1)}', style: const TextStyle(color: Colors.green))),
                   DataCell(_buildStatusBadge(data['isActive'] ?? true)),
                   DataCell(Row(
                     children: [
+                      IconButton(
+                        icon: const Icon(Icons.analytics_outlined, size: 20, color: Colors.amber), 
+                        tooltip: 'Xem chi tiết',
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AffiliateDetailScreen(
+                                affiliateId: doc.id,
+                                affiliateData: data,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                       IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => _showEditAffiliateDialog(doc)),
                     ],
                   )),
