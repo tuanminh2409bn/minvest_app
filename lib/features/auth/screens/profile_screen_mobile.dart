@@ -13,7 +13,6 @@ import 'package:minvest_forex_app/features/auth/screens/settings_screen.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/features/payment_history/screens/payment_history_screen.dart';
 import 'package:minvest_forex_app/features/affiliate/screens/affiliate_dashboard_screen.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ExchangeApp {
@@ -33,18 +32,17 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final List<ExchangeApp> allApps = [
-    ExchangeApp(name: 'Exness', iconPath: 'assets/icons/exness.png', url: 'https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1'),
-    ExchangeApp(name: 'BingX', iconPath: 'assets/icons/bingx.png', url: 'https://bingx.com/invite/S6UV9A'),
-    ExchangeApp(name: 'OKX', iconPath: 'assets/icons/okx.png', url: 'https://www.okx.com/join/minvest'),
-    ExchangeApp(name: 'Binance', iconPath: 'assets/icons/binance.png', url: 'https://www.binance.com/vi/register?ref=12345678'),
-    ExchangeApp(name: 'ByBit', iconPath: 'assets/icons/bybit.png', url: 'https://www.bybit.com/invite?ref=MINVEST'),
-    ExchangeApp(name: 'Bitget', iconPath: 'assets/icons/bitget.png', url: 'https://www.bitget.com/expressly?languageType=0&channelCode=minvest&vipCode=minvest'),
-    ExchangeApp(name: 'MEXC', iconPath: 'assets/icons/mexc.png', url: 'https://www.mexc.com/register?inviteCode=mexc-MINVEST'),
-    ExchangeApp(name: 'MT4', iconPath: 'assets/icons/mt4.png', url: 'https://metatrader4.com'),
-    ExchangeApp(name: 'MT5', iconPath: 'assets/icons/mt5.png', url: 'https://metatrader5.com'),
+    ExchangeApp(name: 'Exness', iconPath: 'assets/icons/exness.png', url: 'https://www.extrading.asia/vi/?_8f4x=1'),
+    ExchangeApp(name: 'XM', iconPath: 'assets/icons/xm.png', url: 'https://affs.click/0mg8B'),
+    ExchangeApp(name: 'Bybit', iconPath: 'assets/icons/bybit.png', url: 'https://partner.bybit.com/b/LISA68'),
+    ExchangeApp(name: 'Binance', iconPath: 'assets/icons/binance.png', url: 'https://accounts.binance.com/vi/register?ref='),
+    ExchangeApp(name: 'LiteFinance', iconPath: 'assets/icons/litefinance.png', url: 'https://litefinance.com.vn/?uid=7'),
+    ExchangeApp(name: 'Axi', iconPath: 'assets/icons/axi.png', url: 'https://www.axi.com/int/live-account?'),
+    ExchangeApp(name: 'Vantagemarkets', iconPath: 'assets/icons/vantagemarkets.png', url: 'https://www.vantagemarkets.com/vi/open-live-account/?affid=MjA3OTcyNDU='),
+    ExchangeApp(name: 'XTB', iconPath: 'assets/icons/xtb.png', url: 'https://geolink.xtb.com/aJSfg'),
   ];
 
-  List<String> selectedAppNames = ['Exness', 'BingX', 'OKX', 'Binance'];
+  List<String> selectedAppNames = ['Exness', 'XM', 'Bybit', 'Binance'];
 
   @override
   void initState() {
@@ -56,9 +54,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getStringList('selected_exchange_apps');
     if (saved != null && saved.isNotEmpty) {
-      setState(() {
-        selectedAppNames = saved;
-      });
+      // Chỉ lấy những app còn tồn tại trong danh sách mới
+      final validSaved = saved.where((name) => allApps.any((app) => app.name == name)).toList();
+      if (validSaved.isNotEmpty) {
+        setState(() {
+          selectedAppNames = validSaved;
+        });
+      }
     }
   }
 
@@ -120,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      const SizedBox(height: 20), // Removed title text
+                      const SizedBox(height: 20),
                       Expanded(
                         child: ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -144,7 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     }
                                   }
                                 });
-                                setState(() {}); // Update Profile Screen
+                                setState(() {});
                                 _saveSelectedApps();
                               },
                               child: Container(
@@ -160,7 +162,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                                 child: Row(
                                   children: [
-                                    Image.asset(app.iconPath, width: 32, height: 32),
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      clipBehavior: Clip.antiAlias,
+                                      decoration: const BoxDecoration(shape: BoxShape.circle),
+                                      child: Image.asset(
+                                        app.iconPath, 
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.account_balance_wallet, size: 20, color: Colors.white24),
+                                      ),
+                                    ),
                                     const SizedBox(width: 16),
                                     Text(
                                       app.name, 
@@ -174,7 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     const Spacer(),
                                     Icon(
                                       isSelected ? Icons.check_circle : Icons.add_circle_outline,
-                                      color: isSelected ? const Color(0xFF276EFB) : Colors.white10, // Subtle unselected icon
+                                      color: isSelected ? const Color(0xFF276EFB) : Colors.white10,
                                       size: 24,
                                     ),
                                   ],
@@ -204,24 +216,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userEmail = userProvider.email ?? currentUser?.email ?? 'user@gmail.com';
     final l10n = AppLocalizations.of(context)!;
 
-    // Helper logic to determine the correct card image
     String getCardImage() {
       if (userTier == 'elite' || userTier == 'vip') {
         final expiryDate = userProvider.subscriptionExpiryDate;
         if (expiryDate != null) {
           final daysLeft = expiryDate.difference(DateTime.now()).inDays;
-          // Logic: Yearly plans usually have > 300 days, 
-          // but we check > 45 days to safely identify extended plans.
           if (daysLeft > 45) return 'assets/mockups/year.png';
         }
         return 'assets/mockups/month.png';
       } else if (userTier == 'demo') {
-        return 'assets/mockups/month.png'; // Show month card for demo users
+        return 'assets/mockups/month.png';
       }
       return 'assets/mockups/free.png';
     }
 
-    // Get selected app objects
     final displayApps = allApps.where((app) => selectedAppNames.contains(app.name)).take(4).toList();
 
     return Scaffold(
@@ -288,7 +296,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: SingleChildScrollView(
           child: Stack(
             children: [
-              // Header Glass Background
               Positioned(
                 left: -1,
                 top: -81,
@@ -307,12 +314,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-
               Column(
                 children: [
                   const SizedBox(height: 16),
-
-                  // Token Card
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Container(
@@ -371,10 +375,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 24),
-
-                  // Exchange Section
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
@@ -403,10 +404,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 50),
-
-                  // Menu Items
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: Column(
@@ -481,7 +479,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             child: Center(
-              child: Image.asset(iconPath, width: 28, height: 28, fit: BoxFit.contain),
+              child: Container(
+                width: 28,
+                height: 28,
+                clipBehavior: Clip.antiAlias,
+                decoration: const BoxDecoration(shape: BoxShape.circle),
+                child: Image.asset(
+                  iconPath, 
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.account_balance_wallet, size: 18, color: Colors.white24),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -511,7 +519,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           borderRadius: BorderRadius.circular(6),
         ),
-        padding: const EdgeInsets.all(1), // Border width
+        padding: const EdgeInsets.all(1), 
         child: Container(
           decoration: BoxDecoration(
             color: const Color(0xFF161616),

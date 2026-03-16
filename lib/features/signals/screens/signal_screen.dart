@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
@@ -36,9 +37,10 @@ class _SignalScreenState extends State<SignalScreen> {
   String _selectedTimezone = 'GMT+7';
   String? _expandedSymbol;
   
-  String _selectedAppName = 'Exness';
-  String _selectedAppWebUrl = 'https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1';
-  String _selectedAppUrl = '';
+  String _selectedAppName = 'MT4';
+  String _selectedAppIosUrl = 'https://apps.apple.com/vn/app/metatrader-4/id496212596?l=vi';
+  String _selectedAppAndroidUrl = 'https://play.google.com/store/apps/details?id=net.metaquotes.metatrader4&hl=vi';
+  String _selectedAppScheme = 'metatrader4://';
 
   final List<String> _timezones = [
     'GMT-12', 'GMT-11', 'GMT-10', 'GMT-9', 'GMT-8', 'GMT-7', 'GMT-6', 'GMT-5', 'GMT-4', 'GMT-3', 'GMT-2', 'GMT-1',
@@ -57,19 +59,20 @@ class _SignalScreenState extends State<SignalScreen> {
     super.dispose();
   }
 
-  Future<void> _launchApp(String url, String webUrl) async {
-    final Uri appUri = Uri.parse(url);
-    final Uri webUri = Uri.parse(webUrl);
+  Future<void> _launchApp(String scheme, String iosUrl, String androidUrl) async {
+    final Uri appSchemeUri = Uri.parse(scheme);
+    final Uri storeUri = Uri.parse(Platform.isIOS ? iosUrl : androidUrl);
+
     try {
-      if (await canLaunchUrl(appUri)) {
-        await launchUrl(appUri, mode: LaunchMode.externalApplication);
-      } else {
-        await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      // Thử mở bằng URL Scheme (để mở App nếu đã cài)
+      bool launched = await launchUrl(appSchemeUri, mode: LaunchMode.externalNonBrowserApplication);
+      if (!launched) {
+        // Nếu không mở được App (chưa cài), mở Link Store
+        await launchUrl(storeUri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      if (await canLaunchUrl(webUri)) {
-        await launchUrl(webUri, mode: LaunchMode.externalApplication);
-      }
+      // Fallback: Mở Link Store nếu có lỗi khi mở Scheme
+      await launchUrl(storeUri, mode: LaunchMode.externalApplication);
     }
   }
 
@@ -82,7 +85,7 @@ class _SignalScreenState extends State<SignalScreen> {
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
           child: Container(
-            height: MediaQuery.of(context).size.height * 0.6,
+            height: MediaQuery.of(context).size.height * 0.7,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -119,15 +122,16 @@ class _SignalScreenState extends State<SignalScreen> {
                     child: ListView(
                       padding: const EdgeInsets.only(left: 24, right: 24, bottom: 20),
                       children: [
-                        _buildAppOption(context, 'BingX', 'https://bingx.com/invite/S6UV9A', '', 'assets/icons/bingx.png'),
-                        _buildAppOption(context, 'Binance', 'https://www.binance.com/vi/register?ref=12345678', '', 'assets/icons/binance.png'),
-                        _buildAppOption(context, 'Exness', 'https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1', '', 'assets/icons/exness.png'),
-                        _buildAppOption(context, 'ByBit', 'https://www.bybit.com/invite?ref=MINVEST', '', 'assets/icons/bybit.png'),
-                        _buildAppOption(context, 'Bitget', 'https://www.bitget.com/expressly?languageType=0&channelCode=minvest&vipCode=minvest', '', 'assets/icons/bitget.png'),
-                        _buildAppOption(context, 'MEXC', 'https://www.mexc.com/register?inviteCode=mexc-MINVEST', '', 'assets/icons/mexc.png'),
-                        _buildAppOption(context, 'OKX', 'https://www.okx.com/join/minvest', '', 'assets/icons/okx.png'),
-                        _buildAppOption(context, 'MT4', 'https://metatrader4.com', '', 'assets/icons/mt4.png'),
-                        _buildAppOption(context, 'MT5', 'https://metatrader5.com', '', 'assets/icons/mt5.png'),
+                        _buildAppOption(context, 'MT4', 'metatrader4://', 'https://apps.apple.com/vn/app/metatrader-4/id496212596?l=vi', 'https://play.google.com/store/apps/details?id=net.metaquotes.metatrader4&hl=vi', 'assets/icons/mt4.png'),
+                        _buildAppOption(context, 'MT5', 'metatrader5://', 'https://apps.apple.com/vn/app/metatrader-5/id413251709?l=vi', 'https://play.google.com/store/apps/details?id=net.metaquotes.metatrader5&hl=vi', 'assets/icons/mt5.png'),
+                        _buildAppOption(context, 'Exness', 'exness://', 'https://apps.apple.com/vn/app/exness-trade-app-giao-d%E1%BB%8Bch/id1359763701?l=vi', 'https://play.google.com/store/apps/details?id=com.exness.android.pa&hl=vi', 'assets/icons/exness.png'),
+                        _buildAppOption(context, 'XM', 'xm://', 'https://apps.apple.com/vn/app/xm-app-giao-d%E1%BB%8Bch-th%E1%BA%ADt-t%E1%BB%B1-tin/id1072084799?l=vi', 'https://play.google.com/store/apps/details?id=com.xm.webapp&hl=vi', 'assets/icons/xm.png'),
+                        _buildAppOption(context, 'Bybit', 'bybit://', 'https://apps.apple.com/vn/app/bybit-buy-bitcoin-trade-crypto/id1488296980?l=vi', 'https://play.google.com/store/apps/details?id=com.bybit.app&hl=vi', 'assets/icons/bybit.png'),
+                        _buildAppOption(context, 'Binance', 'binance://', 'https://apps.apple.com/vn/app/binance-mua-bitcoin-crypto/id1436799971?l=vi', 'https://play.google.com/store/apps/details?id=com.binance.dev&hl=vi', 'assets/icons/binance.png'),
+                        _buildAppOption(context, 'LiteFinance', 'litefinance://', 'https://apps.apple.com/vn/app/litefinance/id1661254805?l=vi', 'https://play.google.com/store/apps/details?id=com.litefinance.cabinet&hl=vi', 'assets/icons/litefinance.png'),
+                        _buildAppOption(context, 'Axi', 'axi://', 'https://apps.apple.com/vn/app/axi-trading-platform/id1537332269?l=vi', 'https://play.google.com/store/apps/details?id=com.lagom&hl=vi', 'assets/icons/axi.png'),
+                        _buildAppOption(context, 'Vantagemarkets', 'vantage://', 'https://apps.apple.com/vn/app/vantage-all-in-one-trading-app/id1457929724?l=vi', 'https://play.google.com/store/apps/details?id=cn.com.vau&hl=vi', 'assets/icons/vantagemarkets.png'),
+                        _buildAppOption(context, 'XTB', 'xtb://', 'https://apps.apple.com/vn/app/xtb-online-investing/id949905889?l=vi', 'https://play.google.com/store/apps/details?id=com.xtb.xmobile2&hl=vi', 'assets/icons/xtb.png'),
                       ],
                     ),
                   ),
@@ -140,14 +144,15 @@ class _SignalScreenState extends State<SignalScreen> {
     );
   }
 
-  Widget _buildAppOption(BuildContext context, String name, String webUrl, String appUrl, String iconPath) {
+  Widget _buildAppOption(BuildContext context, String name, String scheme, String iosUrl, String androidUrl, String iconPath) {
     bool isSelected = _selectedAppName == name;
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedAppName = name;
-          _selectedAppWebUrl = webUrl;
-          _selectedAppUrl = appUrl;
+          _selectedAppScheme = scheme;
+          _selectedAppIosUrl = iosUrl;
+          _selectedAppAndroidUrl = androidUrl;
         });
         Navigator.pop(context);
       },
@@ -446,7 +451,7 @@ class _SignalScreenState extends State<SignalScreen> {
                     const SizedBox(width: 44), // Spacer to balance the right icon
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => _launchApp(_selectedAppUrl, _selectedAppWebUrl),
+                        onTap: () => _launchApp(_selectedAppScheme, _selectedAppIosUrl, _selectedAppAndroidUrl),
                         behavior: HitTestBehavior.opaque,
                         child: Center(
                           child: Text(
