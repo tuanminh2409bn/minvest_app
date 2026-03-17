@@ -1,7 +1,7 @@
 name: minvest_forex_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.1.0+3
+version: 1.1.0+4
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -13,12 +13,12 @@ dependencies:
     sdk: flutter
 
   # Firebase Ecosystem
-  firebase_core:
-  firebase_auth:
-  cloud_firestore:
-  firebase_storage:
-  firebase_messaging:
-  cloud_functions:
+  firebase_core: ^3.10.1
+  firebase_auth: ^5.4.1
+  cloud_firestore: ^5.6.2
+  firebase_storage: ^12.4.2
+  firebase_messaging: ^15.2.10
+  cloud_functions: ^5.2.1
 
   # Authentication
   google_sign_in: 6.3.0

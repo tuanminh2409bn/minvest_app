@@ -126,11 +126,67 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
   }
 
   Widget _buildAffiliateList() {
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
+
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore.collection('affiliates').orderBy('createdAt', descending: true).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return const Center(child: Text('Chưa có affiliate nào.'));
+
+        if (isMobile) {
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              final doc = snapshot.data!.docs[index];
+              final data = doc.data() as Map<String, dynamic>;
+              return Card(
+                color: Colors.white.withOpacity(0.05),
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
+                  title: Row(
+                    children: [
+                      Text(data['code'] ?? '---', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 18)),
+                      const SizedBox(width: 8),
+                      _buildStatusBadge(data['isActive'] ?? true),
+                    ],
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      Text('Đối tác: ${data['name'] ?? 'No Name'}', style: const TextStyle(color: Colors.white70)),
+                      Text('Email: ${data['email'] ?? '---'}', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildMiniStat('Ref', '${data['referralCount'] ?? 0}'),
+                          _buildMiniStat('Rate', '${data['commissionRate'] ?? 40}%'),
+                          _buildMiniStat('Đã nhận', '\$${(data['totalEarnings'] ?? 0).toStringAsFixed(1)}', color: Colors.green),
+                        ],
+                      ),
+                    ],
+                  ),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.analytics_outlined, color: Colors.amber), 
+                        onPressed: () => _navigateToDetail(doc, data),
+                      ),
+                    ],
+                  ),
+                  onTap: () => _navigateToDetail(doc, data),
+                ),
+              );
+            },
+          );
+        }
 
         return Container(
           decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white10)),
@@ -160,17 +216,7 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
                       IconButton(
                         icon: const Icon(Icons.analytics_outlined, size: 20, color: Colors.amber), 
                         tooltip: 'Xem chi tiết',
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AffiliateDetailScreen(
-                                affiliateId: doc.id,
-                                affiliateData: data,
-                              ),
-                            ),
-                          );
-                        },
+                        onPressed: () => _navigateToDetail(doc, data),
                       ),
                       IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => _showEditAffiliateDialog(doc)),
                     ],
@@ -181,6 +227,28 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
           ),
         );
       },
+    );
+  }
+
+  void _navigateToDetail(DocumentSnapshot doc, Map<String, dynamic> data) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AffiliateDetailScreen(
+          affiliateId: doc.id,
+          affiliateData: data,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMiniStat(String label, String value, {Color? color}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+        Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color ?? Colors.white)),
+      ],
     );
   }
 
@@ -215,11 +283,72 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
   }
 
   Widget _buildCommissionsList() {
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
+
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore.collection('commissions').orderBy('createdAt', descending: true).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return const Center(child: Text('Chưa có dữ liệu hoa hồng.'));
+
+        if (isMobile) {
+          return ListView.builder(
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              final doc = snapshot.data!.docs[index];
+              final data = doc.data() as Map<String, dynamic>;
+              final status = data['status'] ?? 'pending';
+              final date = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+
+              return Card(
+                color: Colors.white.withOpacity(0.05),
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(DateFormat('dd/MM HH:mm').format(date), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                          _buildCommissionStatusBadge(status),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Đối tác: ${data['affiliateCode'] ?? '---'}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                                Text('Khách: ${data['userEmail'] ?? '---'}', style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text('Nạp: \$${data['invoiceAmount'] ?? 0}', style: const TextStyle(fontSize: 12)),
+                              Text('+\$${data['commissionAmount'] ?? 0}', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 16)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const Divider(color: Colors.white10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          _buildCommissionActions(doc, status),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        }
 
         return Container(
           decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white10)),
