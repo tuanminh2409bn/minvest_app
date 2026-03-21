@@ -53,6 +53,7 @@ dependencies:
   flutter_native_splash: ^2.4.7
   share_plus: ^12.0.1
   app_settings: ^7.0.0
+  external_app_launcher: ^4.0.0
 
 dev_dependencies:
   flutter_test:

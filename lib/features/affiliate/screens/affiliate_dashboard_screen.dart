@@ -102,7 +102,7 @@ class _AffiliateDashboardScreenState extends State<AffiliateDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(refLink, l10n),
+                _buildHeader(refLink, refCode, l10n),
                 const SizedBox(height: 24),
                 _buildStatsRow(affDocId, affData, l10n),
                 const SizedBox(height: 32),
@@ -112,6 +112,7 @@ class _AffiliateDashboardScreenState extends State<AffiliateDashboardScreen> {
                 ),
                 const SizedBox(height: 16),
                 _buildReferralList(affDocId, l10n),
+                const SizedBox(height: 80), // Thêm khoảng đệm để không bị che bởi thanh điều hướng
               ],
             ),
           ),
@@ -136,51 +137,96 @@ class _AffiliateDashboardScreenState extends State<AffiliateDashboardScreen> {
     );
   }
 
-  Widget _buildHeader(String link, AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF161616),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.referralLink, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text(l10n.referralLinkDescription, style: const TextStyle(color: Colors.white70, fontSize: 14)),
-          const SizedBox(height: 20),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF276EFB).withOpacity(0.5)),
-            ),
-            child: SelectableText(link, style: const TextStyle(color: Color(0xFF276EFB), fontSize: 14)),
+  Widget _buildHeader(String link, String code, AppLocalizations l10n) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF161616),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white10),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: link));
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.linkCopied)));
-              },
-              icon: const Icon(Icons.copy, size: 18),
-              label: Text(l10n.copyLink),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF276EFB),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.referralLink, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text(l10n.referralLinkDescription, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFF276EFB).withOpacity(0.5)),
+                ),
+                child: SelectableText(link, style: const TextStyle(color: Color(0xFF276EFB), fontSize: 14)),
               ),
-            ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: link));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.linkCopied)));
+                  },
+                  icon: const Icon(Icons.copy, size: 18),
+                  label: Text(l10n.copyLink),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF276EFB),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [const Color(0xFF276EFB).withOpacity(0.1), Colors.purple.withOpacity(0.1)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white10),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Mã giới thiệu của bạn', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    const SizedBox(height: 4),
+                    Text(code, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                  ],
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: code));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã copy mã giới thiệu!')));
+                },
+                icon: const Icon(Icons.copy, size: 16),
+                label: const Text('Copy Mã'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white.withOpacity(0.05),
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

@@ -90,7 +90,7 @@ class _CustomFilterDropdownState<T> extends State<CustomFilterDropdown<T>> {
                         onTap: _closeDropdown,
                         child: Container(
                           width: size.width,
-                          height: 41,
+                          constraints: const BoxConstraints(minHeight: 41),
                           margin: const EdgeInsets.all(1),
                           decoration: const ShapeDecoration(
                             color: Color(0xFF276EFB),
@@ -101,7 +101,7 @@ class _CustomFilterDropdownState<T> extends State<CustomFilterDropdown<T>> {
                               ),
                             ),
                           ),
-                          padding: const EdgeInsets.only(left: 11),
+                          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 4),
                           alignment: Alignment.centerLeft,
                           child: Row(
                             children: [
@@ -138,8 +138,8 @@ class _CustomFilterDropdownState<T> extends State<CustomFilterDropdown<T>> {
                                   },
                                   child: Container(
                                     width: size.width,
-                                    height: 40,
-                                    padding: const EdgeInsets.only(left: 11),
+                                    constraints: const BoxConstraints(minHeight: 40),
+                                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
                                     alignment: Alignment.centerLeft,
                                     color: Colors.transparent,
                                     child: Text(
@@ -185,7 +185,7 @@ class _CustomFilterDropdownState<T> extends State<CustomFilterDropdown<T>> {
       child: GestureDetector(
         onTap: _toggleDropdown,
         child: Container(
-          height: 41,
+          constraints: const BoxConstraints(minHeight: 41),
           padding: const EdgeInsets.all(1), // Độ dày viền
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
@@ -202,7 +202,7 @@ class _CustomFilterDropdownState<T> extends State<CustomFilterDropdown<T>> {
             ),
           ),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
               color: const Color(0xFF161616),
               borderRadius: BorderRadius.circular(5),

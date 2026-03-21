@@ -53,6 +53,16 @@
 		<array>
 			<string>fbapi</string>
 			<string>fb-messenger-share-api</string>
+			<string>metatrader4</string>
+			<string>metatrader5</string>
+			<string>exness-trade</string>
+			<string>xm-global</string>
+			<string>bybitapp</string>
+			<string>bnc</string>
+			<string>litefinance</string>
+			<string>axi</string>
+			<string>vantage</string>
+			<string>xtb</string>
 		</array>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>

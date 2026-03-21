@@ -71,10 +71,8 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
           const SizedBox(height: 24),
           const Text('Danh sách Affiliate', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          SizedBox(
-            height: 500, // Fixed height or use another approach for scrollable list
-            child: _buildAffiliateList()
-          ),
+          _buildAffiliateList(),
+          const SizedBox(height: 100), // Thêm khoảng đệm cuối trang
         ],
       ),
     );
@@ -293,6 +291,7 @@ class _AffiliateManagementViewState extends State<AffiliateManagementView> with 
 
         if (isMobile) {
           return ListView.builder(
+            padding: const EdgeInsets.only(bottom: 100), // Thêm khoảng đệm cuối danh sách mobile
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
               final doc = snapshot.data!.docs[index];

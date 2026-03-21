@@ -33,6 +33,59 @@
         <meta-data android:name="com.facebook.sdk.ClientToken" android:value="63e0864d07483d9d91bd8066b4363281"/>
     </application>
     <queries>
+        <!-- Package queries for trading apps -->
+        <package android:name="net.metaquotes.metatrader4" />
+        <package android:name="net.metaquotes.metatrader5" />
+        <package android:name="com.exness.android.pa" />
+        <package android:name="com.xm.webapp" />
+        <package android:name="com.bybit.app" />
+        <package android:name="com.binance.dev" />
+        <package android:name="com.litefinance.cabinet" />
+        <package android:name="com.lagom" />
+        <package android:name="com.axi.pelican" />
+        <package android:name="cn.com.vau" />
+        <package android:name="com.xtb.xmobile2" />
+
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="metatrader4" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="metatrader5" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="exness-trade" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="xm-global" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="bybitapp" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="bnc" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="litefinance" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="axi" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="vantage" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="xtb" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

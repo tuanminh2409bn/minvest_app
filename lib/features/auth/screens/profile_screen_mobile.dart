@@ -36,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ExchangeApp(name: 'XM', iconPath: 'assets/icons/xm.png', url: 'https://affs.click/0mg8B'),
     ExchangeApp(name: 'Bybit', iconPath: 'assets/icons/bybit.png', url: 'https://partner.bybit.com/b/LISA68'),
     ExchangeApp(name: 'Binance', iconPath: 'assets/icons/binance.png', url: 'https://accounts.binance.com/vi/register?ref='),
-    ExchangeApp(name: 'LiteFinance', iconPath: 'assets/icons/litefinance.png', url: 'https://litefinance.com.vn/?uid=7'),
+    ExchangeApp(name: 'LiteFinance', iconPath: 'assets/icons/LiteFinance.png', url: 'https://litefinance.com.vn/?uid=7'),
     ExchangeApp(name: 'Axi', iconPath: 'assets/icons/axi.png', url: 'https://www.axi.com/int/live-account?'),
     ExchangeApp(name: 'Vantagemarkets', iconPath: 'assets/icons/vantagemarkets.png', url: 'https://www.vantagemarkets.com/vi/open-live-account/?affid=MjA3OTcyNDU='),
     ExchangeApp(name: 'XTB', iconPath: 'assets/icons/xtb.png', url: 'https://geolink.xtb.com/aJSfg'),

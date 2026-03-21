@@ -40,7 +40,8 @@ service cloud.firestore {
         request.auth.uid == userId || 
         isAdmin() || 
         isSupport() || 
-        (resource != null && resource.data.referred_by_affiliate_id == request.auth.uid)
+        (resource.data.referred_by_affiliate_id != null && 
+         get(/databases/$(database)/documents/affiliates/$(resource.data.referred_by_affiliate_id)).data.uid == request.auth.uid)
       );
       
       allow create: if isSignedIn() && request.auth.uid == userId;
@@ -112,9 +113,12 @@ service cloud.firestore {
     }
 
     match /commissions/{docId} {
-      // Admin có toàn quyền, Affiliate có quyền xem hoa hồng của mình dựa trên mã affiliateCode
-      // Lưu ý: resource.data.affiliateId cần được lưu vào bản ghi hoa hồng để kiểm tra quyền
-      allow read: if isSignedIn() && (isAdmin() || resource.data.affiliateUid == request.auth.uid);
+      // Admin có toàn quyền, Affiliate có quyền xem hoa hồng của mình dựa trên affiliateId
+      allow read: if isSignedIn() && (
+        isAdmin() || 
+        (resource.data.affiliateId != null && 
+         get(/databases/$(database)/documents/affiliates/$(resource.data.affiliateId)).data.uid == request.auth.uid)
+      );
       allow create, update, delete: if isAdmin();
     }
 

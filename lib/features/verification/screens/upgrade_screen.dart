@@ -353,28 +353,32 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                 ),
               ),
             const SizedBox(width: 12),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white70,
-                    fontSize: 18,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.white70,
+                      fontSize: 18,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  l10n.upgradeToSeeMore,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF636363),
-                    fontSize: 14,
+                  Text(
+                    l10n.upgradeToSeeMore,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF636363),
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const Spacer(),
+            const SizedBox(width: 8),
             Text(
               price,
               style: TextStyle(

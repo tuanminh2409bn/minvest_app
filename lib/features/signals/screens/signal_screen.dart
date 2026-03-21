@@ -1,22 +1,23 @@
 // lib/features/signals/screens/signal_screen.dart
 
-import 'package:flutter/material.dart';
-import 'dart:ui';
 import 'dart:io';
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/core/utils/signal_access_helper.dart';
-import 'package:minvest_forex_app/l10n/app_localizations.dart';
-import 'package:minvest_forex_app/features/notifications/screens/notification_screen.dart';
+import 'package:minvest_forex_app/features/auth/screens/settings_screen.dart';
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
-import 'package:minvest_forex_app/services/price_service.dart';
+import 'package:minvest_forex_app/features/notifications/screens/notification_screen.dart';
 import 'package:minvest_forex_app/features/signals/models/signal_model.dart';
 import 'package:minvest_forex_app/features/signals/screens/signal_analyze_screen.dart';
 import 'package:minvest_forex_app/features/signals/services/signal_service.dart';
-import 'package:minvest_forex_app/features/auth/screens/settings_screen.dart';
 import 'package:minvest_forex_app/features/signals/widgets/custom_filter_dropdown.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/services/price_service.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -31,20 +32,47 @@ class SignalScreen extends StatefulWidget {
 
 class _SignalScreenState extends State<SignalScreen> {
   final PriceService _priceService = PriceService();
-  final NumberFormat _currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
-  
+  final NumberFormat _currencyFormat =
+      NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+
   AssetFilter _assetFilter = AssetFilter.all;
   String _selectedTimezone = 'GMT+7';
   String? _expandedSymbol;
-  
+
   String _selectedAppName = 'MT4';
-  String _selectedAppIosUrl = 'https://apps.apple.com/vn/app/metatrader-4/id496212596?l=vi';
-  String _selectedAppAndroidUrl = 'https://play.google.com/store/apps/details?id=net.metaquotes.metatrader4&hl=vi';
+  String _selectedAppIosUrl =
+      'https://apps.apple.com/vn/app/metatrader-4/id496212596?l=vi';
+  String _selectedAppAndroidUrl =
+      'https://play.google.com/store/apps/details?id=net.metaquotes.metatrader4&hl=vi';
   String _selectedAppScheme = 'metatrader4://';
+  String _selectedAppPackage = 'net.metaquotes.metatrader4';
 
   final List<String> _timezones = [
-    'GMT-12', 'GMT-11', 'GMT-10', 'GMT-9', 'GMT-8', 'GMT-7', 'GMT-6', 'GMT-5', 'GMT-4', 'GMT-3', 'GMT-2', 'GMT-1',
-    'GMT+0', 'GMT+1', 'GMT+2', 'GMT+3', 'GMT+4', 'GMT+5', 'GMT+6', 'GMT+7', 'GMT+8', 'GMT+9', 'GMT+10', 'GMT+11', 'GMT+12'
+    'GMT-12',
+    'GMT-11',
+    'GMT-10',
+    'GMT-9',
+    'GMT-8',
+    'GMT-7',
+    'GMT-6',
+    'GMT-5',
+    'GMT-4',
+    'GMT-3',
+    'GMT-2',
+    'GMT-1',
+    'GMT+0',
+    'GMT+1',
+    'GMT+2',
+    'GMT+3',
+    'GMT+4',
+    'GMT+5',
+    'GMT+6',
+    'GMT+7',
+    'GMT+8',
+    'GMT+9',
+    'GMT+10',
+    'GMT+11',
+    'GMT+12'
   ];
 
   @override
@@ -59,19 +87,48 @@ class _SignalScreenState extends State<SignalScreen> {
     super.dispose();
   }
 
-  Future<void> _launchApp(String scheme, String iosUrl, String androidUrl) async {
-    final Uri appSchemeUri = Uri.parse(scheme);
+  Future<void> _launchApp(String scheme, String iosUrl, String androidUrl,
+      String packageName) async {
     final Uri storeUri = Uri.parse(Platform.isIOS ? iosUrl : androidUrl);
 
     try {
-      // Thử mở bằng URL Scheme (để mở App nếu đã cài)
-      bool launched = await launchUrl(appSchemeUri, mode: LaunchMode.externalNonBrowserApplication);
-      if (!launched) {
-        // Nếu không mở được App (chưa cài), mở Link Store
-        await launchUrl(storeUri, mode: LaunchMode.externalApplication);
+      if (Platform.isAndroid) {
+        // Xử lý đặc biệt cho Axi vì có nhiều Package Name khác nhau
+        if (packageName == 'com.lagom') {
+          // Thử mở app chính (Axi Trading)
+          try {
+            await LaunchApp.openApp(
+              androidPackageName: 'com.lagom',
+              openStore: false, // Không mở store vội để thử mã tiếp theo
+            );
+            return; // Nếu mở thành công thì dừng
+          } catch (_) {
+            // Nếu không mở được com.lagom, thử sang com.axi.pelican (Axi Copy Trading)
+            try {
+              await LaunchApp.openApp(
+                androidPackageName: 'com.axi.pelican',
+                openStore: true, // Mã cuối cùng nên mở store nếu chưa cài
+              );
+              return;
+            } catch (_) {}
+          }
+        }
+
+        // Với các App khác dùng Package Name duy nhất
+        await LaunchApp.openApp(
+          androidPackageName: packageName,
+          openStore: true,
+        );
+      } else {
+        // Trên iOS dùng URL Scheme (đã khai báo trong Info.plist)
+        final Uri appSchemeUri = Uri.parse(scheme);
+        bool launched = await launchUrl(appSchemeUri,
+            mode: LaunchMode.externalNonBrowserApplication);
+        if (!launched) {
+          await launchUrl(storeUri, mode: LaunchMode.externalApplication);
+        }
       }
     } catch (e) {
-      // Fallback: Mở Link Store nếu có lỗi khi mở Scheme
       await launchUrl(storeUri, mode: LaunchMode.externalApplication);
     }
   }
@@ -120,18 +177,89 @@ class _SignalScreenState extends State<SignalScreen> {
                   const SizedBox(height: 20),
                   Expanded(
                     child: ListView(
-                      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 20),
+                      padding: const EdgeInsets.only(
+                          left: 24, right: 24, bottom: 20),
                       children: [
-                        _buildAppOption(context, 'MT4', 'metatrader4://', 'https://apps.apple.com/vn/app/metatrader-4/id496212596?l=vi', 'https://play.google.com/store/apps/details?id=net.metaquotes.metatrader4&hl=vi', 'assets/icons/mt4.png'),
-                        _buildAppOption(context, 'MT5', 'metatrader5://', 'https://apps.apple.com/vn/app/metatrader-5/id413251709?l=vi', 'https://play.google.com/store/apps/details?id=net.metaquotes.metatrader5&hl=vi', 'assets/icons/mt5.png'),
-                        _buildAppOption(context, 'Exness', 'exness://', 'https://apps.apple.com/vn/app/exness-trade-app-giao-d%E1%BB%8Bch/id1359763701?l=vi', 'https://play.google.com/store/apps/details?id=com.exness.android.pa&hl=vi', 'assets/icons/exness.png'),
-                        _buildAppOption(context, 'XM', 'xm://', 'https://apps.apple.com/vn/app/xm-app-giao-d%E1%BB%8Bch-th%E1%BA%ADt-t%E1%BB%B1-tin/id1072084799?l=vi', 'https://play.google.com/store/apps/details?id=com.xm.webapp&hl=vi', 'assets/icons/xm.png'),
-                        _buildAppOption(context, 'Bybit', 'bybit://', 'https://apps.apple.com/vn/app/bybit-buy-bitcoin-trade-crypto/id1488296980?l=vi', 'https://play.google.com/store/apps/details?id=com.bybit.app&hl=vi', 'assets/icons/bybit.png'),
-                        _buildAppOption(context, 'Binance', 'binance://', 'https://apps.apple.com/vn/app/binance-mua-bitcoin-crypto/id1436799971?l=vi', 'https://play.google.com/store/apps/details?id=com.binance.dev&hl=vi', 'assets/icons/binance.png'),
-                        _buildAppOption(context, 'LiteFinance', 'litefinance://', 'https://apps.apple.com/vn/app/litefinance/id1661254805?l=vi', 'https://play.google.com/store/apps/details?id=com.litefinance.cabinet&hl=vi', 'assets/icons/litefinance.png'),
-                        _buildAppOption(context, 'Axi', 'axi://', 'https://apps.apple.com/vn/app/axi-trading-platform/id1537332269?l=vi', 'https://play.google.com/store/apps/details?id=com.lagom&hl=vi', 'assets/icons/axi.png'),
-                        _buildAppOption(context, 'Vantagemarkets', 'vantage://', 'https://apps.apple.com/vn/app/vantage-all-in-one-trading-app/id1457929724?l=vi', 'https://play.google.com/store/apps/details?id=cn.com.vau&hl=vi', 'assets/icons/vantagemarkets.png'),
-                        _buildAppOption(context, 'XTB', 'xtb://', 'https://apps.apple.com/vn/app/xtb-online-investing/id949905889?l=vi', 'https://play.google.com/store/apps/details?id=com.xtb.xmobile2&hl=vi', 'assets/icons/xtb.png'),
+                        _buildAppOption(
+                            context,
+                            'MT4',
+                            'metatrader4://',
+                            'https://apps.apple.com/vn/app/metatrader-4/id496212596?l=vi',
+                            'https://play.google.com/store/apps/details?id=net.metaquotes.metatrader4&hl=vi',
+                            'assets/icons/mt4.png',
+                            'net.metaquotes.metatrader4'),
+                        _buildAppOption(
+                            context,
+                            'MT5',
+                            'metatrader5://',
+                            'https://apps.apple.com/vn/app/metatrader-5/id413251709?l=vi',
+                            'https://play.google.com/store/apps/details?id=net.metaquotes.metatrader5&hl=vi',
+                            'assets/icons/mt5.png',
+                            'net.metaquotes.metatrader5'),
+                        _buildAppOption(
+                            context,
+                            'Exness',
+                            'exness-trade://',
+                            'https://apps.apple.com/vn/app/exness-trade-app-giao-d%E1%BB%8Bch/id1359763701?l=vi',
+                            'https://play.google.com/store/apps/details?id=com.exness.android.pa&hl=vi',
+                            'assets/icons/exness.png',
+                            'com.exness.android.pa'),
+                        _buildAppOption(
+                            context,
+                            'XM',
+                            'xm-global://',
+                            'https://apps.apple.com/vn/app/xm-app-giao-d%E1%BB%8Bch-th%E1%BA%ADt-t%E1%BB%B1-tin/id1072084799?l=vi',
+                            'https://play.google.com/store/apps/details?id=com.xm.webapp&hl=vi',
+                            'assets/icons/xm.png',
+                            'com.xm.webapp'),
+                        _buildAppOption(
+                            context,
+                            'Bybit',
+                            'bybitapp://',
+                            'https://apps.apple.com/vn/app/bybit-buy-bitcoin-trade-crypto/id1488296980?l=vi',
+                            'https://play.google.com/store/apps/details?id=com.bybit.app&hl=vi',
+                            'assets/icons/bybit.png',
+                            'com.bybit.app'),
+                        _buildAppOption(
+                            context,
+                            'Binance',
+                            'bnc://',
+                            'https://apps.apple.com/vn/app/binance-mua-bitcoin-crypto/id1436799971?l=vi',
+                            'https://play.google.com/store/apps/details?id=com.binance.dev&hl=vi',
+                            'assets/icons/binance.png',
+                            'com.binance.dev'),
+                        _buildAppOption(
+                            context,
+                            'LiteFinance',
+                            'litefinance://',
+                            'https://apps.apple.com/vn/app/litefinance/id1661254805?l=vi',
+                            'https://play.google.com/store/apps/details?id=com.litefinance.cabinet&hl=vi',
+                            'assets/icons/LiteFinance.png',
+                            'com.litefinance.cabinet'),
+                        _buildAppOption(
+                            context,
+                            'Axi',
+                            'axi://',
+                            'https://apps.apple.com/vn/app/axi-trading-platform/id1537332269?l=vi',
+                            'https://play.google.com/store/apps/details?id=com.lagom&hl=vi',
+                            'assets/icons/axi.png',
+                            'com.lagom'),
+                        _buildAppOption(
+                            context,
+                            'Vantagemarkets',
+                            'vantage://',
+                            'https://apps.apple.com/vn/app/vantage-all-in-one-trading-app/id1457929724?l=vi',
+                            'https://play.google.com/store/apps/details?id=cn.com.vau&hl=vi',
+                            'assets/icons/vantagemarkets.png',
+                            'cn.com.vau'),
+                        _buildAppOption(
+                            context,
+                            'XTB',
+                            'xtb://',
+                            'https://apps.apple.com/vn/app/xtb-online-investing/id949905889?l=vi',
+                            'https://play.google.com/store/apps/details?id=com.xtb.xmobile2&hl=vi',
+                            'assets/icons/xtb.png',
+                            'com.xtb.xmobile2'),
                       ],
                     ),
                   ),
@@ -144,7 +272,8 @@ class _SignalScreenState extends State<SignalScreen> {
     );
   }
 
-  Widget _buildAppOption(BuildContext context, String name, String scheme, String iosUrl, String androidUrl, String iconPath) {
+  Widget _buildAppOption(BuildContext context, String name, String scheme,
+      String iosUrl, String androidUrl, String iconPath, String packageName) {
     bool isSelected = _selectedAppName == name;
     return GestureDetector(
       onTap: () {
@@ -153,6 +282,7 @@ class _SignalScreenState extends State<SignalScreen> {
           _selectedAppScheme = scheme;
           _selectedAppIosUrl = iosUrl;
           _selectedAppAndroidUrl = androidUrl;
+          _selectedAppPackage = packageName;
         });
         Navigator.pop(context);
       },
@@ -171,7 +301,10 @@ class _SignalScreenState extends State<SignalScreen> {
               child: Image.asset(
                 iconPath,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.account_balance_wallet, size: 14, color: Colors.white54),
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.account_balance_wallet,
+                    size: 14,
+                    color: Colors.white54),
               ),
             ),
             const SizedBox(width: 16),
@@ -188,7 +321,9 @@ class _SignalScreenState extends State<SignalScreen> {
               width: 19,
               height: 19,
               decoration: ShapeDecoration(
-                color: isSelected ? const Color(0xFF276EFB) : Colors.white.withValues(alpha: 0.1),
+                color: isSelected
+                    ? const Color(0xFF276EFB)
+                    : Colors.white.withValues(alpha: 0.1),
                 shape: const OvalBorder(),
               ),
               child: Center(
@@ -212,10 +347,11 @@ class _SignalScreenState extends State<SignalScreen> {
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
     final l10n = AppLocalizations.of(context)!;
-    
+
     final isElite = (userProvider.userTier ?? '').toLowerCase() == 'elite';
     final tokenBalance = userProvider.tokenBalance;
-    final tokenText = isElite ? l10n.unlimited : l10n.freeSignalsCount(tokenBalance);
+    final tokenText =
+        isElite ? l10n.unlimited : l10n.freeSignalsCount(tokenBalance);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -248,11 +384,13 @@ class _SignalScreenState extends State<SignalScreen> {
                 alignment: Alignment.center,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.notifications_none, size: 28, color: Colors.white),
+                    icon: const Icon(Icons.notifications_none,
+                        size: 28, color: Colors.white),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                        MaterialPageRoute(
+                            builder: (context) => const NotificationScreen()),
                       );
                     },
                   ),
@@ -266,8 +404,8 @@ class _SignalScreenState extends State<SignalScreen> {
                         decoration: const BoxDecoration(
                             color: Colors.redAccent,
                             shape: BoxShape.circle,
-                            border: Border.fromBorderSide(BorderSide(color: Color(0xFF0D1117), width: 1.5))
-                        ),
+                            border: Border.fromBorderSide(BorderSide(
+                                color: Color(0xFF0D1117), width: 1.5))),
                       ),
                     ),
                 ],
@@ -291,10 +429,14 @@ class _SignalScreenState extends State<SignalScreen> {
                     child: CustomFilterDropdown<AssetFilter>(
                       value: _assetFilter,
                       items: [
-                        CustomDropdownItem(value: AssetFilter.all, label: l10n.allAssets),
-                        CustomDropdownItem(value: AssetFilter.gold, label: l10n.assetGold),
-                        CustomDropdownItem(value: AssetFilter.crypto, label: l10n.assetCrypto),
-                        CustomDropdownItem(value: AssetFilter.forex, label: l10n.assetForex),
+                        CustomDropdownItem(
+                            value: AssetFilter.all, label: l10n.allAssets),
+                        CustomDropdownItem(
+                            value: AssetFilter.gold, label: l10n.assetGold),
+                        CustomDropdownItem(
+                            value: AssetFilter.crypto, label: l10n.assetCrypto),
+                        CustomDropdownItem(
+                            value: AssetFilter.forex, label: l10n.assetForex),
                       ],
                       onChanged: (value) {
                         if (value != null) setState(() => _assetFilter = value);
@@ -306,9 +448,12 @@ class _SignalScreenState extends State<SignalScreen> {
                   Expanded(
                     child: CustomFilterDropdown<String>(
                       value: _selectedTimezone,
-                      items: _timezones.map((tz) => CustomDropdownItem(value: tz, label: tz)).toList(),
+                      items: _timezones
+                          .map((tz) => CustomDropdownItem(value: tz, label: tz))
+                          .toList(),
                       onChanged: (value) {
-                        if (value != null) setState(() => _selectedTimezone = value);
+                        if (value != null)
+                          setState(() => _selectedTimezone = value);
                       },
                     ),
                   ),
@@ -317,7 +462,7 @@ class _SignalScreenState extends State<SignalScreen> {
             ),
 
             const SizedBox(height: 16),
-            
+
             // Dynamic Tokens Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -338,7 +483,8 @@ class _SignalScreenState extends State<SignalScreen> {
                   ),
                 ),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     color: const Color(0xFF161616),
                     borderRadius: BorderRadius.circular(5),
@@ -368,7 +514,7 @@ class _SignalScreenState extends State<SignalScreen> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
 
             // Asset List (Filtered Real-time Prices)
@@ -378,11 +524,12 @@ class _SignalScreenState extends State<SignalScreen> {
                 initialData: const {'BTC': 0.0, 'ETH': 0.0, 'XAU': 0.0},
                 builder: (context, snapshot) {
                   final prices = snapshot.data!;
-                  
+
                   // Filter list based on selected asset filter
                   List<Widget> assetWidgets = [];
-                  
-                  if (_assetFilter == AssetFilter.all || _assetFilter == AssetFilter.gold) {
+
+                  if (_assetFilter == AssetFilter.all ||
+                      _assetFilter == AssetFilter.gold) {
                     assetWidgets.add(_buildAssetItem(
                       symbol: 'XAUUSD',
                       price: prices['XAU'] ?? 0.0,
@@ -393,9 +540,11 @@ class _SignalScreenState extends State<SignalScreen> {
                       l10n: l10n,
                     ));
                   }
-                  
-                  if (_assetFilter == AssetFilter.all || _assetFilter == AssetFilter.crypto) {
-                    if (assetWidgets.isNotEmpty) assetWidgets.add(const SizedBox(height: 12));
+
+                  if (_assetFilter == AssetFilter.all ||
+                      _assetFilter == AssetFilter.crypto) {
+                    if (assetWidgets.isNotEmpty)
+                      assetWidgets.add(const SizedBox(height: 12));
                     assetWidgets.add(_buildAssetItem(
                       symbol: 'BTC',
                       price: prices['BTC'] ?? 0.0,
@@ -416,13 +565,15 @@ class _SignalScreenState extends State<SignalScreen> {
                       l10n: l10n,
                     ));
                   }
-                  
+
                   // Forex is empty for now as no symbols are being streamed
-                  if (_assetFilter == AssetFilter.forex && assetWidgets.isEmpty) {
+                  if (_assetFilter == AssetFilter.forex &&
+                      assetWidgets.isEmpty) {
                     assetWidgets.add(Center(
                       child: Padding(
                         padding: const EdgeInsets.only(top: 40),
-                        child: Text(l10n.noForexAssets, style: const TextStyle(color: Colors.white54)),
+                        child: Text(l10n.noForexAssets,
+                            style: const TextStyle(color: Colors.white54)),
                       ),
                     ));
                   }
@@ -437,7 +588,8 @@ class _SignalScreenState extends State<SignalScreen> {
 
             // Open SELECTED APP Button
             Padding(
-              padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 80.0),
+              padding: const EdgeInsets.only(
+                  left: 24.0, right: 24.0, top: 24.0, bottom: 80.0),
               child: Container(
                 height: 50,
                 decoration: BoxDecoration(
@@ -448,10 +600,15 @@ class _SignalScreenState extends State<SignalScreen> {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 44), // Spacer to balance the right icon
+                    const SizedBox(
+                        width: 44), // Spacer to balance the right icon
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => _launchApp(_selectedAppScheme, _selectedAppIosUrl, _selectedAppAndroidUrl),
+                        onTap: () => _launchApp(
+                            _selectedAppScheme,
+                            _selectedAppIosUrl,
+                            _selectedAppAndroidUrl,
+                            _selectedAppPackage),
                         behavior: HitTestBehavior.opaque,
                         child: Center(
                           child: Text(
@@ -477,7 +634,8 @@ class _SignalScreenState extends State<SignalScreen> {
                           height: 24,
                           decoration: ShapeDecoration(
                             color: const Color(0xFF4998FF),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6)),
                           ),
                           child: Center(
                             child: Image.asset(
@@ -539,7 +697,10 @@ class _SignalScreenState extends State<SignalScreen> {
                   child: Image.asset(
                     iconPath,
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.currency_exchange, size: 16, color: Colors.white70),
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.currency_exchange,
+                        size: 16,
+                        color: Colors.white70),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -559,7 +720,8 @@ class _SignalScreenState extends State<SignalScreen> {
                 const SizedBox(width: 12),
                 // Ô chỉ số giá
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     border: Border.all(color: priceColor, width: 1),
                     borderRadius: BorderRadius.circular(3),
@@ -574,7 +736,8 @@ class _SignalScreenState extends State<SignalScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12), // Tăng từ 4px lên 12px để đồng bộ khoảng cách
+                const SizedBox(
+                    width: 12), // Tăng từ 4px lên 12px để đồng bộ khoảng cách
                 // Mũi tên nhỏ sát cạnh giá
                 RotatedBox(
                   quarterTurns: isExpanded ? 2 : 0,
@@ -612,7 +775,9 @@ class _SignalScreenState extends State<SignalScreen> {
         ),
         if (isExpanded)
           SignalDetailExpandedView(
-            symbol: symbol == 'XAUUSD' ? 'XAU/USD' : (symbol == 'BTC' ? 'BTC/USD' : 'ETH/USD'),
+            symbol: symbol == 'XAUUSD'
+                ? 'XAU/USD'
+                : (symbol == 'BTC' ? 'BTC/USD' : 'ETH/USD'),
             userTier: userProvider.userTier ?? 'free',
             userProvider: userProvider,
             l10n: l10n,
@@ -637,7 +802,8 @@ class SignalDetailExpandedView extends StatefulWidget {
   });
 
   @override
-  State<SignalDetailExpandedView> createState() => _SignalDetailExpandedViewState();
+  State<SignalDetailExpandedView> createState() =>
+      _SignalDetailExpandedViewState();
 }
 
 class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
@@ -694,16 +860,18 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
             alignment: Alignment.center,
             children: [
               _buildSignalDetails(dummySignal, widget.l10n),
-              _buildBlurredOverlay(context, dummySignal, widget.userProvider, false),
+              _buildBlurredOverlay(
+                  context, dummySignal, widget.userProvider, false),
             ],
           );
         }
 
         final signal = snapshot.data!.first;
-        
+
         // LOGIC MỚI: Luôn kiểm tra xem đã unlock chưa (dựa trên ID trong unlockedSignals)
-        final bool isUnlocked = widget.userProvider.unlockedSignals.contains(signal.id);
-        
+        final bool isUnlocked =
+            widget.userProvider.unlockedSignals.contains(signal.id);
+
         // Kiểm tra quyền miễn phí (Elite/Subscribed)
         final bool isEliteOrSubscribed = SignalAccessHelper.canViewEntry(
           signal,
@@ -716,7 +884,8 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
           children: [
             _buildSignalDetails(signal, widget.l10n),
             if (!isUnlocked)
-              _buildBlurredOverlay(context, signal, widget.userProvider, isEliteOrSubscribed),
+              _buildBlurredOverlay(
+                  context, signal, widget.userProvider, isEliteOrSubscribed),
           ],
         );
       },
@@ -724,8 +893,10 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
   }
 
   Widget _buildSignalDetails(Signal signal, AppLocalizations l10n) {
-    final bool isJustMatched = signal.status == 'running' && signal.isMatched && signal.hitTps.isEmpty;
-    final Color statusColor = isJustMatched ? const Color(0xFF197DFF) : signal.getStatusColor();
+    final bool isJustMatched =
+        signal.status == 'running' && signal.isMatched && signal.hitTps.isEmpty;
+    final Color statusColor =
+        isJustMatched ? const Color(0xFF197DFF) : signal.getStatusColor();
     final bool isPlaceholder = signal.id == 'placeholder';
 
     return Container(
@@ -743,12 +914,18 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
               ),
               _buildSignalInfoBox(
                 label: l10n.signalEntryLabel,
-                value: isPlaceholder ? '-' : signal.entryPrice.toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
+                value: isPlaceholder
+                    ? '-'
+                    : signal.entryPrice
+                        .toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
                 valueColor: const Color(0xFF00BB32),
               ),
               _buildSignalInfoBox(
                 label: l10n.signalSlLabel,
-                value: isPlaceholder ? '-' : signal.stopLoss.toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
+                value: isPlaceholder
+                    ? '-'
+                    : signal.stopLoss
+                        .toStringAsFixed(signal.symbol.contains('XAU') ? 2 : 5),
                 valueColor: const Color(0xFFE3001E),
               ),
             ],
@@ -759,17 +936,23 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
             children: [
               _buildSignalInfoBox(
                 label: l10n.signalTp1Label,
-                value: !isPlaceholder && signal.takeProfits.isNotEmpty ? signal.takeProfits[0].toString() : '-',
+                value: !isPlaceholder && signal.takeProfits.isNotEmpty
+                    ? signal.takeProfits[0].toString()
+                    : '-',
                 valueColor: Colors.white,
               ),
               _buildSignalInfoBox(
                 label: l10n.signalTp2Label,
-                value: !isPlaceholder && signal.takeProfits.length > 1 ? signal.takeProfits[1].toString() : '-',
+                value: !isPlaceholder && signal.takeProfits.length > 1
+                    ? signal.takeProfits[1].toString()
+                    : '-',
                 valueColor: Colors.white,
               ),
               _buildSignalInfoBox(
                 label: l10n.signalTp3Label,
-                value: !isPlaceholder && signal.takeProfits.length > 2 ? signal.takeProfits[2].toString() : '-',
+                value: !isPlaceholder && signal.takeProfits.length > 2
+                    ? signal.takeProfits[2].toString()
+                    : '-',
                 valueColor: Colors.white,
               ),
             ],
@@ -785,7 +968,8 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
               );
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -795,7 +979,8 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
                         'assets/icons/analyze.png',
                         width: 24,
                         height: 24,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
                           Icons.analytics_outlined,
                           size: 24,
                           color: Color(0xFF636363),
@@ -827,7 +1012,8 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
     );
   }
 
-  Widget _buildBlurredOverlay(BuildContext context, Signal signal, UserProvider userProvider, bool isFreeUnlock) {
+  Widget _buildBlurredOverlay(BuildContext context, Signal signal,
+      UserProvider userProvider, bool isFreeUnlock) {
     final l10n = AppLocalizations.of(context)!;
     return Positioned.fill(
       child: ClipRRect(
@@ -914,18 +1100,21 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
                           return;
                         }
                         if (isFreeUnlock) {
-                          await userProvider.unlockSignal(signal.id, freeUnlock: true);
+                          await userProvider.unlockSignal(signal.id,
+                              freeUnlock: true);
                         } else {
                           if (userProvider.tokenBalance > 0) {
-                            final success = await userProvider.unlockSignal(signal.id, freeUnlock: false);
+                            final success = await userProvider
+                                .unlockSignal(signal.id, freeUnlock: false);
                             if (!success && context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(l10n.failedUnlockSignal)),
+                                SnackBar(
+                                    content: Text(l10n.failedUnlockSignal)),
                               );
                             }
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(l10n.notEnoughTokens)),
+                              SnackBar(content: Text(l10n.notEnoughTokens)),
                             );
                           }
                         }
@@ -933,14 +1122,20 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF276EFB),
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 14),
                         elevation: 12,
-                        shadowColor: const Color(0xFF276EFB).withValues(alpha: 0.6),
+                        shadowColor:
+                            const Color(0xFF276EFB).withValues(alpha: 0.6),
                       ),
                       child: Text(
                         l10n.viewNow,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Be Vietnam Pro'),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            fontFamily: 'Be Vietnam Pro'),
                       ),
                     ),
                   ],
@@ -1046,7 +1241,10 @@ class GradientPainter extends CustomPainter {
   final double radius;
   final Gradient gradient;
 
-  GradientPainter({required this.strokeWidth, required this.radius, required this.gradient});
+  GradientPainter(
+      {required this.strokeWidth,
+      required this.radius,
+      required this.gradient});
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -98,6 +98,7 @@ class _AffiliateDetailScreenState extends State<AffiliateDetailScreen> with Sing
               const Text('Lịch sử giao dịch hoa hồng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               const SizedBox(height: 16),
               _buildTransactionList(snapshot.data?.docs ?? []),
+              const SizedBox(height: 100), // Khoảng đệm cuối trang
             ],
           ),
         );
