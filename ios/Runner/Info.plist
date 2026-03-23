@@ -62,11 +62,15 @@
 			<string>bybit</string>
 			<string>bybitapp</string>
 			<string>binance</string>
+			<string>bnc</string>
 			<string>litefinance</string>
 			<string>axi</string>
 			<string>vantage</string>
 			<string>vantage-fx</string>
+			<string>vantage-trading</string>
+			<string>vau</string>
 			<string>xtb</string>
+			<string>xstation</string>
 		</array>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>

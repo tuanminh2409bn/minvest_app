@@ -214,7 +214,7 @@ class _SignalScreenState extends State<SignalScreen> {
                         _buildAppOption(
                             context,
                             'Bybit',
-                            'bybit://',
+                            'bybitapp://',
                             'https://apps.apple.com/vn/app/bybit-buy-bitcoin-trade-crypto/id1488296980?l=vi',
                             'https://play.google.com/store/apps/details?id=com.bybit.app&hl=vi',
                             'assets/icons/bybit.png',
@@ -222,7 +222,7 @@ class _SignalScreenState extends State<SignalScreen> {
                         _buildAppOption(
                             context,
                             'Binance',
-                            'binance://',
+                            'bnc://',
                             'https://apps.apple.com/vn/app/binance-mua-bitcoin-crypto/id1436799971?l=vi',
                             'https://play.google.com/store/apps/details?id=com.binance.dev&hl=vi',
                             'assets/icons/binance.png',
@@ -246,7 +246,7 @@ class _SignalScreenState extends State<SignalScreen> {
                         _buildAppOption(
                             context,
                             'Vantagemarkets',
-                            'vantage://',
+                            'vantage-trading://',
                             'https://apps.apple.com/vn/app/vantage-all-in-one-trading-app/id1457929724?l=vi',
                             'https://play.google.com/store/apps/details?id=cn.com.vau&hl=vi',
                             'assets/icons/vantagemarkets.png',
@@ -254,7 +254,7 @@ class _SignalScreenState extends State<SignalScreen> {
                         _buildAppOption(
                             context,
                             'XTB',
-                            'xtb://',
+                            'xstation://',
                             'https://apps.apple.com/vn/app/xtb-online-investing/id949905889?l=vi',
                             'https://play.google.com/store/apps/details?id=com.xtb.xmobile2&hl=vi',
                             'assets/icons/xtb.png',
