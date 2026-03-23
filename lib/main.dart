@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/app/auth_gate.dart';
+import 'package:minvest_forex_app/app/session_gate.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/core/services/purchase_service.dart';
@@ -110,30 +111,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  StreamSubscription<String>? _forceLogoutSubscription;
-  bool _isLogoutDialogShowing = false;
-
   @override
   void initState() {
     super.initState();
     _initializeCoreServices();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final authService = context.read<AuthService>();
-        _forceLogoutSubscription = authService.forceLogoutStream.listen((reason) {
-          if (mounted && !_isLogoutDialogShowing) {
-            setState(() { _isLogoutDialogShowing = true; });
-            _showLogoutDialog(reason);
-          }
-        });
-      }
-    });
   }
 
   @override
   void dispose() {
-    _forceLogoutSubscription?.cancel();
     super.dispose();
   }
 
@@ -232,42 +217,6 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void _showLogoutDialog(String? reason) {
-    final context = navigatorKey.currentContext;
-    if (context == null) {
-      if (mounted) setState(() => _isLogoutDialogShowing = false);
-      return;
-    }
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text(l10n.logoutDialogTitle),
-          content: Text(reason ?? l10n.logoutDialogDefaultReason),
-          actions: <Widget>[
-            TextButton(
-              child: Text(l10n.ok),
-              onPressed: () async {
-                Navigator.of(dialogContext).pop();
-                if (mounted) {
-                   await Provider.of<AuthService>(context, listen: false).signOut();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    ).then((_) {
-      if (mounted) {
-        setState(() {
-          _isLogoutDialogShowing = false;
-        });
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<LanguageProvider>(
@@ -296,7 +245,7 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: Directionality(
                   textDirection: TextDirection.ltr,
-                  child: child!,
+                  child: SessionGate(child: child!),
                 ),
               );
             },
@@ -328,7 +277,7 @@ class _MyAppState extends State<MyApp> {
               },
               child: Directionality(
                 textDirection: TextDirection.ltr,
-                child: child!,
+                child: SessionGate(child: child!),
               ),
             );
           },

@@ -20,7 +20,6 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
-  bool _isSessionResetDialogShowing = false;
   bool _hasRedirectedToLanding = false;
 
   void _showErrorDialog(BuildContext context, String message) {
@@ -37,40 +36,6 @@ class _AuthGateState extends State<AuthGate> {
             child: const Text('OK'),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showSessionResetDialog(BuildContext context, UserProvider userProvider) {
-    if (_isSessionResetDialogShowing || !mounted) return;
-
-    setState(() {
-      _isSessionResetDialogShowing = true;
-    });
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => PopScope(
-        canPop: false,
-        child: AlertDialog(
-          title: const Text('Thông báo quan trọng'),
-          content: Text(userProvider.sessionResetReason ?? 'Tài khoản của bạn có sự thay đổi. Vui lòng đăng nhập lại.'),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                await userProvider.acknowledgeSessionReset();
-                if (mounted) {
-                  Navigator.of(dialogContext).pop();
-                  setState(() {
-                    _isSessionResetDialogShowing = false;
-                  });
-                }
-              },
-              child: const Text('Tôi đã hiểu'),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -111,12 +76,6 @@ class _AuthGateState extends State<AuthGate> {
         if (state.status == AuthStatus.authenticated) {
           return Consumer<UserProvider>(
             builder: (context, userProvider, child) {
-              if (userProvider.requiresSessionReset) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  _showSessionResetDialog(context, userProvider);
-                });
-              }
-
               if (kIsWeb) {
                 if (!_hasRedirectedToLanding) {
                   _hasRedirectedToLanding = true;

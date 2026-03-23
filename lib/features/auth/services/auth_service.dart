@@ -160,24 +160,34 @@ class AuthService {
       if (snapshot.exists && snapshot.data() != null) {
         final data = snapshot.data()!;
 
-        // 1. Đọc trường "logoutTargetDeviceId" từ server
-        final targetDeviceId = data['logoutTargetDeviceId'] as String?;
+        // 1. Đọc trường logoutTarget theo platform từ server
+        final logoutTargetMobile = data['logoutTargetDeviceIdMobile'] as String?;
+        final logoutTargetWeb = data['logoutTargetDeviceIdWeb'] as String?;
+        final requiresSessionReset = data['requiresSessionReset'] as bool? ?? false;
+        
+        final targetDeviceId = kIsWeb ? logoutTargetWeb : logoutTargetMobile;
 
         // 2. So sánh mục tiêu với ID của thiết bị hiện tại
-        if (targetDeviceId != null && targetDeviceId == currentDeviceId) {
+        if ((targetDeviceId != null && targetDeviceId == currentDeviceId) || requiresSessionReset) {
           print('AuthService: Nhận lệnh đăng xuất từ server cho thiết bị này.');
+
+          String reason = 'Tài khoản của bạn đã được đăng nhập trên một thiết bị khác.';
+          if (requiresSessionReset) {
+            reason = data['sessionResetReason'] ?? 'Tài khoản của bạn có sự thay đổi. Vui lòng đăng nhập lại.';
+          }
 
           // 3. Kích hoạt luồng đăng xuất bắt buộc
           if (!_forceLogoutController.isClosed) {
-            _forceLogoutController.add(
-                'Tài khoản của bạn đã được đăng nhập trên một thiết bị khác.');
+            _forceLogoutController.add(reason);
           }
 
           // 4. (RẤT QUAN TRỌNG) Xóa "lệnh" trên server sau khi đã nhận
-          // Để tránh việc bị đăng xuất lặp lại nếu có lỗi xảy ra.
           try {
-            await userDocRef
-                .update({'logoutTargetDeviceId': FieldValue.delete()});
+            final fieldToRemove = kIsWeb ? 'logoutTargetDeviceIdWeb' : 'logoutTargetDeviceIdMobile';
+            await userDocRef.update({
+              fieldToRemove: FieldValue.delete(),
+              'requiresSessionReset': FieldValue.delete(),
+            });
           } catch (e) {
             print("Lỗi khi xóa logoutTargetDeviceId: $e");
           }

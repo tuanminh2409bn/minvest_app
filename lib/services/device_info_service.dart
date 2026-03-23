@@ -9,29 +9,35 @@ class DeviceInfoService {
 
   static Future<String> getDeviceId() async {
     try {
-      if (kIsWeb) {
-        // Xử lý cho nền tảng Web
-        final prefs = await SharedPreferences.getInstance();
-        String? deviceId = prefs.getString('deviceId');
-        if (deviceId == null) {
-          deviceId = const Uuid().v4(); // Tạo một ID duy nhất
-          await prefs.setString('deviceId', deviceId);
-        }
+      final prefs = await SharedPreferences.getInstance();
+      String? deviceId = prefs.getString('deviceId');
+      
+      if (deviceId != null) {
         return deviceId;
+      }
+
+      // Nếu chưa có, tạo ID mới
+      if (kIsWeb) {
+        deviceId = const Uuid().v4();
       } else {
-        // Xử lý cho nền tảng Mobile
         if (defaultTargetPlatform == TargetPlatform.android) {
           final androidInfo = await _deviceInfoPlugin.androidInfo;
-          return androidInfo.id; // Sử dụng androidId đã được xác minh
+          // Kết hợp androidId với UUID để đảm bảo tính duy nhất
+          deviceId = 'android_${androidInfo.id}_${const Uuid().v4().substring(0, 8)}';
         } else if (defaultTargetPlatform == TargetPlatform.iOS) {
           final iosInfo = await _deviceInfoPlugin.iosInfo;
-          return iosInfo.identifierForVendor ?? 'ios_device_unknown';
+          final vendorId = iosInfo.identifierForVendor ?? const Uuid().v4();
+          deviceId = 'ios_${vendorId}_${const Uuid().v4().substring(0, 8)}';
+        } else {
+          deviceId = 'other_${const Uuid().v4()}';
         }
       }
+
+      await prefs.setString('deviceId', deviceId);
+      return deviceId;
     } catch (e) {
       print('Lỗi khi lấy Device ID: $e');
+      return 'unknown_device_${DateTime.now().millisecondsSinceEpoch}';
     }
-    // Trả về một giá trị dự phòng nếu có lỗi
-    return 'unknown_device_${DateTime.now().millisecondsSinceEpoch}';
   }
 }
