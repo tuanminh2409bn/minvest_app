@@ -55,13 +55,17 @@
 			<string>fb-messenger-share-api</string>
 			<string>metatrader4</string>
 			<string>metatrader5</string>
+			<string>exness</string>
 			<string>exness-trade</string>
+			<string>xm</string>
 			<string>xm-global</string>
+			<string>bybit</string>
 			<string>bybitapp</string>
-			<string>bnc</string>
+			<string>binance</string>
 			<string>litefinance</string>
 			<string>axi</string>
 			<string>vantage</string>
+			<string>vantage-fx</string>
 			<string>xtb</string>
 		</array>
 		<key>LSRequiresIPhoneOS</key>

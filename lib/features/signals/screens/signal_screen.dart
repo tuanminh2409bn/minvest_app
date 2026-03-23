@@ -120,13 +120,12 @@ class _SignalScreenState extends State<SignalScreen> {
           openStore: true,
         );
       } else {
-        // Trên iOS dùng URL Scheme (đã khai báo trong Info.plist)
-        final Uri appSchemeUri = Uri.parse(scheme);
-        bool launched = await launchUrl(appSchemeUri,
-            mode: LaunchMode.externalNonBrowserApplication);
-        if (!launched) {
-          await launchUrl(storeUri, mode: LaunchMode.externalApplication);
-        }
+        // iOS: Sử dụng LaunchApp với URL Scheme
+        await LaunchApp.openApp(
+          iosUrlScheme: scheme,
+          appStoreLink: iosUrl,
+          openStore: true,
+        );
       }
     } catch (e) {
       await launchUrl(storeUri, mode: LaunchMode.externalApplication);
@@ -199,7 +198,7 @@ class _SignalScreenState extends State<SignalScreen> {
                         _buildAppOption(
                             context,
                             'Exness',
-                            'exness-trade://',
+                            'exness://',
                             'https://apps.apple.com/vn/app/exness-trade-app-giao-d%E1%BB%8Bch/id1359763701?l=vi',
                             'https://play.google.com/store/apps/details?id=com.exness.android.pa&hl=vi',
                             'assets/icons/exness.png',
@@ -207,7 +206,7 @@ class _SignalScreenState extends State<SignalScreen> {
                         _buildAppOption(
                             context,
                             'XM',
-                            'xm-global://',
+                            'xm://',
                             'https://apps.apple.com/vn/app/xm-app-giao-d%E1%BB%8Bch-th%E1%BA%ADt-t%E1%BB%B1-tin/id1072084799?l=vi',
                             'https://play.google.com/store/apps/details?id=com.xm.webapp&hl=vi',
                             'assets/icons/xm.png',
@@ -215,7 +214,7 @@ class _SignalScreenState extends State<SignalScreen> {
                         _buildAppOption(
                             context,
                             'Bybit',
-                            'bybitapp://',
+                            'bybit://',
                             'https://apps.apple.com/vn/app/bybit-buy-bitcoin-trade-crypto/id1488296980?l=vi',
                             'https://play.google.com/store/apps/details?id=com.bybit.app&hl=vi',
                             'assets/icons/bybit.png',
@@ -223,7 +222,7 @@ class _SignalScreenState extends State<SignalScreen> {
                         _buildAppOption(
                             context,
                             'Binance',
-                            'bnc://',
+                            'binance://',
                             'https://apps.apple.com/vn/app/binance-mua-bitcoin-crypto/id1436799971?l=vi',
                             'https://play.google.com/store/apps/details?id=com.binance.dev&hl=vi',
                             'assets/icons/binance.png',
