@@ -10,7 +10,9 @@ import 'package:minvest_forex_app/features/notifications/screens/notification_sc
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:minvest_forex_app/features/auth/screens/settings_screen.dart';
+import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/core/utils/navigator_key.dart';
 import 'package:minvest_forex_app/features/payment_history/screens/payment_history_screen.dart';
 import 'package:minvest_forex_app/features/affiliate/screens/affiliate_dashboard_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -446,6 +448,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             icon: Icons.admin_panel_settings_outlined,
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminPanelScreen())),
                           ),
+                        const SizedBox(height: 8),
+                        _buildMenuButton(
+                          label: l10n.deleteAccount,
+                          icon: Icons.delete_forever_outlined,
+                          iconColor: Colors.redAccent,
+                          onTap: () => _showDeleteAccountDialog(context, l10n),
+                        ),
                       ],
                     ),
                   ),
@@ -456,6 +465,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: AlertDialog(
+            backgroundColor: const Color(0xFF161616),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+              side: const BorderSide(color: Colors.white10),
+            ),
+            title: Text(
+              l10n.deleteAccount,
+              style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              l10n.deleteAccountWarning,
+              style: const TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  l10n.cancel,
+                  style: const TextStyle(color: Colors.white54),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  try {
+                    // Hiển thị loading
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => const Center(child: CircularProgressIndicator(color: Colors.redAccent)),
+                    );
+                    
+                    await Provider.of<AuthService>(context, listen: false).deleteAccountAndData();
+                    
+                    // Đóng loading dialog sử dụng navigatorKey tổng
+                    navigatorKey.currentState?.pop();
+                    
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Tài khoản đã được xóa vĩnh viễn.")),
+                      );
+                    }
+                  } catch (e) {
+                    // Đóng loading dialog trong trường hợp lỗi
+                    navigatorKey.currentState?.pop();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Lỗi khi xóa tài khoản: $e")),
+                      );
+                    }
+                  }
+                },
+                child: Text(
+                  l10n.delete,
+                  style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -499,7 +579,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildMenuButton({required String label, required IconData icon, required VoidCallback onTap}) {
+  Widget _buildMenuButton({
+    required String label, 
+    required IconData icon, 
+    required VoidCallback onTap,
+    Color iconColor = Colors.white,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -528,7 +613,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              Icon(icon, color: Colors.white, size: 22),
+              Icon(icon, color: iconColor, size: 22),
               const SizedBox(width: 16),
               Text(
                 label,

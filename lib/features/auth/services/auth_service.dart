@@ -201,15 +201,6 @@ class AuthService {
     _sessionSubscription = null;
   }
 
-  Future<void> _requestTrackingPermission() async {
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-      if (status == TrackingStatus.notDetermined) {
-        await AppTrackingTransparency.requestTrackingAuthorization();
-      }
-    }
-  }
-
   String _generateNonce([int length = 32]) {
     const charset =
         '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
@@ -432,7 +423,6 @@ class AuthService {
         userCredential =
             await _firebaseAuth.signInWithPopup(FacebookAuthProvider());
       } else {
-        await _requestTrackingPermission();
         final LoginResult result = await FacebookAuth.instance.login(
           loginTracking: LoginTracking.enabled,
           permissions: ['public_profile', 'email'],
@@ -633,7 +623,10 @@ class AuthService {
 
   Future<void> deleteAccountAndData() async {
     try {
-      final callable = _functions.httpsCallable('deleteUserAccount');
+      final callable = _functions.httpsCallable(
+        'deleteUserAccount',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 120)),
+      );
       final result = await callable.call();
       print(
           'Cloud function deleteUserAccount được gọi thành công: ${result.data}');

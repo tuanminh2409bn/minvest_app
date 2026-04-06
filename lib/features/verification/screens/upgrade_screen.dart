@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:minvest_forex_app/core/services/purchase_service.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UpgradeScreen extends StatefulWidget {
   const UpgradeScreen({super.key});
@@ -24,6 +25,13 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
       l10n.continuouslyUpdating,
       l10n.providingBestSignals,
     ];
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
   }
 
   @override
@@ -106,6 +114,48 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                             l10n,
                           );
                         }),
+
+                        const SizedBox(height: 16),
+                        // Auto-renewal description for Apple requirements
+                        const Text(
+                          "Subscription will automatically renew unless canceled at least 24 hours before the end of the current period. You can manage and cancel your subscriptions in your App Store account settings.",
+                          style: TextStyle(
+                            color: Color(0xFF636363),
+                            fontSize: 12,
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+                        // Legal Links
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(
+                              onPressed: () => _launchUrl('https://tuanminh2409bn.github.io/Signal-GPT-Privacy/'),
+                              child: const Text(
+                                "Privacy Policy",
+                                style: TextStyle(
+                                  color: Color(0xFF276EFB),
+                                  fontSize: 13,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                            const Text("|", style: TextStyle(color: Color(0xFF636363))),
+                            TextButton(
+                              onPressed: () => _launchUrl('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'),
+                              child: const Text(
+                                "Terms of Use (EULA)",
+                                style: TextStyle(
+                                  color: Color(0xFF276EFB),
+                                  fontSize: 13,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
@@ -288,6 +338,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
 
   Widget _buildCategoryItem(int index, String name, String price, AppLocalizations l10n) {
     final isSelected = selectedCategoryIndices.contains(index);
+    final durationText = isMonthly ? "/ month" : "/ year";
     
     return GestureDetector(
       onTap: () {
@@ -380,7 +431,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              price,
+              "$price $durationText",
               style: TextStyle(
                 color: isSelected ? Colors.white : Colors.white,
                 fontSize: 16,
@@ -394,3 +445,4 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
     );
   }
 }
+

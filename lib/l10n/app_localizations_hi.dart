@@ -179,6 +179,9 @@ class AppLocalizationsHi extends AppLocalizations {
       'पूर्ण विश्लेषण देखने के लिए अपग्रेड करें';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'स्वागत है';
 
   @override

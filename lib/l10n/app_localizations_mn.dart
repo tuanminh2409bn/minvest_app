@@ -177,6 +177,9 @@ class AppLocalizationsMn extends AppLocalizations {
       'Бүрэн шинжилгээг харахын тулд сайжруулах';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Тавтай морилно уу';
 
   @override

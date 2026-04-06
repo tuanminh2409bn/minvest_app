@@ -18,10 +18,17 @@ import StoreKit
     GeneratedPluginRegistrant.register(with: self)
 
     SKPaymentQueue.default().add(self)
-    ApplicationDelegate.shared.application(
-        application,
-        didFinishLaunchingWithOptions: launchOptions
-    )
+
+    // ⚠️ Tắt tính năng thu thập dữ liệu tự động của Facebook SDK
+    // TRƯỚC KHI khởi động SDK. Điều này đảm bảo không có IDFA hoặc
+    // dữ liệu theo dõi nào được thu thập trước khi user cấp quyền ATT.
+    Settings.shared.isAutoLogAppEventsEnabled = false
+    Settings.shared.isAdvertiserIDCollectionEnabled = false
+
+    // 🚫 KHÔNG gọi ApplicationDelegate.shared.application() ở đây!
+    // Facebook SDK sẽ trigger network call đến ep2.facebook.com ngay lập tức,
+    // khiến iOS hiện dialog "Quyền mạng cục bộ" trước khi ATT được xử lý.
+    // Facebook SDK được khởi động SAU trong Dart (sau khi ATT hoàn tất).
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

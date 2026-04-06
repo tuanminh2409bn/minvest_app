@@ -177,6 +177,9 @@ class AppLocalizationsId extends AppLocalizations {
       'Tingkatkan untuk Melihat Analisis Lengkap';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Selamat datang di';
 
   @override

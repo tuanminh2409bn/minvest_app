@@ -178,6 +178,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Mettre à niveau pour voir l\'analyse complète';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Bienvenue sur';
 
   @override

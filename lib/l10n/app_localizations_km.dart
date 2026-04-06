@@ -175,6 +175,9 @@ class AppLocalizationsKm extends AppLocalizations {
   String get upgradeToViewFullAnalysis => 'ដំឡើងកំណែដើម្បីមើលការវិភាគពេញលេញ';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'សូមស្វាគមន៍មកកាន់';
 
   @override

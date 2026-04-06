@@ -11,6 +11,8 @@ import 'package:minvest_forex_app/features/notifications/screens/notification_sc
 import 'package:minvest_forex_app/features/notifications/providers/notification_provider.dart';
 import 'package:minvest_forex_app/features/signals/widgets/custom_filter_dropdown.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
+import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -61,6 +63,7 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
   Widget build(BuildContext context) {
     super.build(context);
     final l10n = AppLocalizations.of(context)!;
+    final userProvider = context.watch<UserProvider>();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -123,63 +126,121 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
+        child: userProvider.role == 'guest'
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.history_toggle_off,
+                          color: Color(0xFF0CA3ED), size: 64),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Đăng nhập để xem lịch sử',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Lịch sử tín hiệu chỉ dành cho người dùng đã đăng nhập. Hãy đăng nhập để theo dõi hiệu quả từ Signal GPT.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xFF636363),
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () {
+                          context
+                              .read<AuthBloc>()
+                              .add(SignOutRequested());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0CA3ED),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Đăng nhập ngay',
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : Column(
                 children: [
-                  Expanded(child: _buildAssetDropdown(l10n)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildGMTDropdown()),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(child: _buildAssetDropdown(l10n)),
+                        const SizedBox(width: 12),
+                        Expanded(child: _buildGMTDropdown()),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(child: _buildDatePicker(l10n)),
+                        const SizedBox(width: 12),
+                        Expanded(child: _buildStatusDropdown(l10n)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: StreamBuilder<List<Signal>>(
+                      stream: _historyStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator(
+                                  color: Color(0xFF276EFB)));
+                        }
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text(l10n.errorLoadingHistory,
+                                  style: const TextStyle(
+                                      color: Colors.redAccent)));
+                        }
+
+                        final filteredSignals =
+                            _applyFilters(snapshot.data ?? []);
+
+                        if (filteredSignals.isEmpty) {
+                          return Center(
+                              child: Text(l10n.noHistoryFound,
+                                  style:
+                                      const TextStyle(color: Colors.white54)));
+                        }
+
+                        return ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 100),
+                          itemCount: filteredSignals.length,
+                          itemExtent: 70,
+                          itemBuilder: (context, index) {
+                            return _buildHistoryItem(
+                                filteredSignals[index], index, l10n);
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(child: _buildDatePicker(l10n)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildStatusDropdown(l10n)),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            Expanded(
-              child: StreamBuilder<List<Signal>>(
-                stream: _historyStream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator(color: Color(0xFF276EFB)));
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text(l10n.errorLoadingHistory, style: const TextStyle(color: Colors.redAccent)));
-                  }
-                  
-                  final filteredSignals = _applyFilters(snapshot.data ?? []);
-
-                  if (filteredSignals.isEmpty) {
-                    return Center(child: Text(l10n.noHistoryFound, style: const TextStyle(color: Colors.white54)));
-                  }
-
-                  return ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 100),
-                    itemCount: filteredSignals.length,
-                    itemExtent: 70,
-                    itemBuilder: (context, index) {
-                      return _buildHistoryItem(filteredSignals[index], index, l10n);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

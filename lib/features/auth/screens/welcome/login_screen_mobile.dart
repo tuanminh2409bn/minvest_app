@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:minvest_forex_app/features/auth/screens/welcome/forgot_password_screen_mobile.dart';
 import 'package:minvest_forex_app/features/auth/screens/welcome/signup_screen_mobile.dart';
+import 'package:minvest_forex_app/l10n/app_localizations.dart';
 
 class LoginScreenMobile extends StatefulWidget {
   const LoginScreenMobile({super.key});
@@ -236,7 +237,30 @@ class _LoginScreenMobileState extends State<LoginScreenMobile> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
+                  
+                  // Guest Login
+                  GestureDetector(
+                    onTap: () {
+                      context.read<AuthBloc>().add(SignInAnonymouslyRequested());
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFF0CA3ED), width: 1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.loginWithoutAccount,
+                        style: const TextStyle(
+                          color: Color(0xFF0CA3ED),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),

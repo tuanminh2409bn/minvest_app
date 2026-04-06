@@ -7,6 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
 import 'package:minvest_forex_app/core/utils/signal_access_helper.dart';
 import 'package:minvest_forex_app/features/auth/screens/settings_screen.dart';
@@ -518,7 +520,57 @@ class _SignalScreenState extends State<SignalScreen> {
 
             // Asset List (Filtered Real-time Prices)
             Expanded(
-              child: StreamBuilder<Map<String, double>>(
+              child: userProvider.role == 'guest'
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.lock_outline,
+                                color: Color(0xFF0CA3ED), size: 64),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Đăng nhập để xem tín hiệu',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Vui lòng đăng nhập tài khoản để xem tín hiệu Signal GPT và sử dụng đầy đủ tính năng.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Color(0xFF636363),
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              onPressed: () {
+                                context
+                                    .read<AuthBloc>()
+                                    .add(SignOutRequested());
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0CA3ED),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 32, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text('Đăng nhập ngay',
+                                  style: TextStyle(color: Colors.white)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : StreamBuilder<Map<String, double>>(
                 stream: _priceService.priceStream,
                 initialData: const {'BTC': 0.0, 'ETH': 0.0, 'XAU': 0.0},
                 builder: (context, snapshot) {

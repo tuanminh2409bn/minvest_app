@@ -175,6 +175,9 @@ class AppLocalizationsDa extends AppLocalizations {
   String get upgradeToViewFullAnalysis => 'Opgrader for at se fuld analyse';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Velkommen til';
 
   @override

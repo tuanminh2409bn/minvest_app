@@ -178,6 +178,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Actualice para Ver Análisis Completo';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Bienvenido a';
 
   @override

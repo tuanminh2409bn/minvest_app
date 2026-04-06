@@ -8,8 +8,8 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-val keyPropertiesFile = file("key.properties")
 val keyProperties = Properties()
+val keyPropertiesFile = project.file("key.properties")
 if (keyPropertiesFile.exists()) {
     keyProperties.load(FileInputStream(keyPropertiesFile))
 }
@@ -32,7 +32,7 @@ android {
     defaultConfig {
         applicationId = "com.minvest.aisignals"
         minSdkVersion(24)
-        targetSdk = 36
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -40,17 +40,32 @@ android {
     signingConfigs {
         create("release") {
             if (keyPropertiesFile.exists()) {
-                keyAlias = keyProperties.getProperty("keyAlias")
-                keyPassword = keyProperties.getProperty("keyPassword")
-                storeFile = file(keyProperties.getProperty("storeFile"))
-                storePassword = keyProperties.getProperty("storePassword")
+                val alias = keyProperties.getProperty("keyAlias")
+                val keyPass = keyProperties.getProperty("keyPassword")
+                val storeFilePath = keyProperties.getProperty("storeFile")
+                val storePass = keyProperties.getProperty("storePassword")
+                
+                if (alias != null && keyPass != null && storeFilePath != null && storePass != null) {
+                    keyAlias = alias
+                    keyPassword = keyPass
+                    storeFile = project.file(storeFilePath)
+                    storePassword = storePass
+                } else {
+                    println("🚨 Cảnh báo: key.properties tồn tại nhưng thiếu thuộc tính ký. Bản release sẽ không được ký đúng cách.")
+                }
+            } else {
+                println("🚨 Cảnh báo: key.properties không tồn tại. Bản release sẽ không được ký.")
             }
         }
     }
 
     buildTypes {
         getByName("release") {
+            // Chỉ gán signingConfig nếu các thông số đã được điền đủ
             signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }

@@ -168,6 +168,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get upgradeToViewFullAnalysis => 'アップグレードして完全な分析を表示';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'ようこそ';
 
   @override

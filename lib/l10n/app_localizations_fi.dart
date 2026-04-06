@@ -177,6 +177,9 @@ class AppLocalizationsFi extends AppLocalizations {
   String get upgradeToViewFullAnalysis => 'Päivitä nähdäksesi täyden analyysin';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Tervetuloa';
 
   @override

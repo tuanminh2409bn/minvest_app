@@ -178,6 +178,9 @@ class AppLocalizationsRo extends AppLocalizations {
       'Actualizați pentru a vizualiza analiza completă';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Bun venit la';
 
   @override

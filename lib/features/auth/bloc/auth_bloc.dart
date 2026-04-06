@@ -85,9 +85,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onSignOutRequested(SignOutRequested event, Emitter<AuthState> emit) async {
     print("AuthBloc: Yêu cầu đăng xuất. Bắt đầu dọn dẹp provider...");
     
-    // Phát ra loggingOut ngay để UI chuyển về màn hình chờ
-    emit(const AuthState.loggingOut());
-
     try {
       _authService.stopListeningForSessionChanges();
 

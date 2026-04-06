@@ -428,6 +428,12 @@ abstract class AppLocalizations {
   /// **'Upgrade to View Full Analysis'**
   String get upgradeToViewFullAnalysis;
 
+  /// No description provided for @loginWithoutAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Login without an account'**
+  String get loginWithoutAccount;
+
   /// No description provided for @welcomeTo.
   ///
   /// In en, this message translates to:

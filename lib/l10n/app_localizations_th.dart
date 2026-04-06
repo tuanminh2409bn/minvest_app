@@ -174,6 +174,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get upgradeToViewFullAnalysis => 'อัปเกรดเพื่อดูการวิเคราะห์ฉบับเต็ม';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'ยินดีต้อนรับสู่';
 
   @override

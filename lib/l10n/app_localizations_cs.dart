@@ -178,6 +178,9 @@ class AppLocalizationsCs extends AppLocalizations {
       'Upgradujte pro zobrazení plné analýzy';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Vítejte v';
 
   @override

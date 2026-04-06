@@ -179,6 +179,9 @@ class AppLocalizationsVi extends AppLocalizations {
       'Nâng cấp tài khoản lên Elite để xem phân tích.';
 
   @override
+  String get loginWithoutAccount => 'Đăng nhập không cần tài khoản';
+
+  @override
   String get welcomeTo => 'Chào mừng đến với';
 
   @override

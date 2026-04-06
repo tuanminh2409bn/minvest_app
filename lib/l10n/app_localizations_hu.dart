@@ -177,6 +177,9 @@ class AppLocalizationsHu extends AppLocalizations {
       'Frissítés a teljes elemzés megtekintéséhez';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Üdvözöljük a';
 
   @override

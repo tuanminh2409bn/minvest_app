@@ -176,6 +176,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upgradeToViewFullAnalysis => 'Upgrade to View Full Analysis';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Welcome to';
 
   @override

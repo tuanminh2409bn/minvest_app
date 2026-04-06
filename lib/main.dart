@@ -5,7 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:minvest_forex_app/app/auth_gate.dart';
+import 'package:minvest_forex_app/app/permission_gate.dart';
 import 'package:minvest_forex_app/app/session_gate.dart';
 import 'package:minvest_forex_app/core/providers/language_provider.dart';
 import 'package:minvest_forex_app/core/providers/user_provider.dart';
@@ -36,8 +36,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:minvest_forex_app/core/utils/navigator_key.dart';
 import 'package:minvest_forex_app/core/utils/messenger_key.dart';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 
 final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
+
+/// Xin quyền ATT (App Tracking Transparency) theo đúng Apple Guideline 2.1.
+/// Phải được gọi TRƯỚC [runApp()] để dialog xuất hiện ngay khi khởi động,
+/// trước bất kỳ quyền hay dịch vụ nào khác (Firebase, Notification, v.v.).
+Future<void> _requestATTPermission() async {
+  if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return;
+  try {
+    final status = await AppTrackingTransparency.requestTrackingAuthorization();
+    debugPrint('[ATT] Đã xử lý quyền tracking: $status');
+  } catch (e) {
+    debugPrint('[ATT] Lỗi: $e');
+  }
+}
 
 Future<void> main() async {
   // Loại bỏ dấu # trên URL Web (Cần gọi trước WidgetsFlutterBinding)
@@ -45,7 +59,14 @@ Future<void> main() async {
 
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
+    // ═══════════════════════════════════════════════════════════════════
+    // ATT - Phải chạy TRƯỚC Firebase và runApp(). Đây là điều kiện để iOS
+    // trình bày dialog trên launch screen trước khi Flutter vẽ bất cứ widget nào.
+    // Tham khảo từ dự án được Apple duyệt.
+    // ═══════════════════════════════════════════════════════════════════
+    await _requestATTPermission();
+
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
@@ -111,37 +132,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    _initializeCoreServices();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  Future<void> _initializeCoreServices() async {
-    // Initialize AuthService
-    await context.read<AuthService>().initialize();
-
-    // Khởi tạo PurchaseService
-    context.read<PurchaseService>().initialize();
-    debugPrint("✅ Đã gọi initialize() cho PurchaseService từ MyApp.");
-
-    // Khởi tạo NotificationService
-    await NotificationService().initialize(
-      onNotificationTapped: (data) {
-        _handleNotificationNavigation(data);
-      },
-    );
-
-    final fcmToken = await NotificationService().getFcmToken();
-    if (fcmToken != null) {
-      debugPrint("FCM Token: $fcmToken");
-    }
-  }
+  // Toàn bộ việc khởi tạo dịch vụ và xin quyền ATT được xử lý
+  // bởi PermissionGate (lib/app/permission_gate.dart) theo đúng thứ tự.
+  // Xem: _runSequentialInit() trong PermissionGate.
 
   Future<void> _handleNotificationNavigation(Map<String, dynamic> data) async {
     final String? type = data['type'];
@@ -281,7 +274,10 @@ class _MyAppState extends State<MyApp> {
               ),
             );
           },
-          home: const AuthGate(),
+          // PermissionGate: ATT → AuthService → PurchaseService → Notification → AuthGate
+          home: PermissionGate(
+            onNotificationTapped: _handleNotificationNavigation,
+          ),
         );
       },
     );

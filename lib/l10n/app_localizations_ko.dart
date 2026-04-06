@@ -168,6 +168,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get upgradeToViewFullAnalysis => '전체 분석을 보려면 업그레이드';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => '환영합니다';
 
   @override

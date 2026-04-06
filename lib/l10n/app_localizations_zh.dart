@@ -168,6 +168,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get upgradeToViewFullAnalysis => '升级以查看完整分析';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => '欢迎来到';
 
   @override

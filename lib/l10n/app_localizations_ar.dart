@@ -172,6 +172,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get upgradeToViewFullAnalysis => 'قم بالترقية لعرض التحليل الكامل';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'مرحبًا بك في';
 
   @override

@@ -177,6 +177,9 @@ class AppLocalizationsMs extends AppLocalizations {
       'Naik taraf untuk Lihat Analisis Penuh';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Selamat datang ke';
 
   @override

@@ -177,6 +177,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'Обновите, чтобы просмотреть полный анализ';
 
   @override
+  String get loginWithoutAccount => 'Login without an account';
+
+  @override
   String get welcomeTo => 'Добро пожаловать в';
 
   @override
