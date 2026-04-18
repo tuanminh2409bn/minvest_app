@@ -125,7 +125,6 @@ export const processVerificationImage = onObjectFinalized(
         exnessClientAccount: exnessId,
         exnessBalance: balance,
         verifiedAt: admin.firestore.FieldValue.serverTimestamp(),
-      };
         notificationCount: 0,
       };
 
@@ -1499,19 +1498,26 @@ export const grantDailyFreeTokens = onSchedule(
         let batchCount = 0;
 
         for (const doc of snapshot.docs) {
-            // Cộng 1 token vào tokenBalance
-            batch.update(doc.ref, {
-                tokenBalance: admin.firestore.FieldValue.increment(1)
-            });
+            const data = doc.data();
+            const currentBalance = typeof data.tokenBalance === 'number' ? data.tokenBalance : 0;
             
-            operationCounter++;
+            // Giới hạn số dư tối đa là 50 khi cộng tự động.
+            // Nếu admin đã set > 50 thì sẽ không bị cộng đè hoặc thay đổi.
+            if (currentBalance < 50) {
+                // Cộng 1 token vào tokenBalance
+                batch.update(doc.ref, {
+                    tokenBalance: admin.firestore.FieldValue.increment(1)
+                });
+                
+                operationCounter++;
 
-            // Nếu đạt giới hạn batch (500), commit và tạo batch mới
-            if (operationCounter >= batchSize) {
-                await batch.commit();
-                functions.logger.log(`Đã commit batch thứ ${++batchCount} (${operationCounter} users)`);
-                batch = firestore.batch();
-                operationCounter = 0;
+                // Nếu đạt giới hạn batch (500), commit và tạo batch mới
+                if (operationCounter >= batchSize) {
+                    await batch.commit();
+                    functions.logger.log(`Đã commit batch thứ ${++batchCount} (${operationCounter} users)`);
+                    batch = firestore.batch();
+                    operationCounter = 0;
+                }
             }
         }
 

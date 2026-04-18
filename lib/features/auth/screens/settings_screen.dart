@@ -16,9 +16,40 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:minvest_forex_app/core/providers/affiliate_provider.dart';
+import 'package:minvest_forex_app/core/models/exchange_app.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  List<String> selectedAppNames = ['Exness', 'XM', 'Bybit', 'Binance'];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSelectedApps();
+  }
+
+  Future<void> _loadSelectedApps() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getStringList('selected_exchange_apps');
+    if (saved != null && saved.isNotEmpty) {
+      setState(() {
+        selectedAppNames = saved;
+      });
+    }
+  }
+
+  Future<void> _saveSelectedApps() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('selected_exchange_apps', selectedAppNames);
+  }
 
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
@@ -29,6 +60,128 @@ class SettingsScreen extends StatelessWidget {
     } catch (e) {
       debugPrint('Error launching URL: $e');
     }
+  }
+
+  void _showAppSelection(BuildContext context) {
+    final allApps = Provider.of<AffiliateProvider>(context, listen: false).exchangeApps;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.7,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.12),
+                      Colors.white.withValues(alpha: 0.04),
+                    ],
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                  border: Border.all(
+                    width: 1.5,
+                    color: Colors.white.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white24,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          itemCount: allApps.length,
+                          itemBuilder: (context, index) {
+                            final app = allApps[index];
+                            final isSelected = selectedAppNames.contains(app.name);
+                            final bool isTop = index == 0;
+                            final bool isBottom = index == allApps.length - 1;
+
+                            return GestureDetector(
+                              onTap: () {
+                                _launchURL(app.url);
+                                setModalState(() {
+                                  if (!isSelected) {
+                                    if (selectedAppNames.length < 4) {
+                                      selectedAppNames.add(app.name);
+                                    } else {
+                                      selectedAppNames.removeAt(0);
+                                      selectedAppNames.add(app.name);
+                                    }
+                                  }
+                                });
+                                setState(() {});
+                                _saveSelectedApps();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(isTop ? 12 : 0),
+                                    topRight: Radius.circular(isTop ? 12 : 0),
+                                    bottomLeft: Radius.circular(isBottom ? 12 : 0),
+                                    bottomRight: Radius.circular(isBottom ? 12 : 0),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      clipBehavior: Clip.antiAlias,
+                                      decoration: const BoxDecoration(shape: BoxShape.circle),
+                                      child: Image.asset(
+                                        app.iconPath, 
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.account_balance_wallet, size: 20, color: Colors.white24),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Text(
+                                      app.name, 
+                                      style: const TextStyle(
+                                        color: Colors.white, 
+                                        fontSize: 18,
+                                        fontFamily: 'Be Vietnam Pro',
+                                        fontWeight: FontWeight.w400,
+                                      )
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+        );
+      },
+    );
   }
 
   void _rateApp() {
@@ -131,7 +284,7 @@ class SettingsScreen extends StatelessWidget {
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
               width: 342,
-              height: 180, // Slightly taller to fit buttons
+              height: 180, 
               decoration: ShapeDecoration(
                 gradient: LinearGradient(
                   begin: const Alignment(0.00, 0.78),
@@ -157,7 +310,7 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min, // Auto size height based on content
+                mainAxisSize: MainAxisSize.min, 
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
@@ -345,7 +498,7 @@ class SettingsScreen extends StatelessWidget {
                                     else
                                       const Icon(
                                         Icons.radio_button_unchecked,
-                                        color: Colors.white10, // Very subtle unselected icon
+                                        color: Colors.white10, 
                                         size: 24,
                                       ),
                                   ],
@@ -368,6 +521,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final affiliateProvider = Provider.of<AffiliateProvider>(context);
+    final allApps = affiliateProvider.exchangeApps;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final l10n = AppLocalizations.of(context)!;
 
@@ -412,7 +567,7 @@ class SettingsScreen extends StatelessWidget {
                   _buildMenuButton(
                     label: l10n.openTradingAccount,
                     icon: Icons.account_balance_wallet_outlined,
-                    onTap: () => _launchURL('https://my.exmarkets.guide/accounts/sign-up/303589?utm_source=partners&ex_ol=1'),
+                    onTap: () => _showAppSelection(context),
                   ),
 
                   const SizedBox(height: 32),
@@ -496,22 +651,21 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 40), // Compact space for Bottom Nav
+                  const SizedBox(height: 40), 
                 ],
               ),
             ),
           ),
 
-          // Menu lơ lửng Liquid Glass
           Positioned(
             bottom: bottomPadding > 0 ? bottomPadding : 20,
             left: 0,
             right: 0,
             child: Center(
               child: LiquidGlassNavBar(
-                selectedIndex: 3, // Settings belongs to Profile section (now index 3)
+                selectedIndex: 3, 
                 onTap: (index) {
-                  Navigator.pop(context); // Pop Settings
+                  Navigator.pop(context); 
                   if (index != 3) {
                     mainScreenKey.currentState?.switchToTab(index);
                   }

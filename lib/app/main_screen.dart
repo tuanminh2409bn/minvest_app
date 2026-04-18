@@ -19,24 +19,20 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
-  late PageController _pageController;
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: _selectedIndex);
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
     super.dispose();
   }
 
   void switchToTab(int index) {
     if (mounted && index >= 0 && index < _pages.length) {
-      _pageController.jumpToPage(index);
       setState(() {
         _selectedIndex = index;
       });
@@ -63,15 +59,9 @@ class MainScreenState extends State<MainScreen> {
       body: Stack(
         children: [
           // Nội dung các trang
-          PageView(
-            controller: _pageController,
+          IndexedStack(
+            index: _selectedIndex,
             children: _pages,
-            onPageChanged: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            physics: const NeverScrollableScrollPhysics(),
           ),
 
           // Menu lơ lửng Liquid Glass

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/bloc/auth_bloc.dart';
 import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
@@ -22,24 +23,20 @@ class EmailVerificationScreen extends StatefulWidget {
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
-  final List<TextEditingController> _controllers = List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+  final TextEditingController _otpController = TextEditingController();
+  final FocusNode _otpFocusNode = FocusNode();
   bool _isLoading = false;
   String _errorMessage = '';
 
   @override
   void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
+    _otpController.dispose();
+    _otpFocusNode.dispose();
     super.dispose();
   }
 
   Future<void> _verifyCode() async {
-    String code = _controllers.map((c) => c.text).join();
+    String code = _otpController.text;
     if (code.length < 6) {
       setState(() => _errorMessage = 'Please enter all 6 digits');
       return;
@@ -114,187 +111,205 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           }
         },
         child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: IntrinsicHeight(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 20),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: GestureDetector(
-                              onTap: () => Navigator.of(context).pop(),
-                              child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
-                            ),
-                          ),
-                          const SizedBox(height: 40),
-                          const Text(
-                            'Verify Your Email',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 30,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            'Please enter the 6 digit code\nsent to your email',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Color(0xFF9A9A9A),
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          const SizedBox(height: 40),
-                          
-                          // 6-Digit Code Input
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: List.generate(6, (index) => _buildCodeBox(index)),
-                          ),
-                          
-                          if (_errorMessage.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16.0),
-                              child: Text(
-                                _errorMessage,
-                                style: const TextStyle(color: Colors.redAccent, fontSize: 14),
-                              ),
-                            ),
-                          
-                          const SizedBox(height: 30),
-                          
-                          GestureDetector(
-                            onTap: _isLoading ? null : _resendCode,
-                            child: const Text(
-                              'Resend code',
-                              style: TextStyle(
-                                color: Color(0xFF9A9A9A),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w400,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                          
-                          const SizedBox(height: 40),
-                          
-                          // Verify Button
-                          GestureDetector(
-                            onTap: _isLoading ? null : _verifyCode,
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
-                                ),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              alignment: Alignment.center,
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                    )
-                                  : const Text(
-                                      'Verify',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                        fontFamily: 'Be Vietnam Pro',
-                                      ),
-                                    ),
-                            ),
-                          ),
-                          
-                          const Spacer(),
-                          
-                          Row(
-                            children: [
-                              Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.3), thickness: 1)),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(
-                                  'or',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Color(0xFF636363),
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ),
-                              Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.3), thickness: 1)),
-                            ],
-                          ),
-                          
-                          const SizedBox(height: 20),
-                          
-                          const Text(
-                            'Sign in with',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Color(0xFF636363),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          
-                          const SizedBox(height: 24),
-                          
-                          // Social Buttons
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _SocialCircleSmallButton(
-                                iconPath: 'assets/images/facebook_logo.png',
-                                color: Colors.transparent,
-                                size: 62,
-                                padding: 0,
-                                onPressed: () => context.read<AuthBloc>().add(SignInWithFacebookRequested()),
-                              ),
-                              const SizedBox(width: 30),
-                              if (Platform.isIOS) ...[
-                                _SocialCircleSmallButton(
-                                  iconPath: 'assets/images/apple_logo.png',
-                                  color: Colors.transparent,
-                                  size: 45,
-                                  padding: 5,
-                                  iconColor: Colors.white,
-                                  onPressed: () => context.read<AuthBloc>().add(SignInWithAppleRequested()),
-                                ),
-                                const SizedBox(width: 30),
-                              ],
-                              _SocialCircleSmallButton(
-                                iconPath: 'assets/images/google_logo.png',
-                                color: Colors.white,
-                                size: 45,
-                                padding: 5,
-                                onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
-                              ),
-                            ],
-                          ),
-                          
-                          const SizedBox(height: 30),
-                        ],
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                const Text(
+                  'Verify Your Email',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Please enter the 6 digit code\nsent to your email',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF9A9A9A),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                
+                // 6-Digit Code Input
+                Stack(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(6, (index) => _buildCodeBox(index)),
+                    ),
+                    Positioned.fill(
+                      child: TextField(
+                        controller: _otpController,
+                        focusNode: _otpFocusNode,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [LengthLimitingTextInputFormatter(6)],
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        showCursor: false,
+                        cursorColor: Colors.transparent,
+                        style: const TextStyle(color: Colors.transparent, fontSize: 20),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          fillColor: Colors.transparent,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                          if (value.length == 6) {
+                            _otpFocusNode.unfocus();
+                            _verifyCode();
+                          }
+                        },
                       ),
+                    ),
+                  ],
+                ),
+                
+                if (_errorMessage.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Text(
+                      _errorMessage,
+                      style: const TextStyle(color: Colors.redAccent, fontSize: 14),
+                    ),
+                  ),
+                
+                const SizedBox(height: 30),
+                
+                GestureDetector(
+                  onTap: _isLoading ? null : _resendCode,
+                  child: const Text(
+                    'Resend code',
+                    style: TextStyle(
+                      color: Color(0xFF9A9A9A),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
-              );
-            },
+                
+                const SizedBox(height: 40),
+                
+                // Verify Button
+                GestureDetector(
+                  onTap: _isLoading ? null : _verifyCode,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)],
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    alignment: Alignment.center,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : const Text(
+                            'Verify',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Be Vietnam Pro',
+                            ),
+                          ),
+                  ),
+                ),
+                
+                const SizedBox(height: 60),
+                
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.white.withOpacity(0.3), thickness: 1)),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'or',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xFF636363),
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Colors.white.withOpacity(0.3), thickness: 1)),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
+                const Text(
+                  'Sign in with',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF636363),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Social Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _SocialCircleSmallButton(
+                      iconPath: 'assets/images/facebook_logo.png',
+                      color: Colors.transparent,
+                      size: 62,
+                      padding: 0,
+                      onPressed: () => context.read<AuthBloc>().add(SignInWithFacebookRequested()),
+                    ),
+                    const SizedBox(width: 30),
+                    if (Platform.isIOS) ...[
+                      _SocialCircleSmallButton(
+                        iconPath: 'assets/images/apple_logo.png',
+                        color: Colors.transparent,
+                        size: 45,
+                        padding: 5,
+                        iconColor: Colors.white,
+                        onPressed: () => context.read<AuthBloc>().add(SignInWithAppleRequested()),
+                      ),
+                      const SizedBox(width: 30),
+                    ],
+                    _SocialCircleSmallButton(
+                      iconPath: 'assets/images/google_logo.png',
+                      color: Colors.white,
+                      size: 45,
+                      padding: 5,
+                      onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleRequested()),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 30),
+              ],
+            ),
           ),
         ),
       ),
@@ -302,36 +317,31 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   }
 
   Widget _buildCodeBox(int index) {
+    String char = '';
+    if (_otpController.text.length > index) {
+      char = _otpController.text[index];
+    }
+    
+    bool isFocused = _otpController.text.length == index || (_otpController.text.length == 6 && index == 5);
+    if (!_otpFocusNode.hasFocus) isFocused = false;
+
     return Container(
+      key: ValueKey('code_box_container_$index'),
       width: 45,
       height: 45,
       decoration: BoxDecoration(
         color: const Color(0xFF222222),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFF7B7B7B), width: 1),
-      ),
-      child: TextField(
-        controller: _controllers[index],
-        focusNode: _focusNodes[index],
-        textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
-        maxLength: 1,
-        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-        decoration: const InputDecoration(
-          counterText: '',
-          border: InputBorder.none,
+        border: Border.all(
+          color: isFocused ? const Color(0xFF289EFF) : const Color(0xFF7B7B7B),
+          width: 1,
         ),
-        onChanged: (value) {
-          if (value.isNotEmpty && index < 5) {
-            _focusNodes[index + 1].requestFocus();
-          } else if (value.isEmpty && index > 0) {
-            _focusNodes[index - 1].requestFocus();
-          }
-          if (index == 5 && value.isNotEmpty) {
-            _focusNodes[index].unfocus();
-            _verifyCode();
-          }
-        },
+      ),
+      child: Center(
+        child: Text(
+          char,
+          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }

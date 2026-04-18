@@ -76,6 +76,7 @@ class _LoginScreenMobileState extends State<LoginScreenMobile> {
                   
                   // Email Field
                   _buildGlassTextField(
+                    key: const ValueKey('login_email_field'),
                     controller: _emailController,
                     hintText: 'Email',
                     icon: Icons.email_outlined,
@@ -90,6 +91,7 @@ class _LoginScreenMobileState extends State<LoginScreenMobile> {
                   
                   // Password Field
                   _buildGlassTextField(
+                    key: const ValueKey('login_password_field'),
                     controller: _passwordController,
                     hintText: 'Password',
                     icon: Icons.lock_outline,
@@ -278,8 +280,10 @@ class _LoginScreenMobileState extends State<LoginScreenMobile> {
     Widget? suffixIcon,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
+    Key? key, // Thêm key để duy trì trạng thái Focus trên iOS
   }) {
     return Container(
+      key: key,
       width: double.infinity,
       padding: const EdgeInsets.all(1), // Độ dày viền
       decoration: BoxDecoration(
@@ -288,10 +292,10 @@ class _LoginScreenMobileState extends State<LoginScreenMobile> {
           begin: const Alignment(-1.0, -2.0),
           end: const Alignment(1.0, 2.0),
           colors: [
-            Colors.white.withValues(alpha: 0.6),
-            Colors.white.withValues(alpha: 0),
-            Colors.white.withValues(alpha: 0),
-            Colors.white.withValues(alpha: 0.8),
+            Colors.white.withOpacity(0.6),
+            Colors.white.withOpacity(0),
+            Colors.white.withOpacity(0),
+            Colors.white.withOpacity(0.8),
           ],
           stops: const [0.0, 0.07, 0.88, 1.0],
         ),
@@ -302,6 +306,7 @@ class _LoginScreenMobileState extends State<LoginScreenMobile> {
           borderRadius: BorderRadius.circular(5),
         ),
         child: TextFormField(
+          key: (key != null) ? ValueKey('${key.toString()}_input') : null,
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,

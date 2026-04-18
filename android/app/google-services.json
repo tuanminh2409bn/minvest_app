@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "245218403052-dllrq69dgr4joa5cs7aepsflsauujja5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.minvest.aisignals",
+            "certificate_hash": "af5763a86ef6d688d2fd7271e8a832b48f335220"
+          }
+        },
+        {
           "client_id": "245218403052-od4o65p52jq9aljgd7pqlcs3d3d4v5u8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

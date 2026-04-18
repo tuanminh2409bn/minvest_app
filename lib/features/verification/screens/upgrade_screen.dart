@@ -280,7 +280,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
 
   Widget _buildPlanToggle(AppLocalizations l10n) {
     return Container(
-      width: 180,
+      width: 210,
       height: 36,
       decoration: BoxDecoration(
         color: Colors.black,

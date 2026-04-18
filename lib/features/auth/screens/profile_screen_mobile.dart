@@ -17,13 +17,8 @@ import 'package:minvest_forex_app/features/payment_history/screens/payment_histo
 import 'package:minvest_forex_app/features/affiliate/screens/affiliate_dashboard_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ExchangeApp {
-  final String name;
-  final String iconPath;
-  final String url;
-
-  ExchangeApp({required this.name, required this.iconPath, required this.url});
-}
+import 'package:minvest_forex_app/core/providers/affiliate_provider.dart';
+import 'package:minvest_forex_app/core/models/exchange_app.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -33,17 +28,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final List<ExchangeApp> allApps = [
-    ExchangeApp(name: 'Exness', iconPath: 'assets/icons/exness.png', url: 'https://www.extrading.asia/vi/?_8f4x=1'),
-    ExchangeApp(name: 'XM', iconPath: 'assets/icons/xm.png', url: 'https://affs.click/0mg8B'),
-    ExchangeApp(name: 'Bybit', iconPath: 'assets/icons/bybit.png', url: 'https://partner.bybit.com/b/LISA68'),
-    ExchangeApp(name: 'Binance', iconPath: 'assets/icons/binance.png', url: 'https://accounts.binance.com/vi/register?ref='),
-    ExchangeApp(name: 'LiteFinance', iconPath: 'assets/icons/LiteFinance.png', url: 'https://litefinance.com.vn/?uid=7'),
-    ExchangeApp(name: 'Axi', iconPath: 'assets/icons/axi.png', url: 'https://www.axi.com/int/live-account?'),
-    ExchangeApp(name: 'Vantagemarkets', iconPath: 'assets/icons/vantagemarkets.png', url: 'https://www.vantagemarkets.com/vi/open-live-account/?affid=MjA3OTcyNDU='),
-    ExchangeApp(name: 'XTB', iconPath: 'assets/icons/xtb.png', url: 'https://geolink.xtb.com/aJSfg'),
-  ];
-
   List<String> selectedAppNames = ['Exness', 'XM', 'Bybit', 'Binance'];
 
   @override
@@ -56,13 +40,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getStringList('selected_exchange_apps');
     if (saved != null && saved.isNotEmpty) {
-      // Chỉ lấy những app còn tồn tại trong danh sách mới
-      final validSaved = saved.where((name) => allApps.any((app) => app.name == name)).toList();
-      if (validSaved.isNotEmpty) {
-        setState(() {
-          selectedAppNames = validSaved;
-        });
-      }
+      setState(() {
+        selectedAppNames = saved;
+      });
     }
   }
 
@@ -83,6 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showAppSelection(BuildContext context) {
+    final allApps = Provider.of<AffiliateProvider>(context, listen: false).exchangeApps;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -217,6 +198,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final tokenBalance = userProvider.tokenBalance;
     final userEmail = userProvider.email ?? currentUser?.email ?? 'user@gmail.com';
     final l10n = AppLocalizations.of(context)!;
+    final affiliateProvider = Provider.of<AffiliateProvider>(context);
+    final allApps = affiliateProvider.exchangeApps;
 
     String getCardImage() {
       if (userTier == 'elite' || userTier == 'vip') {
@@ -233,6 +216,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     final displayApps = allApps.where((app) => selectedAppNames.contains(app.name)).take(4).toList();
+    double appSpacing = (MediaQuery.of(context).size.width - 48 - (4 * 59)) / 3;
+    if (appSpacing < 0) appSpacing = 0;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -349,7 +334,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           Positioned(
                             left: 18,
-                            bottom: 52,
+                            bottom: 58,
                             child: Text(
                               l10n.yourTokens, 
                               style: const TextStyle(
@@ -362,7 +347,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           Positioned(
                             left: 18,
-                            bottom: 14,
+                            bottom: 12,
                             child: Text(
                               userTier == 'elite' ? l10n.unlimited : '$tokenBalance ${l10n.left}',
                               style: const TextStyle(
@@ -399,8 +384,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Wrap(
+                          spacing: appSpacing,
+                          runSpacing: 16,
                           children: displayApps.map((app) => _buildExchangeIcon(app.name, app.iconPath, app.url)).toList(),
                         ),
                       ],
@@ -540,41 +526,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildExchangeIcon(String name, String iconPath, String url) {
+    String displayName = name == 'Vantagemarkets' ? 'Vantage' : name;
+    
     return GestureDetector(
       onTap: () => _launchURL(url),
-      child: Column(
-        children: [
-          Container(
-            width: 59,
-            height: 50,
-            decoration: ShapeDecoration(
-              gradient: LinearGradient(
-                begin: const Alignment(0.00, 1.00),
-                end: const Alignment(1.00, 0.12),
-                colors: [Colors.white.withValues(alpha: 0.15), Colors.white.withValues(alpha: 0.05)],
+      child: SizedBox(
+        width: 59,
+        child: Column(
+          children: [
+            Container(
+              width: 59,
+              height: 50,
+              decoration: ShapeDecoration(
+                gradient: LinearGradient(
+                  begin: const Alignment(0.00, 1.00),
+                  end: const Alignment(1.00, 0.12),
+                  colors: [Colors.white.withValues(alpha: 0.15), Colors.white.withValues(alpha: 0.05)],
+                ),
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(width: 1, color: Colors.white.withValues(alpha: 0.2)),
+                  borderRadius: BorderRadius.circular(6),
+                ),
               ),
-              shape: RoundedRectangleBorder(
-                side: BorderSide(width: 1, color: Colors.white.withValues(alpha: 0.2)),
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            child: Center(
-              child: Container(
-                width: 28,
-                height: 28,
-                clipBehavior: Clip.antiAlias,
-                decoration: const BoxDecoration(shape: BoxShape.circle),
-                child: Image.asset(
-                  iconPath, 
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.account_balance_wallet, size: 18, color: Colors.white24),
+              child: Center(
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: const BoxDecoration(shape: BoxShape.circle),
+                  child: Image.asset(
+                    iconPath, 
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.account_balance_wallet, size: 18, color: Colors.white24),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(name, style: const TextStyle(color: Colors.white, fontSize: 12)),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              displayName, 
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ],
+        ),
       ),
     );
   }

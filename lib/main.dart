@@ -34,6 +34,7 @@ import 'package:minvest_forex_app/app/routes/web_routes_stub.dart' if (dart.libr
 import 'features/auth/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:minvest_forex_app/core/providers/affiliate_provider.dart';
 import 'package:minvest_forex_app/core/utils/navigator_key.dart';
 import 'package:minvest_forex_app/core/utils/messenger_key.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
@@ -114,6 +115,7 @@ Future<void> main() async {
           ChangeNotifierProvider(create: (context) => PurchaseService()),
           ChangeNotifierProvider(create: (context) => ChatProvider(context.read<AuthService>())),
           ChangeNotifierProvider(create: (context) => PaymentHistoryProvider()),
+          ChangeNotifierProvider(create: (context) => AffiliateProvider()),
         ],
         child: const MyApp(),
       ),
@@ -261,10 +263,12 @@ class _MyAppState extends State<MyApp> {
           supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) {
             return GestureDetector(
+              behavior: HitTestBehavior.translucent, // Quan trọng để iOS không chiếm quyền xử lý tap sai cách
               onTap: () {
-                // Thu bàn phím cho phiên bản Mobile
-                FocusScopeNode currentFocus = FocusScope.of(context);
+                // Chỉ unfocus nếu focus hiện tại không thuộc về một ô nhập liệu (primary focus)
+                final FocusScopeNode currentFocus = FocusScope.of(context);
                 if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+                  // Sử dụng FocusManager thay vì FocusScope để tránh các vấn đề rebuild không mong muốn trên iOS
                   FocusManager.instance.primaryFocus?.unfocus();
                 }
               },

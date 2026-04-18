@@ -524,7 +524,27 @@ class _VerificationStepState extends State<_VerificationStep> {
         const SizedBox(height: 32),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(6, (index) => _OtpBox(controller: _controllers[index])),
+          children: List.generate(6, (index) => _OtpBox(
+            controller: _controllers[index],
+            onChanged: (value) {
+              if (value.length > 1) {
+                final pastedText = value.replaceAll(RegExp(r'[^0-9]'), '');
+                for (int i = 0; i < pastedText.length && i < 6; i++) {
+                  _controllers[i].text = pastedText[i];
+                }
+                if (pastedText.length == 6) {
+                  FocusScope.of(context).unfocus();
+                  String otp = _controllers.map((c) => c.text).join();
+                  widget.onVerify(otp);
+                } else if (pastedText.isNotEmpty) {
+                  FocusScope.of(context).nextFocus();
+                }
+                return;
+              }
+              if (value.length == 1 && index < 5) FocusScope.of(context).nextFocus();
+              if (value.isEmpty && index > 0) FocusScope.of(context).previousFocus();
+            },
+          )),
         ),
         const SizedBox(height: 32),
         _PrimaryButton(
@@ -571,7 +591,8 @@ class _VerificationStepState extends State<_VerificationStep> {
 
 class _OtpBox extends StatelessWidget {
   final TextEditingController controller;
-  const _OtpBox({required this.controller});
+  final ValueChanged<String>? onChanged;
+  const _OtpBox({required this.controller, this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -582,7 +603,6 @@ class _OtpBox extends StatelessWidget {
         controller: controller,
         textAlign: TextAlign.center,
         keyboardType: TextInputType.number,
-        maxLength: 1,
         style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         decoration: InputDecoration(
           counterText: '',
@@ -591,7 +611,7 @@ class _OtpBox extends StatelessWidget {
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Color(0xFF424242))),
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Color(0xFF289EFF))),
         ),
-        onChanged: (value) {
+        onChanged: onChanged ?? (value) {
           if (value.length == 1) FocusScope.of(context).nextFocus();
         },
       ),

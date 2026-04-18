@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minvest_forex_app/features/auth/services/auth_service.dart';
 
@@ -107,6 +108,7 @@ We will send a verification code to your email address.''',
           const SizedBox(height: 60),
           
           _buildGlassTextField(
+            key: const ValueKey('forgot_email_field'),
             controller: _emailController,
             hintText: 'Email',
             icon: Icons.email_outlined,
@@ -172,8 +174,12 @@ We will send a verification code to your email address.''',
     required String hintText,
     required IconData icon,
     TextInputType? keyboardType,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    Key? key,
   }) {
     return Container(
+      key: key,
       width: double.infinity,
       padding: const EdgeInsets.all(1), // Độ dày viền
       decoration: BoxDecoration(
@@ -182,10 +188,10 @@ We will send a verification code to your email address.''',
           begin: const Alignment(-1.0, -2.0),
           end: const Alignment(1.0, 2.0),
           colors: [
-            Colors.white.withValues(alpha: 0.6),
-            Colors.white.withValues(alpha: 0),
-            Colors.white.withValues(alpha: 0),
-            Colors.white.withValues(alpha: 0.8),
+            Colors.white.withOpacity(0.6),
+            Colors.white.withOpacity(0),
+            Colors.white.withOpacity(0),
+            Colors.white.withOpacity(0.8),
           ],
           stops: const [0.0, 0.07, 0.88, 1.0],
         ),
@@ -196,13 +202,16 @@ We will send a verification code to your email address.''',
           borderRadius: BorderRadius.circular(5),
         ),
         child: TextFormField(
+          key: key != null ? ValueKey('${key.toString()}_input') : null,
           controller: controller,
           keyboardType: keyboardType,
+          obscureText: obscureText,
           style: const TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Be Vietnam Pro'),
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: const TextStyle(color: Color(0xFF636363), fontSize: 18, fontFamily: 'Be Vietnam Pro'),
             prefixIcon: Icon(icon, color: const Color(0xFF636363), size: 20),
+            suffixIcon: suffixIcon,
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(vertical: 14),
           ),
@@ -222,12 +231,22 @@ class _VerifyAndResetStep extends StatefulWidget {
 }
 
 class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
-  final List<TextEditingController> _codeControllers = List.generate(6, (_) => TextEditingController());
+  final TextEditingController _otpController = TextEditingController();
+  final FocusNode _otpFocusNode = FocusNode();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
+
+  @override
+  void dispose() {
+    _otpController.dispose();
+    _otpFocusNode.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -259,14 +278,43 @@ class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
           const SizedBox(height: 40),
           
           // 6-digit code input
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(6, (index) => _buildCodeBox(index)),
+          Stack(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(6, (index) => _buildCodeBox(index)),
+              ),
+              Positioned.fill(
+                child: TextField(
+                  controller: _otpController,
+                  focusNode: _otpFocusNode,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [LengthLimitingTextInputFormatter(6)],
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  showCursor: false,
+                  cursorColor: Colors.transparent,
+                  style: const TextStyle(color: Colors.transparent, fontSize: 20),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    fillColor: Colors.transparent,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onChanged: (value) {
+                    setState(() {});
+                    if (value.length == 6) {
+                      _otpFocusNode.unfocus();
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
           
           const SizedBox(height: 40),
           
           _buildGlassTextField(
+            key: const ValueKey('forgot_new_pass_field'),
             controller: _newPasswordController,
             hintText: 'New Password',
             icon: Icons.lock_outline,
@@ -280,6 +328,7 @@ class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
           const SizedBox(height: 16),
           
           _buildGlassTextField(
+            key: const ValueKey('forgot_confirm_pass_field'),
             controller: _confirmPasswordController,
             hintText: 'Confirm New Password',
             icon: Icons.lock_outline,
@@ -321,30 +370,36 @@ class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
   }
 
   Widget _buildCodeBox(int index) {
+    String char = '';
+    if (_otpController.text.length > index) {
+      char = _otpController.text[index];
+    }
+    
+    bool isFocused = _otpController.text.length == index || (_otpController.text.length == 6 && index == 5);
+    if (!_otpFocusNode.hasFocus) isFocused = false;
+
     return Container(
       width: 45,
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        border: Border.all(
+          color: isFocused ? const Color(0xFF289EFF) : Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
-      child: TextField(
-        controller: _codeControllers[index],
-        textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
-        maxLength: 1,
-        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-        decoration: const InputDecoration(counterText: '', border: InputBorder.none),
-        onChanged: (value) {
-          if (value.length == 1 && index < 5) FocusScope.of(context).nextFocus();
-          if (value.isEmpty && index > 0) FocusScope.of(context).previousFocus();
-        },
+      child: Center(
+        child: Text(
+          char,
+          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
 
   Widget _buildGlassTextField({
+    Key? key,
     required TextEditingController controller,
     required String hintText,
     required IconData icon,
@@ -352,6 +407,7 @@ class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
     Widget? suffixIcon,
   }) {
     return Container(
+      key: key,
       width: double.infinity,
       padding: const EdgeInsets.all(1), // Độ dày viền
       decoration: BoxDecoration(
@@ -391,7 +447,7 @@ class _VerifyAndResetStepState extends State<_VerifyAndResetStep> {
   }
 
   Future<void> _resetPassword() async {
-    final code = _codeControllers.map((c) => c.text).join();
+    final code = _otpController.text;
     final newPass = _newPasswordController.text;
     final confirmPass = _confirmPasswordController.text;
     
