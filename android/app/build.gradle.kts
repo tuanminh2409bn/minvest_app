@@ -15,7 +15,7 @@ if (keyPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.minvest.aisignals"
+    namespace = "com.signalgpt.ai"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
 
@@ -30,7 +30,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.minvest.aisignals"
+        applicationId = "com.signalgpt.ai"
         minSdkVersion(24)
         targetSdk = 35
         versionCode = flutter.versionCode

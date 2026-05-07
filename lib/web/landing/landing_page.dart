@@ -16,6 +16,7 @@ import '../theme/spacing.dart';
 import 'widgets/navbar.dart';
 import 'widgets/gradient_button.dart';
 import 'widgets/orb_effect.dart';
+import '../widgets/app_download_banner.dart';
 import 'sections/pricing_section.dart';
 import 'sections/footer_section.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
@@ -30,6 +31,8 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
+  bool _showAppBanner = true;
+
   @override
   void initState() {
     super.initState();
@@ -79,106 +82,133 @@ class _LandingPageState extends State<LandingPage> {
                 ),
                                 child: Container(
                                   color: AppColors.background,
-                                  child: CustomScrollView(
-                                    slivers: [
-                                      SliverPadding(
-                                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                                        sliver: SliverToBoxAdapter(
-                                          child: Align(
-                                            alignment: Alignment.topCenter,
-                                            child: ConstrainedBox(
-                                              constraints: const BoxConstraints(maxWidth: 1200),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                                children: [
-                                                  const SizedBox(height: 12),
-                                                  const RepaintBoundary(child: LandingNavBar()),
-                                                  const RepaintBoundary(child: HeroSection()),
-                                                  SizedBox(height: sectionSpacing),
-                                                  const RepaintBoundary(child: HeroSubtitleSection()),
-                                                  SizedBox(height: sectionSpacing),
-                                                  RepaintBoundary(
-                                                    child: LayoutBuilder(
-                                                      builder: (context, constraints) {
-                                                        final bool isNarrow = constraints.maxWidth < 900;
-                                                        if (isNarrow) {
-                                                          return const Column(
-                                                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                                                            children: [
-                                                              LiveSignalsSection(),
-                                                              SizedBox(height: 24),
-                                                              HeroSignalsSection(),
-                                                            ],
-                                                          );
-                                                        }
-                                                        return const Row(
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children: [
-                                                            Expanded(child: HeroSignalsSection()),
-                                                            SizedBox(width: 16),
-                                                            Expanded(child: LiveSignalsSection()),
-                                                          ],
-                                                        );
-                                                      },
-                                                    ),
+                                  child: Stack(
+                                    children: [
+                                      CustomScrollView(
+                                        slivers: [
+                                          SliverPadding(
+                                            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                                            sliver: SliverToBoxAdapter(
+                                              child: Align(
+                                                alignment: Alignment.topCenter,
+                                                child: ConstrainedBox(
+                                                  constraints: const BoxConstraints(maxWidth: 1200),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                    children: [
+                                                      const SizedBox(height: 12),
+                                                      const RepaintBoundary(child: LandingNavBar()),
+                                                      const RepaintBoundary(child: HeroSection()),
+                                                      SizedBox(height: sectionSpacing),
+                                                      const RepaintBoundary(child: HeroSubtitleSection()),
+                                                      SizedBox(height: sectionSpacing),
+                                                      RepaintBoundary(
+                                                        child: LayoutBuilder(
+                                                          builder: (context, constraints) {
+                                                            final bool isNarrow = constraints.maxWidth < 900;
+                                                            if (isNarrow) {
+                                                              return const Column(
+                                                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                                children: [
+                                                                  LiveSignalsSection(),
+                                                                  SizedBox(height: 24),
+                                                                  HeroSignalsSection(),
+                                                                ],
+                                                              );
+                                                            }
+                                                            return const Row(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Expanded(child: HeroSignalsSection()),
+                                                                SizedBox(width: 16),
+                                                                Expanded(child: LiveSignalsSection()),
+                                                              ],
+                                                            );
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          SliverPadding(
+                                            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                                            sliver: SliverToBoxAdapter(
+                                              child: Align(
+                                                alignment: Alignment.topCenter,
+                                                child: ConstrainedBox(
+                                                  constraints: const BoxConstraints(maxWidth: 1200),
+                                                  child: Column(
+                                                    children: [
+                                                      SizedBox(height: sectionSpacing),
+                                                      RepaintBoundary(
+                                                        child: LayoutBuilder(
+                                                          builder: (context, constraints) {
+                                                            final bool isNarrow = constraints.maxWidth < 900;
+                                                            if (isNarrow) {
+                                                              return Column(
+                                                                children: [
+                                                                  const OrderEngineSection(),
+                                                                  SizedBox(height: sectionSpacing),
+                                                                  const _TransparentCardAnimated(),
+                                                                  const SizedBox(height: 8),
+                                                                  const _SignalsPerformanceCard(),
+                                                                ],
+                                                              );
+                                                            }
+                                                            return const Column(
+                                                              children: [
+                                                                OrderEngineSection(),
+                                                                SizedBox(height: 72),
+                                                                _SignalsPerformanceRow(),
+                                                              ],
+                                                            );
+                                                          },
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: sectionSpacing),
+                                                      const RepaintBoundary(child: CoreValueSection()),
+                                                      SizedBox(height: sectionSpacing),
+                                                      const RepaintBoundary(child: PricingSection()),
+                                                      SizedBox(height: sectionSpacing),
+                                                      const RepaintBoundary(child: FaqSection()),
+                                                      SizedBox(height: sectionSpacing),
+                                                      const RepaintBoundary(child: CtaSection()),
+                                                      SizedBox(height: sectionSpacing),
+                                                      const RepaintBoundary(child: FooterSection()),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          if (_showAppBanner)
+                                            const SliverToBoxAdapter(child: SizedBox(height: 100)), // padding for sticky banner
+                                        ],
+                                      ),
+                                      if (_showAppBanner)
+                                        Positioned(
+                                          bottom: 0,
+                                          left: 0,
+                                          right: 0,
+                                          child: SafeArea(
+                                            child: Align(
+                                              alignment: Alignment.bottomCenter,
+                                              child: ConstrainedBox(
+                                                constraints: const BoxConstraints(maxWidth: 1200),
+                                                child: AppDownloadBanner(
+                                                  onClose: () {
+                                                    setState(() {
+                                                      _showAppBanner = false;
+                                                    });
+                                                  },
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      SliverPadding(
-                                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                                        sliver: SliverToBoxAdapter(
-                                          child: Align(
-                                            alignment: Alignment.topCenter,
-                                            child: ConstrainedBox(
-                                              constraints: const BoxConstraints(maxWidth: 1200),
-                                              child: Column(
-                                                children: [
-                                                  SizedBox(height: sectionSpacing),
-                                                  RepaintBoundary(
-                                                    child: LayoutBuilder(
-                                                      builder: (context, constraints) {
-                                                        final bool isNarrow = constraints.maxWidth < 900;
-                                                        if (isNarrow) {
-                                                          return Column(
-                                                            children: [
-                                                              const OrderEngineSection(),
-                                                              SizedBox(height: sectionSpacing),
-                                                              const _TransparentCardAnimated(),
-                                                              const SizedBox(height: 8),
-                                                              const _SignalsPerformanceCard(),
-                                                            ],
-                                                          );
-                                                        }
-                                                        return const Column(
-                                                          children: [
-                                                            OrderEngineSection(),
-                                                            SizedBox(height: 72),
-                                                            _SignalsPerformanceRow(),
-                                                          ],
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: sectionSpacing),
-                                                  const RepaintBoundary(child: CoreValueSection()),
-                                                  SizedBox(height: sectionSpacing),
-                                                  const RepaintBoundary(child: PricingSection()),
-                                                  SizedBox(height: sectionSpacing),
-                                                  const RepaintBoundary(child: FaqSection()),
-                                                  SizedBox(height: sectionSpacing),
-                                                  const RepaintBoundary(child: CtaSection()),
-                                                  SizedBox(height: sectionSpacing),
-                                                  const RepaintBoundary(child: FooterSection()),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -841,7 +871,7 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection>
       children: [
         tab('Gold', active: true),
         const SizedBox(width: AppSpacing.sm),
-        tab('Forex'),
+        tab('Currency pair'),
         const SizedBox(width: AppSpacing.sm),
         tab('Crypto'),
       ],

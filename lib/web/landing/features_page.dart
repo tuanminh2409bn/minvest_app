@@ -292,7 +292,7 @@ class _PhoneScreen extends StatelessWidget {
                     children: [
                       _chip('Gold', true, isMobileLayout),
                       const SizedBox(width: 8),
-                      _chip('Forex', false, isMobileLayout),
+                      _chip('Currency pair', false, isMobileLayout),
                       const SizedBox(width: 8),
                       _chip('Crypto', false, isMobileLayout),
                     ],

@@ -412,7 +412,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildMenuButton(
                           label: l10n.onlineSupport,
                           icon: Icons.support_agent_outlined,
-                          onTap: () => _launchURL('https://www.tidio.com/talk/4z2xqtu7ftageaykiq3k7b6vcb55cotv'),
+                          onTap: () => _launchURL('https://wa.me/84868649747'),
                         ),
                         const SizedBox(height: 8),
                         _buildMenuButton(

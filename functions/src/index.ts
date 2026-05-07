@@ -401,11 +401,23 @@ export const verifyPurchase = onCall(
 
             if (platform === 'ios') {
                 const receipt = transactionData.receiptData;
+                const calculateExpiryDate = (pid: string) => {
+                    const now = new Date();
+                    if (pid.includes('lifetime')) {
+                        now.setFullYear(now.getFullYear() + 100);
+                    } else if (pid.includes('12_months') || pid.includes('12.months')) {
+                        now.setFullYear(now.getFullYear() + 1);
+                    } else {
+                        now.setMonth(now.getMonth() + 1);
+                    }
+                    return now;
+                };
+
                 if (receipt.startsWith("ey")) {
                     const jwsResult = await verifyAppleJwsReceipt(receipt);
                     isValid = jwsResult.isValid;
-                    expiryDate = jwsResult.expiryDate;
-                    transactionId = jwsResult.transactionId;
+                    expiryDate = (jwsResult.expiryDate && !isNaN(jwsResult.expiryDate.getTime())) ? jwsResult.expiryDate : calculateExpiryDate(productId);
+                    transactionId = jwsResult.transactionId || receipt.slice(-15);
                     verifiedProductId = jwsResult.productId;
                 } else {
                     const sharedSecret = process.env.APPLE_SHARED_SECRET;
@@ -415,22 +427,37 @@ export const verifyPurchase = onCall(
                     const latestReceipt = appleResponse.latest_receipt_info?.sort((a: any, b: any) => Number(b.purchase_date_ms) - Number(a.purchase_date_ms))[0];
                     if (latestReceipt && latestReceipt.product_id === productId) {
                         isValid = true;
-                        expiryDate = new Date(Number(latestReceipt.expires_date_ms));
-                        transactionId = latestReceipt.transaction_id;
+                        const parsedExpiry = new Date(Number(latestReceipt.expires_date_ms));
+                        expiryDate = !isNaN(parsedExpiry.getTime()) ? parsedExpiry : calculateExpiryDate(productId);
+                        transactionId = latestReceipt.transaction_id || latestReceipt.original_transaction_id;
                     }
                 }
             } else if (platform === 'android') {
                 const { purchaseToken } = transactionData;
-                const packageName = "com.minvest.aisignals";
+                const packageName = "com.signalgpt.ai";
                 const auth = new GoogleAuth({ scopes: "https://www.googleapis.com/auth/androidpublisher" });
                 const authClient = await auth.getClient();
                 const url = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${packageName}/purchases/products/${productId}/tokens/${purchaseToken}`;
                 const res = await authClient.request({ url });
                 const purchase = res.data as any;
+                
+                const calculateExpiryDate = (pid: string) => {
+                    const now = new Date();
+                    if (pid.includes('lifetime')) {
+                        now.setFullYear(now.getFullYear() + 100);
+                    } else if (pid.includes('12_months') || pid.includes('12.months')) {
+                        now.setFullYear(now.getFullYear() + 1);
+                    } else {
+                        now.setMonth(now.getMonth() + 1);
+                    }
+                    return now;
+                };
+
                 if (purchase && purchase.purchaseState === 0) {
                     isValid = true;
-                    expiryDate = new Date(Number(purchase.expiryTimeMillis));
-                    transactionId = purchase.orderId;
+                    const parsedExpiry = new Date(Number(purchase.expiryTimeMillis));
+                    expiryDate = !isNaN(parsedExpiry.getTime()) ? parsedExpiry : calculateExpiryDate(productId);
+                    transactionId = purchase.orderId || purchaseToken;
                 }
             }
 
@@ -576,7 +603,7 @@ async function verifyAppleJwsReceipt(jwsRepresentation: string) {
         functions.logger.log("   JWS: Payload đã xác thực:", verifiedPayload);
 
         // 5. Kiểm tra các thông tin quan trọng trong payload
-        const bundleId = "com.minvest.aisignals"; // !!! QUAN TRỌNG: Đảm bảo đây là Bundle ID chính xác của bạn
+        const bundleId = "com.signalgpt.ai"; // !!! QUAN TRỌNG: Đảm bảo đây là Bundle ID chính xác của bạn
         if (verifiedPayload.bundleId !== bundleId) {
             throw new Error(`Bundle ID không khớp. Mong muốn: ${bundleId}, Thực tế: ${verifiedPayload.bundleId}`);
         }

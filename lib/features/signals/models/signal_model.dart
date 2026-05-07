@@ -73,34 +73,50 @@ class Signal {
     if (hitTps.contains(1)) return l10n.tp1Hit;
 
     final lowercasedResult = result?.toLowerCase() ?? '';
-    switch (lowercasedResult) {
-      case 'sl hit':
-        return l10n.slHit;
-      case 'cancelled':
-      case 'cancelled (new signal)':
-        return l10n.cancelled;
-      case 'exited by admin':
-        return l10n.exitedByAdmin;
+    
+    if (lowercasedResult.isNotEmpty) {
+      if (lowercasedResult == 'exit' || lowercasedResult.startsWith('exit timeout')) {
+        return 'Exit';
+      }
+      switch (lowercasedResult) {
+        case 'sl hit':
+          return l10n.slHit;
+        case 'cancelled':
+        case 'cancelled (new signal)':
+          return l10n.cancelled;
+        case 'exited by admin':
+          return l10n.exitedByAdmin;
+        default:
+          return result!;
+      }
     }
 
     if (status == 'running') {
       return isMatched ? l10n.matched : l10n.notMatched;
     }
 
-    return result ?? l10n.signalClosed;
+    return l10n.signalClosed;
   }
 
   Color getStatusColor() {
     if (hitTps.isNotEmpty) return Colors.greenAccent.shade400;
 
     final lowercasedResult = result?.toLowerCase() ?? '';
-    switch (lowercasedResult) {
-      case 'sl hit':
-        return Colors.redAccent;
-      case 'cancelled':
-      case 'cancelled (new signal)':
-      case 'exited by admin':
+    
+    if (lowercasedResult.isNotEmpty) {
+      if (lowercasedResult == 'exit' || lowercasedResult.startsWith('exit timeout')) {
         return Colors.grey;
+      }
+      switch (lowercasedResult) {
+        case 'sl hit':
+          return Colors.redAccent;
+        case 'cancelled':
+        case 'cancelled (new signal)':
+        case 'exited by admin':
+          return Colors.grey;
+        default:
+          return Colors.blueGrey.shade200;
+      }
     }
 
     if (status == 'running') {

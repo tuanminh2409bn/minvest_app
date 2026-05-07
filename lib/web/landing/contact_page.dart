@@ -135,16 +135,16 @@ class _ContactPageState extends State<ContactPage> {
         final List<Widget> cards = [
           _InfoCard(
             title: 'Whatsapp',
-            subtitle: '+84 969.15.6969',
+            subtitle: '+84 868.64.9747',
             icon: Icons.chat_bubble_outline,
-            onTap: () => launchUrl(Uri.parse('https://wa.me/84969156969')),
+            onTap: () => launchUrl(Uri.parse('https://wa.me/84868649747')),
           ),
           const SizedBox(width: 24, height: 24), // Figma Spacing
           _InfoCard(
             title: AppLocalizations.of(context)!.phone,
-            subtitle: '+84 969.15.6969',
+            subtitle: '+84 868.64.9747',
             icon: Icons.phone_in_talk_outlined,
-            onTap: () => launchUrl(Uri.parse('tel:+84969156969')),
+            onTap: () => launchUrl(Uri.parse('tel:+84868649747')),
           ),
         ];
 

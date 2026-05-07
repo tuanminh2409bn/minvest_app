@@ -5,6 +5,8 @@ import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+enum PlanDuration { monthly, annually, lifetime }
+
 class UpgradeScreen extends StatefulWidget {
   const UpgradeScreen({super.key});
 
@@ -13,7 +15,7 @@ class UpgradeScreen extends StatefulWidget {
 }
 
 class _UpgradeScreenState extends State<UpgradeScreen> {
-  bool isMonthly = true;
+  PlanDuration selectedDuration = PlanDuration.monthly;
   final Set<int> selectedCategoryIndices = {0}; // 0: GOLD, 1: FOREX, 2: CRYPTO
 
   List<String> _getFeatures(AppLocalizations l10n) {
@@ -34,16 +36,29 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
     }
   }
 
+  String _getPriceForDuration(AppLocalizations l10n) {
+    switch (selectedDuration) {
+      case PlanDuration.monthly:
+        return l10n.price1Month;
+      case PlanDuration.annually:
+        return l10n.price12Months;
+      case PlanDuration.lifetime:
+        return l10n.priceLifetime;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final purchaseService = context.watch<PurchaseService>();
     final isPurchasing = purchaseService.isPurchasePending;
     final l10n = AppLocalizations.of(context)!;
 
+    final priceStr = _getPriceForDuration(l10n);
+
     final List<Map<String, String>> categories = [
-      {'name': 'GOLD', 'price': isMonthly ? l10n.price1Month : l10n.price12Months},
-      {'name': 'FOREX', 'price': isMonthly ? l10n.price1Month : l10n.price12Months},
-      {'name': 'CRYPTO', 'price': isMonthly ? l10n.price1Month : l10n.price12Months},
+      {'name': 'GOLD', 'price': priceStr},
+      {'name': 'CURRENCY PAIR', 'price': priceStr},
+      {'name': 'CRYPTO', 'price': priceStr},
     ];
 
     final features = _getFeatures(l10n);
@@ -85,23 +100,16 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                         const SizedBox(height: 40),
                         
                         // Plan Selector Header
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                l10n.choosePlanSubtitle,
-                                style: const TextStyle(
-                                  color: Color(0xFF636363),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            _buildPlanToggle(l10n),
-                          ],
+                        Text(
+                          l10n.choosePlanSubtitle,
+                          style: const TextStyle(
+                            color: Color(0xFF636363),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
+                        const SizedBox(height: 12),
+                        Center(child: _buildPlanToggle(l10n)),
                         
                         const SizedBox(height: 24),
                         
@@ -118,7 +126,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                         const SizedBox(height: 16),
                         // Auto-renewal description for Apple requirements
                         const Text(
-                          "Subscription will automatically renew unless canceled at least 24 hours before the end of the current period. You can manage and cancel your subscriptions in your App Store account settings.",
+                          "Subscription will automatically renew unless canceled at least 24 hours before the end of the current period. You can manage and cancel your subscriptions in your App Store account settings. Lifetime plan is a one-time purchase.",
                           style: TextStyle(
                             color: Color(0xFF636363),
                             fontSize: 12,
@@ -220,17 +228,28 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
       else if (index == 1) categoryName = 'forex';
       else if (index == 2) categoryName = 'crypto';
 
-      final String productId;
-      if (Platform.isIOS) {
-        productId = isMonthly ? '$categoryName.1.month' : '$categoryName.12.months';
+      String durationSuffix = '';
+      if (selectedDuration == PlanDuration.monthly) {
+        durationSuffix = Platform.isIOS ? '1.month' : '1_month';
+      } else if (selectedDuration == PlanDuration.annually) {
+        durationSuffix = Platform.isIOS ? '12.months' : '12_months';
       } else {
-        productId = isMonthly ? '${categoryName}_1_month' : '${categoryName}_12_months';
+        durationSuffix = Platform.isIOS ? 'lifetime' : 'lifetime';
       }
 
-      final product = purchaseService.products.firstWhere(
-        (p) => p.id == productId,
-        orElse: () => throw Exception('Product not found: $productId'),
-      );
+      final String productId = Platform.isIOS ? '$categoryName.$durationSuffix' : '${categoryName}_$durationSuffix';
+
+      final productIndex = purchaseService.products.indexWhere((p) => p.id == productId);
+      if (productIndex == -1) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Product not found: $productId. Please ensure it is configured in stores.')),
+          );
+        }
+        break;
+      }
+      
+      final product = purchaseService.products[productIndex];
 
       try {
         await purchaseService.buyProduct(product);
@@ -280,8 +299,8 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
 
   Widget _buildPlanToggle(AppLocalizations l10n) {
     return Container(
-      width: 210,
-      height: 36,
+      width: 320,
+      height: 38,
       decoration: BoxDecoration(
         color: Colors.black,
         borderRadius: BorderRadius.circular(23),
@@ -289,56 +308,51 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
       ),
       child: Row(
         children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => isMonthly = true),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: isMonthly
-                      ? const LinearGradient(colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)])
-                      : null,
-                  borderRadius: BorderRadius.circular(60),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  l10n.monthly,
-                  style: TextStyle(
-                    color: isMonthly ? Colors.white : const Color(0xFF636363),
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => isMonthly = false),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: !isMonthly
-                      ? const LinearGradient(colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)])
-                      : null,
-                  borderRadius: BorderRadius.circular(60),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  l10n.annually,
-                  style: TextStyle(
-                    color: !isMonthly ? Colors.white : const Color(0xFF636363),
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          _buildToggleOption(l10n.monthly, PlanDuration.monthly),
+          _buildToggleOption(l10n.annually, PlanDuration.annually),
+          _buildToggleOption(l10n.lifetime, PlanDuration.lifetime),
         ],
+      ),
+    );
+  }
+
+  Widget _buildToggleOption(String text, PlanDuration duration) {
+    final isSelected = selectedDuration == duration;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => selectedDuration = duration),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? const LinearGradient(colors: [Color(0xFF0CA3ED), Color(0xFF276EFB)])
+                : null,
+            borderRadius: BorderRadius.circular(60),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            text,
+            style: TextStyle(
+              color: isSelected ? Colors.white : const Color(0xFF636363),
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildCategoryItem(int index, String name, String price, AppLocalizations l10n) {
     final isSelected = selectedCategoryIndices.contains(index);
-    final durationText = isMonthly ? "/ month" : "/ year";
+    
+    String durationText = '';
+    if (selectedDuration == PlanDuration.monthly) {
+      durationText = "/ month";
+    } else if (selectedDuration == PlanDuration.annually) {
+      durationText = "/ year";
+    } else {
+      durationText = ""; // no suffix for lifetime
+    }
     
     return GestureDetector(
       onTap: () {
@@ -431,7 +445,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              "$price $durationText",
+              durationText.isEmpty ? price : "$price $durationText",
               style: TextStyle(
                 color: isSelected ? Colors.white : Colors.white,
                 fontSize: 16,

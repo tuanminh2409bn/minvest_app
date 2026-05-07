@@ -12,6 +12,7 @@ class ChartScreen extends StatefulWidget {
 class _ChartScreenState extends State<ChartScreen> {
   late final WebViewController _controller;
   bool _isLoading = true;
+  String? _currentLang;
 
   @override
   void initState() {
@@ -22,10 +23,19 @@ class _ChartScreenState extends State<ChartScreen> {
       ..setBackgroundColor(const Color(0xFF0D1117))
       ..setNavigationDelegate(
         NavigationDelegate(
+          onPageStarted: (String url) {
+            if (mounted) {
+              setState(() {
+                _isLoading = true;
+              });
+            }
+          },
           onPageFinished: (String url) {
-            setState(() {
-              _isLoading = false;
-            });
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
           },
           onWebResourceError: (WebResourceError error) {
             debugPrint('''
@@ -35,13 +45,25 @@ class _ChartScreenState extends State<ChartScreen> {
             errorType: ${error.errorType}
             isForMainFrame: ${error.isForMainFrame}
             ''');
-            setState(() {
-              _isLoading = false;
-            });
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
           },
         ),
-      )
-      ..loadRequest(Uri.parse('https://vn.tradingview.com/chart/?symbol=OANDA%3AXAUUSD'));
+      );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final lang = Localizations.localeOf(context).languageCode;
+    if (_currentLang != lang) {
+      _currentLang = lang;
+      final subdomain = lang == 'vi' ? 'vn' : 'www';
+      _controller.loadRequest(Uri.parse('https://$subdomain.tradingview.com/chart/?symbol=OANDA%3AXAUUSD'));
+    }
   }
 
   @override

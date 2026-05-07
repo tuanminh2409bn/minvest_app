@@ -320,7 +320,7 @@ class _WelcomeHeader extends StatelessWidget {
             TextSpan(text: "${l10n.chatWelcomeBody1}\n"),
             TextSpan(text: l10n.chatWelcomeBody2),
             TextSpan(
-              text: "0969.15.6969",
+              text: "0868.64.9747",
               style: boldTextStyle,
             ),
             TextSpan(text: l10n.chatWelcomeBody3),

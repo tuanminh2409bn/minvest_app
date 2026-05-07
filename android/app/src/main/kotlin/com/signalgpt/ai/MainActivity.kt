@@ -1,4 +1,4 @@
-package com.minvest.aisignals
+package com.signalgpt.ai
 
 import io.flutter.embedding.android.FlutterActivity
 import android.os.Bundle

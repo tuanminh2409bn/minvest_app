@@ -519,13 +519,13 @@ class AppLocalizationsMn extends AppLocalizations {
   String get signalEntry => 'Entry';
 
   @override
-  String get price1Month => '\$78';
+  String get price1Month => '\$11.99';
 
   @override
-  String get price12Months => '\$460';
+  String get price12Months => '\$89.00';
 
   @override
-  String get price12MonthsOld => '\$920';
+  String get price12MonthsOld => '\$178.00';
 
   @override
   String get foreignTraderSupport =>
@@ -740,7 +740,7 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get winMoreWithAiSignalsDesc =>
-      'Манай олон зах зээлийн AI нь Forex, Crypto, Металлуудыг бодит цагт сканнердаж,\nшинжээчдийн баталгаажуулсан худалдааны дохиог хүргэдэг —\nтодорхой оролт, алдагдлыг зогсоох, ашиг авах түвшнүүдтэй';
+      'Манай олон зах зээлийн AI нь Currency pair, Crypto, Металлуудыг бодит цагт сканнердаж,\nшинжээчдийн баталгаажуулсан худалдааны дохиог хүргэдэг —\nтодорхой оролт, алдагдлыг зогсоох, ашиг авах түвшнүүдтэй';
 
   @override
   String get buyLimit => 'Худалдан авах хязгаар';
@@ -761,7 +761,7 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get performanceOverviewDesc =>
-      'Манай олон зах зээлийн AI нь Forex, Crypto, Металлуудыг бодит цагт сканнердаж, шинжээчдийн баталгаажуулсан худалдааны дохиог хүргэдэг - тодорхой оролт, алдагдлыг зогсоох, ашиг авах түвшнүүдтэй';
+      'Манай олон зах зээлийн AI нь Currency pair, Crypto, Металлуудыг бодит цагт сканнердаж, шинжээчдийн баталгаажуулсан худалдааны дохиог хүргэдэг - тодорхой оролт, алдагдлыг зогсоох, ашиг авах түвшнүүдтэй';
 
   @override
   String get totalProfit => 'Нийт ашиг';
@@ -1236,7 +1236,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get cryptoSignals => 'Крипто дохио';
 
   @override
-  String get forexSignals => 'Forex дохио';
+  String get forexSignals => 'Currency pair дохио';
 
   @override
   String get goldSignals => 'Алтны дохио';
@@ -1555,13 +1555,13 @@ class AppLocalizationsMn extends AppLocalizations {
   String get assetCrypto => 'Crypto';
 
   @override
-  String get assetForex => 'Forex';
+  String get assetForex => 'Currency pair';
 
   @override
   String get tokens => 'Tokens';
 
   @override
-  String get noForexAssets => 'No Forex assets available';
+  String get noForexAssets => 'No Currency pair assets available';
 
   @override
   String openApp(String appName) {
@@ -1693,4 +1693,26 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get referralCodeApplied => 'Referral code applied successfully!';
+
+  @override
+  String get getTheAppForBestExperience =>
+      'Get the app for the best experience';
+
+  @override
+  String get installApp => 'Install App';
+
+  @override
+  String get reviews => 'reviews';
+
+  @override
+  String get priceLifetime => '\$249.00';
+
+  @override
+  String get durationLifetime => 'Lifetime';
+
+  @override
+  String get orderInfoLifetime => 'Payment for Elite Lifetime package';
+
+  @override
+  String get lifetime => 'Lifetime';
 }

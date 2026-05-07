@@ -319,9 +319,9 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _socialButton('assets/images/zalo.png', size: 40, url: 'https://zalo.me/84969156969'),
-                const SizedBox(width: 6),
-                _socialButton('assets/images/whatsapp.png', size: 55, url: 'https://wa.me/84969156969'),
+                _socialButton('assets/images/zalo.png', size: 40, url: 'https://zalo.me/84868649747'),
+                const SizedBox(width: 16),
+                _socialButton('assets/images/whatsapp.png', size: 55, url: 'https://wa.me/84868649747'),
               ],
             ),
           ],

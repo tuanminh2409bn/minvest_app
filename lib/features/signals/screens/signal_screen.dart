@@ -1019,11 +1019,36 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
               );
             },
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              padding: const EdgeInsets.only(
+                  left: 6.0, right: 5.0, top: 8.0, bottom: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: signal.type.toLowerCase().contains('buy')
+                            ? const Color(0xFF00BB32).withValues(alpha: 0.3)
+                            : const Color(0xFFE3001E).withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      signal.type.toUpperCase(),
+                      style: TextStyle(
+                        color: signal.type.toLowerCase().contains('buy')
+                            ? const Color(0xFF00BB32)
+                            : const Color(0xFFE3001E),
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Be Vietnam Pro',
+                      ),
+                    ),
+                  ),
                   Row(
                     children: [
                       Image.asset(
@@ -1047,12 +1072,13 @@ class _SignalDetailExpandedViewState extends State<SignalDetailExpandedView> {
                           fontFamily: 'Be Vietnam Pro',
                         ),
                       ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: Color(0xFF636363),
+                        size: 24,
+                      ),
                     ],
-                  ),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: Color(0xFF636363),
-                    size: 24,
                   ),
                 ],
               ),

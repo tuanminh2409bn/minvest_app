@@ -25,6 +25,19 @@
 
   <!-- Tidio Chat Integration -->
   <script src="//code.tidio.co/4z2xqtu7ftageaykiq3k7b6vcb55cotv.js" async></script>
+  <style>
+    /* Push Tidio chat up to avoid overlapping with App Download Banner */
+    @media (min-width: 768px) {
+      #tidio-chat-iframe, #tidio-chat {
+        margin-bottom: 160px !important;
+      }
+    }
+    @media (max-width: 767px) {
+      #tidio-chat-iframe, #tidio-chat {
+        margin-bottom: 200px !important;
+      }
+    }
+  </style>
 
   <script>
     var serviceWorkerVersion = {{flutter_service_worker_version}};

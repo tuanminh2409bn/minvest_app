@@ -186,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _rateApp() {
     final String url = Platform.isAndroid
-        ? 'market://details?id=com.minvest.aisignals'
+        ? 'market://details?id=com.signalgpt.ai'
         : 'https://apps.apple.com/app/id6749299894?action=write-review';
     _launchURL(url);
   }

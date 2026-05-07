@@ -7,42 +7,26 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:245218403052:android:9ef58c4c7b016a17b03bc9",
+        "mobilesdk_app_id": "1:245218403052:android:b1ed1a2de62331c6b03bc9",
         "android_client_info": {
-          "package_name": "com.minvest.aisignals"
+          "package_name": "com.signalgpt.ai"
         }
       },
       "oauth_client": [
         {
-          "client_id": "245218403052-6qchi0i5rj37i0qp5jub43gtnu17j507.apps.googleusercontent.com",
+          "client_id": "245218403052-6dlk6j1t86parv8c5d3p8c56iq7j4aeh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.minvest.aisignals",
-            "certificate_hash": "695c06b870ede521619fbf3427ebcf55ae12ed58"
-          }
-        },
-        {
-          "client_id": "245218403052-dllrq69dgr4joa5cs7aepsflsauujja5.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.minvest.aisignals",
-            "certificate_hash": "af5763a86ef6d688d2fd7271e8a832b48f335220"
-          }
-        },
-        {
-          "client_id": "245218403052-od4o65p52jq9aljgd7pqlcs3d3d4v5u8.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.minvest.aisignals",
+            "package_name": "com.signalgpt.ai",
             "certificate_hash": "c8ccfa1ca575d74b92cf61c37cdef9e0e77b1e88"
           }
         },
         {
-          "client_id": "245218403052-r4v05k1r7dv3r62e1536uvmo5rgdv85m.apps.googleusercontent.com",
+          "client_id": "245218403052-mirdk2dners770bs5kvns50eg2ok5e1q.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.minvest.aisignals",
-            "certificate_hash": "6f94031f9a6ecc9d69fdd527c1e7e29f759d39b2"
+            "package_name": "com.signalgpt.ai",
+            "certificate_hash": "af5763a86ef6d688d2fd7271e8a832b48f335220"
           }
         }
       ],

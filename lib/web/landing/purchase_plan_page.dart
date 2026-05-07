@@ -8,6 +8,8 @@ import '../theme/spacing.dart';
 import '../theme/breakpoints.dart';
 import 'sections/pricing_section.dart';
 
+enum PlanDuration { monthly, annually, lifetime }
+
 class PurchasePlanPage extends StatefulWidget {
   final String? initialPlan;
 
@@ -18,7 +20,7 @@ class PurchasePlanPage extends StatefulWidget {
 }
 
 class _PurchasePlanPageState extends State<PurchasePlanPage> {
-  bool _isAnnual = true;
+  PlanDuration _selectedDuration = PlanDuration.annually;
   final Set<String> _selectedPlans = {};
 
   @override
@@ -32,15 +34,28 @@ class _PurchasePlanPageState extends State<PurchasePlanPage> {
   }
 
   double _getPrice(String planId, AppLocalizations l10n) {
-    // For simplicity, all plans have the same price structure in current l10n
-    final priceStr = _isAnnual ? l10n.price12Months : l10n.price1Month;
-    return double.tryParse(priceStr.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+    String priceStr;
+    switch (_selectedDuration) {
+      case PlanDuration.monthly:
+        priceStr = l10n.price1Month;
+        break;
+      case PlanDuration.annually:
+        priceStr = l10n.price12Months;
+        break;
+      case PlanDuration.lifetime:
+        priceStr = l10n.priceLifetime;
+        break;
+    }
+    // Remove all non-digit characters except for a dot if it's used as decimal separator
+    // Note: since prices like $11.99 include a dot, we need to extract just numbers and the decimal point
+    String digitsOnly = priceStr.replaceAll(RegExp(r'[^\d.]'), '');
+    return double.tryParse(digitsOnly) ?? 0.0;
   }
 
   String _getPlanTitle(String planId, AppLocalizations l10n) {
     switch (planId) {
       case 'forex':
-        return 'Forex Signals';
+        return 'Currency pair Signals';
       case 'gold':
         return 'Gold Signals';
       case 'crypto':
@@ -65,6 +80,13 @@ class _PurchasePlanPageState extends State<PurchasePlanPage> {
       return subtotal * 0.20; // 20% discount for 3+ plans
     }
     return 0;
+  }
+
+  String _formatCurrency(double amount, AppLocalizations l10n) {
+    if (amount == amount.toInt().toDouble()) {
+      return '\$${amount.toInt()}';
+    }
+    return '\$${amount.toStringAsFixed(2)}';
   }
 
   @override
@@ -195,7 +217,7 @@ class _PurchasePlanPageState extends State<PurchasePlanPage> {
           ),
         ),
         const SizedBox(height: 24),
-        _buildPlanItem('forex', 'Forex Signals', l10n),
+        _buildPlanItem('forex', 'Currency pair Signals', l10n),
         const SizedBox(height: 12),
         _buildPlanItem('gold', 'Gold Signals', l10n),
         const SizedBox(height: 12),
@@ -210,14 +232,19 @@ class _PurchasePlanPageState extends State<PurchasePlanPage> {
       runSpacing: 16,
       children: [
         _toggleItem(
-          'Annually (50%)',
-          selected: _isAnnual,
-          onTap: () => setState(() => _isAnnual = true),
+          l10n.monthly,
+          selected: _selectedDuration == PlanDuration.monthly,
+          onTap: () => setState(() => _selectedDuration = PlanDuration.monthly),
         ),
         _toggleItem(
-          '6 Month (50% Off)',
-          selected: !_isAnnual,
-          onTap: () => setState(() => _isAnnual = false),
+          l10n.annually,
+          selected: _selectedDuration == PlanDuration.annually,
+          onTap: () => setState(() => _selectedDuration = PlanDuration.annually),
+        ),
+        _toggleItem(
+          l10n.lifetime,
+          selected: _selectedDuration == PlanDuration.lifetime,
+          onTap: () => setState(() => _selectedDuration = PlanDuration.lifetime),
         ),
       ],
     );
@@ -333,7 +360,7 @@ class _PurchasePlanPageState extends State<PurchasePlanPage> {
               ),
             ),
             Text(
-              '\$${price.toStringAsFixed(0)}',
+              _formatCurrency(price, l10n),
               style: AppTextStyles.bodyBold.copyWith(color: Colors.white),
             ),
           ],
@@ -346,6 +373,19 @@ class _PurchasePlanPageState extends State<PurchasePlanPage> {
     final subtotal = _calculateSubtotal(l10n);
     final discount = _calculateDiscount(subtotal);
     final total = subtotal - discount;
+
+    String durationText = '';
+    switch (_selectedDuration) {
+      case PlanDuration.monthly:
+        durationText = l10n.monthly;
+        break;
+      case PlanDuration.annually:
+        durationText = l10n.annually;
+        break;
+      case PlanDuration.lifetime:
+        durationText = l10n.lifetime;
+        break;
+    }
 
     return Container(
       padding: const EdgeInsets.all(32),
@@ -364,16 +404,16 @@ class _PurchasePlanPageState extends State<PurchasePlanPage> {
           ),
           const SizedBox(height: 24),
           ..._selectedPlans.map((planId) {
-            final title = '${_getPlanTitle(planId, l10n)} (${_isAnnual ? 'Annually' : '6 Month (50% Off)'})';
-            final price = '\$${_getPrice(planId, l10n).toStringAsFixed(0)}';
+            final title = '${_getPlanTitle(planId, l10n)} ($durationText)';
+            final price = _formatCurrency(_getPrice(planId, l10n), l10n);
             return _summaryRow(title, price, isSmall: true);
           }),
           const SizedBox(height: 16),
-          _summaryRow('Subtotal', '\$${subtotal.toStringAsFixed(0)}'),
+          _summaryRow('Subtotal', _formatCurrency(subtotal, l10n)),
           if (!isMobile) const Spacer() else const SizedBox(height: 32),
           if (discount > 0)
-            _summaryRow('Discount', '-\$${discount.toStringAsFixed(0)}', isDiscount: true),
-          _summaryRow('Total', '\$${total.toStringAsFixed(0)}', isTotal: true),
+            _summaryRow('Discount', '-${_formatCurrency(discount, l10n)}', isDiscount: true),
+          _summaryRow('Total', _formatCurrency(total, l10n), isTotal: true),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,

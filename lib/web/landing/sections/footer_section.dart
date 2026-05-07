@@ -68,28 +68,15 @@ class FooterSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             _ContactItem(
               icon: Icons.phone,
-              text: '+84 969.15.6969',
+              text: '0868.64.9747',
               isMobile: isMobileLayout,
               onTap: () async {
-                final Uri uri = Uri.parse('https://wa.me/84969156969');
+                final Uri uri = Uri.parse('https://wa.me/84868649747');
                 if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
                   debugPrint('Could not launch $uri');
                 }
               },
             ),
-          ],
-        );
-
-        final socialIcons = Wrap(
-          spacing: 16,
-          runSpacing: 12,
-          alignment: WrapAlignment.center,
-          children: const [
-            _SocialIcon(iconPath: 'assets/images/facebook_logo.png', url: 'https://www.facebook.com/minvest.vn'),
-            _SocialIcon(iconPath: 'assets/images/tiktok_logo.png', url: 'https://www.tiktok.com/@minvest.minh'),
-            _SocialIcon(iconPath: 'assets/images/youtube_logo.png', url: 'https://www.youtube.com/@minvestvn'),
-            _SocialIcon(iconPath: 'assets/images/telegram_logo.png', url: 'https://t.me/minvest_free', size: 32),
-            _SocialIcon(iconPath: 'assets/images/web_logo.png', url: 'https://minvest.live/'),
           ],
         );
 
@@ -143,8 +130,6 @@ class FooterSection extends StatelessWidget {
                             Expanded(flex: 4, child: contactCol),
                           ],
                         ),
-                        const SizedBox(height: 40),
-                        Center(child: socialIcons),
                       ],
                     )
                   : Row(
@@ -173,8 +158,6 @@ class FooterSection extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               contactCol,
-                              const SizedBox(height: AppSpacing.lg),
-                              socialIcons,
                             ],
                           ),
                         ),
@@ -232,46 +215,6 @@ class _ContactItem extends StatelessWidget {
     }
 
     return content;
-  }
-}
-
-class _SocialIcon extends StatelessWidget {
-  final String iconPath;
-  final String url;
-  final double size;
-
-  const _SocialIcon({
-    required this.iconPath,
-    required this.url,
-    this.size = 32.0,
-  });
-
-  Future<void> _launchURL() async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {}
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: _launchURL,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.all(4.0),
-          child: Image.asset(
-            iconPath,
-            fit: BoxFit.contain,
-          ),
-        ),
-      ),
-    );
   }
 }
 

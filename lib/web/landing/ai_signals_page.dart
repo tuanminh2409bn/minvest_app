@@ -1117,7 +1117,7 @@ class _AssetDropdownState extends State<_AssetDropdown> {
                       if (val == AssetFilter.all) label = AppLocalizations.of(context)!.allAssets;
                       else if (val == AssetFilter.gold) label = 'Gold';
                       else if (val == AssetFilter.crypto) label = 'Crypto';
-                      else if (val == AssetFilter.forex) label = 'Forex';
+                      else if (val == AssetFilter.forex) label = 'Currency pair';
                       return Align(alignment: Alignment.centerLeft, child: Text(label));
                     }).toList();
                   },
@@ -1132,7 +1132,7 @@ class _AssetDropdownState extends State<_AssetDropdown> {
                     if (val == AssetFilter.all) label = AppLocalizations.of(context)!.allAssets;
                     else if (val == AssetFilter.gold) label = 'Gold';
                     else if (val == AssetFilter.crypto) label = 'Crypto';
-                    else if (val == AssetFilter.forex) label = 'Forex';
+                    else if (val == AssetFilter.forex) label = 'Currency pair';
 
                     return DropdownMenuItem<AssetFilter>(
                       value: val,
@@ -1593,9 +1593,9 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       SizedBox(
         width: columnWidth,
         child: forexLatest.isEmpty
-            ? const _EmptyColumn(title: 'FOREX', icon: Icons.verified)
+            ? const _EmptyColumn(title: 'CURRENCY PAIR', icon: Icons.verified)
             : _SignalColumnLive(
-                title: 'FOREX',
+                title: 'CURRENCY PAIR',
                 icon: Icons.verified,
                 signals: forexLatest,
                 page: 0,
@@ -1687,7 +1687,7 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       if (stacked) const SizedBox(height: 16),
       SizedBox(
         width: columnWidth,
-        child: const _EmptyColumn(title: 'FOREX', icon: Icons.verified),
+        child: const _EmptyColumn(title: 'CURRENCY PAIR', icon: Icons.verified),
       ),
     ];
 
@@ -2814,7 +2814,7 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
 
         // 3. Forex (Placeholder - Chưa có dữ liệu tách biệt từ Tele)
         distribution.add(const _DistributionBarData(
-            label: 'Forex', 
+            label: 'Currency pair', 
             value: 0.1, // Placeholder visual
             winRate: 0.0, 
             wins: 0, 
@@ -4212,7 +4212,12 @@ HistoryRow _mapSignalToRow(Signal s, String timeZone, BuildContext context) {
   final order = s.type.toUpperCase();
   // Use getTranslatedResult for consistent status display
   final status = s.getTranslatedResult(AppLocalizations.of(context)!);
-  final pips = s.pips != null ? (s.pips! >= 0 ? '+${s.pips}' : s.pips.toString()) : '-';
+  
+  num? pipsVal = s.pips;
+  if (s.hitTps.isNotEmpty && pipsVal != null && pipsVal < 0) {
+    pipsVal = pipsVal.abs();
+  }
+  final pips = pipsVal != null ? (pipsVal >= 0 ? '+${pipsVal}' : pipsVal.toString()) : '-';
 
   String _fmt(num? v) {
     if (v == null) return '-';

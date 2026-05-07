@@ -6,7 +6,7 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round">
         <activity
-            android:name="com.minvest.aisignals.MainActivity"
+            android:name="com.signalgpt.ai.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""

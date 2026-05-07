@@ -487,18 +487,26 @@ class _SignalHistoryScreenState extends State<SignalHistoryScreen> with Automati
             ),
             Expanded(
               flex: 1,
-              child: Text(
-                signal.closedPips != null ? (signal.closedPips! >= 0 ? '+${signal.closedPips!.toStringAsFixed(0)}' : '${signal.closedPips!.toStringAsFixed(0)}') : '-',
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: (signal.closedPips ?? 0) >= 0 ? const Color(0xFF00BB32) : const Color(0xFFE3001E), fontSize: 14),
+              child: Builder(
+                builder: (context) {
+                  num? pipsVal = signal.closedPips;
+                  if (signal.hitTps.isNotEmpty && pipsVal != null && pipsVal < 0) {
+                    pipsVal = pipsVal.abs();
+                  }
+                  return Text(
+                    pipsVal != null ? (pipsVal >= 0 ? '+${pipsVal.toStringAsFixed(0)}' : pipsVal.toStringAsFixed(0)) : '-',
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: (pipsVal ?? 0) >= 0 ? const Color(0xFF00BB32) : const Color(0xFFE3001E), fontSize: 14),
+                  );
+                }
               ),
             ),
             Expanded(
               flex: 2,
               child: Text(
-                signal.closedPrice?.toStringAsFixed(2) ?? '-',
+                signal.entryPrice.toString(),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

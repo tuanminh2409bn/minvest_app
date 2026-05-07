@@ -519,13 +519,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String get signalEntry => 'Belépés';
 
   @override
-  String get price1Month => '\$78';
+  String get price1Month => '\$11.99';
 
   @override
-  String get price12Months => '\$460';
+  String get price12Months => '\$89.00';
 
   @override
-  String get price12MonthsOld => '\$920';
+  String get price12MonthsOld => '\$178.00';
 
   @override
   String get foreignTraderSupport =>
@@ -741,7 +741,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get winMoreWithAiSignalsDesc =>
-      'Többpiacos AI-nk valós időben pásztázza a Forexet, a kriptovalutákat és a fémeket,\nszakértők által validált kereskedési jelzéseket nyújtva —\negyértelmű belépési, stop-loss és take-profit szintekkel';
+      'Többpiacos AI-nk valós időben pásztázza a Currency pairet, a kriptovalutákat és a fémeket,\nszakértők által validált kereskedési jelzéseket nyújtva —\negyértelmű belépési, stop-loss és take-profit szintekkel';
 
   @override
   String get buyLimit => 'Vételi limit';
@@ -761,7 +761,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get performanceOverviewDesc =>
-      'Többpiacos AI-nk valós időben pásztázza a Forexet, a kriptovalutákat és a fémeket, szakértők által validált kereskedési jelzéseket nyújtva - egyértelmű belépési, stop-loss és take-profit szintekkel';
+      'Többpiacos AI-nk valós időben pásztázza a Currency pairet, a kriptovalutákat és a fémeket, szakértők által validált kereskedési jelzéseket nyújtva - egyértelmű belépési, stop-loss és take-profit szintekkel';
 
   @override
   String get totalProfit => 'Teljes nyereség';
@@ -1235,7 +1235,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get cryptoSignals => 'Kripto jelzések';
 
   @override
-  String get forexSignals => 'Forex jelzések';
+  String get forexSignals => 'Currency pair jelzések';
 
   @override
   String get goldSignals => 'Arany jelzések';
@@ -1553,13 +1553,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String get assetCrypto => 'Crypto';
 
   @override
-  String get assetForex => 'Forex';
+  String get assetForex => 'Currency pair';
 
   @override
   String get tokens => 'Tokens';
 
   @override
-  String get noForexAssets => 'No Forex assets available';
+  String get noForexAssets => 'No Currency pair assets available';
 
   @override
   String openApp(String appName) {
@@ -1691,4 +1691,26 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get referralCodeApplied => 'Referral code applied successfully!';
+
+  @override
+  String get getTheAppForBestExperience =>
+      'Get the app for the best experience';
+
+  @override
+  String get installApp => 'Install App';
+
+  @override
+  String get reviews => 'reviews';
+
+  @override
+  String get priceLifetime => '\$249.00';
+
+  @override
+  String get durationLifetime => 'Lifetime';
+
+  @override
+  String get orderInfoLifetime => 'Payment for Elite Lifetime package';
+
+  @override
+  String get lifetime => 'Lifetime';
 }

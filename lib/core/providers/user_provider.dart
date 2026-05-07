@@ -87,6 +87,7 @@ class UserProvider with ChangeNotifier {
         .snapshots(includeMetadataChanges: true)
         .listen((snapshot) {
       if (snapshot.exists) {
+        _uid = snapshot.id;
         final data = snapshot.data() as Map<String, dynamic>;
         
         _email = data['email'];

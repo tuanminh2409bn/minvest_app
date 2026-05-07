@@ -9,6 +9,8 @@ import '../../theme/spacing.dart';
 import 'package:minvest_forex_app/l10n/app_localizations.dart';
 import 'package:minvest_forex_app/web/theme/breakpoints.dart';
 
+enum PlanDuration { monthly, annually, lifetime }
+
 class PricingSection extends StatefulWidget {
   final String? heading;
   final String? subheading;
@@ -26,14 +28,35 @@ class PricingSection extends StatefulWidget {
 }
 
 class _PricingSectionState extends State<PricingSection> {
-  bool _isAnnual = true;
+  PlanDuration _selectedDuration = PlanDuration.annually;
 
   List<_PlanData> _buildPlans(BuildContext context) {
     final appLocalizations = AppLocalizations.of(context)!;
-    final price = _isAnnual ? appLocalizations.price12Months : appLocalizations.price1Month;
-    final oldPrice = _isAnnual ? appLocalizations.price12MonthsOld : null;
-    final badge = appLocalizations.save50Percent;
-    final suffix = _isAnnual ? '_12_months' : '_1_month';
+    
+    String price;
+    String? oldPrice;
+    String badge = '';
+    String suffix;
+
+    switch (_selectedDuration) {
+      case PlanDuration.monthly:
+        price = appLocalizations.price1Month;
+        oldPrice = null;
+        suffix = '_1_month';
+        break;
+      case PlanDuration.annually:
+        price = appLocalizations.price12Months;
+        oldPrice = appLocalizations.price12MonthsOld;
+        badge = appLocalizations.save50Percent;
+        suffix = '_12_months';
+        break;
+      case PlanDuration.lifetime:
+        price = appLocalizations.priceLifetime;
+        oldPrice = null;
+        suffix = '_lifetime';
+        break;
+    }
+
     // Sử dụng màu xanh dương sáng chung cho hiệu ứng glow
     const commonGlowColor = Color(0xFF00BFFF); 
 
@@ -48,7 +71,7 @@ class _PricingSectionState extends State<PricingSection> {
       ),
       _PlanData(
         id: 'forex$suffix',
-        title: 'FOREX',
+        title: 'CURRENCY PAIR',
         price: price,
         oldPrice: oldPrice,
         badge: badge,
@@ -171,13 +194,18 @@ class _PricingSectionState extends State<PricingSection> {
         children: [
           _toggleItem(
             appLocalizations.monthly,
-            selected: !_isAnnual,
-            onTap: () => setState(() => _isAnnual = false),
+            selected: _selectedDuration == PlanDuration.monthly,
+            onTap: () => setState(() => _selectedDuration = PlanDuration.monthly),
           ),
           _toggleItem(
             appLocalizations.annually,
-            selected: _isAnnual,
-            onTap: () => setState(() => _isAnnual = true),
+            selected: _selectedDuration == PlanDuration.annually,
+            onTap: () => setState(() => _selectedDuration = PlanDuration.annually),
+          ),
+          _toggleItem(
+            appLocalizations.lifetime,
+            selected: _selectedDuration == PlanDuration.lifetime,
+            onTap: () => setState(() => _selectedDuration = PlanDuration.lifetime),
           ),
         ],
       ),
@@ -403,8 +431,10 @@ class _PricingCardContentState extends State<_PricingCardContent> {
                                 maxLines: 1,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            _saveBadge(widget.plan.badge, isMobile),
+                            if (widget.plan.badge.isNotEmpty) ...[
+                              const SizedBox(width: 8),
+                              _saveBadge(widget.plan.badge, isMobile),
+                            ]
                           ],
                         ),
                         SizedBox(height: isMobile ? 32 : 32),

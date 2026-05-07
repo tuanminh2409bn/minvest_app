@@ -519,13 +519,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get signalEntry => 'Vùng vào lệnh';
 
   @override
-  String get price1Month => '2.056.080đ';
+  String get price1Month => '\$11.99';
 
   @override
-  String get price12Months => '12.652.789đ';
+  String get price12Months => '\$89.00';
 
   @override
-  String get price12MonthsOld => '25.305.578đ';
+  String get price12MonthsOld => '\$178.00';
 
   @override
   String get foreignTraderSupport =>
@@ -1233,7 +1233,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get cryptoSignals => 'Tín hiệu Crypto';
 
   @override
-  String get forexSignals => 'Tín hiệu Forex';
+  String get forexSignals => 'Tín hiệu Currency pair';
 
   @override
   String get goldSignals => 'Tín hiệu Vàng';
@@ -1552,13 +1552,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get assetCrypto => 'Crypto';
 
   @override
-  String get assetForex => 'Ngoại hối';
+  String get assetForex => 'Cặp tiền tệ';
 
   @override
   String get tokens => 'Token';
 
   @override
-  String get noForexAssets => 'Không có tài sản Ngoại hối khả dụng';
+  String get noForexAssets => 'Không có tài sản Cặp tiền tệ khả dụng';
 
   @override
   String openApp(String appName) {
@@ -1690,4 +1690,26 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get referralCodeApplied => 'Đã áp dụng mã giới thiệu thành công!';
+
+  @override
+  String get getTheAppForBestExperience =>
+      'Tải ứng dụng để có trải nghiệm tốt nhất';
+
+  @override
+  String get installApp => 'Cài đặt ngay';
+
+  @override
+  String get reviews => 'đánh giá';
+
+  @override
+  String get priceLifetime => '\$249.00';
+
+  @override
+  String get durationLifetime => 'Trọn đời';
+
+  @override
+  String get orderInfoLifetime => 'Thanh toán gói Elite trọn đời';
+
+  @override
+  String get lifetime => 'Trọn đời';
 }

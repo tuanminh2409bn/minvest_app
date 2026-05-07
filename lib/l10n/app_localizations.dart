@@ -1091,19 +1091,19 @@ abstract class AppLocalizations {
   /// No description provided for @price1Month.
   ///
   /// In en, this message translates to:
-  /// **'\$78'**
+  /// **'\$11.99'**
   String get price1Month;
 
   /// No description provided for @price12Months.
   ///
   /// In en, this message translates to:
-  /// **'\$460'**
+  /// **'\$89.00'**
   String get price12Months;
 
   /// No description provided for @price12MonthsOld.
   ///
   /// In en, this message translates to:
-  /// **'\$920'**
+  /// **'\$178.00'**
   String get price12MonthsOld;
 
   /// No description provided for @foreignTraderSupport.
@@ -1481,7 +1481,7 @@ abstract class AppLocalizations {
   /// No description provided for @winMoreWithAiSignalsDesc.
   ///
   /// In en, this message translates to:
-  /// **'Our multi-market AI scans Forex, Crypto, and Metals in real-time,\ndelivering expert-validated trading signals —\nwith clear entry, stop-loss, and take-profit levels'**
+  /// **'Our multi-market AI scans Currency pair, Crypto, and Metals in real-time,\ndelivering expert-validated trading signals —\nwith clear entry, stop-loss, and take-profit levels'**
   String get winMoreWithAiSignalsDesc;
 
   /// No description provided for @buyLimit.
@@ -1517,7 +1517,7 @@ abstract class AppLocalizations {
   /// No description provided for @performanceOverviewDesc.
   ///
   /// In en, this message translates to:
-  /// **'Our multi-market AI scans Forex, Crypto, and Metals in real-time, delivering expert-validated trading signals - with clear entry, stop-loss, and take-profit levels'**
+  /// **'Our multi-market AI scans Currency pair, Crypto, and Metals in real-time, delivering expert-validated trading signals - with clear entry, stop-loss, and take-profit levels'**
   String get performanceOverviewDesc;
 
   /// No description provided for @totalProfit.
@@ -2387,7 +2387,7 @@ abstract class AppLocalizations {
   /// No description provided for @forexSignals.
   ///
   /// In en, this message translates to:
-  /// **'Forex Signals'**
+  /// **'Currency pair Signals'**
   String get forexSignals;
 
   /// No description provided for @goldSignals.
@@ -2987,7 +2987,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetForex.
   ///
   /// In en, this message translates to:
-  /// **'Forex'**
+  /// **'Currency pair'**
   String get assetForex;
 
   /// No description provided for @tokens.
@@ -2999,7 +2999,7 @@ abstract class AppLocalizations {
   /// No description provided for @noForexAssets.
   ///
   /// In en, this message translates to:
-  /// **'No Forex assets available'**
+  /// **'No Currency pair assets available'**
   String get noForexAssets;
 
   /// No description provided for @openApp.
@@ -3247,6 +3247,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Referral code applied successfully!'**
   String get referralCodeApplied;
+
+  /// No description provided for @getTheAppForBestExperience.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the app for the best experience'**
+  String get getTheAppForBestExperience;
+
+  /// No description provided for @installApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Install App'**
+  String get installApp;
+
+  /// No description provided for @reviews.
+  ///
+  /// In en, this message translates to:
+  /// **'reviews'**
+  String get reviews;
+
+  /// No description provided for @priceLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'\$249.00'**
+  String get priceLifetime;
+
+  /// No description provided for @durationLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime'**
+  String get durationLifetime;
+
+  /// No description provided for @orderInfoLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment for Elite Lifetime package'**
+  String get orderInfoLifetime;
+
+  /// No description provided for @lifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime'**
+  String get lifetime;
 }
 
 class _AppLocalizationsDelegate
