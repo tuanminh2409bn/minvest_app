@@ -12,16 +12,16 @@ class PurchaseService extends ChangeNotifier {
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
   final Set<String> _androidIds = {
-    'gold_1_month', 'gold_12_months',
-    'forex_1_month', 'forex_12_months',
-    'crypto_1_month', 'crypto_12_months',
+    'gold_1_month', 'gold_12_months', 'gold_lifetime',
+    'forex_1_month', 'forex_12_months', 'forex_lifetime',
+    'crypto_1_month', 'crypto_12_months', 'crypto_lifetime',
   };
   
-  // Các ID iOS mới khớp với Android (thay _ bằng .)
+  // Các ID iOS
   final Set<String> _iosIds = {
-    'gold.1.month', 'gold.12.months',
-    'forex.1.month', 'forex.12.months',
-    'crypto.1.month', 'crypto.12.months',
+    'gold.monthly', 'gold.yearly', 'gold.lifetime',
+    'forex.monthly', 'forex.yearly', 'forex.lifetime',
+    'crypto.monthly', 'crypto.yearly', 'crypto.lifetime',
   };
 
   List<ProductDetails> _products = [];

@@ -20,18 +20,24 @@ admin.initializeApp();
 const firestore = admin.firestore();
 
 const PRODUCT_PRICES: { [key: string]: number } = {
-  'gold_1_month': 78,
-  'gold_12_months': 460,
-  'forex_1_month': 78,
-  'forex_12_months': 460,
-  'crypto_1_month': 78,
-  'crypto_12_months': 460,
-  'gold.1.month': 78,
-  'gold.12.months': 460,
-  'forex.1.month': 78,
-  'forex.12.months': 460,
-  'crypto.1.month': 78,
-  'crypto.12.months': 460,
+  'gold_1_month': 11.99,
+  'gold_12_months': 89,
+  'gold_lifetime': 249,
+  'forex_1_month': 11.99,
+  'forex_12_months': 89,
+  'forex_lifetime': 249,
+  'crypto_1_month': 11.99,
+  'crypto_12_months': 89,
+  'crypto_lifetime': 249,
+  'gold.monthly': 11.99,
+  'gold.yearly': 89,
+  'gold.lifetime': 249,
+  'forex.monthly': 11.99,
+  'forex.yearly': 89,
+  'forex.lifetime': 249,
+  'crypto.monthly': 11.99,
+  'crypto.yearly': 89,
+  'crypto.lifetime': 249,
 };
 
 const APPLE_VERIFY_RECEIPT_URL_PRODUCTION = "https://buy.itunes.apple.com/verifyReceipt";
@@ -405,7 +411,7 @@ export const verifyPurchase = onCall(
                     const now = new Date();
                     if (pid.includes('lifetime')) {
                         now.setFullYear(now.getFullYear() + 100);
-                    } else if (pid.includes('12_months') || pid.includes('12.months')) {
+                    } else if (pid.includes('12_months') || pid.includes('yearly')) {
                         now.setFullYear(now.getFullYear() + 1);
                     } else {
                         now.setMonth(now.getMonth() + 1);
@@ -445,7 +451,7 @@ export const verifyPurchase = onCall(
                     const now = new Date();
                     if (pid.includes('lifetime')) {
                         now.setFullYear(now.getFullYear() + 100);
-                    } else if (pid.includes('12_months') || pid.includes('12.months')) {
+                    } else if (pid.includes('12_months') || pid.includes('yearly')) {
                         now.setFullYear(now.getFullYear() + 1);
                     } else {
                         now.setMonth(now.getMonth() + 1);

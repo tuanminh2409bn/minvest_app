@@ -230,9 +230,9 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
 
       String durationSuffix = '';
       if (selectedDuration == PlanDuration.monthly) {
-        durationSuffix = Platform.isIOS ? '1.month' : '1_month';
+        durationSuffix = Platform.isIOS ? 'monthly' : '1_month';
       } else if (selectedDuration == PlanDuration.annually) {
-        durationSuffix = Platform.isIOS ? '12.months' : '12_months';
+        durationSuffix = Platform.isIOS ? 'yearly' : '12_months';
       } else {
         durationSuffix = Platform.isIOS ? 'lifetime' : 'lifetime';
       }
