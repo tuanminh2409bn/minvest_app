@@ -71,7 +71,7 @@ class _PricingSectionState extends State<PricingSection> {
       ),
       _PlanData(
         id: 'forex$suffix',
-        title: 'CURRENCY PAIR',
+        title: 'FOREX',
         price: price,
         oldPrice: oldPrice,
         badge: badge,

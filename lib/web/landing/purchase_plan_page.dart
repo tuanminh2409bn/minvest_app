@@ -55,7 +55,7 @@ class _PurchasePlanPageState extends State<PurchasePlanPage> {
   String _getPlanTitle(String planId, AppLocalizations l10n) {
     switch (planId) {
       case 'forex':
-        return 'Currency pair Signals';
+        return 'Forex Signals';
       case 'gold':
         return 'Gold Signals';
       case 'crypto':
@@ -217,7 +217,7 @@ class _PurchasePlanPageState extends State<PurchasePlanPage> {
           ),
         ),
         const SizedBox(height: 24),
-        _buildPlanItem('forex', 'Currency pair Signals', l10n),
+        _buildPlanItem('forex', 'Forex Signals', l10n),
         const SizedBox(height: 12),
         _buildPlanItem('gold', 'Gold Signals', l10n),
         const SizedBox(height: 12),

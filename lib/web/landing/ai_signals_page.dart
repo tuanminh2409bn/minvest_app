@@ -1117,7 +1117,7 @@ class _AssetDropdownState extends State<_AssetDropdown> {
                       if (val == AssetFilter.all) label = AppLocalizations.of(context)!.allAssets;
                       else if (val == AssetFilter.gold) label = 'Gold';
                       else if (val == AssetFilter.crypto) label = 'Crypto';
-                      else if (val == AssetFilter.forex) label = 'Currency pair';
+                      else if (val == AssetFilter.forex) label = 'Forex';
                       return Align(alignment: Alignment.centerLeft, child: Text(label));
                     }).toList();
                   },
@@ -1132,7 +1132,7 @@ class _AssetDropdownState extends State<_AssetDropdown> {
                     if (val == AssetFilter.all) label = AppLocalizations.of(context)!.allAssets;
                     else if (val == AssetFilter.gold) label = 'Gold';
                     else if (val == AssetFilter.crypto) label = 'Crypto';
-                    else if (val == AssetFilter.forex) label = 'Currency pair';
+                    else if (val == AssetFilter.forex) label = 'Forex';
 
                     return DropdownMenuItem<AssetFilter>(
                       value: val,
@@ -1593,9 +1593,9 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       SizedBox(
         width: columnWidth,
         child: forexLatest.isEmpty
-            ? const _EmptyColumn(title: 'CURRENCY PAIR', icon: Icons.verified)
+            ? const _EmptyColumn(title: 'FOREX', icon: Icons.verified)
             : _SignalColumnLive(
-                title: 'CURRENCY PAIR',
+                title: 'FOREX',
                 icon: Icons.verified,
                 signals: forexLatest,
                 page: 0,
@@ -1687,7 +1687,7 @@ class _SignalGridLiveState extends State<_SignalGridLive> {
       if (stacked) const SizedBox(height: 16),
       SizedBox(
         width: columnWidth,
-        child: const _EmptyColumn(title: 'CURRENCY PAIR', icon: Icons.verified),
+        child: const _EmptyColumn(title: 'FOREX', icon: Icons.verified),
       ),
     ];
 
@@ -2814,7 +2814,7 @@ class _PerformanceSectionState extends State<_PerformanceSection> {
 
         // 3. Forex (Placeholder - Chưa có dữ liệu tách biệt từ Tele)
         distribution.add(const _DistributionBarData(
-            label: 'Currency pair', 
+            label: 'Forex', 
             value: 0.1, // Placeholder visual
             winRate: 0.0, 
             wins: 0, 
@@ -3176,12 +3176,14 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
 
     if (_selectedPeriodIndex == 0) {
       // === DAILY (Intraday) ===
-      final todayStr = DateFormat('yyyy-MM-dd').format(now);
-      
-      // Try to find today's doc by ID directly (ID format is YYYY-MM-DD)
       QueryDocumentSnapshot? todayDoc;
       try {
-        todayDoc = widget.docs.firstWhere((d) => d.id == todayStr);
+        todayDoc = widget.docs.firstWhere((d) {
+           final data = d.data() as Map<String, dynamic>;
+           if (data['date'] == null) return false;
+           final docDate = (data['date'] as Timestamp).toDate();
+           return docDate.year == now.year && docDate.month == now.month && docDate.day == now.day;
+        });
       } catch (e) {
         // No doc for today
       }
@@ -3207,7 +3209,7 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
       }
 
     } else {
-      // === WEEKLY / MONTHLY (Aggregated Daily - CUMULATIVE) ===
+      // === WEEKLY / MONTHLY (Daily Profit) ===
       DateTime startDate;
       if (_selectedPeriodIndex == 1) {
         // Weekly (Mon - Sun)
@@ -3217,8 +3219,6 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
         // Monthly (1st - Now)
         startDate = DateTime(now.year, now.month, 1);
       }
-
-      double runningPips = 0; // Biến tích lũy
 
       for (var doc in widget.docs) {
          final data = doc.data() as Map<String, dynamic>;
@@ -3244,8 +3244,7 @@ class _ProfitChartState extends State<_ProfitChart> with SingleTickerProviderSta
              }
          }
          
-         runningPips += dailyPips; // Cộng dồn
-         points.add(_ChartPoint(date: date, value: runningPips));
+         points.add(_ChartPoint(date: date, value: dailyPips));
       }
     }
 

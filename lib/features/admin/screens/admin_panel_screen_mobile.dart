@@ -235,7 +235,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                             _getPackageDate(userData, 'subscriptionsExpiry', 'gold'), 
                             activeSubs.contains('gold')),
                           const Divider(height: 16),
-                          _buildPackageRow(userId, 'CURRENCY PAIR', 
+                          _buildPackageRow(userId, 'FOREX', 
                             _getPackageDate(userData, 'subscriptionsStart', 'forex'), 
                             _getPackageDate(userData, 'subscriptionsExpiry', 'forex'), 
                             activeSubs.contains('forex')),

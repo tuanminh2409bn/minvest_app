@@ -871,7 +871,7 @@ class _HeroSignalsSectionState extends State<HeroSignalsSection>
       children: [
         tab('Gold', active: true),
         const SizedBox(width: AppSpacing.sm),
-        tab('Currency pair'),
+        tab('Forex'),
         const SizedBox(width: AppSpacing.sm),
         tab('Crypto'),
       ],

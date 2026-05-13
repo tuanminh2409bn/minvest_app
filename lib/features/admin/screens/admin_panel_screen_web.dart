@@ -463,7 +463,7 @@ class _UserManagementViewState extends State<UserManagementView> {
                           Expanded(flex: 2, child: Text('Role (Tier)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
                           Expanded(flex: 1, child: Text('Tokens', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
                           Expanded(flex: 2, child: Text('Gold', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
-                          Expanded(flex: 2, child: Text('Currency pair', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
+                          Expanded(flex: 2, child: Text('Forex', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
                           Expanded(flex: 2, child: Text('Crypto', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
                           Expanded(flex: 2, child: Text('Registered', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black))),
                         ],

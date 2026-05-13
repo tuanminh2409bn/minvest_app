@@ -77,6 +77,30 @@ class FooterSection extends StatelessWidget {
                 }
               },
             ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                InkWell(
+                  onTap: () async {
+                    final Uri uri = Uri.parse('https://wa.me/84966649896');
+                    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                      debugPrint('Could not launch $uri');
+                    }
+                  },
+                  child: Image.asset('assets/images/whatsapp.png', width: 44, height: 44),
+                ),
+                const SizedBox(width: 16),
+                InkWell(
+                  onTap: () async {
+                    final Uri uri = Uri.parse('https://t.me/LisaAISignals');
+                    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                      debugPrint('Could not launch $uri');
+                    }
+                  },
+                  child: Image.asset('assets/images/telegram_logo.png', width: 32, height: 32),
+                ),
+              ],
+            ),
           ],
         );
 

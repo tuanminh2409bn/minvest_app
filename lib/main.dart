@@ -41,9 +41,6 @@ import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 
 final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
 
-/// Xin quyền ATT (App Tracking Transparency) theo đúng Apple Guideline 2.1.
-/// Phải được gọi TRƯỚC [runApp()] để dialog xuất hiện ngay khi khởi động,
-/// trước bất kỳ quyền hay dịch vụ nào khác (Firebase, Notification, v.v.).
 Future<void> _requestATTPermission() async {
   if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return;
   try {
@@ -61,11 +58,6 @@ Future<void> main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // ═══════════════════════════════════════════════════════════════════
-    // ATT - Phải chạy TRƯỚC Firebase và runApp(). Đây là điều kiện để iOS
-    // trình bày dialog trên launch screen trước khi Flutter vẽ bất cứ widget nào.
-    // Tham khảo từ dự án được Apple duyệt.
-    // ═══════════════════════════════════════════════════════════════════
     await _requestATTPermission();
 
     await Firebase.initializeApp(
